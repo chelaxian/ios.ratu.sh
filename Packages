@@ -1,0 +1,14 @@
+Package: com.wavelink.bundleidsxi
+Name: BundleIDsXI
+Version: 2.0
+Architecture: iphoneos-arm
+Description: App to see installed app bundle IDs.
+Maintainer: TD
+Author: TD/nahtedetihw
+Section: Utilities
+Depends: mobilesubstrate, firmware (>= 13.0)
+Filename: debs/com.wavelink.bundleidsxi.deb
+Size: 69234
+MD5sum: d31416cae276a1bf06a5c679ed8c8864
+SHA1: 06ab79a2d7e2682923d6d0ac5b127e4a7ea206e6
+SHA256: 48c6a6df07ac2f65b95ad332cab7500922387cf38ab5ca783b411ff8032f2808
