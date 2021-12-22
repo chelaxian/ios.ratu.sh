@@ -1,2 +1,2 @@
-# ratu.sh ios repo
+# ios.ratu.sh
  
