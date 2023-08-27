@@ -1,7 +1,7 @@
 Package: com.wavelink.bundleidsxi
 Name: BundleIDsXI
 Version: 2.0
-Architecture: iphoneos-arm
+Architecture: iphoneos-arm64
 Description: App to see installed app bundle IDs.
 Maintainer: TD
 Author: TD/nahtedetihw
@@ -12,3 +12,78 @@ Size: 69234
 MD5sum: d31416cae276a1bf06a5c679ed8c8864
 SHA1: 06ab79a2d7e2682923d6d0ac5b127e4a7ea206e6
 SHA256: 48c6a6df07ac2f65b95ad332cab7500922387cf38ab5ca783b411ff8032f2808
+
+Package: ios.alderis.deb
+Name: Alderis
+Version: 1.0
+Architecture: iphoneos-arm64
+Description: App.
+Maintainer: N/A
+Author: N/A
+Section: Utilities
+Depends: firmware (>= 15.0)
+Filename: debs/alderis.deb
+Size: 204
+MD5sum: 8A0F35FEFFF1CC8930AD8304ED214CF7
+SHA1: 41A20BE33FD1C99998508BA0AB6D58A2242041BC
+SHA256: 581F32086E3541C3A3D16960ABE5FC029F99F0C13151798629CD6236812F1DC3
+
+Package: ios.atria.deb
+Name: Atria
+Version: 1.0
+Architecture: iphoneos-arm64
+Description: App.
+Maintainer: N/A
+Author: N/A
+Section: Utilities
+Depends: firmware (>= 15.0)
+Filename: debs/alderis.deb
+Size: 205
+MD5sum: 25E76CF1FB7D325528D6069C5CF89DCE
+SHA1: AA8D8AE41A79D5ED1CAD65699318FE8294718440
+SHA256: 2F49C73EAE8F4EF104E99AF460B28C3A61391C8577D1FA5B0A36050452F18ED6
+
+Package: ios.iosgodsiapcracker.deb
+Name: iosgodsiapcracker
+Version: 1.0.2
+Architecture: iphoneos-arm64
+Description: App.
+Maintainer: N/A
+Author: N/A
+Section: Utilities
+Depends: firmware (>= 15.0)
+Filename: debs/com.laxus.iosgodsiapcracker_1.0-2+debug_iphoneos-arm.deb
+Size: 205
+MD5sum: 0C746FA7EE0A51A780D34D83B171A41D
+SHA1: BC88F9E44943420F0F99E71A41553587CCB9F2FE
+SHA256: 721404482AA54C437BD387FF307D5C5752D91029751EDE369A08A6CF4396525D
+
+Package: ios.iapstorefugu-rootless.deb
+Name: iapstorefugu-rootless
+Version: 1.0
+Architecture: iphoneos-arm64
+Description: App.
+Maintainer: N/A
+Author: N/A
+Section: Utilities
+Depends: firmware (>= 15.0)
+Filename: debs/com.lenglengyu.iapstorefugu-rootless.deb
+Size: 204
+MD5sum: CDEB630D791845A3FAC3497957CF9A83
+SHA1: E2443A9B57AB189B38936B992C7E81CCC44AD74D
+SHA256: 11D1F29321020C20E35FD9FA14C54CDD8D8724EC37F468A35BEE962FA1FF11D6
+
+Package: ios.dumpdecrypter.deb
+Name: dumpdecrypter
+Version: 1.3.7
+Architecture: iphoneos-arm64
+Description: App.
+Maintainer: N/A
+Author: N/A
+Section: Utilities
+Depends: firmware (>= 15.0)
+Filename: debs/dumpdecrypter_1.3-7_iphoneos-arm.deb
+Size: 204
+MD5sum: 4870A65AB1C9D5E3E23AEA9BBCD456B2
+SHA1: AA0D618D27C3E8F3DE6D8B1C021D71FA93F185C2
+SHA256: 45CEA50AE3E50168ED3E4D7AF642300EE50A62B9BC067D94F73BC3B53486DAD1
