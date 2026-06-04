@@ -1,8 +1,21 @@
 Origin: ios.ratu.sh
 Label: ios.ratu.sh
 Suite: stable
-Version: 1.0
-Codename: ios
-Architectures: iphoneos-arm64
+Version: 2.0
+Codename: roothide
+Architectures: iphoneos-arm64e
 Components: main
-Description: ios.ratu.sh
+Description: RootHide Bootstrap 2.2 packages for iOS 17.0 arm64e
+Date: Thu, 04 Jun 2026 09:30:06 +0000
+MD5Sum:
+ 2ac6d89eac0fa84a4b38e325a65f7ef8             1275 Packages
+ d0fb77860a79f0fca2aaf8b6f6c5a187              793 Packages.bz2
+ c7df79580d8e869fde300a612a9a001d              695 Packages.gz
+SHA1:
+ 144dc9cbcf30daf97d41433e4404b26930f4cda8             1275 Packages
+ b370386e974404dbd5c816834de91b0167117faf              793 Packages.bz2
+ 467abd83a2585eecd17caa840a039f093e04e423              695 Packages.gz
+SHA256:
+ 7eec076202b618d8200b09cc4d40354048c65d5787cdbfdfe9846c6232ee3c02             1275 Packages
+ 4f89a2558d327c5716616a9f5d6f1d4680c510b7f1286b97cb99d1d26fa627f1              793 Packages.bz2
+ 6b54b952599259a4c4c18e23e2e82f1040542643d50f36299ad49f9636e43e0d              695 Packages.gz

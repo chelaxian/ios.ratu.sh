@@ -1,2 +1,17 @@
-# Auto detect text files and perform LF normalization
+# Auto detect text files and perform LF normalization.
 * text=auto
+
+# APT indexes and shell scripts should stay LF-only.
+.gitattributes text eol=lf
+Packages text eol=lf
+Release text eol=lf
+README.md text eol=lf
+index.html text eol=lf
+*.sh text eol=lf
+
+# Debian packages and repo assets are binary artifacts.
+*.deb binary
+*.png binary
+*.bz2 binary
+*.gz binary
+*.xz binary
