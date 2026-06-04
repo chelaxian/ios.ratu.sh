@@ -33,3 +33,19 @@ Tag: role::developer
 Author: Muirey03
 Name: libMRYIPC
 
+Package: com.ratush.hppe
+Version: 0.3.0
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 332
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
+Filename: debs/com.ratush.hppe_0.3.0_iphoneos-arm64e.deb
+Size: 22194
+MD5sum: b67603333fe7abe082e634e6d43f9c0f
+SHA1: 242e24a5d4555c1a8db58269a92ca2e21bc1b577
+SHA256: 9d78f588ce35e14c005af9e3c69af7fc8ca79b4b3fb57624e0dacdc18024bb86
+Section: Tweaks
+Description: AlbumManager companion hooks for hidden asset visibility in Photos picker on RootHide.
+Author: Codex
+Name: Hidden Photos Picker Enabler
+

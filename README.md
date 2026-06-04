@@ -13,3 +13,7 @@ Update package indexes after adding or replacing `.deb` files:
 ```sh
 scripts/build-index.sh
 ```
+
+Current packages include Offloader and HPPE. HPPE requires the official
+AlbumManager package (`com.noisyflake.albummanager`) and extends its hidden
+album asset visibility into system photo pickers.
