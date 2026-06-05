@@ -5,6 +5,8 @@
 
 static NSString *const OffAntiOffloadPath =
     @"/var/mobile/Library/Preferences/com.level3tjg.offloader.anti.plist";
+static NSString *const OffAntiOffloadDomain =
+    @"com.level3tjg.offloader.anti";
 static CFStringRef const OffSettingsChanged =
     CFSTR("com.level3tjg.offloader/settings.changed");
 
@@ -60,6 +62,16 @@ static CFStringRef const OffSettingsChanged =
     }
 
     [preferences writeToFile:OffAntiOffloadPath atomically:YES];
+
+    NSUserDefaults *sharedPreferences =
+        [[NSUserDefaults alloc] initWithSuiteName:OffAntiOffloadDomain];
+    if (enabled.boolValue) {
+        [sharedPreferences setBool:YES forKey:applicationID];
+    } else {
+        [sharedPreferences removeObjectForKey:applicationID];
+    }
+    [sharedPreferences synchronize];
+
     CFNotificationCenterPostNotification(
         CFNotificationCenterGetDarwinNotifyCenter(),
         OffSettingsChanged,

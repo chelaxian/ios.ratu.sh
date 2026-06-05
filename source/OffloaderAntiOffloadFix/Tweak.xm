@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-static NSString *const OffloaderAntiOffloadPath =
-    @"/var/mobile/Library/Preferences/com.level3tjg.offloader.anti.plist";
+static NSString *const OffloaderAntiOffloadDomain =
+    @"com.level3tjg.offloader.anti";
 static NSString *const OffloaderAntiOffloadErrorDomain =
     @"com.ratush.offloader.anti";
 
@@ -13,9 +13,9 @@ static BOOL OffloaderIsProtectedBundleID(NSString *bundleID) {
         return NO;
     }
 
-    NSDictionary *preferences =
-        [NSDictionary dictionaryWithContentsOfFile:OffloaderAntiOffloadPath];
-    return [preferences[bundleID] boolValue];
+    NSUserDefaults *preferences =
+        [[NSUserDefaults alloc] initWithSuiteName:OffloaderAntiOffloadDomain];
+    return [preferences boolForKey:bundleID];
 }
 
 static NSString *OffloaderBundleIDFromIdentity(id identity) {
