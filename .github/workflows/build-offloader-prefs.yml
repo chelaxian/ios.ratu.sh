@@ -34,9 +34,18 @@ jobs:
           export THEOS="$HOME/theos"
           gmake clean package FINALPACKAGE=1
 
+      - name: Build AntiOffload tweak
+        working-directory: source/OffloaderAntiOffloadFix
+        env:
+          THEOS: ${{ github.workspace }}/../theos
+        run: |
+          export THEOS="$HOME/theos"
+          gmake clean package FINALPACKAGE=1
+
       - uses: actions/upload-artifact@v4
         with:
           name: offloader-fixes-build
           path: |
             source/OffloaderPrefsFix/packages/*.deb
             source/OffloaderRuntimeFix/packages/*.deb
+            source/OffloaderAntiOffloadFix/packages/*.deb

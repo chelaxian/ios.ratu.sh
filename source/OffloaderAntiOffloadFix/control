@@ -1,0 +1,9 @@
+Package: com.ratush.offloaderantioffloadfix
+Name: Offloader AntiOffload Build Artifact
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: Build artifact for Offloader automatic-offload protection.
+Maintainer: RATU
+Author: RATU
+Section: Development
+Depends: mobilesubstrate
