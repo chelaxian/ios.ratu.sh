@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-static NSString *const OffloaderPreferencesPath =
-    @"/var/mobile/Library/Preferences/com.level3tjg.offloaderprefs.plist";
+static NSString *const OffloaderPreferencesDomain =
+    @"com.level3tjg.offloaderprefs";
 
 @interface SBIconView : NSObject
 - (NSArray *)applicationShortcutItems;
@@ -11,10 +11,10 @@ static NSString *const OffloaderPreferencesPath =
 @end
 
 static BOOL OffloaderPreferenceEnabled(NSString *key) {
-    NSDictionary *preferences =
-        [NSDictionary dictionaryWithContentsOfFile:OffloaderPreferencesPath];
-    id value = preferences[key];
-    return value ? [value boolValue] : YES;
+    NSUserDefaults *preferences =
+        [[NSUserDefaults alloc] initWithSuiteName:OffloaderPreferencesDomain];
+    id value = [preferences objectForKey:key];
+    return value ? [preferences boolForKey:key] : YES;
 }
 
 static BOOL OffloaderBooleanSelector(id item, SEL selector) {
