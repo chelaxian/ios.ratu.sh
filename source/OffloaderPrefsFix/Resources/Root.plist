@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>title</key>
+    <string>Offloader</string>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>3D Touch Items</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.level3tjg.offloaderprefs</string>
+            <key>key</key>
+            <string>3doffload</string>
+            <key>label</key>
+            <string>Offload</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.level3tjg.offloaderprefs</string>
+            <key>key</key>
+            <string>3ddelete</string>
+            <key>label</key>
+            <string>Delete</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSSwitchCell</string>
+            <key>default</key>
+            <true/>
+            <key>defaults</key>
+            <string>com.level3tjg.offloaderprefs</string>
+            <key>key</key>
+            <string>3dedit</string>
+            <key>label</key>
+            <string>Edit</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>AntiOffload</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSLinkCell</string>
+            <key>detail</key>
+            <string>OffAntiOffloadListController</string>
+            <key>label</key>
+            <string>Prevent Offloading of Apps</string>
+            <key>sections</key>
+            <array>
+                <dict>
+                    <key>sectionType</key>
+                    <string>User</string>
+                </dict>
+            </array>
+            <key>useSearchBar</key>
+            <true/>
+            <key>showIdentifiersAsSubtitle</key>
+            <true/>
+            <key>defaultApplicationSwitchValue</key>
+            <false/>
+        </dict>
+    </array>
+</dict>
+</plist>

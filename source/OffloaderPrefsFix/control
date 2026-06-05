@@ -1,0 +1,9 @@
+Package: com.ratush.offloaderprefsfix
+Name: Offloader Preferences Build Artifact
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: Build artifact for the Offloader RootHide preference bundle.
+Maintainer: RATU
+Author: RATU
+Section: Development
+Depends: com.opa334.altlist, preferenceloader
