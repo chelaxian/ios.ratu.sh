@@ -14,7 +14,9 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
           brew install ldid make
           mkdir -p "$HOME/theos/sdks"
-          ln -s "$(xcrun --sdk iphoneos --show-sdk-path)" "$HOME/theos/sdks/iPhoneOS17.0.sdk"
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git "$RUNNER_TEMP/theos-sdks"
+          git -C "$RUNNER_TEMP/theos-sdks" sparse-checkout set iPhoneOS16.5.sdk
+          cp -R "$RUNNER_TEMP/theos-sdks/iPhoneOS16.5.sdk" "$HOME/theos/sdks/"
 
       - name: Build preference bundle
         working-directory: source/OffloaderPrefsFix
