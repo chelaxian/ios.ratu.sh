@@ -5,6 +5,9 @@ static NSString *const OffloaderPreferencesPath =
 
 @interface SBIconView : NSObject
 - (NSArray *)applicationShortcutItems;
+- (NSArray *)effectiveApplicationShortcutItems;
+- (NSArray *)_contextMenuInteraction:(id)interaction
+    overrideSuggestedActionsForConfiguration:(id)configuration;
 @end
 
 static BOOL OffloaderPreferenceEnabled(NSString *key) {
@@ -14,38 +17,54 @@ static BOOL OffloaderPreferenceEnabled(NSString *key) {
     return value ? [value boolValue] : YES;
 }
 
-static BOOL OffloaderIsSystemShortcut(id item, NSString *type) {
-    SEL selector = @selector(sbh_isSystemShortcut);
+static BOOL OffloaderBooleanSelector(id item, SEL selector) {
     if ([item respondsToSelector:selector]) {
         BOOL (*implementation)(id, SEL) =
             (BOOL (*)(id, SEL))[item methodForSelector:selector];
         return implementation(item, selector);
     }
-
-    return [type hasPrefix:@"com.apple.springboardhome.application-shortcut-item."];
+    return NO;
 }
 
-static BOOL OffloaderMatchesDeleteShortcut(NSString *type, NSString *title) {
-    return [type containsString:@"remove-app"] ||
+static NSString *OffloaderStringProperty(id item, SEL selector) {
+    if (![item respondsToSelector:selector]) {
+        return @"";
+    }
+
+    id (*implementation)(id, SEL) =
+        (id (*)(id, SEL))[item methodForSelector:selector];
+    id value = implementation(item, selector);
+    if ([value isKindOfClass:NSString.class]) {
+        return [value lowercaseString];
+    }
+    return value ? [[value description] lowercaseString] : @"";
+}
+
+static BOOL OffloaderMatchesDeleteAction(id item,
+                                          NSString *type,
+                                          NSString *title) {
+    return OffloaderBooleanSelector(item, @selector(sbh_isShortcutDeleteOrRemove)) ||
+        [type containsString:@"remove-app"] ||
         [type containsString:@"delete-app"] ||
         [type containsString:@"uninstall"] ||
+        [type containsString:@"deleteapplication"] ||
+        [type containsString:@"removeapplication"] ||
         [title containsString:@"delete app"] ||
         [title containsString:@"remove app"] ||
         [title containsString:@"удалить приложение"];
 }
 
-static BOOL OffloaderMatchesEditShortcut(NSString *type, NSString *title) {
+static BOOL OffloaderMatchesEditAction(NSString *type, NSString *title) {
     return [type containsString:@"rearrange-icons"] ||
         [type containsString:@"edit-home-screen"] ||
+        [type containsString:@"edithomescreen"] ||
+        [type containsString:@"rearrangeicons"] ||
         [title containsString:@"edit home screen"] ||
         ([title containsString:@"изменить экран"] &&
          [title containsString:@"домой"]);
 }
 
-%hook SBIconView
-
-- (NSArray *)applicationShortcutItems {
-    NSArray *items = %orig;
+static NSArray *OffloaderFilteredItems(NSArray *items) {
     if (items.count == 0) {
         return items;
     }
@@ -58,21 +77,19 @@ static BOOL OffloaderMatchesEditShortcut(NSString *type, NSString *title) {
 
     NSMutableArray *filteredItems = [NSMutableArray arrayWithCapacity:items.count];
     for (id item in items) {
-        NSString *type = nil;
-        NSString *title = nil;
-
-        if ([item respondsToSelector:@selector(type)]) {
-            type = [[item performSelector:@selector(type)] lowercaseString];
-        }
-        if ([item respondsToSelector:@selector(localizedTitle)]) {
-            title = [[item performSelector:@selector(localizedTitle)] lowercaseString];
+        NSString *type = OffloaderStringProperty(item, @selector(type));
+        if (type.length == 0) {
+            type = OffloaderStringProperty(item, @selector(identifier));
         }
 
-        BOOL isSystemShortcut = OffloaderIsSystemShortcut(item, type ?: @"");
+        NSString *title = OffloaderStringProperty(item, @selector(localizedTitle));
+        if (title.length == 0) {
+            title = OffloaderStringProperty(item, @selector(title));
+        }
+
         BOOL shouldHide =
-            isSystemShortcut &&
-            ((!showDelete && OffloaderMatchesDeleteShortcut(type ?: @"", title ?: @"")) ||
-             (!showEdit && OffloaderMatchesEditShortcut(type ?: @"", title ?: @"")));
+            (!showDelete && OffloaderMatchesDeleteAction(item, type, title)) ||
+            (!showEdit && OffloaderMatchesEditAction(type, title));
 
         if (!shouldHide) {
             [filteredItems addObject:item];
@@ -80,6 +97,21 @@ static BOOL OffloaderMatchesEditShortcut(NSString *type, NSString *title) {
     }
 
     return filteredItems;
+}
+
+%hook SBIconView
+
+- (NSArray *)applicationShortcutItems {
+    return OffloaderFilteredItems(%orig);
+}
+
+- (NSArray *)effectiveApplicationShortcutItems {
+    return OffloaderFilteredItems(%orig);
+}
+
+- (NSArray *)_contextMenuInteraction:(id)interaction
+    overrideSuggestedActionsForConfiguration:(id)configuration {
+    return OffloaderFilteredItems(%orig);
 }
 
 %end
