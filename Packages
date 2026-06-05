@@ -1,14 +1,14 @@
 Package: com.level3tjg.offloader
-Version: 0.0.6+roothide3
+Version: 0.0.6+roothide4
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 332
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+roothide3_iphoneos-arm64e.deb
-Size: 27336
-MD5sum: 6e96a764232d8bffb3194b51f6252cdc
-SHA1: c5ca9c84ef2ba1b684dee5cc446116a7f6aa898c
-SHA256: 55b2427f0a461061f44eba9f58aa83c790de9f8c591562246cf16b61d0e51b67
+Filename: debs/com.level3tjg.offloader_0.0.6+roothide4_iphoneos-arm64e.deb
+Size: 41186
+MD5sum: bf7c608b7667a54b659777f977c52198
+SHA1: 79d115a29ad337a074fe8aa0a898b1428b96dbb9
+SHA256: 358b2d00bec3fd11b67f1efbbf0bdf962b45f2467cb304f17a25aeff9417557e
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (RootHide adapted)
 Author: level3tjg
