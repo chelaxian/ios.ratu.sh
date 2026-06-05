@@ -1,4 +1,4 @@
-name: Build Offloader Preferences
+name: Build Offloader Fixes
 
 on:
   workflow_dispatch:
@@ -26,7 +26,17 @@ jobs:
           export THEOS="$HOME/theos"
           gmake clean package FINALPACKAGE=1
 
+      - name: Build runtime tweak
+        working-directory: source/OffloaderRuntimeFix
+        env:
+          THEOS: ${{ github.workspace }}/../theos
+        run: |
+          export THEOS="$HOME/theos"
+          gmake clean package FINALPACKAGE=1
+
       - uses: actions/upload-artifact@v4
         with:
-          name: offloader-prefs-build
-          path: source/OffloaderPrefsFix/packages/*.deb
+          name: offloader-fixes-build
+          path: |
+            source/OffloaderPrefsFix/packages/*.deb
+            source/OffloaderRuntimeFix/packages/*.deb
