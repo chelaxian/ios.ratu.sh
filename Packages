@@ -81,3 +81,19 @@ Description: AlbumManager companion that exposes hidden assets in system pickers
 Author: chelaxian
 Name: Hidden Photos Picker Enabler
 
+Package: com.ratush.hppe
+Version: 0.6.5
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 224
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
+Filename: debs/com.ratush.hppe_0.6.5_iphoneos-arm64e.deb
+Size: 20094
+MD5sum: 719a49acedf615ed7ee6aa8e6c2fff35
+SHA1: 24cc7dfab53acbe63c1737e8a17e92d406a393fe
+SHA256: db96b0c6c5c84946a292cba9fd887f8eb99b83a4160eeaeb1007df9db3a90c86
+Section: Tweaks
+Description: AlbumManager companion that exposes hidden assets in system pickers. RootHide Bootstrap 2.2, iOS 17 arm64e. v0.6.5: declutter DISABLED (the runtime-subclass wrapper that hid moved assets from Recents/Hidden was crashing Photos.app on launch because iOS 17+ RootHide unmaps TweakInject dylibs after init, leaving the wrapper method IMPs dangling; see MobileSlideShow-2026-06-09-113644.ips SIGBUS at 0x104800000). Picker hooks (a, b, c - includeHiddenAssets=YES, hidden album fetch, showLockedAlbums=YES) all still fire. The picker TCC kill is fixed by the patched /Applications/PhotosUIService.app/Info.plist (the original Sep 8 2023 binary plist lacked NSPhotoLibraryUsageDescription and NSPhotoLibraryAddUsageDescription). Declutter is a separate scope for v0.7.x.
+Author: chelaxian
+Name: Hidden Photos Picker Enabler
+
