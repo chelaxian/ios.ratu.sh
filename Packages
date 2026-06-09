@@ -49,3 +49,35 @@ Description: AlbumManager companion hooks for hidden asset visibility in Photos 
 Author: Codex
 Name: Hidden Photos Picker Enabler
 
+Package: com.ratush.hppe
+Version: 0.6.4
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 240
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
+Filename: debs/com.ratush.hppe_0.6.4+roothide_iphoneos-arm64e.deb
+Size: 25214
+MD5sum: 620347dd811ec05d3ac37b4aea26fff5
+SHA1: e2d7c0e5ba08b2e9a1bea42da24d32c5d3d5fe1d
+SHA256: 0b6fbb3b0b634c8227f57f998b5610a6ebe668fe2cc7663b74278eea95c7d2b8
+Section: Tweaks
+Description: AlbumManager companion that exposes hidden assets in system pickers and declutters Recents/Hidden in pickers on iOS 17 arm64e RootHide. v0.6.4: real declutter (membership-based filter via +fetchAssetCollectionsContainingAssets:withType:options:); NSBundle.infoDictionary hook injects NSPhotoLibraryUsageDescription/NSPhotoLibraryAddUsageDescription into the picker service bundle so TCC stops killing PhotosUIService when it accesses the full library; tccd-init still off (v0.6.3 fix).
+Author: chelaxian
+Name: Hidden Photos Picker Enabler
+
+Package: com.ratush.hppe
+Version: 0.6.4
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 240
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
+Filename: debs/com.ratush.hppe_0.6.4_iphoneos-arm64e.deb
+Size: 21896
+MD5sum: aba4438cf29ba9b4d8f3699088f05f7e
+SHA1: 7243f450f2fb547e7129baf2f867c06061a08197
+SHA256: ebf65ed3fd7a4ba9578b45d19d26b7b97a1fa73076e2dd1b679943a5909604f8
+Section: Tweaks
+Description: AlbumManager companion that exposes hidden assets in system pickers and declutters Recents/Hidden in pickers on iOS 17 arm64e RootHide. v0.6.4: real declutter (membership-based filter via +fetchAssetCollectionsContainingAssets:withType:options:); NSBundle.infoDictionary hook injects NSPhotoLibraryUsageDescription/NSPhotoLibraryAddUsageDescription into the picker service bundle so TCC stops killing PhotosUIService when it accesses the full library; tccd-init still off (v0.6.3 fix).
+Author: chelaxian
+Name: Hidden Photos Picker Enabler
+
