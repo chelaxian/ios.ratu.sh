@@ -29,48 +29,57 @@ static CFStringRef const OffSettingsChanged =
 
 @implementation OffAntiOffloadListController
 
-- (NSString *)applicationIdentifierForSpecifier:(PSSpecifier *)specifier {
-    id value = [specifier propertyForKey:@"applicationID"];
-    if (![value isKindOfClass:NSString.class] || [value length] == 0) {
-        value = [specifier propertyForKey:@"applicationIdentifier"];
-    }
-    return [value isKindOfClass:NSString.class] ? value : nil;
+- (void)loadPreferences {
+    NSDictionary *preferences = CFBridgingRelease(CFPreferencesCopyMultiple(
+        NULL,
+        (__bridge CFStringRef)OffAntiOffloadDomain,
+        kCFPreferencesCurrentUser,
+        kCFPreferencesAnyHost
+    ));
+    NSMutableSet *selectedApplications = [NSMutableSet set];
+
+    [preferences enumerateKeysAndObjectsUsingBlock:
+        ^(id key, id value, BOOL *stop) {
+        if ([key isKindOfClass:NSString.class] && [value boolValue]) {
+            [selectedApplications addObject:key];
+        }
+    }];
+
+    _selectedApplications = selectedApplications;
 }
 
-- (id)readApplicationEnabled:(PSSpecifier *)specifier {
-    NSString *applicationID = [self applicationIdentifierForSpecifier:specifier];
-    NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:OffAntiOffloadPath];
-    return @([preferences[applicationID] boolValue]);
-}
-
-- (void)setApplicationEnabled:(NSNumber *)enabled specifier:(PSSpecifier *)specifier {
-    NSString *applicationID = [self applicationIdentifierForSpecifier:specifier];
-    if (applicationID.length == 0) {
-        return;
+- (void)savePreferences {
+    NSMutableDictionary *preferences = [NSMutableDictionary dictionary];
+    for (id applicationID in _selectedApplications) {
+        if ([applicationID isKindOfClass:NSString.class]) {
+            preferences[applicationID] = @YES;
+        }
     }
 
-    NSMutableDictionary *preferences =
-        [[NSDictionary dictionaryWithContentsOfFile:OffAntiOffloadPath] mutableCopy];
-    if (!preferences) {
-        preferences = [NSMutableDictionary dictionary];
-    }
+    NSDictionary *existingPreferences =
+        CFBridgingRelease(CFPreferencesCopyMultiple(
+            NULL,
+            (__bridge CFStringRef)OffAntiOffloadDomain,
+            kCFPreferencesCurrentUser,
+            kCFPreferencesAnyHost
+        ));
+    NSMutableArray *keysToRemove =
+        [NSMutableArray arrayWithArray:existingPreferences.allKeys ?: @[]];
+    [keysToRemove removeObjectsInArray:preferences.allKeys];
 
-    if (enabled.boolValue) {
-        preferences[applicationID] = @YES;
-    } else {
-        [preferences removeObjectForKey:applicationID];
-    }
-
+    CFPreferencesSetMultiple(
+        (__bridge CFDictionaryRef)preferences,
+        (__bridge CFArrayRef)keysToRemove,
+        (__bridge CFStringRef)OffAntiOffloadDomain,
+        kCFPreferencesCurrentUser,
+        kCFPreferencesAnyHost
+    );
+    CFPreferencesSynchronize(
+        (__bridge CFStringRef)OffAntiOffloadDomain,
+        kCFPreferencesCurrentUser,
+        kCFPreferencesAnyHost
+    );
     [preferences writeToFile:OffAntiOffloadPath atomically:YES];
-
-    NSUserDefaults *sharedPreferences =
-        [[NSUserDefaults alloc] initWithSuiteName:OffAntiOffloadDomain];
-    if (enabled.boolValue) {
-        [sharedPreferences setBool:YES forKey:applicationID];
-    } else {
-        [sharedPreferences removeObjectForKey:applicationID];
-    }
-    [sharedPreferences synchronize];
 
     CFNotificationCenterPostNotification(
         CFNotificationCenterGetDarwinNotifyCenter(),
