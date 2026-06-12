@@ -6,6 +6,7 @@ static NSString *const OffloaderPreferencesDomain =
 @interface SBIconView : NSObject
 - (NSArray *)applicationShortcutItems;
 - (NSArray *)effectiveApplicationShortcutItems;
+- (NSArray *)fetchedApplicationShortcutItems;
 - (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration;
 - (id)icon;
@@ -130,10 +131,11 @@ static NSArray *OffloaderFilteredItems(id items) {
 %hook SBIconView
 
 - (NSArray *)applicationShortcutItems {
-    NSArray *items = %orig;
-    return OffloaderIconIsPlaceholder(self)
-        ? OffloaderRemoveOffloadAction(items)
-        : OffloaderFilteredItems(items);
+    if (OffloaderIconIsPlaceholder(self)) {
+        return OffloaderRemoveOffloadAction(
+            [self fetchedApplicationShortcutItems] ?: @[]);
+    }
+    return OffloaderFilteredItems(%orig);
 }
 
 - (NSArray *)effectiveApplicationShortcutItems {
