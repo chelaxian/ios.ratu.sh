@@ -8,7 +8,11 @@ static NSString *const OffloaderPreferencesDomain =
 - (NSArray *)effectiveApplicationShortcutItems;
 - (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration;
-- (NSString *)applicationBundleIdentifierForShortcuts;
+- (id)icon;
+@end
+
+@interface SBApplicationIcon : NSObject
+- (BOOL)hasApplicationPlaceholder;
 @end
 
 static BOOL OffloaderPreferenceEnabled(NSString *key) {
@@ -66,38 +70,10 @@ static BOOL OffloaderMatchesEditAction(NSString *type, NSString *title) {
 }
 
 static BOOL OffloaderIconIsPlaceholder(SBIconView *iconView) {
-    NSString *bundleIdentifier =
-        [iconView applicationBundleIdentifierForShortcuts];
-    if (bundleIdentifier.length == 0) {
-        return NO;
-    }
-
-    Class workspaceClass = NSClassFromString(@"LSApplicationWorkspace");
-    SEL defaultWorkspaceSelector = NSSelectorFromString(@"defaultWorkspace");
-    SEL placeholdersSelector = NSSelectorFromString(@"placeholderApplications");
-    if (![workspaceClass respondsToSelector:defaultWorkspaceSelector]) {
-        return NO;
-    }
-
-    id (*sendClassMessage)(id, SEL) =
-        (id (*)(id, SEL))[workspaceClass methodForSelector:defaultWorkspaceSelector];
-    id workspace = sendClassMessage(workspaceClass, defaultWorkspaceSelector);
-    if (![workspace respondsToSelector:placeholdersSelector]) {
-        return NO;
-    }
-
-    id (*sendMessage)(id, SEL) =
-        (id (*)(id, SEL))[workspace methodForSelector:placeholdersSelector];
-    NSArray *placeholders = sendMessage(workspace, placeholdersSelector);
-    for (id application in placeholders) {
-        NSString *candidate =
-            OffloaderStringProperty(application, @selector(bundleIdentifier));
-        if ([candidate isEqualToString:bundleIdentifier.lowercaseString]) {
-            return YES;
-        }
-    }
-
-    return NO;
+    id icon = [iconView icon];
+    return [icon isKindOfClass:NSClassFromString(@"SBApplicationIcon")] &&
+        [icon respondsToSelector:@selector(hasApplicationPlaceholder)] &&
+        [(SBApplicationIcon *)icon hasApplicationPlaceholder];
 }
 
 static NSArray *OffloaderRemoveOffloadAction(NSArray *items) {
