@@ -6,8 +6,9 @@ static NSString *const OffloaderPreferencesDomain =
 @interface SBIconView : NSObject
 - (NSArray *)applicationShortcutItems;
 - (NSArray *)effectiveApplicationShortcutItems;
-- (NSArray *)_contextMenuInteraction:(id)interaction
+- (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration;
+- (NSString *)applicationBundleIdentifierForShortcuts;
 @end
 
 static BOOL OffloaderPreferenceEnabled(NSString *key) {
@@ -64,8 +65,58 @@ static BOOL OffloaderMatchesEditAction(NSString *type, NSString *title) {
          [title containsString:@"домой"]);
 }
 
-static NSArray *OffloaderFilteredItems(NSArray *items) {
-    if (items.count == 0) {
+static BOOL OffloaderIconIsPlaceholder(SBIconView *iconView) {
+    NSString *bundleIdentifier =
+        [iconView applicationBundleIdentifierForShortcuts];
+    if (bundleIdentifier.length == 0) {
+        return NO;
+    }
+
+    Class workspaceClass = NSClassFromString(@"LSApplicationWorkspace");
+    SEL defaultWorkspaceSelector = NSSelectorFromString(@"defaultWorkspace");
+    SEL placeholdersSelector = NSSelectorFromString(@"placeholderApplications");
+    if (![workspaceClass respondsToSelector:defaultWorkspaceSelector]) {
+        return NO;
+    }
+
+    id (*sendClassMessage)(id, SEL) =
+        (id (*)(id, SEL))[workspaceClass methodForSelector:defaultWorkspaceSelector];
+    id workspace = sendClassMessage(workspaceClass, defaultWorkspaceSelector);
+    if (![workspace respondsToSelector:placeholdersSelector]) {
+        return NO;
+    }
+
+    id (*sendMessage)(id, SEL) =
+        (id (*)(id, SEL))[workspace methodForSelector:placeholdersSelector];
+    NSArray *placeholders = sendMessage(workspace, placeholdersSelector);
+    for (id application in placeholders) {
+        NSString *candidate =
+            OffloaderStringProperty(application, @selector(bundleIdentifier));
+        if ([candidate isEqualToString:bundleIdentifier.lowercaseString]) {
+            return YES;
+        }
+    }
+
+    return NO;
+}
+
+static NSArray *OffloaderRemoveOffloadAction(NSArray *items) {
+    if (![items isKindOfClass:NSArray.class] || items.count == 0) {
+        return items;
+    }
+
+    NSMutableArray *filteredItems = [NSMutableArray arrayWithCapacity:items.count];
+    for (id item in items) {
+        NSString *type = OffloaderStringProperty(item, @selector(type));
+        if (![type isEqualToString:@"com.level3tjg.offloader/offload"]) {
+            [filteredItems addObject:item];
+        }
+    }
+    return filteredItems;
+}
+
+static NSArray *OffloaderFilteredItems(id items) {
+    if (![items isKindOfClass:NSArray.class] || [items count] == 0) {
         return items;
     }
 
@@ -102,16 +153,25 @@ static NSArray *OffloaderFilteredItems(NSArray *items) {
 %hook SBIconView
 
 - (NSArray *)applicationShortcutItems {
-    return OffloaderFilteredItems(%orig);
+    NSArray *items = %orig;
+    return OffloaderIconIsPlaceholder(self)
+        ? OffloaderRemoveOffloadAction(items)
+        : OffloaderFilteredItems(items);
 }
 
 - (NSArray *)effectiveApplicationShortcutItems {
-    return OffloaderFilteredItems(%orig);
+    NSArray *items = %orig;
+    return OffloaderIconIsPlaceholder(self)
+        ? OffloaderRemoveOffloadAction(items)
+        : OffloaderFilteredItems(items);
 }
 
-- (NSArray *)_contextMenuInteraction:(id)interaction
+- (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration {
-    return OffloaderFilteredItems(%orig);
+    id actions = %orig;
+    return OffloaderIconIsPlaceholder(self)
+        ? actions
+        : OffloaderFilteredItems(actions);
 }
 
 %end
