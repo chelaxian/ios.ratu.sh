@@ -70,6 +70,10 @@ static BOOL OffloaderMatchesEditAction(NSString *type, NSString *title) {
          [title containsString:@"домой"]);
 }
 
+static BOOL OffloaderMatchesOffloadAction(NSString *type) {
+    return [type isEqualToString:@"com.level3tjg.offloader/offload"];
+}
+
 static BOOL OffloaderIconIsPlaceholder(SBIconView *iconView) {
     id icon = [iconView icon];
     return [icon isKindOfClass:NSClassFromString(@"SBApplicationIcon")] &&
@@ -98,9 +102,10 @@ static NSArray *OffloaderFilteredItems(id items) {
     }
     NSArray *array = items;
 
+    BOOL showOffload = OffloaderPreferenceEnabled(@"3doffload");
     BOOL showDelete = OffloaderPreferenceEnabled(@"3ddelete");
     BOOL showEdit = OffloaderPreferenceEnabled(@"3dedit");
-    if (showDelete && showEdit) {
+    if (showOffload && showDelete && showEdit) {
         return array;
     }
 
@@ -117,6 +122,7 @@ static NSArray *OffloaderFilteredItems(id items) {
         }
 
         BOOL shouldHide =
+            (!showOffload && OffloaderMatchesOffloadAction(type)) ||
             (!showDelete && OffloaderMatchesDeleteAction(item, type, title)) ||
             (!showEdit && OffloaderMatchesEditAction(type, title));
 
