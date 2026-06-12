@@ -119,15 +119,16 @@ static NSArray *OffloaderFilteredItems(id items) {
     if (![items isKindOfClass:NSArray.class] || [items count] == 0) {
         return items;
     }
+    NSArray *array = items;
 
     BOOL showDelete = OffloaderPreferenceEnabled(@"3ddelete");
     BOOL showEdit = OffloaderPreferenceEnabled(@"3dedit");
     if (showDelete && showEdit) {
-        return items;
+        return array;
     }
 
-    NSMutableArray *filteredItems = [NSMutableArray arrayWithCapacity:items.count];
-    for (id item in items) {
+    NSMutableArray *filteredItems = [NSMutableArray arrayWithCapacity:array.count];
+    for (id item in array) {
         NSString *type = OffloaderStringProperty(item, @selector(type));
         if (type.length == 0) {
             type = OffloaderStringProperty(item, @selector(identifier));
