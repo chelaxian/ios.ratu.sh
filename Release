@@ -6,16 +6,16 @@ Codename: roothide
 Architectures: iphoneos-arm64e
 Components: main
 Description: RootHide Bootstrap 2.2 packages for iOS 17.0 arm64e
-Date: Fri, 12 Jun 2026 15:31:56 +0000
+Date: Fri, 12 Jun 2026 15:47:48 +0000
 MD5Sum:
- 3d44927e433873382a0e948ed24c7310             5313 Packages
- 2b3b25362d87261623a71152340c06c8             2178 Packages.bz2
- 5a557b70eeb87dfc44b6bb549ce48f85             1924 Packages.gz
+ 5b591eab2f33d31c26c0a446829fe420             5313 Packages
+ 9ce938d9f6c2d006273e90b2ee11e55d             2182 Packages.bz2
+ 39f7b98c5dae51621d31cf443a331fbb             1925 Packages.gz
 SHA1:
- 0852f9badcce5af3b22c99c8f3190d386c308d55             5313 Packages
- 668cd5ac43485c52fb8dd8fe33b1b0fd4e91581c             2178 Packages.bz2
- 8bcf5bbbebf42d6f0ab0292416dcf96335260cb2             1924 Packages.gz
+ 4633f8433b25955effca0f4f692bf26a8b40a4f0             5313 Packages
+ fab0d70881567724f64e4c0c8f3b19fbd23ef3e8             2182 Packages.bz2
+ 969741b055c039c6a6086f0d8e72da06dab8e6cb             1925 Packages.gz
 SHA256:
- dc49cf1486f4174525ab429af7186792eaccd45a4e81d798e2e35384bc630d58             5313 Packages
- 70e2b516691999893163db1d070939f598585398f7780ec2234abdaf99b4a9db             2178 Packages.bz2
- 48fe5cad9a16bcefc2925e39a34de4034252d90e37dcf720914074d9c1960410             1924 Packages.gz
+ a20c731c0514142b6713fad2a9079638a6fadbf2b75bd3b70714a3168fb9b9c6             5313 Packages
+ 691c9b806c49b01d3c4bc1485f265b2efd668110a10b6aedc1da6f15bd3127e3             2182 Packages.bz2
+ 5c73cf187abdfd02e006cea7c90fdd8333fc3b3c886c6ff7f2cfe333d2d9c744             1925 Packages.gz
