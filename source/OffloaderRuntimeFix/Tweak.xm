@@ -81,6 +81,10 @@ static BOOL OffloaderIconIsPlaceholder(SBIconView *iconView) {
         [(SBApplicationIcon *)icon hasApplicationPlaceholder];
 }
 
+static BOOL OffloaderIconIsFolder(SBIconView *iconView) {
+    return [[iconView icon] isKindOfClass:NSClassFromString(@"SBFolderIcon")];
+}
+
 static NSArray *OffloaderRemoveOffloadAction(NSArray *items) {
     if (![items isKindOfClass:NSArray.class] || items.count == 0) {
         return items;
@@ -137,6 +141,9 @@ static NSArray *OffloaderFilteredItems(id items) {
 %hook SBIconView
 
 - (NSArray *)applicationShortcutItems {
+    if (OffloaderIconIsFolder(self)) {
+        return @[];
+    }
     if (OffloaderIconIsPlaceholder(self)) {
         return OffloaderRemoveOffloadAction(
             [self fetchedApplicationShortcutItems] ?: @[]);
@@ -145,6 +152,9 @@ static NSArray *OffloaderFilteredItems(id items) {
 }
 
 - (NSArray *)effectiveApplicationShortcutItems {
+    if (OffloaderIconIsFolder(self)) {
+        return @[];
+    }
     NSArray *items = %orig;
     return OffloaderIconIsPlaceholder(self)
         ? OffloaderRemoveOffloadAction(items)
@@ -153,6 +163,9 @@ static NSArray *OffloaderFilteredItems(id items) {
 
 - (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration {
+    if (OffloaderIconIsFolder(self)) {
+        return @[];
+    }
     id actions = %orig;
     return OffloaderIconIsPlaceholder(self)
         ? actions
