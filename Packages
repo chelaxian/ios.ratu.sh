@@ -1,16 +1,16 @@
 Package: com.catmcp.daemon
-Version: 1.0.3-roothidefix3
+Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: 0x530c<0x530c@gmail.com>
-Installed-Size: 6244
+Installed-Size: 5256
 Depends: mobilesubstrate, preferenceloader
-Filename: debs/com.catmcp.daemon_1.0.3-roothidefix3_iphoneos-arm64e.deb
-Size: 2412106
-MD5sum: b2ad079d88f4b781d54f9f34a64665bc
-SHA1: 7c3ac76fb9b7aa445975d63f0eaaa307eb2d55d6
-SHA256: d7dfddc7d058ce046e6c116365a07268815ea2c9d6b0ea22b92cf14245b729bf
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64e.deb
+Size: 1942284
+MD5sum: 22925af20f08af36ae57e3ef8d254a98
+SHA1: 4ee31a6818440b4cc635110a461060625173d906
+SHA256: 504ddfb1e0bd5311dbb74c9d340daef6d31295f5ec13de38de0023c96794d458
 Section: Tweaks
-Description: iOS MCP Server with RootHide watchdog and namespace compatibility helper
+Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
 Name: catmcp
 
