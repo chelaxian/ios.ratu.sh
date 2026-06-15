@@ -32,10 +32,10 @@ lines = [
     "Label: ios.ratu.sh",
     "Suite: stable",
     "Version: 2.0",
-    "Codename: roothide",
-    "Architectures: iphoneos-arm64e",
+    "Codename: ios",
+    "Architectures: iphoneos-arm64 iphoneos-arm64e",
     "Components: main",
-    "Description: RootHide Bootstrap 2.2 packages for iOS 17.0 arm64e",
+    "Description: Rootless and RootHide jailbreak packages",
     f"Date: {datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S +0000')}",
 ]
 

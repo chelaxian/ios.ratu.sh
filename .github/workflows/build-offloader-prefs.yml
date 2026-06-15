@@ -26,6 +26,14 @@ jobs:
           export THEOS="$HOME/theos"
           gmake clean package FINALPACKAGE=1
 
+      - name: Build vanilla context-menu capture
+        working-directory: source/OffloaderVanillaCapture
+        env:
+          THEOS: ${{ github.workspace }}/../theos
+        run: |
+          export THEOS="$HOME/theos"
+          gmake clean package FINALPACKAGE=1
+
       - name: Build runtime tweak
         working-directory: source/OffloaderRuntimeFix
         env:
@@ -47,5 +55,6 @@ jobs:
           name: offloader-fixes-build
           path: |
             source/OffloaderPrefsFix/packages/*.deb
+            source/OffloaderVanillaCapture/packages/*.deb
             source/OffloaderRuntimeFix/packages/*.deb
             source/OffloaderAntiOffloadFix/packages/*.deb

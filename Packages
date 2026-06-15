@@ -1,19 +1,54 @@
 Package: com.level3tjg.offloader
-Version: 0.0.6+roothide12
+Version: 0.0.6+roothide13
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+roothide12_iphoneos-arm64e.deb
-Size: 62586
-MD5sum: 16653bef90e10a0ca796268748713d35
-SHA1: f4a431007eb58c0fceca576a6934fc6819a9ab81
-SHA256: 5091d41eadea130dd3534bc5966ad87bdc55fa8c8264b0dad6761a9b4998d4c1
+Filename: debs/com.level3tjg.offloader_0.0.6+roothide13_iphoneos-arm64e.deb
+Size: 67970
+MD5sum: 7ef739f2134e44e9ce31d7d21fc43ae5
+SHA1: 162011c83bd1868becb926a54e249d550bcde368
+SHA256: f8bd91f4426ca897836089319cc2a8e10286799ebbee7921e0940f6e00891e27
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (RootHide adapted)
 Author: level3tjg
 Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
+
+Package: com.level3tjg.offloader
+Version: 0.0.6+rootless13
+Architecture: iphoneos-arm64
+Maintainer: level3tjg
+Installed-Size: 332
+Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
+Filename: debs/com.level3tjg.offloader_0.0.6+rootless13_iphoneos-arm64.deb
+Size: 67636
+MD5sum: 550e27bb2fa36f90069c9d08e3cf554b
+SHA1: 119ff0c0f5e8131296cc42cf3a3fbaf3333341a8
+SHA256: 38bae49c986ca2d8eb8085e07b9ad108c93b4e9f8c612d288ef6a87b5b63c16c
+Section: Tweaks
+Description: Offload apps from the 3D touch menu and more (rootless)
+Author: level3tjg
+Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
+Name: Offloader
+
+Package: com.muirey03.libmryipc
+Version: 2.0.1
+Architecture: iphoneos-arm64
+Maintainer: Muirey03
+Installed-Size: 308
+Depends: mobilesubstrate
+Conflicts: ws.hbang.stopcrashingpls (=1.0)
+Filename: debs/com.muirey03.libmryipc_2.0.1_iphoneos-arm64.deb
+Size: 31486
+MD5sum: 27b6b2155abd737d960aabc59fe8b8f2
+SHA1: 6b508cd02d1b68febb3942cc8e9e9f3f3a7092e4
+SHA256: 1d2d75fa2d899d5efca751e2fd081756fb9093b5d1f44bab8436085fa82ed2aa
+Section: System
+Description: Easy-to-use, RocketBootstrap-less iOS IPC
+Tag: role::developer
+Author: Muirey03
+Name: libMRYIPC
 
 Package: com.muirey03.libmryipc
 Version: 2.0.1+roothide3

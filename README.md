@@ -1,6 +1,6 @@
 # ios.ratu.sh
 
-Personal APT repository for iOS 17.0 arm64e RootHide Bootstrap 2.2 packages.
+Personal APT repository for rootless and RootHide jailbreak packages.
 
 Repository URL:
 
@@ -14,6 +14,11 @@ Update package indexes after adding or replacing `.deb` files:
 scripts/build-index.sh
 ```
 
-Current packages include Offloader and HPPE. HPPE requires the official
-AlbumManager package (`com.noisyflake.albummanager`) and extends its hidden
-album asset visibility into system photo pickers.
+Offloader is published in two variants:
+
+- `iphoneos-arm64` for standard rootless jailbreaks such as Dopamine and NathanLR.
+- `iphoneos-arm64e` for RootHide Bootstrap.
+
+HPPE remains a RootHide package. It requires the official AlbumManager package
+(`com.noisyflake.albummanager`) and extends hidden album asset visibility into
+system photo pickers.

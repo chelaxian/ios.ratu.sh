@@ -2,20 +2,20 @@ Origin: ios.ratu.sh
 Label: ios.ratu.sh
 Suite: stable
 Version: 2.0
-Codename: roothide
-Architectures: iphoneos-arm64e
+Codename: ios
+Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
-Description: RootHide Bootstrap 2.2 packages for iOS 17.0 arm64e
-Date: Mon, 15 Jun 2026 11:05:58 +0000
+Description: Rootless and RootHide jailbreak packages
+Date: Mon, 15 Jun 2026 11:42:18 +0000
 MD5Sum:
- 44c64d9dd66f9cb53e627ab09ae6a5b8             5313 Packages
- 68c18fa17d826241efb1ee6d22f46d5a             2173 Packages.bz2
- c83776a6e27db5b147cc3ab214c68bae             1923 Packages.gz
+ cbdf23ac20caa41e3f5a9b4fb9a82689             6539 Packages
+ cd091cb0db9c16cb3606396ee9201f8e             2442 Packages.bz2
+ 3204d5d8040f2144cb4df059ca4ab7a4             2160 Packages.gz
 SHA1:
- a1a1db007327575c58fcb380ff8e23bf234f9996             5313 Packages
- 150b42d6b55352e284e5d112c45e6d9c754ae441             2173 Packages.bz2
- 74537dba3d9faa435a9268f93f87d5b6e4dabb4c             1923 Packages.gz
+ 0a7571084949e3971d0f1d0b7edf5c935efea410             6539 Packages
+ cafb8d74a7a77cc93c6608e8a550d8d27c596491             2442 Packages.bz2
+ 7941fe036b91d58b8b0d4a828eaa1c1be2776d12             2160 Packages.gz
 SHA256:
- d267e313afe72e589ae4e5eecb55d083d0fa30ab4f0325202f8056f6277e2159             5313 Packages
- f71df28a198c9f2a8507758f9e19b819e3ec7ef478b961f5176bf14c226245d6             2173 Packages.bz2
- 69b8f0d75431ecbf1c45ef2dcf85aa0e6bca3faa0c02115157cdf931c1c626d1             1923 Packages.gz
+ 1e48321140a2f871255c84bd422ce3f8a3beb13ff072ac28fe19e49174f38280             6539 Packages
+ c1f83d9011000cfcca9bb28363b4d543866b921f943fbca6567480cc47cd3918             2442 Packages.bz2
+ 38bc1df12686f37b9c1e3d6f32904748b715b0ce3ac2f96a3707b96fc624ec8c             2160 Packages.gz

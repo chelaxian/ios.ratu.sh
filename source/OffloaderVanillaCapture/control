@@ -1,0 +1,9 @@
+Package: com.ratush.offloadervanillacapture
+Name: Offloader Vanilla Capture Build Artifact
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: Captures SpringBoard icon menu implementations before Offloader hooks them.
+Maintainer: RATU
+Author: RATU
+Section: Development
+Depends: mobilesubstrate

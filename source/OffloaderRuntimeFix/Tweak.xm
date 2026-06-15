@@ -1,7 +1,17 @@
 #import <Foundation/Foundation.h>
+#import <dlfcn.h>
+#import <mach-o/dyld.h>
+#import <string.h>
 
 static NSString *const OffloaderPreferencesDomain =
     @"com.level3tjg.offloaderprefs";
+
+typedef id (*OffloaderVanillaNoArgumentFunction)(id receiver);
+typedef id (*OffloaderVanillaOverrideFunction)(id receiver,
+                                                id interaction,
+                                                id configuration);
+
+static void *OffloaderVanillaCaptureHandle;
 
 @interface SBIconView : NSObject
 - (NSArray *)applicationShortcutItems;
@@ -85,6 +95,37 @@ static BOOL OffloaderIconIsFolder(SBIconView *iconView) {
     return [[iconView icon] isKindOfClass:NSClassFromString(@"SBFolderIcon")];
 }
 
+static void *OffloaderVanillaCaptureSymbol(const char *name) {
+    if (!OffloaderVanillaCaptureHandle) {
+        uint32_t imageCount = _dyld_image_count();
+        for (uint32_t index = 0; index < imageCount; index++) {
+            const char *path = _dyld_get_image_name(index);
+            if (path && strstr(path, "/AOffloaderVanillaCapture.dylib")) {
+                OffloaderVanillaCaptureHandle =
+                    dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+                break;
+            }
+        }
+    }
+
+    return OffloaderVanillaCaptureHandle
+        ? dlsym(OffloaderVanillaCaptureHandle, name)
+        : NULL;
+}
+
+static OffloaderVanillaNoArgumentFunction
+OffloaderVanillaNoArgumentSymbol(const char *name) {
+    return (OffloaderVanillaNoArgumentFunction)
+        OffloaderVanillaCaptureSymbol(name);
+}
+
+static OffloaderVanillaOverrideFunction
+OffloaderVanillaOverrideSymbol(void) {
+    return (OffloaderVanillaOverrideFunction)
+        OffloaderVanillaCaptureSymbol(
+            "OffloaderCallVanillaOverrideSuggestedActions");
+}
+
 static NSArray *OffloaderRemoveOffloadAction(NSArray *items) {
     if (![items isKindOfClass:NSArray.class] || items.count == 0) {
         return items;
@@ -141,35 +182,43 @@ static NSArray *OffloaderFilteredItems(id items) {
 %hook SBIconView
 
 - (NSArray *)applicationShortcutItems {
-    if (OffloaderIconIsFolder(self)) {
-        return @[];
-    }
-    if (OffloaderIconIsPlaceholder(self)) {
-        return OffloaderRemoveOffloadAction(
-            [self fetchedApplicationShortcutItems] ?: @[]);
+    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+        OffloaderVanillaNoArgumentFunction function =
+            OffloaderVanillaNoArgumentSymbol(
+                "OffloaderCallVanillaApplicationShortcutItems");
+        if (function) {
+            return function(self);
+        }
+        return OffloaderIconIsPlaceholder(self)
+            ? OffloaderRemoveOffloadAction(
+                [self fetchedApplicationShortcutItems] ?: @[])
+            : @[];
     }
     return OffloaderFilteredItems(%orig);
 }
 
 - (NSArray *)effectiveApplicationShortcutItems {
-    if (OffloaderIconIsFolder(self)) {
-        return @[];
+    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+        OffloaderVanillaNoArgumentFunction function =
+            OffloaderVanillaNoArgumentSymbol(
+                "OffloaderCallVanillaEffectiveShortcutItems");
+        return function ? function(self) : @[];
     }
     NSArray *items = %orig;
-    return OffloaderIconIsPlaceholder(self)
-        ? OffloaderRemoveOffloadAction(items)
-        : OffloaderFilteredItems(items);
+    return OffloaderFilteredItems(items);
 }
 
 - (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration {
-    if (OffloaderIconIsFolder(self)) {
-        return @[];
+    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+        OffloaderVanillaOverrideFunction function =
+            OffloaderVanillaOverrideSymbol();
+        return function
+            ? function(self, interaction, configuration)
+            : @[];
     }
     id actions = %orig;
-    return OffloaderIconIsPlaceholder(self)
-        ? actions
-        : OffloaderFilteredItems(actions);
+    return OffloaderFilteredItems(actions);
 }
 
 %end
