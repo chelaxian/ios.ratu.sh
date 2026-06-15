@@ -1,14 +1,14 @@
 Package: com.level3tjg.offloader
-Version: 0.0.6+roothide13
+Version: 0.0.6+roothide14
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+roothide13_iphoneos-arm64e.deb
-Size: 67970
-MD5sum: 7ef739f2134e44e9ce31d7d21fc43ae5
-SHA1: 162011c83bd1868becb926a54e249d550bcde368
-SHA256: f8bd91f4426ca897836089319cc2a8e10286799ebbee7921e0940f6e00891e27
+Filename: debs/com.level3tjg.offloader_0.0.6+roothide14_iphoneos-arm64e.deb
+Size: 67834
+MD5sum: 898e858cc2347f50ea17fb354ffcea08
+SHA1: 9cca027da9dd077ed39c9cbd4962e3793699fc11
+SHA256: 770a41ec96ae4980cf59c404c6b9881f0d153940ed496c0d4525d6252d214799
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (RootHide adapted)
 Author: level3tjg
@@ -16,16 +16,16 @@ Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+rootless13
+Version: 0.0.6+rootless14
 Architecture: iphoneos-arm64
 Maintainer: level3tjg
 Installed-Size: 332
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+rootless13_iphoneos-arm64.deb
-Size: 67636
-MD5sum: 550e27bb2fa36f90069c9d08e3cf554b
-SHA1: 119ff0c0f5e8131296cc42cf3a3fbaf3333341a8
-SHA256: 38bae49c986ca2d8eb8085e07b9ad108c93b4e9f8c612d288ef6a87b5b63c16c
+Filename: debs/com.level3tjg.offloader_0.0.6+rootless14_iphoneos-arm64.deb
+Size: 67922
+MD5sum: 4180897bf59826513b39d80f0958ea4b
+SHA1: 238f9cfd5ff970ea5bc082a32c8f1a436ddd45b5
+SHA256: 5b02979b54dd2ba137a9d2fd6edb39e6ce465667cf58fe20e8b7711dc2e57a67
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (rootless)
 Author: level3tjg

@@ -26,6 +26,10 @@ static void *OffloaderVanillaCaptureHandle;
 - (BOOL)hasApplicationPlaceholder;
 @end
 
+@interface SBWidgetIcon : NSObject
+- (BOOL)isWidgetIcon;
+@end
+
 static BOOL OffloaderPreferenceEnabled(NSString *key) {
     NSUserDefaults *preferences =
         [[NSUserDefaults alloc] initWithSuiteName:OffloaderPreferencesDomain];
@@ -93,6 +97,19 @@ static BOOL OffloaderIconIsPlaceholder(SBIconView *iconView) {
 
 static BOOL OffloaderIconIsFolder(SBIconView *iconView) {
     return [[iconView icon] isKindOfClass:NSClassFromString(@"SBFolderIcon")];
+}
+
+static BOOL OffloaderIconIsWidget(SBIconView *iconView) {
+    id icon = [iconView icon];
+    return [icon isKindOfClass:NSClassFromString(@"SBWidgetIcon")] ||
+        ([icon respondsToSelector:@selector(isWidgetIcon)] &&
+         [(SBWidgetIcon *)icon isWidgetIcon]);
+}
+
+static BOOL OffloaderIconNeedsVanillaMenu(SBIconView *iconView) {
+    return OffloaderIconIsFolder(iconView) ||
+        OffloaderIconIsPlaceholder(iconView) ||
+        OffloaderIconIsWidget(iconView);
 }
 
 static void *OffloaderVanillaCaptureSymbol(const char *name) {
@@ -182,7 +199,7 @@ static NSArray *OffloaderFilteredItems(id items) {
 %hook SBIconView
 
 - (NSArray *)applicationShortcutItems {
-    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+    if (OffloaderIconNeedsVanillaMenu(self)) {
         OffloaderVanillaNoArgumentFunction function =
             OffloaderVanillaNoArgumentSymbol(
                 "OffloaderCallVanillaApplicationShortcutItems");
@@ -198,7 +215,7 @@ static NSArray *OffloaderFilteredItems(id items) {
 }
 
 - (NSArray *)effectiveApplicationShortcutItems {
-    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+    if (OffloaderIconNeedsVanillaMenu(self)) {
         OffloaderVanillaNoArgumentFunction function =
             OffloaderVanillaNoArgumentSymbol(
                 "OffloaderCallVanillaEffectiveShortcutItems");
@@ -210,7 +227,7 @@ static NSArray *OffloaderFilteredItems(id items) {
 
 - (id)_contextMenuInteraction:(id)interaction
     overrideSuggestedActionsForConfiguration:(id)configuration {
-    if (OffloaderIconIsFolder(self) || OffloaderIconIsPlaceholder(self)) {
+    if (OffloaderIconNeedsVanillaMenu(self)) {
         OffloaderVanillaOverrideFunction function =
             OffloaderVanillaOverrideSymbol();
         return function
