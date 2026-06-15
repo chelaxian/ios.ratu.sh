@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "fishhook.h"
@@ -33,6 +32,20 @@ static const char *translated_path(const char *path, char *buffer, size_t size) 
     } else if (strcmp(path, "/private/var/mobile") == 0 ||
                starts_with(path, "/private/var/mobile/")) {
         suffix = path + strlen("/private");
+    }
+    if (!suffix || snprintf(buffer, size, "%s%s", g_jbroot, suffix) >= (int)size) {
+        return path;
+    }
+    return buffer;
+}
+
+static const char *translated_spawn_path(const char *path, char *buffer, size_t size) {
+    if (!path || g_jbroot[0] == '\0' || starts_with(path, g_jbroot)) return path;
+    const char *suffix = NULL;
+    if (strcmp(path, "/var/jb") == 0) {
+        suffix = "";
+    } else if (starts_with(path, "/var/jb/")) {
+        suffix = path + strlen("/var/jb");
     }
     if (!suffix || snprintf(buffer, size, "%s%s", g_jbroot, suffix) >= (int)size) {
         return path;
@@ -111,27 +124,14 @@ static int rootfix_posix_spawn(pid_t *pid, const char *path,
         }
     }
 
-    int result = original_posix_spawn(pid, path, actions, attributes,
+    char translated[PATH_MAX];
+    int result = original_posix_spawn(pid,
+                                      translated_spawn_path(path, translated, sizeof(translated)),
+                                      actions, attributes,
                                       replacement_argv ? replacement_argv : argv, envp);
     free(replacement_command);
     free(replacement_argv);
     return result;
-}
-
-static void ensure_jbroot_link(void) {
-    struct stat info;
-    if (lstat("/var/jb", &info) == 0) {
-        if (S_ISDIR(info.st_mode)) {
-            unlink("/var/jb/bin/sh");
-            rmdir("/var/jb/bin");
-            if (rmdir("/var/jb") != 0) return;
-        } else if (S_ISLNK(info.st_mode)) {
-            unlink("/var/jb");
-        } else {
-            return;
-        }
-    }
-    symlink(g_jbroot, "/var/jb");
 }
 
 __attribute__((constructor))
@@ -153,5 +153,4 @@ static void catmcp_rootfix_init(void) {
         {"posix_spawn", rootfix_posix_spawn, NULL},
     };
     rebind_symbols(bindings, sizeof(bindings) / sizeof(bindings[0]));
-    ensure_jbroot_link();
 }
