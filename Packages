@@ -116,6 +116,38 @@ Description: Safe recovery package for CatMCP RootHide metadata. Removes experim
 Author: ratu.sh
 Name: CatMCP RootHide Fix
 
+Package: com.ratush.catmcp-roothide-fix
+Version: 1.6.1
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit
+Filename: debs/com.ratush.catmcp-roothide-fix_1.6.1_iphoneos-arm64.deb
+Size: 1008
+MD5sum: 84c5331315ad6d6cd6aedbd025d1fb0f
+SHA1: 9751f066fcac31c02fd3b7d7506cdd3da98edd2d
+SHA256: f67036c5e9e62c131b3678bea9e0910d2557bfa7453ef2679ef613f9a658a1c7
+Section: Tweaks
+Priority: optional
+Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
+Author: ratu.sh
+Name: CatMCP RootHide Fix
+
+Package: com.ratush.catmcp-roothide-fix
+Version: 1.6.1
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit
+Filename: debs/com.ratush.catmcp-roothide-fix_1.6.1_iphoneos-arm64e.deb
+Size: 978
+MD5sum: 03effa7c9f6b35ad60cbfdb2043b2572
+SHA1: 61e0cc5f791e53fbf1602ea58a01b2796c73c22a
+SHA256: 66acb1ed81f0ecf2b9d1f4bf7dee54bf8f9944f88f993f182bbff15e113bb579
+Section: Tweaks
+Priority: optional
+Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
+Author: ratu.sh
+Name: CatMCP RootHide Fix
+
 Package: com.ratush.hppe
 Version: 0.3.0
 Architecture: iphoneos-arm64e
