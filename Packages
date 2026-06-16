@@ -85,116 +85,42 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.5.3
-Architecture: iphoneos-arm64
+Version: 1.6.5
+Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
-Depends: com.catmcp.daemon (>= 1.0.3), ellekit
-Filename: debs/com.ratush.catmcp-roothide-fix_1.5.3_iphoneos-arm64.deb
-Size: 914
-MD5sum: 94c791c6a57906c9a577edbce52ce2f8
-SHA1: dbea034f00a3dfff0211bbb1e173cea8731412cf
-SHA256: 3a766a3e98025029bfcc90a40ff2f1c96d26114a9ef893ab6fc4d9788850b12d
+Installed-Size: 532
+Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
+Conflicts: com.ratush.catmcp-touch-bridge
+Replaces: com.ratush.catmcp-touch-bridge
+Filename: debs/com.ratush.catmcp-roothide-fix_1.6.5_roothide_iphoneos-arm64e.deb
+Size: 13782
+MD5sum: 221fb8450d00d55b886c782954e3da43
+SHA1: af6bdff9d78f80828e79cc0901163b61cf2ee7cf
+SHA256: 8544be50775d8de6309dd5426e5e0d7420cfe319000a16847a6649f74208dc45
 Section: Tweaks
 Priority: optional
-Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
+Description: RootHide-safe CatMCP companion: restores sidecars and provides /tmp/catmcp.ipc_bb touch bridge for SpringBoard HID dispatch.
 Author: ratu.sh
-Name: CatMCP RootHide Fix
+Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.5.3
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: com.catmcp.daemon (>= 1.0.3), ellekit
-Filename: debs/com.ratush.catmcp-roothide-fix_1.5.3_iphoneos-arm64e.deb
-Size: 884
-MD5sum: fcfee82cc37fea89fd0781529ecd486a
-SHA1: 9f25faa90736c59810164aa1069abb12b96338d2
-SHA256: b1091eaa9e3d8e8aa8c801b44bba752c30132d6aeb4792429b782cfd8dc8b488
-Section: Tweaks
-Priority: optional
-Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
-Author: ratu.sh
-Name: CatMCP RootHide Fix
-
-Package: com.ratush.catmcp-roothide-fix
-Version: 1.6.1
+Version: 1.6.5
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Depends: com.catmcp.daemon (>= 1.0.3), ellekit
-Filename: debs/com.ratush.catmcp-roothide-fix_1.6.1_iphoneos-arm64.deb
-Size: 1008
-MD5sum: 84c5331315ad6d6cd6aedbd025d1fb0f
-SHA1: 9751f066fcac31c02fd3b7d7506cdd3da98edd2d
-SHA256: f67036c5e9e62c131b3678bea9e0910d2557bfa7453ef2679ef613f9a658a1c7
+Installed-Size: 532
+Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
+Conflicts: com.ratush.catmcp-touch-bridge
+Replaces: com.ratush.catmcp-touch-bridge
+Filename: debs/com.ratush.catmcp-roothide-fix_1.6.5_rootless_iphoneos-arm64.deb
+Size: 13870
+MD5sum: 4900569d820bf650ddefa0fef49d6d5a
+SHA1: ef3271fe3ea29938341bfdac7dc25db174de6c94
+SHA256: 45afd5faadaae287ff5af6d5be219839d8c746a6b6ad93b9af5f149526d006fe
 Section: Tweaks
 Priority: optional
-Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
+Description: RootHide-safe CatMCP companion: restores sidecars and provides /tmp/catmcp.ipc_bb touch bridge for SpringBoard HID dispatch.
 Author: ratu.sh
-Name: CatMCP RootHide Fix
-
-Package: com.ratush.catmcp-roothide-fix
-Version: 1.6.1
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: com.catmcp.daemon (>= 1.0.3), ellekit
-Filename: debs/com.ratush.catmcp-roothide-fix_1.6.1_iphoneos-arm64e.deb
-Size: 978
-MD5sum: 03effa7c9f6b35ad60cbfdb2043b2572
-SHA1: 61e0cc5f791e53fbf1602ea58a01b2796c73c22a
-SHA256: 66acb1ed81f0ecf2b9d1f4bf7dee54bf8f9944f88f993f182bbff15e113bb579
-Section: Tweaks
-Priority: optional
-Description: Safe recovery package for CatMCP RootHide metadata. Removes experimental input hook payload.
-Author: ratu.sh
-Name: CatMCP RootHide Fix
-
-Package: com.ratush.hppe
-Version: 0.3.0
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 332
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_0.3.0_iphoneos-arm64e.deb
-Size: 22194
-MD5sum: b67603333fe7abe082e634e6d43f9c0f
-SHA1: 242e24a5d4555c1a8db58269a92ca2e21bc1b577
-SHA256: 9d78f588ce35e14c005af9e3c69af7fc8ca79b4b3fb57624e0dacdc18024bb86
-Section: Tweaks
-Description: AlbumManager companion hooks for hidden asset visibility in Photos picker on RootHide.
-Author: Codex
-Name: Hidden Photos Picker Enabler
-
-Package: com.ratush.hppe
-Version: 0.6.4
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 240
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_0.6.4+roothide_iphoneos-arm64e.deb
-Size: 25506
-MD5sum: bd8be999a6c3821c5e2a4a96e189e79a
-SHA1: d3a195069b0acb03663f006817dafa37e9941d00
-SHA256: ce9d783300be332c09ad0477e1f4d60e141fb02e5c2cbe4a08a7cfee8ec95b94
-Section: Tweaks
-Description: AlbumManager companion that exposes hidden assets in system pickers and declutters Recents/Hidden in pickers on iOS 17 arm64e RootHide. v0.6.4: real declutter (membership-based filter via +fetchAssetCollectionsContainingAssets:withType:options:); NSBundle.infoDictionary hook injects NSPhotoLibraryUsageDescription/NSPhotoLibraryAddUsageDescription into the picker service bundle so TCC stops killing PhotosUIService when it accesses the full library; tccd-init still off (v0.6.3 fix).
-Author: chelaxian
-Name: Hidden Photos Picker Enabler
-
-Package: com.ratush.hppe
-Version: 0.6.4
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 224
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_0.6.4_iphoneos-arm64e.deb
-Size: 21190
-MD5sum: 5a24fbcb0c379f14887138dc33d9b062
-SHA1: 7b8b24cc4113e8d66e372129a21b14b000cc2e46
-SHA256: cb85ff114323d4c3561528fac6d71b71317fe663a67febf4a6d974e0504a47bb
-Section: Tweaks
-Description: AlbumManager companion that exposes hidden assets in system pickers and declutters Recents/Hidden in pickers on iOS 17 arm64e RootHide. v0.6.4: real declutter (membership-based filter via +fetchAssetCollectionsContainingAssets:withType:options:); NSBundle.infoDictionary hook injects NSPhotoLibraryUsageDescription/NSPhotoLibraryAddUsageDescription into the picker service bundle so TCC stops killing PhotosUIService when it accesses the full library; tccd-init still off (v0.6.3 fix).
-Author: chelaxian
-Name: Hidden Photos Picker Enabler
+Name: catmcp_fix_roothide
 
 Package: com.ratush.hppe
 Version: 0.6.5
