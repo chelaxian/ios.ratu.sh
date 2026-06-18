@@ -85,40 +85,40 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.6.5
+Version: 1.7.1
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
-Installed-Size: 532
+Installed-Size: 868
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.6.5_roothide_iphoneos-arm64e.deb
-Size: 13782
-MD5sum: 221fb8450d00d55b886c782954e3da43
-SHA1: af6bdff9d78f80828e79cc0901163b61cf2ee7cf
-SHA256: 8544be50775d8de6309dd5426e5e0d7420cfe319000a16847a6649f74208dc45
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.1_roothide_iphoneos-arm64e.deb
+Size: 32176
+MD5sum: c75e82786cefb3e498186f5a33a7bb2d
+SHA1: a9f9c095887343bb75675ea29eefad5a521ede32
+SHA256: 3364af7950a0c86335838eab23ad0b4846457e4dc136b7cc00644b7e89bc3762
 Section: Tweaks
 Priority: optional
-Description: RootHide-safe CatMCP companion: restores sidecars and provides /tmp/catmcp.ipc_bb touch bridge for SpringBoard HID dispatch.
+Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.6.5
+Version: 1.7.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 532
+Installed-Size: 868
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.6.5_rootless_iphoneos-arm64.deb
-Size: 13870
-MD5sum: 4900569d820bf650ddefa0fef49d6d5a
-SHA1: ef3271fe3ea29938341bfdac7dc25db174de6c94
-SHA256: 45afd5faadaae287ff5af6d5be219839d8c746a6b6ad93b9af5f149526d006fe
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.1_rootless_iphoneos-arm64.deb
+Size: 32162
+MD5sum: 7dadb75cf76fd171415872c14e64b393
+SHA1: 5a47985aae4f0677729d6f4833508c79fa269460
+SHA256: 74710ac425852b8b623a2f56da33c16d34d73f5b17ee4d01b2c453d87ff35f8c
 Section: Tweaks
 Priority: optional
-Description: RootHide-safe CatMCP companion: restores sidecars and provides /tmp/catmcp.ipc_bb touch bridge for SpringBoard HID dispatch.
+Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
