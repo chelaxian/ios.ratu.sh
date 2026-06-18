@@ -185,18 +185,18 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.5
+Version: 1.7.8
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
-Installed-Size: 872
+Installed-Size: 876
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.5_roothide_iphoneos-arm64e.deb
-Size: 34104
-MD5sum: f4b67923b66a70efd0a9f44d2e5ab94b
-SHA1: cf2af833021ae967c5036f258faaa2fe5fab7fb1
-SHA256: 3699eb435aa006ff6490d5047bf2c742861d4f7ebcf1fb8baeb6bd5f2f5b5791
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.8_roothide_iphoneos-arm64e.deb
+Size: 35294
+MD5sum: 4948406d09a0da195a882d136d143113
+SHA1: 85197cceb524d1ebb7ba2e83862c5339f15e2d41
+SHA256: 06306a6356d8887352236d264cbf3646c09146c4c19803fdd88098c71366ca75
 Section: Tweaks
 Priority: optional
 Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
@@ -204,18 +204,18 @@ Author: ratu.sh
 Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.5
+Version: 1.7.8
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 872
+Installed-Size: 876
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.5_rootless_iphoneos-arm64.deb
-Size: 34096
-MD5sum: fc443cd5071806f3207fc7ad8b1ad798
-SHA1: 8b18f12716aae1accb275d368889348d9d2c9411
-SHA256: 8c56f569af7d499cba3aecfa246722b42b1ddc5f970a9ed757cc42b3ebd7edbc
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.8_rootless_iphoneos-arm64.deb
+Size: 35260
+MD5sum: f2727288264128b13f0a7431082a7593
+SHA1: c221abcea7cbf3d3f522638fe35a4978ff6b752f
+SHA256: 05fe58b92d0cf7d47f40e1ff858111b1638da2f3aad967b455b8b488ec0c8db9
 Section: Tweaks
 Priority: optional
 Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
