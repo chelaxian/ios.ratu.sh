@@ -1766,10 +1766,10 @@ Maintainer: DanP
 Installed-Size: 4639
 Depends: firmware (>= 3.0)
 Filename: debs/ru.danpashin.twackup_2.0.2_iphoneos-arm64.deb
-Size: 2263760
-MD5sum: 1f19a7b3585721802e53b0609d5d3019
-SHA1: 8b9c93872383f44c5ead2261cf72e3d16939a9e7
-SHA256: 4d8211a1265a022305bba7f4a2572e72ca8897301c72f58944818da3c39830b9
+Size: 2263758
+MD5sum: 8dd2dad2c64eb841314fbef2fba0b4e3
+SHA1: d51b37b283cb36261a4a1dc72e3b894ca7c8bf6d
+SHA256: 03605512cb207e634145fe3b6aa420a557dd4d06346ecbbcd798bd176ef3a781
 Section: Utilities
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1784,10 +1784,10 @@ Maintainer: DanP
 Installed-Size: 4639
 Depends: firmware (>= 3.0)
 Filename: debs/ru.danpashin.twackup_2.0.2_iphoneos-arm64e.deb
-Size: 2263736
-MD5sum: 4ff7939b484d4ce48ce0e21324f6038c
-SHA1: 9c52f1131704eabb0e89d858ac2065e0d0880bab
-SHA256: 534797376829e1db28baa14fdde0cda98c24339bb6456d157e9220ba0bede7ff
+Size: 2263732
+MD5sum: 52572685a2c100091ca78e81490f8e0a
+SHA1: 133cfc0036a20a342dbd849dcb7919dac12f9a80
+SHA256: 4101044c96bc69d015a51afed0c3c36eac3fa25de20161f772a2a5e2df9a0179
 Section: Utilities
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1802,10 +1802,10 @@ Maintainer: DanP
 Installed-Size: 11990
 Depends: firmware (>= 14.0), libroot-dopamine
 Filename: debs/ru.danpashin.twackup-gui_2.0.2_iphoneos-arm64.deb
-Size: 4480990
-MD5sum: bf4db5440cc65923d926215327541f20
-SHA1: 725947cbd3542716683c33346a6a399ac988b2d4
-SHA256: 0156f89aaf470b5d0fbca819286584bc86e8b78c2c1d0b53a05870b6c7aa320d
+Size: 4483458
+MD5sum: 36fbe98fa79a5703c8ba82e105077fb6
+SHA1: b4c3a60cbbb4577afbcfbea8f749eb64614fc10e
+SHA256: cb842c88859a34d9f3b7e875575267ae85eacfc027d3f3d62606caf8d9a8a88d
 Section: Utilities
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1820,10 +1820,10 @@ Maintainer: DanP
 Installed-Size: 11990
 Depends: firmware (>= 14.0)
 Filename: debs/ru.danpashin.twackup-gui_2.0.2_iphoneos-arm64e.deb
-Size: 4481116
-MD5sum: 37c4286cc18047a9e852ba295e0f1856
-SHA1: cba5fdb424a98f33735cfa1a8a870de94464a7ac
-SHA256: 1b1b96fd18c0681f2f97033d8bd75b9b66b0c16ef31ad972245f4c7d675189f9
+Size: 4483302
+MD5sum: 79766365a1d19a9d889fe961054f8f4f
+SHA1: 8bbca1791387a608bc4f3a3b453cc1934931fea6
+SHA256: 1f0141e7cc79c7191af58d5089e56b030044f07fb43431556417b3179078d655
 Section: Utilities
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
