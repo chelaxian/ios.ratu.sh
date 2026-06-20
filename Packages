@@ -230,14 +230,14 @@ Installed-Size: 196
 Depends: mobilesubstrate, com.ratush.hppe, com.opa334.ccsupport
 Recommends: com.ratush.hppe
 Filename: debs/com.ratush.cchppe_1.0.1_iphoneos-arm64e.deb
-Size: 10116
-MD5sum: d059defd06233a502bc819c0c3e07090
-SHA1: f6b6c26dc1909fc3f33e0a5f8bf58bef37b22945
-SHA256: 16380217c206aae6d09f5f650d622e5d77e96f178d66670236c61661d78ad34b
+Size: 10452
+MD5sum: e51ce487b352e59437908c6b4ed9a9ae
+SHA1: fdede7ccf44add5bab695e23b7c1b24e964b4f2b
+SHA256: 811b5cce723142204885df5e5ec91e9ac93a01e85a292868ea4d548476d55aaf
 Section: Tweaks
 Description: Control Center tile for HPPE. Turns the whole Hidden Photos Picker Enabler tweak on and off (the same master switch as Settings -> HPPE -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
 Author: chelaxian
-Name: CCHPPE
+Name: CCHPM
 
 Package: com.ratush.hppe
 Version: 1.4.20
@@ -247,14 +247,14 @@ Installed-Size: 424
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy
 Recommends: com.noisyflake.albummanager
 Filename: debs/com.ratush.hppe_1.4.20_iphoneos-arm64e.deb
-Size: 69850
-MD5sum: bf21ed6ac18188d0e0d0b34d60e6e372
-SHA1: 25a8f1d1c2dc774f73406c6031cb557ad6cb6da4
-SHA256: 30d0b30bf1a6d60bb9ea29011db5d5f93a1aeff0471640a3c85cd877552818b2
+Size: 78674
+MD5sum: ec195dc690ad9708c68242d580162db7
+SHA1: 42be4b4467e4a3f5982952e226ffc1fcd4737093
+SHA256: 7a36eb962b0f364562c77f65a98da83fa5800059a192b6fea5ab8eadc0a2dad7
 Section: Tweaks
 Description: Reveal your hidden and locked photo albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app, where iOS normally hides them. Settings -> HPPE: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden after you move a photo into an album; "Allow hidden profiling" lets hidden photos join the automatic collections (Media Types, People). Works with or without AlbumManager.
 Author: chelaxian
-Name: Hidden Photos Picker Enabler
+Name: Hidden Photos Manager
 
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug

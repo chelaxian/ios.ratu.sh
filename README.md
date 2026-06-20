@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- HPPE and CCHPPE
+- Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
 - CatMCP and its RootHide companion
