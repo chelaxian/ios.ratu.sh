@@ -185,40 +185,40 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.11
+Version: 1.7.16
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 872
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.11_roothide_iphoneos-arm64e.deb
-Size: 36084
-MD5sum: b7a07daa380e2deddd36e07edfb6ca27
-SHA1: 93683f313df32fb2ad7276ca4b2258e46dafa60c
-SHA256: 3e5aa1be40bc81121f4ebf191b2824d12397d6708e22be399526de54c3d39f4b
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.16_roothide_iphoneos-arm64e.deb
+Size: 36600
+MD5sum: b88e7bc6ae18ad6c90e53ff6a35fbd97
+SHA1: e12ee5f0775786019a45d4381bd763fc8299becd
+SHA256: 8483226515499214d15437c2adc0cbf6a7d188a5657195c1bb634058963b95fb
 Section: Tweaks
 Priority: optional
-Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
+Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.11
+Version: 1.7.16
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 872
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.11_rootless_iphoneos-arm64.deb
-Size: 36074
-MD5sum: 1879989472a70e2d8d205e3df98788e0
-SHA1: 98470ffb0a29c4f4bb340806784e035d73505db7
-SHA256: d8b41d7a607e82b6af688c56f777cd4df2a48b47bfdf0ce05c231f5fc64ac969
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.16_rootless_iphoneos-arm64.deb
+Size: 36630
+MD5sum: 9dd0d53cefcb5404819c74802cd0cf5e
+SHA1: 444bcbfcf1778408272bc9d38f33d2db7ecfef96
+SHA256: 738580904d6a4b9da31d680c524660358a6e25a95c6aadaa1f64fbc72f738f9d
 Section: Tweaks
 Priority: optional
-Description: RootHide-safe CatMCP companion: autoloads the CatMCP touch bridge and provides SpringBoard HID dispatch.
+Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
