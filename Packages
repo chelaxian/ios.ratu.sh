@@ -222,19 +222,37 @@ Description: RootHide-safe CatMCP companion: supervises the server, autoloads th
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
-Package: com.ratush.hppe
-Version: 0.6.5
-Architecture: iphoneos-arm64
+Package: com.ratush.cchppe
+Version: 1.0.1
+Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 224
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_0.6.5_iphoneos-arm64e.deb
-Size: 20094
-MD5sum: 719a49acedf615ed7ee6aa8e6c2fff35
-SHA1: 24cc7dfab53acbe63c1737e8a17e92d406a393fe
-SHA256: db96b0c6c5c84946a292cba9fd887f8eb99b83a4160eeaeb1007df9db3a90c86
+Installed-Size: 196
+Depends: mobilesubstrate, com.ratush.hppe, com.opa334.ccsupport
+Recommends: com.ratush.hppe
+Filename: debs/com.ratush.cchppe_1.0.1_iphoneos-arm64e.deb
+Size: 10116
+MD5sum: d059defd06233a502bc819c0c3e07090
+SHA1: f6b6c26dc1909fc3f33e0a5f8bf58bef37b22945
+SHA256: 16380217c206aae6d09f5f650d622e5d77e96f178d66670236c61661d78ad34b
 Section: Tweaks
-Description: AlbumManager companion that exposes hidden assets in system pickers. RootHide Bootstrap 2.2, iOS 17 arm64e. v0.6.5: declutter DISABLED (the runtime-subclass wrapper that hid moved assets from Recents/Hidden was crashing Photos.app on launch because iOS 17+ RootHide unmaps TweakInject dylibs after init, leaving the wrapper method IMPs dangling; see MobileSlideShow-2026-06-09-113644.ips SIGBUS at 0x104800000). Picker hooks (a, b, c - includeHiddenAssets=YES, hidden album fetch, showLockedAlbums=YES) all still fire. The picker TCC kill is fixed by the patched /Applications/PhotosUIService.app/Info.plist (the original Sep 8 2023 binary plist lacked NSPhotoLibraryUsageDescription and NSPhotoLibraryAddUsageDescription). Declutter is a separate scope for v0.7.x.
+Description: Control Center tile for HPPE. Turns the whole Hidden Photos Picker Enabler tweak on and off (the same master switch as Settings -> HPPE -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
+Author: chelaxian
+Name: CCHPPE
+
+Package: com.ratush.hppe
+Version: 1.4.20
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 424
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy
+Recommends: com.noisyflake.albummanager
+Filename: debs/com.ratush.hppe_1.4.20_iphoneos-arm64e.deb
+Size: 69850
+MD5sum: bf21ed6ac18188d0e0d0b34d60e6e372
+SHA1: 25a8f1d1c2dc774f73406c6031cb557ad6cb6da4
+SHA256: 30d0b30bf1a6d60bb9ea29011db5d5f93a1aeff0471640a3c85cd877552818b2
+Section: Tweaks
+Description: Reveal your hidden and locked photo albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app, where iOS normally hides them. Settings -> HPPE: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden after you move a photo into an album; "Allow hidden profiling" lets hidden photos join the automatic collections (Media Types, People). Works with or without AlbumManager.
 Author: chelaxian
 Name: Hidden Photos Picker Enabler
 
@@ -1760,17 +1778,17 @@ Author: roothide
 Name: roothide core
 
 Package: ru.danpashin.twackup
-Version: 2.0.4
+Version: 2.0.5
 Architecture: iphoneos-arm64
 Maintainer: DanP
-Installed-Size: 4639
+Installed-Size: 4640
 Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.4_iphoneos-arm64.deb
-Size: 2261044
-MD5sum: 5132481fff6a8f0a29040586fe3cdd39
-SHA1: ce224233cfd6b48db4fd15d4c9a1ed2e5354a7b8
-SHA256: 4140729cbf00117a4ec252db6029297f7fcee65566c74aa2b93d8ba7033fb6b3
-Section: Utilities
+Filename: debs/ru.danpashin.twackup_2.0.5_iphoneos-arm64.deb
+Size: 2261148
+MD5sum: 12b0d10a4dd7aa95f2f987453e43fef5
+SHA1: e36f09e16f51f60695c8658b877c629c47d885ae
+SHA256: f414f4c72a616ecf76890c829558a13e170c2022adad7b6ce863c41da276449b
+Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
 Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
@@ -1778,17 +1796,17 @@ License: GPL-3.0-only
 Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup
-Version: 2.0.4
+Version: 2.0.5
 Architecture: iphoneos-arm64e
 Maintainer: DanP
-Installed-Size: 4639
+Installed-Size: 4640
 Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.4_iphoneos-arm64e.deb
-Size: 2260978
-MD5sum: aea2c2aba99f84f303b7a21381c61783
-SHA1: 7f647ca87e362ad41af054fea26b2b81cc64adff
-SHA256: b66e67d8240b02aef3d57ae7c5c90a16dd9fb26785f9b2c6d5e508810868e468
-Section: Utilities
+Filename: debs/ru.danpashin.twackup_2.0.5_iphoneos-arm64e.deb
+Size: 2261070
+MD5sum: 84631bfef24e0b075130c32f3a169d26
+SHA1: eb9d7d0a27bb58478337ad1765b94f228e8f0f8a
+SHA256: eff2e7456c56888537bf980407064c6320180efeee25a93736d771893edcfe44
+Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
 Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
@@ -1796,17 +1814,17 @@ License: GPL-3.0-only
 Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup-gui
-Version: 2.0.4
+Version: 2.0.5
 Architecture: iphoneos-arm64
 Maintainer: DanP
-Installed-Size: 12043
+Installed-Size: 12044
 Depends: firmware (>= 14.0), libroot-dopamine
-Filename: debs/ru.danpashin.twackup-gui_2.0.4_iphoneos-arm64.deb
-Size: 4506782
-MD5sum: 7afb6d4f65568a3e02cdbe6abf3db115
-SHA1: b82f8afbbc00d1b4d294b6b4acc12a055916366a
-SHA256: 233755aeaf54bcf7494beabd240d81a26899865f124e935542aa8c7cbde4deaa
-Section: Utilities
+Filename: debs/ru.danpashin.twackup-gui_2.0.5_iphoneos-arm64.deb
+Size: 4509954
+MD5sum: 644d3fadce2e6035040d22fa0a7be64e
+SHA1: 02a2530204c1671e362655750eb5ab36dab2a21d
+SHA256: 145f6ca7ed2a0017c076cd0b6dc6fd586c6b634b442d14dff820db62515de73f
+Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
 Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
@@ -1814,17 +1832,17 @@ License: GPL-3.0-only
 Name: Twackup (GUI)
 
 Package: ru.danpashin.twackup-gui
-Version: 2.0.4
+Version: 2.0.5
 Architecture: iphoneos-arm64e
 Maintainer: DanP
-Installed-Size: 12043
+Installed-Size: 12044
 Depends: firmware (>= 14.0)
-Filename: debs/ru.danpashin.twackup-gui_2.0.4_iphoneos-arm64e.deb
-Size: 4506846
-MD5sum: f7b0d1eeac52daa601eb968537c13984
-SHA1: c5e6d73247e115e1d8c0fe5f21b0f246d560dcb4
-SHA256: e5ef1e94a820aac2593b2092abe013d84bafe75d572849621670374e18541c30
-Section: Utilities
+Filename: debs/ru.danpashin.twackup-gui_2.0.5_iphoneos-arm64e.deb
+Size: 4509970
+MD5sum: 7ca1ec252e9499b02e44857431bfeb26
+SHA1: 9a9cf9574ced8c385ed3f6b3cb2264eed5d50a99
+SHA256: 2a35153bde251f886cca3e0b278f182427a32e98ea404969822061e28288842b
+Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
 Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages

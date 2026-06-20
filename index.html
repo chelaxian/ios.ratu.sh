@@ -1,82 +1,235 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#121417">
   <title>ios.ratu.sh</title>
   <style>
     :root {
       color-scheme: dark;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #101114;
-      color: #f4f4f5;
+      background: #121417;
+      color: #f4f5f7;
+      letter-spacing: 0;
     }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 32px;
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #121417; }
+    button, input { font: inherit; letter-spacing: 0; }
+    a { color: inherit; }
+    header { border-bottom: 1px solid #2c3036; background: #171a1f; }
+    .header-inner, main, footer { width: min(920px, calc(100% - 32px)); margin: 0 auto; }
+    .header-inner { display: flex; align-items: center; gap: 16px; min-height: 112px; padding: 18px 0; }
+    .repo-icon { width: 64px; height: 64px; border-radius: 8px; flex: 0 0 auto; }
+    .brand { min-width: 0; flex: 1; }
+    h1 { margin: 0 0 6px; font-size: 28px; line-height: 1.1; }
+    .subtitle { margin: 0; color: #aeb4bd; font-size: 15px; line-height: 1.45; }
+    .add-button {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+      padding: 0 16px; border-radius: 7px; background: #2ea9b7; color: #071315;
+      text-decoration: none; font-weight: 750; white-space: nowrap;
     }
-    main {
-      width: min(720px, 100%);
+    main { padding: 24px 0 44px; }
+    .toolbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    .search-wrap { position: relative; }
+    .search-wrap span { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #858c96; }
+    #search {
+      width: 100%; height: 44px; border: 1px solid #343941; border-radius: 7px;
+      padding: 0 14px 0 39px; background: #1b1f24; color: #f4f5f7; outline: none;
     }
-    img {
-      width: 72px;
-      height: 72px;
-      border-radius: 16px;
+    #search:focus { border-color: #2ea9b7; box-shadow: 0 0 0 3px rgba(46,169,183,.16); }
+    .segments { display: inline-flex; gap: 2px; padding: 3px; border-radius: 7px; background: #23272d; }
+    .segments button {
+      min-height: 36px; padding: 0 12px; border: 0; border-radius: 5px;
+      background: transparent; color: #aeb4bd; cursor: pointer;
     }
-    h1 {
-      margin: 24px 0 8px;
-      font-size: clamp(32px, 7vw, 56px);
-      line-height: 1;
+    .segments button[aria-selected="true"] { background: #424852; color: #fff; }
+    .summary { display: flex; justify-content: space-between; gap: 16px; margin: 22px 0 10px; color: #949ba5; font-size: 14px; }
+    .package-group { margin-top: 24px; }
+    .group-heading {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+      margin: 0; padding: 0 2px 9px; border-bottom: 1px solid #343941; font-size: 17px;
     }
-    p {
-      color: #c8cad0;
-      font-size: 18px;
-      line-height: 1.55;
-      max-width: 58ch;
+    .group-count { color: #858c96; font-size: 13px; font-weight: 500; }
+    .package-list { list-style: none; margin: 0; padding: 0; }
+    .package-row {
+      display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 12px;
+      align-items: start; padding: 14px 2px; border-bottom: 1px solid #292d33;
     }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 28px;
+    .package-symbol {
+      display: grid; place-items: center; width: 42px; height: 42px; border-radius: 7px;
+      background: #f2ba2f; color: #17130a; font-size: 21px; font-weight: 800;
     }
-    a {
-      color: inherit;
+    .package-symbol.tool { background: #46a6d8; color: #07141c; }
+    .package-symbol.library { background: #d27c67; color: #1a0b08; }
+    .package-name { margin: 0; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
+    .package-id { margin-top: 3px; color: #858c96; font-size: 12px; overflow-wrap: anywhere; }
+    .package-description {
+      display: -webkit-box; margin: 7px 0 0; overflow: hidden; color: #b7bdc6;
+      font-size: 13px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
     }
-    .button {
-      display: inline-flex;
-      align-items: center;
-      min-height: 44px;
-      padding: 0 16px;
-      border: 1px solid #3f424a;
-      border-radius: 8px;
-      background: #1b1d22;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    code {
-      color: #ffffff;
-      background: #1b1d22;
-      padding: 2px 6px;
-      border-radius: 5px;
+    .package-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; max-width: 220px; }
+    .tag { padding: 4px 7px; border: 1px solid #3a4048; border-radius: 5px; color: #c8cdd4; font-size: 11px; white-space: nowrap; }
+    .tag.roothide { border-color: #3b8173; color: #7fd0bd; }
+    .tag.rootless { border-color: #326f91; color: #79bfe6; }
+    .empty, .loading { padding: 48px 0; text-align: center; color: #949ba5; }
+    .error { color: #ef8d80; }
+    footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 20px 0 32px; border-top: 1px solid #2c3036; color: #858c96; font-size: 13px; }
+    footer nav { display: flex; gap: 14px; }
+    @media (max-width: 720px) {
+      .header-inner { align-items: flex-start; flex-wrap: wrap; }
+      .add-button { width: 100%; }
+      .toolbar { grid-template-columns: 1fr; }
+      .segments { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .segments button { padding: 0 6px; font-size: 12px; }
+      .package-row { grid-template-columns: 38px minmax(0, 1fr); }
+      .package-symbol { width: 38px; height: 38px; }
+      .package-meta { grid-column: 2; justify-content: flex-start; max-width: none; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <img src="/CydiaIcon.png" alt="ios.ratu.sh icon">
-    <h1>ios.ratu.sh</h1>
-    <p>Personal APT repository for iOS 17.0 arm64e packages adapted for RootHide Bootstrap 2.2.</p>
-    <p>HPPE is published here as an AlbumManager companion tweak and requires the official <code>com.noisyflake.albummanager</code> package.</p>
-    <p>Add <code>https://ios.ratu.sh/</code> in Sileo or another compatible package manager.</p>
-    <div class="actions">
-      <a class="button" href="sileo://source/https://ios.ratu.sh/">Add to Sileo</a>
-      <a class="button" href="/Packages">Packages</a>
-      <a class="button" href="/Release">Release</a>
+  <header>
+    <div class="header-inner">
+      <img class="repo-icon" src="/CydiaIcon.png" alt="">
+      <div class="brand">
+        <h1>ios.ratu.sh</h1>
+        <p class="subtitle">Пакеты для RootHide Bootstrap и современных rootless-джейлбрейков</p>
+      </div>
+      <a class="add-button" href="sileo://source/https://ios.ratu.sh/">Добавить в Sileo</a>
     </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <label class="search-wrap">
+        <span aria-hidden="true">⌕</span>
+        <input id="search" type="search" placeholder="Поиск по пакетам" autocomplete="off">
+      </label>
+      <div class="segments" role="tablist" aria-label="Категория пакетов">
+        <button type="button" role="tab" data-filter="all" aria-selected="true">Все</button>
+        <button type="button" role="tab" data-filter="tweaks" aria-selected="false">Твики</button>
+        <button type="button" role="tab" data-filter="tools" aria-selected="false">Инструменты</button>
+        <button type="button" role="tab" data-filter="libraries" aria-selected="false">Библиотеки</button>
+      </div>
+    </div>
+    <div class="summary"><span id="package-count">Загрузка индекса…</span><span>iOS 15–17</span></div>
+    <div id="catalog" class="loading">Читаю Packages…</div>
   </main>
+
+  <footer>
+    <span>RootHide · rootless · arm64 · arm64e</span>
+    <nav><a href="/Packages">Packages</a><a href="/Release">Release</a><a href="https://github.com/chelaxian/ios.ratu.sh">GitHub</a></nav>
+  </footer>
+
+  <script>
+    const catalog = document.querySelector('#catalog');
+    const countLabel = document.querySelector('#package-count');
+    const search = document.querySelector('#search');
+    const tabs = [...document.querySelectorAll('[data-filter]')];
+    let packages = [];
+    let activeFilter = 'all';
+
+    const toolSections = new Set(['Development', 'Utilities', 'Packaging', 'Administration', 'Networking', 'Security', 'Archiving', 'Scripting', 'Text_Editors', 'Terminal_Support']);
+    const librarySections = new Set(['Libraries', 'System', 'Tweak Injection', 'Keyrings']);
+
+    function parseIndex(text) {
+      const stanzas = text.trim().split(/\n\s*\n/).map(block => {
+        const item = {};
+        let current = '';
+        block.split('\n').forEach(line => {
+          const match = line.match(/^([^:]+):\s*(.*)$/);
+          if (match) { current = match[1]; item[current] = match[2]; }
+          else if (/^\s/.test(line) && current) item[current] += ' ' + line.trim();
+        });
+        return item;
+      }).filter(item => item.Package);
+
+      const grouped = new Map();
+      stanzas.forEach(item => {
+        const key = item.Package;
+        if (!grouped.has(key)) grouped.set(key, { ...item, architectures: new Set(), versions: new Set() });
+        const group = grouped.get(key);
+        group.architectures.add(item.Architecture || 'all');
+        group.versions.add(item.Version || '');
+        if (item.Section === 'Tweaks') group.Section = 'Tweaks';
+      });
+      return [...grouped.values()].sort((a, b) => (a.Name || a.Package).localeCompare(b.Name || b.Package));
+    }
+
+    function kindOf(item) {
+      if (item.Section === 'Tweaks') return 'tweaks';
+      if (librarySections.has(item.Section)) return 'libraries';
+      return toolSections.has(item.Section) ? 'tools' : 'tools';
+    }
+
+    function archTags(item) {
+      return [...item.architectures].sort().map(arch => {
+        const cls = arch === 'iphoneos-arm64e' ? 'roothide' : arch === 'iphoneos-arm64' ? 'rootless' : '';
+        const label = arch === 'iphoneos-arm64e' ? 'RootHide' : arch === 'iphoneos-arm64' ? 'Rootless' : arch;
+        return `<span class="tag ${cls}">${label}</span>`;
+      }).join('');
+    }
+
+    function versionTags(item) {
+      return [...item.versions].sort().map(version => `<span class="tag">${escapeHtml(version)}</span>`).join('');
+    }
+
+    function escapeHtml(value = '') {
+      return value.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+    }
+
+    function render() {
+      const query = search.value.trim().toLocaleLowerCase('ru');
+      const visible = packages.filter(item => {
+        const kind = kindOf(item);
+        const haystack = [item.Name, item.Package, item.Description, item.Section].join(' ').toLocaleLowerCase('ru');
+        return (activeFilter === 'all' || kind === activeFilter) && (!query || haystack.includes(query));
+      });
+      countLabel.textContent = `${visible.length} из ${packages.length} пакетов`;
+      if (!visible.length) { catalog.className = 'empty'; catalog.textContent = 'Ничего не найдено'; return; }
+
+      const groups = [
+        ['tweaks', 'Твики'],
+        ['tools', 'Инструменты'],
+        ['libraries', 'Системные компоненты и библиотеки']
+      ];
+      catalog.className = '';
+      catalog.innerHTML = groups.map(([kind, title]) => {
+        const items = visible.filter(item => kindOf(item) === kind);
+        if (!items.length) return '';
+        const rows = items.map(item => {
+          const iconClass = kind === 'tweaks' ? '' : kind === 'libraries' ? 'library' : 'tool';
+          const symbol = kind === 'tweaks' ? '⌁' : kind === 'libraries' ? 'L' : '›_';
+          return `<li class="package-row">
+            <span class="package-symbol ${iconClass}" aria-hidden="true">${symbol}</span>
+            <div>
+              <h3 class="package-name">${escapeHtml(item.Name || item.Package)}</h3>
+              <div class="package-id">${escapeHtml(item.Package)}</div>
+              <p class="package-description">${escapeHtml(item.Description || '')}</p>
+            </div>
+            <div class="package-meta">${versionTags(item)}${archTags(item)}</div>
+          </li>`;
+        }).join('');
+        return `<section class="package-group"><h2 class="group-heading"><span>${title}</span><span class="group-count">${items.length}</span></h2><ul class="package-list">${rows}</ul></section>`;
+      }).join('');
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      activeFilter = tab.dataset.filter;
+      tabs.forEach(item => item.setAttribute('aria-selected', String(item === tab)));
+      render();
+    }));
+    search.addEventListener('input', render);
+
+    fetch('/Packages', { cache: 'no-store' })
+      .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })
+      .then(text => { packages = parseIndex(text); render(); })
+      .catch(error => {
+        countLabel.textContent = 'Индекс недоступен';
+        catalog.className = 'empty error';
+        catalog.textContent = `Не удалось загрузить Packages: ${error.message}`;
+      });
+  </script>
 </body>
 </html>

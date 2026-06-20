@@ -1,31 +1,46 @@
 # ios.ratu.sh
 
-Personal APT repository for rootless and RootHide jailbreak packages.
+Personal APT repository for RootHide Bootstrap and modern rootless jailbreaks.
 
-Repository URL:
+Repository URL: `https://ios.ratu.sh/`
 
-```text
-https://ios.ratu.sh/
-```
+## Package layout
 
-Update package indexes after adding or replacing `.deb` files:
+| Architecture | Environment |
+| --- | --- |
+| `iphoneos-arm64e` | RootHide Bootstrap |
+| `iphoneos-arm64` | Standard rootless jailbreaks |
+
+User-facing tweaks use `Section: Tweaks`. Development tools, package-management
+utilities, libraries, and system components retain their functional sections so
+Sileo can group them predictably.
+
+Current project families:
+
+- HPPE and CCHPPE
+- Twackup CLI and GUI
+- Offloader and libMRYIPC
+- CatMCP and its RootHide companion
+- RootHide development and recovery toolchain
+
+The website reads `Packages` directly and merges architecture variants into one
+catalog entry. Adding or removing a package therefore does not require editing the
+HTML package list.
+
+## Publishing
+
+Place release archives in `debs/`, remove superseded versions, then rebuild all
+indexes from the repository root:
 
 ```sh
 scripts/build-index.sh
 ```
 
-Offloader is published in two variants:
-
-- `iphoneos-arm64` for standard rootless jailbreaks such as Dopamine and NathanLR.
-- `iphoneos-arm64e` for RootHide Bootstrap.
-
-Build both variants from their previous binary base packages:
+Validate the generated metadata before committing:
 
 ```sh
-scripts/build-offloader-dual-release.sh \
-  <release-number> <rootless-base.deb> <roothide-base.deb>
+grep -E '^(Package|Name|Version|Architecture|Section|Filename|SHA256):' Packages
 ```
 
-HPPE remains a RootHide package. It requires the official AlbumManager package
-(`com.noisyflake.albummanager`) and extends hidden album asset visibility into
-system photo pickers.
+`Release` advertises both supported architectures and contains checksums for
+`Packages`, `Packages.gz`, and `Packages.bz2`.
