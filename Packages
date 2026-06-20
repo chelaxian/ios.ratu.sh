@@ -184,6 +184,26 @@ Tag: role::developer
 Author: Muirey03
 Name: libMRYIPC
 
+Package: com.noisyflake.albummanager
+Version: 1.0.2
+Architecture: iphoneos-arm64e
+Maintainer: NoisyFlake <support@noisyflake.com>
+Installed-Size: 690
+Pre-Depends: rootless-compat(>= 0.9)
+Depends: firmware (>=15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
+Filename: debs/com.noisyflake.albummanager_1.0.2_iphoneos-arm64e.deb
+Size: 72436
+MD5sum: 35b2cd149f80ffa5ff6f59c9b66bd774
+SHA1: 2fe26c90014c5ec76f07499221a2bcc05170117e
+SHA256: 8d488717653d3dfbb434e968ddfcaaab5c666862b7fe8c39a3bf674c9858d8fc
+Section: Tweaks
+Description: Organize and protect your photo albums
+Tag: cydia::commercial, compatible_min::ios15.0
+Author: NoisyFlake <support@noisyflake.com>
+Depiction: https://chariz.com/buy/albummanager
+Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
+Name: AlbumManager
+
 Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.16
 Architecture: iphoneos-arm64e
