@@ -1798,16 +1798,16 @@ Author: roothide
 Name: roothide core
 
 Package: ru.danpashin.twackup
-Version: 2.0.8
+Version: 2.0.9
 Architecture: iphoneos-arm64
 Maintainer: DanP
 Installed-Size: 4640
 Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.8_iphoneos-arm64.deb
-Size: 2261244
-MD5sum: 0d52ca7b57befc42a221c37ce9ae4ab2
-SHA1: c9c8c43c7f1cc63de4c1da8dc4d120aeae42a3a6
-SHA256: fdcd98e2f64262f6d492a9c6accaeb06356b3cff528377e6597b51503e071c35
+Filename: debs/ru.danpashin.twackup_2.0.9_iphoneos-arm64.deb
+Size: 2261388
+MD5sum: 79937707d7f51e20d67a698e949220f7
+SHA1: 87663514359daa7193314b1e179f817a57b5bdab
+SHA256: 3ba0ce7873256366f3198a6abbca204cfe3ad7c20fa51205c35d764dccace783
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1816,16 +1816,16 @@ License: GPL-3.0-only
 Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup
-Version: 2.0.8
+Version: 2.0.9
 Architecture: iphoneos-arm64e
 Maintainer: DanP
 Installed-Size: 4640
 Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.8_iphoneos-arm64e.deb
-Size: 2261192
-MD5sum: 3791bf31edf386f7a0c9a9bcddcb828f
-SHA1: d741b72ea94308cfbb06a9ccdef7caacdd153065
-SHA256: 8c4098449872c2254d078efceef6514129afd8324f28fdf0145e802877352748
+Filename: debs/ru.danpashin.twackup_2.0.9_iphoneos-arm64e.deb
+Size: 2261344
+MD5sum: e412dbd98722ed9f5a3d567de254abf8
+SHA1: b2f2b9b83adf9f40dc8b02f479c86b182814761c
+SHA256: adcc5b30e5914fb3dc8661af908f24c0ff68b9fdb373165a3bff1b4f7ad0e9a4
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1834,16 +1834,16 @@ License: GPL-3.0-only
 Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup-gui
-Version: 2.0.8
+Version: 2.0.9
 Architecture: iphoneos-arm64
 Maintainer: DanP
 Installed-Size: 12061
 Depends: firmware (>= 14.0), libroot-dopamine
-Filename: debs/ru.danpashin.twackup-gui_2.0.8_iphoneos-arm64.deb
-Size: 4515254
-MD5sum: c62d2e04cde3c087262ae904d5963fe4
-SHA1: a24d591dd27c1512cfc010802567925c9f4d5540
-SHA256: ae1f3aaea0cb7e3dc2172ed56d26055164bddb3735e21d84e1e2a984f16eecfd
+Filename: debs/ru.danpashin.twackup-gui_2.0.9_iphoneos-arm64.deb
+Size: 4515352
+MD5sum: 13fdc32f3c0f50dec20eb577d329038f
+SHA1: 4d0189ddcaa70151daf7bdc6fa94c5924b374402
+SHA256: 2651be6f45ec23acf6b3b5e28b7f0cfecf23158e95e6bf027e5d1fcea777e9b0
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
@@ -1852,16 +1852,16 @@ License: GPL-3.0-only
 Name: Twackup (GUI)
 
 Package: ru.danpashin.twackup-gui
-Version: 2.0.8
+Version: 2.0.9
 Architecture: iphoneos-arm64e
 Maintainer: DanP
 Installed-Size: 12061
 Depends: firmware (>= 14.0)
-Filename: debs/ru.danpashin.twackup-gui_2.0.8_iphoneos-arm64e.deb
-Size: 4515130
-MD5sum: d0bd12057e7c5be217e2848d941fc102
-SHA1: 9b7792f6d47eaf58d9c624fae0782445828568b8
-SHA256: ed2bd95e74c4df153acf07798b81154c9d73d4f7f5bfb44c54ed33ab42f80fac
+Filename: debs/ru.danpashin.twackup-gui_2.0.9_iphoneos-arm64e.deb
+Size: 4515314
+MD5sum: 9fd9703303873269892218bb9c513e85
+SHA1: 55d4acff9da8598d2f37430fef263b8c36ad060c
+SHA256: 15badad14d0493b3bdee3519377d76852375516436e9934db96b8ccc1d37deb7
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
