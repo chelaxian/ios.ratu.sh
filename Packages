@@ -205,42 +205,42 @@ Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.16
+Version: 1.7.23
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 872
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.16_roothide_iphoneos-arm64e.deb
-Size: 36600
-MD5sum: b88e7bc6ae18ad6c90e53ff6a35fbd97
-SHA1: e12ee5f0775786019a45d4381bd763fc8299becd
-SHA256: 8483226515499214d15437c2adc0cbf6a7d188a5657195c1bb634058963b95fb
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.23_roothide_iphoneos-arm64e.deb
+Size: 38004
+MD5sum: c86f856d5aceaf793584bb4ba8b6e38d
+SHA1: b837b00494fc0c8d2e5e888017d4945507db3b3f
+SHA256: 64db56a2bd675fa1ea708264a5768c074150abd6c22625258a8ffbf916f39b4d
 Section: Tweaks
 Priority: optional
 Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
-Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.16
+Package: com.ratush.catmcp-rootless-fix
+Version: 1.7.23
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 872
 Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
-Conflicts: com.ratush.catmcp-touch-bridge
-Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.16_rootless_iphoneos-arm64.deb
-Size: 36630
-MD5sum: 9dd0d53cefcb5404819c74802cd0cf5e
-SHA1: 444bcbfcf1778408272bc9d38f33d2db7ecfef96
-SHA256: 738580904d6a4b9da31d680c524660358a6e25a95c6aadaa1f64fbc72f738f9d
+Conflicts: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix (<= 1.7.22)
+Replaces: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix (<= 1.7.22)
+Filename: debs/com.ratush.catmcp-rootless-fix_1.7.23_rootless_iphoneos-arm64.deb
+Size: 38012
+MD5sum: 7af448974874b40e4f741106b29af273
+SHA1: 4b7f130203cc4fdd30ac6690ecf962dad4ce1987
+SHA256: 6c7780ebfa3a21ebae53fde14410f02a126306a4b51c4e8623d0f22e284d8583
 Section: Tweaks
 Priority: optional
-Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
+Description: Rootless-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
-Name: catmcp_fix_roothide
+Name: catmcp_fix_rootless
 
 Package: com.ratush.cchppe
 Version: 1.0.1
