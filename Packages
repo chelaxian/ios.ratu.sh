@@ -192,11 +192,11 @@ Installed-Size: 5156
 Pre-Depends: rootless-compat(>= 0.9)
 Depends: firmware (>= 15.0), mobilesubstrate, preferenceloader
 Filename: debs/com.netskao.appdata_1.4.7_iphoneos-arm64e.deb
-Size: 4330628
-MD5sum: 19265f63bccd3391ea0e70676c570ac2
-SHA1: f801af59287b24d950f5ec54ec9c28d0ba2006c9
-SHA256: 8c937fb495c0f53e75efd37cba2079720e126901e3b5de8065a6027aa3663cb9
-Section: Netskao-Tweaks
+Size: 4330616
+MD5sum: 46337d09372350527f991118f0597a7e
+SHA1: 57128efbd83a1448311f8eb6102578cbc9ed1234
+SHA256: ab7485fb311bf78358fc9167d7920a3c28adacda6ffb01f9492e19fe3e281ac7
+Section: Tweaks
 Description: View & Manage Applications Data from your Home Screen
 Author: Fouad Raheb
 Markdowndescription: View & Manage Applications Data from your Home Screen<br><br>• v1.4.7: Fix app failed to downgrade<br><br>• v1.4.6: Fix iOS15 crash issues<br><br>• v1.4.5: Modify the API interface for obtaining the downgraded version number of an application
