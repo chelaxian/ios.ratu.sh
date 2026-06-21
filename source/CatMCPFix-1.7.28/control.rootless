@@ -1,0 +1,12 @@
+Package: com.ratush.catmcp-rootless-fix
+Name: catmcp_fix_rootless
+Version: 1.7.28
+Architecture: iphoneos-arm64
+Description: Rootless CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
+Maintainer: ratu.sh
+Author: ratu.sh
+Section: Tweaks
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
+Replaces: com.ratush.catmcp-touch-bridge
+Conflicts: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix
+Priority: optional

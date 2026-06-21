@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+PREFIX=
+[ -d /var/jb/Library/LaunchDaemons ] && PREFIX=/var/jb
+DIR=$PREFIX/Library/MobileSubstrate/DynamicLibraries
+TARGET=$PREFIX/usr/lib/DynamicPatches/AutoPatches.dylib
+AUTOPLIST=$PREFIX/Library/LaunchDaemons/com.ratush.catmcp-autoinjectd.plist
+
+mkdir -p "$DIR"
+if [ -e "$TARGET" ]; then
+  ln -sfn "$TARGET" "$DIR/catmcp.dylib.roothidepatch"
+  ln -sfn "$TARGET" "$DIR/CatMCPSpringBoardTouchBridge.dylib.roothidepatch"
+fi
+
+chmod 755 $PREFIX/usr/libexec/catmcp-inject 2>/dev/null || true
+chmod 755 $PREFIX/usr/libexec/catmcp-autoinjectd 2>/dev/null || true
+
+# Direct touch hooks bypass the vendor IpcClient entirely. Remove any older
+# socket helper during upgrades so no obsolete process or socket remains.
+launchctl bootout system/com.ratush.catmcp-touchd 2>/dev/null || true
+launchctl bootout user/501/com.ratush.catmcp-touchd 2>/dev/null || true
+rm -f /tmp/catmcp.ipc_bb
+
+load_job() {
+  label="$1"
+  file="$2"
+  [ -f "$file" ] || return 0
+  chown root:wheel "$file"
+  chmod 0644 "$file"
+  launchctl bootout "system/$label" 2>/dev/null || true
+  launchctl bootout "user/501/$label" 2>/dev/null || true
+  launchctl unload "$file" 2>/dev/null || true
+  if ! launchctl bootstrap system "$file"; then
+    echo "catmcp fix: failed to bootstrap $label" >&2
+    return 1
+  fi
+}
+
+load_job com.ratush.catmcp-autoinjectd "$AUTOPLIST"
+
+exit 0

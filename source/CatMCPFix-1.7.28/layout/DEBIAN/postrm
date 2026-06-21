@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+PREFIX=
+[ -d /var/jb/Library/LaunchDaemons ] && PREFIX=/var/jb
+DIR=$PREFIX/Library/MobileSubstrate/DynamicLibraries
+TARGET=$PREFIX/usr/lib/DynamicPatches/AutoPatches.dylib
+AUTOPLIST=$PREFIX/Library/LaunchDaemons/com.ratush.catmcp-autoinjectd.plist
+
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+  launchctl bootout system/com.ratush.catmcp-autoinjectd 2>/dev/null || true
+  launchctl bootout user/501/com.ratush.catmcp-autoinjectd 2>/dev/null || true
+  launchctl unload "$AUTOPLIST" 2>/dev/null || true
+  launchctl bootout system/com.ratush.catmcp-touchd 2>/dev/null || true
+  launchctl bootout user/501/com.ratush.catmcp-touchd 2>/dev/null || true
+  for sidecar in "$DIR/CatMCPSpringBoardTouchBridge.dylib.roothidepatch" "$DIR/catmcp.dylib.roothidepatch"; do
+    if [ -L "$sidecar" ] && [ "$(readlink "$sidecar")" = "$TARGET" ]; then
+      rm -f "$sidecar"
+    fi
+  done
+  rm -f /tmp/catmcp.ipc_bb
+fi
+
+exit 0

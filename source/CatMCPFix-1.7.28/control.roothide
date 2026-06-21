@@ -1,0 +1,12 @@
+Package: com.ratush.catmcp-roothide-fix
+Name: catmcp_fix_roothide
+Version: 1.7.28
+Architecture: iphoneos-arm64e
+Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
+Maintainer: ratu.sh
+Author: ratu.sh
+Section: Tweaks
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
+Replaces: com.ratush.catmcp-touch-bridge
+Conflicts: com.ratush.catmcp-touch-bridge
+Priority: optional

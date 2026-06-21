@@ -224,18 +224,18 @@ Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.23
+Version: 1.7.28
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
-Installed-Size: 872
-Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
+Installed-Size: 704
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.23_roothide_iphoneos-arm64e.deb
-Size: 38004
-MD5sum: c86f856d5aceaf793584bb4ba8b6e38d
-SHA1: b837b00494fc0c8d2e5e888017d4945507db3b3f
-SHA256: 64db56a2bd675fa1ea708264a5768c074150abd6c22625258a8ffbf916f39b4d
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.28_roothide_iphoneos-arm64e.deb
+Size: 35570
+MD5sum: 8568155a8e499208e4f1d49fd17c0cc7
+SHA1: 18c60ba63b7af4bdfb3250421bee667f2666ef53
+SHA256: d8de6c0ab8d86029e7243753a76d3ac0a4d8b1ee4b472920b005e33c9fb34962
 Section: Tweaks
 Priority: optional
 Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
@@ -243,21 +243,21 @@ Author: ratu.sh
 Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcp-rootless-fix
-Version: 1.7.23
+Version: 1.7.28
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 872
-Depends: com.catmcp.daemon (>= 1.0.3), firmware (>= 15.0)
-Conflicts: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix (<= 1.7.22)
-Replaces: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix (<= 1.7.22)
-Filename: debs/com.ratush.catmcp-rootless-fix_1.7.23_rootless_iphoneos-arm64.deb
-Size: 38012
-MD5sum: 7af448974874b40e4f741106b29af273
-SHA1: 4b7f130203cc4fdd30ac6690ecf962dad4ce1987
-SHA256: 6c7780ebfa3a21ebae53fde14410f02a126306a4b51c4e8623d0f22e284d8583
+Installed-Size: 704
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
+Conflicts: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix
+Replaces: com.ratush.catmcp-touch-bridge
+Filename: debs/com.ratush.catmcp-rootless-fix_1.7.28_rootless_iphoneos-arm64.deb
+Size: 35596
+MD5sum: c6429f5a39c7bb50db1619dc2a1216f7
+SHA1: 0f645efb8991a94b217b9e23023e02dfe90613c7
+SHA256: bdd08357bad147ef6f0bd0fbf6cb9f9ffdde2c1614d1eaa3c7fec1c3f3a4b797
 Section: Tweaks
 Priority: optional
-Description: Rootless-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
+Description: Rootless CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
 Name: catmcp_fix_rootless
 
