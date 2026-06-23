@@ -100,6 +100,22 @@ Description: GnuPG keys for the Chariz repository
 
 Package: com.catmcp.daemon
 Version: 1.0.3
+Architecture: iphoneos-arm64
+Maintainer: 0x530c<0x530c@gmail.com>
+Installed-Size: 5256
+Depends: mobilesubstrate, preferenceloader
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
+Size: 1733498
+MD5sum: e94d766d1b363753b65e57794468f93b
+SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
+SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
+Section: Tweaks
+Description: iOS MCP Server
+Author: 0x530c<0x530c@gmail.com>
+Name: catmcp
+
+Package: com.catmcp.daemon
+Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: 0x530c<0x530c@gmail.com>
 Installed-Size: 5256
