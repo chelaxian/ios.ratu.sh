@@ -115,16 +115,16 @@ Author: 0x530c<0x530c@gmail.com>
 Name: catmcp
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+roothide14
+Version: 0.0.6+roothide15
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+roothide14_iphoneos-arm64e.deb
-Size: 67834
-MD5sum: 898e858cc2347f50ea17fb354ffcea08
-SHA1: 9cca027da9dd077ed39c9cbd4962e3793699fc11
-SHA256: 770a41ec96ae4980cf59c404c6b9881f0d153940ed496c0d4525d6252d214799
+Filename: debs/com.level3tjg.offloader_0.0.6+roothide15_iphoneos-arm64e.deb
+Size: 67942
+MD5sum: 59703407d2792697b757caf7371051af
+SHA1: 73e89a6bf2cf36a7c9d4c706795265a40c953356
+SHA256: 17392b38c21465dbd74bdf9eb15dde4d10d45731c0fd7cb579d5c4958a8806d3
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (RootHide adapted)
 Author: level3tjg
