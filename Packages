@@ -2028,6 +2028,68 @@ Description: retrieves files from the web
  .
  Wget supports proxy servers; this can lighten the network load, speed up retrieval, and provide access behind firewalls.
 
+Package: xyz.cypwn.cr4shed
+Version: 4.3.1-2+roothide1
+Architecture: iphoneos-arm64e
+Maintainer: CyPwn
+Pre-Depends: rootless-compat(>= 0.9)
+Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
+Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+roothide1_iphoneos-arm64e.deb
+Size: 961466
+MD5sum: b548c51318aa4ee791b7d73543ba1ea4
+SHA1: 8c12802da27e7192eaf7d6aeaf5edc6454407aa1
+SHA256: 7e4262b32505bef76675e5293592c2492ac9ddc48bb01a72188e79633aeb9ab6
+Section: Tweaks
+Description: A modern crash reporter for iOS!
+Author: Muirey03
+Depiction: https://repo.cypwn.xyz/depiction/2532
+Icon: https://repo.cypwn.xyz/packages/Cr4shed-Rootless/icon.png
+Name: Cr4shed
+Sileodepiction: https://repo.cypwn.xyz/sileo_depiction/2532
+
+Package: xyz.cypwn.crossoveripc
+Version: 1.2-1
+Architecture: iphoneos-arm64e
+Maintainer: CyPwn
+Installed-Size: 338
+Pre-Depends: rootless-compat(>= 0.9)
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/xyz.cypwn.crossoveripc_1.2-1_iphoneos-arm64e.deb
+Size: 19048
+MD5sum: 7423f78256591f813c4dd976b6660071
+SHA1: 34bc1f2aadf8a521524c886d8c38c96a70bb7df7
+SHA256: 016fb865281933d126854384cd53b02874da0d7a9c3e96e5a69d81aa811528d7
+Section: Tweaks
+Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=crossoveripcdopamineDp
+Description: A cross-process communication tool for sending and receiving messages on iOS 15 & 16 for rootless JBs
+Author: @CrazyMind90 <CvCrazyMind@gmail.com>
+Depiction: https://repo.cypwn.xyz/depiction/2908
+Dev: crazymind90
+Icon: https://repo.cypwn.xyz/packages/CrossOverIPC-Rootless/icon.png
+Name: CrossOverIPC
+Sileodepiction: https://repo.cypwn.xyz/sileo_depiction/2908
+Sponsor: thebigboss.org <http://thebigboss.org>
+
+Package: xyz.cypwn.libnotifications
+Version: 0.3-6-1
+Architecture: iphoneos-arm64e
+Maintainer: CyPwn
+Pre-Depends: rootless-compat(>= 0.9)
+Depends: firmware (>= 8.0)
+Filename: debs/xyz.cypwn.libnotifications_0.3-6-1_iphoneos-arm64e.deb
+Size: 21382
+MD5sum: ed55b477cd3b6c5ab2ed15d05bfc9449
+SHA1: f70d15730cafe734e14cd084c27225733d31ef3f
+SHA256: 160b251f9cc8fdaa038116b283a122369807dc97ae20d30a7d526f0aaf4f5b10
+Section: Development
+Priority: optional
+Description: App notification library.
+Author: CokePokes
+Depiction: https://repo.cypwn.xyz/depiction/2531
+Icon: https://repo.cypwn.xyz/packages/libnotifications-Rootless/icon.png
+Name: libnotifications
+Sileodepiction: https://repo.cypwn.xyz/sileo_depiction/2531
+
 Package: xz-utils
 Version: 5.4.1
 Architecture: iphoneos-arm64e
