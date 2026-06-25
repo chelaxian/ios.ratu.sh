@@ -311,6 +311,22 @@ Description: Manage your hidden and locked photos everywhere iOS normally keeps 
 Author: chelaxian
 Name: Hidden Photos Manager
 
+Package: com.ratush.jetsamfix
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 356
+Depends: firmware (>= 14.0)
+Filename: debs/com.ratush.jetsamfix_1.0.0_iphoneos-arm64e.deb
+Size: 28372
+MD5sum: dfb8cca934ea4b0336762323ff4af63c
+SHA1: 590ccd4565d12981fedeb3842a3ca871c217a5f5
+SHA256: 7e770c2cffc043cf6e6fdeff90bd3658328dd201a963599adc10332107a40e85
+Section: Tweaks
+Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to stop OOM/safe-mode crashes on iOS 17. Runs as a launchd daemon; control via `jetsamfix status|apply|lenient on|off`.
+Author: ratush
+Name: JetsamFix
+
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug
 Architecture: iphoneos-arm64e
