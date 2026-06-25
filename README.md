@@ -91,9 +91,10 @@ only for ad-hoc checks or one-off changes.
 `com.ratush.safeguard` — proactive memory-pressure watchdog that complements
 JetsamFix. Where JetsamFix holds a *passive* policy floor (raised limits +
 lenient mode), Safeguard actively *detects and remediates* pressure events:
-it samples RAM pressure and resident processes every ~20 s and, when the device
-is in the jetsam RED zone, SIGKILLs allowlisted debug-daemon hogs (default: a
-leftover `frida-server`/`frida-helper` — the classic hidden hog that tips a
+it samples RAM pressure and resident processes every ~20 s and, once the device
+is under pressure (jetsam AMBER or RED zone), SIGKILLs allowlisted debug-daemon
+hogs that have *ballooned* past an RSS floor (default target: a leftover
+`frida-server`/`frida-helper` — the classic hidden hog that tips a
 heavily-tweaked device into recurring safe mode).
 
 Key properties:
@@ -101,7 +102,14 @@ Key properties:
 - **Detection is syscall-only** (`host_statistics64` for free/purgeable/swap,
   `proc_pidinfo` for per-process RSS) and so works from the launchd daemon's
   data-container namespace where file reads fail.
-- **Red zone:** free+purgeable < 60 MB idle (the case-study crash line).
+- **Pressure zones:** AMBER at free+purgeable < 120 MB, RED below 60 MB. Acting
+  at AMBER, not only at RED, because a memory-starved process can SIGSEGV
+  before free memory ever crosses the RED line — the case-study Safe-Mode
+  crash was exactly such a pressure-starvation SIGSEGV, not a jetsam relaunch.
+- **RSS floor:** an allowlisted hog is only killed when its RSS is at least
+  `kill_min_rss_mb` (default 100 MB). A small/idle instance you still need (a
+  `frida-server` resting at ~10 MB) is tolerated and logged as `tolerated`;
+  only a ballooned one (150 MB+) is killed.
 - **Safety:** only names on the kill-allowlist are ever touched; SpringBoard,
   backboardd, launchd, kernel_task, etc. are on an explicit never-kill list and
   cannot be auto-killed.
