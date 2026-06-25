@@ -327,6 +327,22 @@ Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-proce
 Author: ratush
 Name: JetsamFix
 
+Package: com.ratush.safeguard
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 356
+Depends: com.ratush.jetsamfix, firmware (>= 14.0)
+Filename: debs/com.ratush.safeguard_1.0.0_iphoneos-arm64e.deb
+Size: 35292
+MD5sum: 9e4f2c9d0b8443670c0854497d3d5193
+SHA1: 92a207198409349a2304a3559faf5e7519e84a0b
+SHA256: b7dbbda6b413d5c87cd0f34739d7761d884dc5cb0c01c560618ce6dd6b958677
+Section: Tweaks
+Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills whitelisted hogs when the device enters the jetsam RED zone, to prevent SpringBoard OOM / Safe-Mode crashes. Detection is syscall-based (container-safe). Pairs with JetsamFix (which holds the passive policy floor). Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
+Author: ratush
+Name: Safeguard
+
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug
 Architecture: iphoneos-arm64e
