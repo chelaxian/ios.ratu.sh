@@ -2029,16 +2029,16 @@ Description: retrieves files from the web
  Wget supports proxy servers; this can lighten the network load, speed up retrieval, and provide access behind firewalls.
 
 Package: xyz.cypwn.cr4shed
-Version: 4.3.1-2+roothide1
+Version: 4.3.1-2+roothide2
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)
 Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
-Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+roothide1_iphoneos-arm64e.deb
-Size: 961466
-MD5sum: b548c51318aa4ee791b7d73543ba1ea4
-SHA1: 8c12802da27e7192eaf7d6aeaf5edc6454407aa1
-SHA256: 7e4262b32505bef76675e5293592c2492ac9ddc48bb01a72188e79633aeb9ab6
+Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+roothide2_iphoneos-arm64e.deb
+Size: 939716
+MD5sum: 5f1cbf2cb706d20b9802ee399f20d264
+SHA1: bfa91fc77170bb6621047712bd2a93f6bb2002a8
+SHA256: cd0d323b440c620d05439a5e97c4ef065d8717797b1ec03cd5d48c841fd7cab2
 Section: Tweaks
 Description: A modern crash reporter for iOS!
 Author: Muirey03
