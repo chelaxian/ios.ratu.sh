@@ -295,17 +295,17 @@ Author: chelaxian
 Name: CCHPM
 
 Package: com.ratush.hppe
-Version: 1.4.35
+Version: 1.4.36
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 460
+Installed-Size: 476
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy
 Recommends: com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_1.4.35_iphoneos-arm64e.deb
-Size: 85442
-MD5sum: 8a515ba1237ff16512afd6464f113ec0
-SHA1: b7826f847a9ee29eb63d0e96ece9cb2e9f311f71
-SHA256: c2cc63f41e10fd6af9a252408e1ee12017f37ffd6c8c583248221fa7045fca90
+Filename: debs/com.ratush.hppe_1.4.36_iphoneos-arm64e.deb
+Size: 87392
+MD5sum: 8a01d4fce67dadf70253053b48e59a31
+SHA1: ea9d1bfae08fbf615adb404c59e7a1911258e952
+SHA256: 6e84567a25f04013a1f0e9d9a474c30c3a6026ca10726246c938cfb81e336d22
 Section: Tweaks
 Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
 Author: chelaxian
