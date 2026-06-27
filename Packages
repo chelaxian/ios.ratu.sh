@@ -294,6 +294,23 @@ Description: Control Center tile for HPPE. Turns the whole Hidden Photos Picker 
 Author: chelaxian
 Name: CCHPM
 
+Package: com.ratush.ccvpnonoffauto
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Installed-Size: 408
+Depends: firmware (>=14.0), com.opa334.ccsupport
+Filename: debs/com.ratush.ccvpnonoffauto_1.0.0_iphoneos-arm64e.deb
+Size: 22492
+MD5sum: ab0a5550db613ce382cfd9bcd6a5d2e8
+SHA1: 52827ae80be1bff7264f06a4278d076396c66062
+SHA256: 4a92a01fa3b6843d8758810c9a64411a0f24fb9a61fabce1cb1b5400f6ab080f
+Section: Tweaks (CCSupport)
+Homepage: https://ios.ratu.sh
+Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
+Author: ratu.sh
+Name: CCVPN-ON-OFF-AUTO
+
 Package: com.ratush.hppe
 Version: 1.4.37
 Architecture: iphoneos-arm64e
