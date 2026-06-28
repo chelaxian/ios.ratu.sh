@@ -395,6 +395,22 @@ Tag: role::developer
 Author: roothide
 Name: PatchLoader
 
+Package: com.snail.autovpn.global
+Version: 1.0.8+roothidefix2
+Architecture: iphoneos-arm64e
+Maintainer: Snail <mu514983786@gmail.com>
+Installed-Size: 1048
+Depends: mobilesubstrate (>= 0.9.5000),preferenceloader,com.opa334.altlist
+Filename: debs/com.snail.autovpn.global_1.0.8+roothidefix2_iphoneos-arm64e.deb
+Size: 366048
+MD5sum: 6f3f70dbf5c7048483e8bc00a4c89910
+SHA1: 4fca3889d9be2eca5c94b675e7c6b4890a05595a
+SHA256: 3d15843535ffb7e374677a512fd2de33eba0699a69a37c2acecf30bd5850667b
+Section: Tweaks
+Description: Automatically enable or disable the vpn according to the situation, and enjoy smooth browsing experience in the app. 根据特定场景自动开启/关闭代理连接，畅享APP丝滑浏览体验。
+Author: Snail <mu514983786@gmail.com>
+Name: AutoVPN 自动VPN
+
 Package: coreutils
 Version: 9.3-1
 Architecture: iphoneos-arm64e
