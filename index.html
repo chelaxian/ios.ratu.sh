@@ -158,7 +158,7 @@
     }
 
     function kindOf(item) {
-      if (item.Section === 'Tweaks') return 'tweaks';
+      if ((item.Section || '').startsWith('Tweaks')) return 'tweaks';
       if (librarySections.has(item.Section)) return 'libraries';
       return toolSections.has(item.Section) ? 'tools' : 'tools';
     }
