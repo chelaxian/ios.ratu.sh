@@ -401,14 +401,14 @@ Maintainer: chelaxian <chelaxian@users.noreply.github.com>
 Installed-Size: 540
 Depends: com.snail.autovpn.global (= 1.0.8+roothidefix2)
 Filename: debs/com.ratush.vpnappbridge_1.0.1_iphoneos-arm64e.deb
-Size: 23426
-MD5sum: 3ddc4ab569b092d637a7b61d46cc3984
-SHA1: 41c1722e3dd1a697c9ea30fcbb959947675bc78f
-SHA256: 3d687db683a503ced26f0f870abbdf0511aac62cab18c20dddc57e4131765cab
+Size: 20598
+MD5sum: 2429242530937bcec4c179c597ba8226
+SHA1: 12170659fe544c2b99427daf456b78f64ae3454a
+SHA256: eb9d62194e194f04757f8b14a1a7495474b71473c274bb040c6f3320de390025
 Section: Tweaks
 Description: RootHide-native foreground app bridge for starting and stopping the active system VPN.
 Author: chelaxian
-Name: Avt0VPN fix
+Name: Aut0VPN (fix)
 
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug
@@ -452,14 +452,14 @@ Maintainer: Snail <mu514983786@gmail.com>
 Installed-Size: 1048
 Depends: mobilesubstrate (>= 0.9.5000),preferenceloader,com.opa334.altlist
 Filename: debs/com.snail.autovpn.global_1.0.8+roothidefix2_iphoneos-arm64e.deb
-Size: 366048
-MD5sum: 6f3f70dbf5c7048483e8bc00a4c89910
-SHA1: 4fca3889d9be2eca5c94b675e7c6b4890a05595a
-SHA256: 3d15843535ffb7e374677a512fd2de33eba0699a69a37c2acecf30bd5850667b
+Size: 290902
+MD5sum: f78904be5188e32eebb060c2589bbf6c
+SHA1: 8dc1710a68ac98e0188b21528deab19656ca3874
+SHA256: 4d1710566275a35986c3e2277a8acfbb235f53faf0247d1165d2304ec1d7be95
 Section: Tweaks
 Description: Automatically enable or disable the vpn according to the situation, and enjoy smooth browsing experience in the app. 根据特定场景自动开启/关闭代理连接，畅享APP丝滑浏览体验。
 Author: Snail <mu514983786@gmail.com>
-Name: AutoVPN 自动VPN
+Name: AutoVPN (roothide)
 
 Package: coreutils
 Version: 9.3-1
