@@ -394,6 +394,22 @@ Description: Automatic round-robin proxy rotation for Telegram iOS. Rotates the 
 Author: chelaxian
 Name: TGProxyRotation
 
+Package: com.ratush.tgproxyrotation
+Version: 0.0.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 128
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_0.0.2_iphoneos-arm64e.deb
+Size: 24078
+MD5sum: 473c584f66072f235100aaa46119694b
+SHA1: 8b9a904826d12d36d13b7ffeb31bb8a81b67887b
+SHA256: cd8be1f464a4c469d372040c35d6e8436a0610f89b65a866ce2ad8f19ca8d1d7
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS. Rotates the saved proxy list when the active proxy stays unavailable beyond a chosen threshold (5/10/15/30/60s), mirroring the Android/Desktop feature.
+Author: chelaxian
+Name: TGProxyRotation
+
 Package: com.ratush.vpnappbridge
 Version: 1.0.1
 Architecture: iphoneos-arm64e
