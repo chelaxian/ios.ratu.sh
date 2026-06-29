@@ -239,22 +239,6 @@ Depiction: https://chariz.com/buy/albummanager
 Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
-Package: com.ratush.autovpnfix
-Version: 1.5.1
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian <chelaxian@users.noreply.github.com>
-Installed-Size: 540
-Depends: com.snail.autovpn.global (>= 1.0.8+roothidefix2)
-Filename: debs/com.ratush.autovpnfix_1.5.1_iphoneos-arm64e.deb
-Size: 23464
-MD5sum: 75b05001daab7fc48a18c9b766446b1c
-SHA1: dfd3db3057122519be355d87d1fc25a23efca070
-SHA256: 1f83bf71787b8dce2ad8832c9f1188fbc63120226e13af17808955aa0fa2e0fc
-Section: Tweaks
-Description: RootHide-native runtime bridge for AutoVPN. Uses AutoVPN's existing settings to start/stop the active system VPN when selected apps become foreground.
-Author: chelaxian
-Name: AutoVPN RootHide Fix
-
 Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.28
 Architecture: iphoneos-arm64e
@@ -409,6 +393,22 @@ Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS. Rotates the saved proxy list when the active proxy stays unavailable beyond a chosen threshold (5/10/15/30/60s), mirroring the Android/Desktop feature.
 Author: chelaxian
 Name: TGProxyRotation
+
+Package: com.ratush.vpnappbridge
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian <chelaxian@users.noreply.github.com>
+Installed-Size: 540
+Depends: com.snail.autovpn.global (>= 1.0.8+roothidefix2)
+Filename: debs/com.ratush.vpnappbridge_1.0.0_iphoneos-arm64e.deb
+Size: 23424
+MD5sum: 68b725f43d4196379e9754182b8ad44e
+SHA1: cab9a0b171eb29416bf3810c60af2ad82eb8eb89
+SHA256: 4afb88466a982a4ec4859ba8a53432d6b0a3578d53158e8b41dc8ab9889caeff
+Section: Tweaks
+Description: RootHide-native foreground app bridge for starting and stopping the active system VPN.
+Author: chelaxian
+Name: Ratu VPN App Bridge
 
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug
