@@ -360,6 +360,22 @@ Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-proce
 Author: ratush
 Name: JetsamFix
 
+Package: com.ratush.ratuhosts
+Version: 0.1.0
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 384
+Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy
+Filename: debs/com.ratush.ratuhosts_0.1.0_iphoneos-arm64e.deb
+Size: 24736
+MD5sum: 2e47a2bcad840eef3cfd5389556c101a
+SHA1: 577fde96d0243094418593083f9f7496bd0774e7
+SHA256: b2f1c0de88ce570486f955f5deef63bc929c1b00a70540564e46132d31394657
+Section: Tweaks
+Description: Editable supplemental hosts file for RootHide iOS 17.
+Author: ratush
+Name: RatuHosts
+
 Package: com.ratush.safeguard
 Version: 1.2.0
 Architecture: iphoneos-arm64e
