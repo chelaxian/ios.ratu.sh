@@ -360,6 +360,22 @@ Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM press
 Author: ratush
 Name: Safeguard
 
+Package: com.ratush.tgproxyrotation
+Version: 0.0.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 128
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_0.0.1_iphoneos-arm64e.deb
+Size: 18942
+MD5sum: 557a08250bfcd6d86e61d79f6ec3d558
+SHA1: 0876af06ab3416ccc81ac1759f5613fe547ce807
+SHA256: 5d10cc06b0e66f4c6db65e98554cbb6766e431699ff93f20972372efa41254aa
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS. Rotates the saved proxy list when the active proxy stays unavailable beyond a chosen threshold (5/10/15/30/60s), mirroring the Android/Desktop feature.
+Author: chelaxian
+Name: TGProxyRotation
+
 Package: com.roothide.patcher
 Version: 2.1.4-1+debug
 Architecture: iphoneos-arm64e
