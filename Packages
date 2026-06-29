@@ -327,6 +327,24 @@ Description: Control Center VPN toggle. Short tap toggles the last-active system
 Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
+Package: com.ratush.etchosts17
+Version: 0.1.1
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 384
+Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy
+Conflicts: com.ratush.ratuhosts
+Replaces: com.ratush.ratuhosts
+Filename: debs/com.ratush.etchosts17_0.1.1_iphoneos-arm64e.deb
+Size: 24830
+MD5sum: 75d27bd8b7d46ccd0ed992f5160f1b1d
+SHA1: 49e37c7bdf360d085e334f43f1c75ffcd156fc56
+SHA256: b2b08b083cb5d104c55f06f6a7d3dcbe2570c49dbb3df3bc9ab1d214670c21dd
+Section: Tweaks
+Description: Editable supplemental hosts file for RootHide iOS 17.
+Author: ratush
+Name: EtcHosts17
+
 Package: com.ratush.hppe
 Version: 1.4.40
 Architecture: iphoneos-arm64e
@@ -359,22 +377,6 @@ Section: Tweaks
 Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to stop OOM/safe-mode crashes on iOS 17. Runs as a launchd daemon; control via `jetsamfix status|apply|lenient on|off`.
 Author: ratush
 Name: JetsamFix
-
-Package: com.ratush.ratuhosts
-Version: 0.1.0
-Architecture: iphoneos-arm64e
-Maintainer: ratush
-Installed-Size: 384
-Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy
-Filename: debs/com.ratush.ratuhosts_0.1.0_iphoneos-arm64e.deb
-Size: 24736
-MD5sum: 2e47a2bcad840eef3cfd5389556c101a
-SHA1: 577fde96d0243094418593083f9f7496bd0774e7
-SHA256: b2f1c0de88ce570486f955f5deef63bc929c1b00a70540564e46132d31394657
-Section: Tweaks
-Description: Editable supplemental hosts file for RootHide iOS 17.
-Author: ratush
-Name: RatuHosts
 
 Package: com.ratush.safeguard
 Version: 1.2.0
