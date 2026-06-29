@@ -301,11 +301,11 @@ Maintainer: ratu.sh
 Installed-Size: 420
 Depends: firmware (>=14.0), com.opa334.ccsupport
 Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64e.deb
-Size: 26220
-MD5sum: a1bb9ff5345b6df44bb3cbab7ee879ac
-SHA1: d11bb8959cc2d9869e5c4ec28d653fe7437bd162
-SHA256: a3395cc9620c0950f492500b49dbb394b2f30205c390ee0267fbedb2e454ec85
-Section: Tweaks (CCSupport)
+Size: 28560
+MD5sum: 46ae362deadee5695c053a55fe322434
+SHA1: 88f33dc932e291d91776444ac9634553495fc0d2
+SHA256: 60b2c117acf7a7d99a3a5f3cca269977d24da9ea82ebe116ec586b9ccf819d4c
+Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
@@ -2170,11 +2170,11 @@ Installed-Size: 338
 Pre-Depends: rootless-compat(>= 0.9)
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
 Filename: debs/xyz.cypwn.crossoveripc_1.2-1_iphoneos-arm64e.deb
-Size: 19048
-MD5sum: 7423f78256591f813c4dd976b6660071
-SHA1: 34bc1f2aadf8a521524c886d8c38c96a70bb7df7
-SHA256: 016fb865281933d126854384cd53b02874da0d7a9c3e96e5a69d81aa811528d7
-Section: Tweaks
+Size: 16940
+MD5sum: 8d460aae04eed1fb3c211850af918413
+SHA1: 1640ad9aac2c702c192f35c325b169daa334bd71
+SHA256: eebf0d78710d13bb86aab3aded677af7745bf2c06a9a0dbc526911012d45166f
+Section: Utilities
 Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=crossoveripcdopamineDp
 Description: A cross-process communication tool for sending and receiving messages on iOS 15 & 16 for rootless JBs
 Author: @CrazyMind90 <CvCrazyMind@gmail.com>

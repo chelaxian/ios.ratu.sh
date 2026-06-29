@@ -132,10 +132,7 @@
 
     const toolSections = new Set(['Development', 'Utilities', 'Packaging', 'Administration', 'Networking', 'Security', 'Archiving', 'Scripting', 'Text_Editors', 'Terminal_Support']);
     const librarySections = new Set(['Libraries', 'System', 'Tweak Injection', 'Keyrings']);
-    // Curated per-package overrides for upstream Section tags the repo treats
-    // differently. CrossOverIPC is tagged "Tweaks" upstream but is really an
-    // IPC framework / dependency (used by Cr4shed), so show it as a library.
-    const libraryPackages = new Set(['xyz.cypwn.crossoveripc']);
+    const libraryPackages = new Set([]);
 
     function parseIndex(text) {
       const stanzas = text.trim().split(/\n\s*\n/).map(block => {
