@@ -239,6 +239,22 @@ Depiction: https://chariz.com/buy/albummanager
 Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
+Package: com.ratush.autovpnfix
+Version: 1.3.5
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian <chelaxian@users.noreply.github.com>
+Installed-Size: 540
+Depends: com.snail.autovpn.global (>= 1.0.8+roothidefix2)
+Filename: debs/com.ratush.autovpnfix_1.3.5_iphoneos-arm64e.deb
+Size: 26922
+MD5sum: 68742d844eb26950e3c6c12dacd63b6c
+SHA1: a49a97e5f1f60561acec3d8da49e08b32c1fb3de
+SHA256: 092df392561130bec501ff5bb10ef5075e62a6af419a5fa5588032532b0ec547
+Section: Tweaks
+Description: RootHide-native runtime bridge for AutoVPN. Reads AutoVPN's existing settings and starts/stops the active system VPN when selected apps become foreground.
+Author: chelaxian
+Name: AutoVPN RootHide Fix
+
 Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.28
 Architecture: iphoneos-arm64e
