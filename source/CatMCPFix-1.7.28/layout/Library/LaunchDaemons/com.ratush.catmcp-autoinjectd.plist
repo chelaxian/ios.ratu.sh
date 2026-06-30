@@ -10,11 +10,7 @@
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
-	<key>KeepAlive</key>
-	<true/>
-	<key>StandardOutPath</key>
-	<string>/var/mobile/Library/Preferences/catmcp-autoinjectd.launch.log</string>
-	<key>StandardErrorPath</key>
-	<string>/var/mobile/Library/Preferences/catmcp-autoinjectd.launch.log</string>
+	<key>StartInterval</key>
+	<integer>60</integer>
 </dict>
 </plist>

@@ -6,6 +6,7 @@ PREFIX=
 DIR=$PREFIX/Library/MobileSubstrate/DynamicLibraries
 TARGET=$PREFIX/usr/lib/DynamicPatches/AutoPatches.dylib
 AUTOPLIST=$PREFIX/Library/LaunchDaemons/com.ratush.catmcp-autoinjectd.plist
+VENDORPLIST=$PREFIX/Library/MobileSubstrate/DynamicLibraries/catmcp.plist
 
 mkdir -p "$DIR"
 if [ -e "$TARGET" ]; then
@@ -15,6 +16,24 @@ fi
 
 chmod 755 $PREFIX/usr/libexec/catmcp-inject 2>/dev/null || true
 chmod 755 $PREFIX/usr/libexec/catmcp-autoinjectd 2>/dev/null || true
+
+# The vendor CatMCP dylib also tries to posix_spawn /usr/bin/catmcp from
+# SpringBoard/backboardd. On RootHide that creates duplicate launchers and has
+# produced SIGABRT crash loops in KrashKop. Keep the preference pane but stop
+# vendor SpringBoard/backboardd autostart; this package's supervisor owns the
+# server lifecycle and the direct SpringBoard touch bridge owns HID dispatch.
+if [ -f "$VENDORPLIST" ] && command -v python3 >/dev/null 2>&1; then
+  cp "$VENDORPLIST" "$VENDORPLIST.bak-catmcpfix" 2>/dev/null || true
+  python3 - "$VENDORPLIST" <<'PY' || true
+import plistlib, sys
+p = sys.argv[1]
+with open(p, "rb") as f:
+    d = plistlib.load(f)
+d["Filter"] = {"Bundles": ["com.apple.Preferences"]}
+with open(p, "wb") as f:
+    plistlib.dump(d, f, sort_keys=False)
+PY
+fi
 
 # Direct touch hooks bypass the vendor IpcClient entirely. Remove any older
 # socket helper during upgrades so no obsolete process or socket remains.
@@ -31,7 +50,7 @@ load_job() {
   launchctl bootout "system/$label" 2>/dev/null || true
   launchctl bootout "user/501/$label" 2>/dev/null || true
   launchctl unload "$file" 2>/dev/null || true
-  if ! launchctl bootstrap system "$file"; then
+  if ! launchctl bootstrap user/501 "$file"; then
     echo "catmcp fix: failed to bootstrap $label" >&2
     return 1
   fi

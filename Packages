@@ -258,6 +258,24 @@ Description: RootHide-safe CatMCP companion: supervises the server, autoloads th
 Author: ratu.sh
 Name: catmcp_fix_roothide
 
+Package: com.ratush.catmcp-roothide-fix
+Version: 1.7.29
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
+Conflicts: com.ratush.catmcp-touch-bridge
+Replaces: com.ratush.catmcp-touch-bridge
+Filename: debs/com.ratush.catmcp-roothide-fix_1.7.29_roothide_iphoneos-arm64e.deb
+Size: 74714
+MD5sum: 0f391011f9109e4cddd3c75ce88c8425
+SHA1: aa99411d8c16ec0752a23a700cf9ad2de330a439
+SHA256: 685618cbaed4246ae27a35e0cf823c22b2ccb0cf4ea667559465f214150e426b
+Section: Tweaks
+Priority: optional
+Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
+Author: ratu.sh
+Name: catmcp_fix_roothide
+
 Package: com.ratush.catmcp-rootless-fix
 Version: 1.7.28
 Architecture: iphoneos-arm64
@@ -363,6 +381,22 @@ Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-proce
 Author: ratush
 Name: JetsamFix
 
+Package: com.ratush.jetsamfix
+Version: 1.0.1
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 356
+Depends: firmware (>= 14.0)
+Filename: debs/com.ratush.jetsamfix_1.0.1_iphoneos-arm64e.deb
+Size: 28264
+MD5sum: f723d416cf527c173a25c69e5acd1353
+SHA1: db1382c44e38a8ce3dda80a41b88db329270804b
+SHA256: c089cc21fcd906d63ff124fa17750199e88ce7921c27be7cca8ad4f84d5dfe5a
+Section: Tweaks
+Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to reduce OOM/safe-mode crashes on iOS 17. Release build removes debug entitlement and non-rotating launchd redirect logs. Control via `jetsamfix status|apply|lenient on|off`.
+Author: ratush
+Name: JetsamFix
+
 Package: com.ratush.safeguard
 Version: 1.2.0
 Architecture: iphoneos-arm64e
@@ -376,6 +410,22 @@ SHA1: 684ae4e757fe59a29a377562e78758610d81ce2c
 SHA256: b6b0c2af1c8927b31cef802c95d54eca5fcf0b7fe68bdf417b63372676e7bfff
 Section: Tweaks
 Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills an allowlisted hog once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds a floor (kill_min_rss_mb) — so a small/idle instance you still need (a frida-server at ~10MB) is tolerated, while a ballooned one (150MB+) is killed. Acting at AMBER, not only RED, because a starved process can SIGSEGV before free memory ever crosses the RED line. Detection is syscall-based (container-safe). Pairs with JetsamFix (which holds the passive policy floor). Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
+Author: ratush
+Name: Safeguard
+
+Package: com.ratush.safeguard
+Version: 1.2.1
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Installed-Size: 356
+Depends: com.ratush.jetsamfix, firmware (>= 14.0)
+Filename: debs/com.ratush.safeguard_1.2.1_iphoneos-arm64e.deb
+Size: 35494
+MD5sum: bf1b5c8a21830d94110fd5fdae0b3a58
+SHA1: aafbadb9a71a3211785165770e168e6698da3fb8
+SHA256: 83201189a7b69015962dafa367151a3c3c4a378477565e17ca4a0f71c292e1af
+Section: Tweaks
+Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills only allowlisted hogs once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds kill_min_rss_mb. Release build removes debug entitlement and non-rotating launchd redirect logs; user apps remain advisory-only. Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
 Author: ratush
 Name: Safeguard
 
@@ -638,6 +688,22 @@ Section: Packaging
 Priority: required
 Homepage: http://wiki.debian.org/Teams/Dpkg
 Description: package maintainance tools from Debian
+
+Package: eg.anubistweaks.fridacc
+Version: 1.0.1+ratu10
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Installed-Size: 524
+Depends: firmware (>= 15.0), re.frida.server, com.opa334.ccsupport
+Filename: debs/eg.anubistweaks.fridacc_1.0.1+ratu10_iphoneos-arm64e.deb
+Size: 22334
+MD5sum: 4391fb12bb67af59de6f1b5f5498013e
+SHA1: 473f70167a64b258944ee68424580beff41ee5c3
+SHA256: 1e1f6c67bd8324bfce223b68fdf5ff1533525fef3e475de9f799912173d60226
+Section: Control Center (Modules)
+Description: Control Center toggle for hard on/off Frida server on RootHide. OFF bootouts/disables Frida, kills resident frida-server, and removes the active launchd plist so Frida cannot respawn until the tile turns it on.
+Author: Anubistweaks
+Name: FridaCC
 
 Package: ellekit
 Version: 1.1.3-3

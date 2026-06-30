@@ -17,10 +17,10 @@ extern void MSHookFunction(void *symbol, void *replace, void **result);
 
 static const char *kLogPath = "/var/mobile/Library/Preferences/catmcp-touch-bridge.log";
 static const char *kSlotNotifyPrefix = "com.ratush.catmcp.touchbridge.slot";
-static const int kNotifySlots = 64;
+enum { kNotifySlots = 64 };
 static const uint8_t kFrameMagic[4] = { 0xf1, 0xd3, 0x03, 0xca };
-static const size_t kMaxFrame = 4096;
-static const int kMaxFD = 256;
+enum { kMaxFrame = 4096 };
+enum { kMaxFD = 256 };
 static ssize_t (*orig_write)(int, const void *, size_t);
 static ssize_t (*orig_read)(int, void *, size_t);
 static ssize_t (*orig_readv)(int, const struct iovec *, int);
