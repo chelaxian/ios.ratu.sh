@@ -330,21 +330,21 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.3.11
+Version: 0.3.21
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 644
+Installed-Size: 652
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.3.11_iphoneos-arm64e.deb
-Size: 64154
-MD5sum: 152e737d7a2c2c524c520253c9aac372
-SHA1: c24a58c4dbc228096f2849864fa6f1e59002a0bb
-SHA256: 9698baba76ca88ff854ef638754fd7d33a44b92785bcc522d3b50c3ec777c22f
+Filename: debs/com.ratush.etchosts17_0.3.21_iphoneos-arm64e.deb
+Size: 67898
+MD5sum: 0f8b8e9512bfa8fcb37537d4f2bc467d
+SHA1: d06cae6f3954d048d6517a2fbb25263ae2522809
+SHA256: 69f23147776ebf35871fb6cf6d5965907969fd06870783b094cdf0508c1b8554
 Section: Tweaks
 Description: Editable supplemental hosts-style DNS overrides for RootHide iOS 17.
- Provides a Settings editor for additional hosts entries, persistent preset profiles, master enable/disable, VPN DNS override control, DNS profile priority control, fallback DNS protection, strict syntax validation, a local DNS override daemon, CNAME-aware blocking, and VPN-resistant DNS priority using SystemConfiguration DNS enforcement plus IPv4/IPv6 loopback aliases for common external DNS endpoints.
+ Provides a Settings editor for additional hosts entries, persistent preset profiles, master enable/disable, VPN DNS override control, DNS profile priority control, fallback DNS protection, strict syntax validation, a local DNS override daemon, CNAME-aware blocking, and VPN-resistant DNS priority using SystemConfiguration DNS enforcement plus IPv4/IPv6 loopback aliases for common external DNS endpoints. Disable/uninstall paths remove local DNS hooks and sanitize stale SystemConfiguration DNS entries so normal internet resolution survives tweak failure or removal.
 Author: ratush
 Name: etc_hosts_17.0
 
