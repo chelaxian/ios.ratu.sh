@@ -8,7 +8,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = IGGridFeed
 
 IGGridFeed_FILES = Tweak.x
-IGGridFeed_FRAMEWORKS = UIKit Foundation CoreGraphics
+IGGridFeed_FRAMEWORKS = Foundation
 IGGridFeed_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-function
 IGGridFeed_LDFLAGS = -Wl,-install_name,/Library/MobileSubstrate/DynamicLibraries/IGGridFeed.dylib
 

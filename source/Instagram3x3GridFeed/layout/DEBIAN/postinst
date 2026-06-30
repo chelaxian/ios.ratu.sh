@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+PYTHON=/usr/bin/python3
+if [ -x "$PYTHON" ]; then
+  "$PYTHON" <<'PY'
+import os
+import plistlib
+
+paths = [
+    "/var/mobile/Library/Preferences/rocket-settings.plist",
+    "/rootfs/var/mobile/Library/Preferences/rocket-settings.plist",
+    "/var/jb/var/mobile/Library/Preferences/rocket-settings.plist",
+]
+
+prefs = {}
+for path in paths:
+    try:
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                prefs = plistlib.load(f)
+            break
+    except Exception:
+        prefs = {}
+
+prefs["GridLayoutEnabled"] = True
+prefs["DefaultFeedLayout"] = "Grid"
+prefs["kGridLayoutEnabled"] = True
+prefs["kDefaultFeedLayout"] = "Grid"
+
+for path in paths:
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            plistlib.dump(prefs, f)
+    except Exception:
+        pass
+PY
+fi
+
+killall -9 Instagram 2>/dev/null || true
+exit 0
