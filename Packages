@@ -312,22 +312,22 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.2.0
+Version: 0.3.2
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 548
+Installed-Size: 556
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.2.0_iphoneos-arm64e.deb
-Size: 34290
-MD5sum: 663497c7a45022eab2992e23f6cb6238
-SHA1: f8b479be1f40494fb4cdafaf47d8c8745ad3b9e6
-SHA256: b90beb2075f311605649e52dd5e8e172eb78b87444c5c1cac9a21b5c460ed3e6
+Filename: debs/com.ratush.etchosts17_0.3.2_iphoneos-arm64e.deb
+Size: 36654
+MD5sum: f0ac0d4a2d9fccbd41f2cc5bf8b8278c
+SHA1: ec2ea752882ecbbc0501b96429bb47640407953b
+SHA256: 2f6d968fdf0c711f9aa7bcf5f2ca0da6db22f22378432c01f2c0246d63965e19
 Section: Tweaks
 Description: Editable supplemental hosts-style DNS overrides for RootHide iOS 17.
 Author: ratush
-Name: EtcHosts17
+Name: etc_hosts_17.0
 
 Package: com.ratush.hppe
 Version: 1.4.40
