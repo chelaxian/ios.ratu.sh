@@ -443,16 +443,16 @@ Author: chelaxian
 Name: TGProxyRotation
 
 Package: com.ratush.vpnappbridge
-Version: 1.0.1
+Version: 1.0.6
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian <chelaxian@users.noreply.github.com>
-Installed-Size: 540
+Installed-Size: 544
 Depends: com.snail.autovpn.global (= 1.0.8+roothidefix2)
-Filename: debs/com.ratush.vpnappbridge_1.0.1_iphoneos-arm64e.deb
-Size: 20598
-MD5sum: 2429242530937bcec4c179c597ba8226
-SHA1: 12170659fe544c2b99427daf456b78f64ae3454a
-SHA256: eb9d62194e194f04757f8b14a1a7495474b71473c274bb040c6f3320de390025
+Filename: debs/com.ratush.vpnappbridge_1.0.6_iphoneos-arm64e.deb
+Size: 28014
+MD5sum: 88da5473c84d1b66f2b5df04c0fe3c79
+SHA1: 51393fd678abb2553e4aa8fd1f3ae14cbf31d5f4
+SHA256: aa10eb35f2f6e78e005a1e2f6f6d89d9af4cfdc9cee7563e7ccfde32ac36707b
 Section: Tweaks
 Description: RootHide-native foreground app bridge for starting and stopping the active system VPN.
 Author: chelaxian
