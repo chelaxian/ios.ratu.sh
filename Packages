@@ -366,16 +366,16 @@ Author: chelaxian
 Name: Hidden Photos Manager
 
 Package: com.ratush.iggridfeed
-Version: 0.1.1
+Version: 0.1.2
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
 Installed-Size: 88
 Depends: firmware (>= 15.0), ellekit
-Filename: debs/com.ratush.iggridfeed_0.1.1_iphoneos-arm64e.deb
-Size: 4888
-MD5sum: 51eeb9ee582e679dc9b7f02fef459456
-SHA1: e404f5bc481a06a119cfbd2fddb09639a57151ce
-SHA256: 9a3f92bd01552f44ec202beee93941069b9b77fec4dfe9d7816d7c1ae93b478c
+Filename: debs/com.ratush.iggridfeed_0.1.2_iphoneos-arm64e.deb
+Size: 4844
+MD5sum: 84851d3ced74043f6b8fcad34c41e3ef
+SHA1: 451bb093f8f7d1102161db9370665b918556ca04
+SHA256: c2034f409482714dc5b413a09c6d3335b7818e1eadc6b57dc2ec362cd85ea9c4
 Section: Tweaks
 Description: Makes Instagram Home Feed render in a compact 3-column grid like the Profile grid.
 Author: chelaxian

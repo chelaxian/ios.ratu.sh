@@ -7,9 +7,7 @@ static BOOL IGGFIsInstagram(void) {
     NSString *bid = NSBundle.mainBundle.bundleIdentifier ?: @"";
     NSString *exe = NSProcessInfo.processInfo.arguments.firstObject.lastPathComponent ?: @"";
     return [bid isEqualToString:@"com.burbn.instagram"] ||
-           [bid isEqualToString:@"com.burbn.basel"] ||
-           [exe isEqualToString:@"Instagram"] ||
-           [exe isEqualToString:@"Basel"];
+           [exe isEqualToString:@"Instagram"];
 }
 
 static void IGGFLog(NSString *fmt, ...) {

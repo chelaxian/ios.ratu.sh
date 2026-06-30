@@ -7,12 +7,10 @@
 		<key>Bundles</key>
 		<array>
 			<string>com.burbn.instagram</string>
-			<string>com.burbn.basel</string>
 		</array>
 		<key>Executables</key>
 		<array>
 			<string>Instagram</string>
-			<string>Basel</string>
 		</array>
 	</dict>
 </dict>

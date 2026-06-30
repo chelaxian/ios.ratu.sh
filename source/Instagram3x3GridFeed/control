@@ -1,6 +1,6 @@
 Package: com.ratush.iggridfeed
 Name: Instagram 3x3 Grid Feed
-Version: 0.1.1
+Version: 0.1.2
 Architecture: iphoneos-arm64e
 Description: Makes Instagram Home Feed render in a compact 3-column grid like the Profile grid.
 Maintainer: chelaxian
