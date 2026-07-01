@@ -311,6 +311,22 @@ Description: Rootless CatMCP companion: supervises the server, autoloads the tou
 Author: ratu.sh
 Name: catmcp_fix_rootless
 
+Package: com.ratush.ccgapcloser
+Version: 0.3.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 388
+Depends: ellekit, preferenceloader (>= 2.2)
+Filename: debs/com.ratush.ccgapcloser_0.3.2_iphoneos-arm64e.deb
+Size: 16540
+MD5sum: 6d14f7145bb02c8897d1795e68386e36
+SHA1: de955a8c7d86ed9b47a3a48cf9e09ca6ebaaa2df
+SHA256: 34a63c01b359269e4592b4014d42ee50fa329469195e117f6c098aa3335e37bd
+Section: Tweaks
+Description: Move iOS Control Center modules upward and tune portrait/landscape top offsets.
+Author: chelaxian
+Name: CCGapCloser
+
 Package: com.ratush.cchppe
 Version: 1.0.1
 Architecture: iphoneos-arm64e
