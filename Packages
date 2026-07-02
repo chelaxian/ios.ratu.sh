@@ -362,21 +362,21 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.4.0
+Version: 0.5.0
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 684
+Installed-Size: 828
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.4.0_iphoneos-arm64e.deb
-Size: 80626
-MD5sum: 13550995b8f4f30481968b80da87834f
-SHA1: b675ac78ecde2ab791c0d1c1e95ea9b85be601a2
-SHA256: 24549fb333e922404aa6c066b77d014e317f766f9e94fca259060fefcc3fa8b3
+Filename: debs/com.ratush.etchosts17_0.5.0_iphoneos-arm64e.deb
+Size: 96080
+MD5sum: cd49bb4603eab7384ee279fa3b7edd46
+SHA1: 940a0eb64311048936909ee26a9a65f2855ae672
+SHA256: 76e3c462b7efca00575eda1aa9e84f552098607eb5c8d5d3e4e928d48dd9f91a
 Section: Tweaks
-Description: Editable supplemental hosts-style DNS overrides for RootHide iOS 17.
- Provides a terminal-styled Settings editor for additional hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles; a master enable/disable switch and instantly-applied toggles pushed to the daemon over a control socket; VPN DNS override control; DNS profile priority control; fallback DNS protection; strict syntax validation; a local DNS override daemon; CNAME-aware blocking; and VPN-resistant DNS priority using SystemConfiguration DNS enforcement plus IPv4/IPv6 loopback aliases for common external DNS endpoints. Disable/uninstall paths remove local DNS hooks and sanitize stale SystemConfiguration DNS entries so normal internet resolution survives tweak failure or removal.
+Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
+ Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall; a master enable switch and instantly-applied toggles pushed to a local DNS daemon over a control socket. To beat encrypted DNS (DoH/DoT profiles such as ControlD) and VPN DNS, the "Create DNS-profile to override DOH/DOT" switch installs a scoped NEDNSSettings resolver (via an entitled helper) that routes exactly the listed hosts to the local daemon, so those names resolve as configured regardless of VPN or encrypted DNS — /etc/hosts parity. Enable the profile once under Settings › General › VPN &amp; Device Management › DNS. Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
 Author: ratush
 Name: etc_hosts_17.0
 
