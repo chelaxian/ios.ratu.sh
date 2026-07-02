@@ -362,23 +362,24 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.5.0
+Version: 0.5.1
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 828
+Installed-Size: 860
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.5.0_iphoneos-arm64e.deb
-Size: 96080
-MD5sum: cd49bb4603eab7384ee279fa3b7edd46
-SHA1: 940a0eb64311048936909ee26a9a65f2855ae672
-SHA256: 76e3c462b7efca00575eda1aa9e84f552098607eb5c8d5d3e4e928d48dd9f91a
+Filename: debs/com.ratush.etchosts17_0.5.1_iphoneos-arm64e.deb
+Size: 126518
+MD5sum: cf597c425871e67074c3292e21b63bc1
+SHA1: 0d2e1f0b1e41320ff60e2d2b3fb593b36b275fd2
+SHA256: e643302064699ce4109a16c4f7bfcac100fe81bcddc03a11fa7a7e0215025aa5
 Section: Tweaks
 Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
  Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall; a master enable switch and instantly-applied toggles pushed to a local DNS daemon over a control socket. To beat encrypted DNS (DoH/DoT profiles such as ControlD) and VPN DNS, the "Create DNS-profile to override DOH/DOT" switch installs a scoped NEDNSSettings resolver (via an entitled helper) that routes exactly the listed hosts to the local daemon, so those names resolve as configured regardless of VPN or encrypted DNS — /etc/hosts parity. Enable the profile once under Settings › General › VPN &amp; Device Management › DNS. Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
 Author: ratush
-Name: etc_hosts_17.0
+Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
+Name: /etc/hosts (iOS 17.0)
 
 Package: com.ratush.hppe
 Version: 1.4.45
