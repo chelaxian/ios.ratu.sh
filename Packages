@@ -240,18 +240,18 @@ Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
 Package: com.ratush.appabetical
-Version: 1.0.12
+Version: 1.0.14
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 436
+Installed-Size: 468
 Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.appabetical_1.0.12_iphoneos-arm64e.deb
-Size: 38418
-MD5sum: cb47394b1a653089e76e55e390e9a846
-SHA1: f460aeb0bc1694c05bd1426f965c15e1969e8963
-SHA256: a47c105af90415e929202eb5bdcdab6d41b05055684e67d1a335c37527e9fbca
+Filename: debs/com.ratush.appabetical_1.0.14_iphoneos-arm64e.deb
+Size: 41900
+MD5sum: ff75f5033e9d957ca8ff4800eeeefb4f
+SHA1: 6cb31b01e3caebc1582898adb2bcd0242bec466b
+SHA256: 70242f506a42da0ab4b16f0a9b995cebc609c9065a4c5bfda239ea2856be7709
 Section: Tweaks
-Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. RootHide port of Avangelista/Appabetical.
+Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). RootHide port of Avangelista/Appabetical.
 Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by chelaxian
 Name: Appabetical
 
