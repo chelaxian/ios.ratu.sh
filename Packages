@@ -311,6 +311,22 @@ Description: Rootless CatMCP companion: supervises the server, autoloads the tou
 Author: ratu.sh
 Name: catmcp_fix_rootless
 
+Package: com.ratush.catmcpcc
+Version: 1.0.0+ratu3
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Installed-Size: 320
+Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-roothide-fix
+Filename: debs/com.ratush.catmcpcc_1.0.0+ratu3_iphoneos-arm64e.deb
+Size: 36786
+MD5sum: c2237921c539787d38cf66fa20d78144
+SHA1: d407f04b7c6a1f280c1110205a18c8fbf7bffafa
+SHA256: ded4b3f42307cefb1a25873d52d69021e86e368993f6525a1f4e91c82c51b20a
+Section: Tweaks
+Description: Control Center toggle for the CatMCP server on RootHide. The tile tracks localhost:9000 and a setuid-root helper performs launchctl/killall for com.ratush.catmcp-autoinjectd.
+Author: ratu.sh
+Name: CatMCP CC Toggle
+
 Package: com.ratush.ccgapcloser
 Version: 0.4.7
 Architecture: iphoneos-arm64e
