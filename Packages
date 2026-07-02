@@ -312,16 +312,16 @@ Author: ratu.sh
 Name: catmcp_fix_rootless
 
 Package: com.ratush.ccgapcloser
-Version: 0.4.1
+Version: 0.4.2
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
 Installed-Size: 388
 Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.ccgapcloser_0.4.1_iphoneos-arm64e.deb
-Size: 18722
-MD5sum: a271774325ba6604317e3a7b50d66b8d
-SHA1: 727a7ef37d606c2dbb499a8bc305f79e0e84762b
-SHA256: ba703024c072b726678cb1b83f961b0ca64599ec0e09e9539e6c536fc10931de
+Filename: debs/com.ratush.ccgapcloser_0.4.2_iphoneos-arm64e.deb
+Size: 18668
+MD5sum: 0cbe1727a44ae6c1f52c5a936ff8a23b
+SHA1: 4855163a457861cc4d862987cfcd8e3fbbdb945d
+SHA256: 9ddd2863ec63c2e7b5c4d714969fd7a1ba99f6b141d55d63b90abe49377ae101
 Section: Tweaks
 Description: Move iOS Control Center modules upward and tune portrait/landscape top offsets.
 Author: chelaxian
