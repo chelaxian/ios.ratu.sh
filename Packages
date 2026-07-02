@@ -738,18 +738,18 @@ Homepage: http://wiki.debian.org/Teams/Dpkg
 Description: package maintainance tools from Debian
 
 Package: eg.anubistweaks.fridacc
-Version: 1.0.1+ratu10
+Version: 1.0.1+ratu29
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 524
 Depends: firmware (>= 15.0), re.frida.server, com.opa334.ccsupport
-Filename: debs/eg.anubistweaks.fridacc_1.0.1+ratu10_iphoneos-arm64e.deb
-Size: 22334
-MD5sum: 4391fb12bb67af59de6f1b5f5498013e
-SHA1: 473f70167a64b258944ee68424580beff41ee5c3
-SHA256: 1e1f6c67bd8324bfce223b68fdf5ff1533525fef3e475de9f799912173d60226
+Filename: debs/eg.anubistweaks.fridacc_1.0.1+ratu29_iphoneos-arm64e.deb
+Size: 51644
+MD5sum: e4f4b5d31ec2f5524c8bf33467f8826e
+SHA1: 565a31d7614253828c9c99d4ca59e2259f396f02
+SHA256: 761efa0f34601ec68d98ebeb0a0a318efdcfa2654bb7e8a239bf1c00a1e11799
 Section: Control Center (Modules)
-Description: Control Center toggle for hard on/off Frida server on RootHide. OFF bootouts/disables Frida, kills resident frida-server, and removes the active launchd plist so Frida cannot respawn until the tile turns it on.
+Description: Control Center toggle that hard on/off the Frida server on RootHide. Tile repaints instantly on tap (white FR = off, red FR on white = on). A setuid-root native helper performs launchctl/killall in the caller context; a lightweight daemon monitors localhost:27042 and broadcasts re.frida.server/{on,off}.
 Author: Anubistweaks
 Name: FridaCC
 
