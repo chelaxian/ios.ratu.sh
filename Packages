@@ -378,18 +378,18 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.5.5
+Version: 0.5.6
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 900
+Installed-Size: 1072
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.5.5_iphoneos-arm64e.deb
-Size: 92576
-MD5sum: 82a4c3308b095dd3e4ebcd20d65d480f
-SHA1: 5c94c49edbc739771cd691ed7073aed5eccff450
-SHA256: 9cf36fda7e9fe8bf11607105ead44126114de951405dd552710dd9221717ece0
+Filename: debs/com.ratush.etchosts17_0.5.6_iphoneos-arm64e.deb
+Size: 97620
+MD5sum: 561c6c6f98630028063fe7b62cee3033
+SHA1: 243b3cf9e689653e5d9bd297a76cecd678bd3b27
+SHA256: 88308a2e70af1a704e31b6b03917cc8b78ca9c128cc2e7fce83577755db383ac
 Section: Tweaks
 Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
  Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. The device's system volume is sealed (APFS SSV) so /etc/hosts itself cannot be edited; instead the "Create / update DNS profile" switch hands you an installable configuration profile (com.apple.dnsSettings.managed) that routes hosts to a local DNS-over-TLS resolver, bundling a per-device CA so the profile trusts it automatically. That is the only DNS override iOS surfaces and enforces here, and a DNS profile always wins over encrypted DoH/DoT (ControlD) and VPN DNS for its scope. Scoped mode overrides only the listed hosts; Global mode routes all DNS through the local resolver (every editor change is then live). Note: the profile bakes the set of hostnames at install time — editing an IP is picked up live, but adding or removing a hostname needs a one-tap profile re-install (Global mode avoids this). Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
