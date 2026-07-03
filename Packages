@@ -312,6 +312,23 @@ Author: ratu.sh
 Name: catmcp_fix_rootless
 
 Package: com.ratush.catmcpcc
+Version: 1.0.0+ratu10
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Installed-Size: 320
+Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-roothide-fix
+Filename: debs/com.ratush.catmcpcc_1.0.0+ratu10_iphoneos-arm64e.deb
+Size: 50850
+MD5sum: 11e03d69b0fecbae76bd546b94d24c93
+SHA1: ed944ad30a80db84c46a53369fb85ee3bd8afc60
+SHA256: 96b82c3e0b98661e97605eea34de853e311d22c01e3f48c6114edd90531ca246
+Section: Tweaks
+Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
+Author: ratu.sh
+Icon: https://ios.ratu.sh/icons/catmcpcc.png
+Name: CatMCP CC Toggle
+
+Package: com.ratush.catmcpcc
 Version: 1.0.0+ratu7
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
@@ -322,22 +339,6 @@ Size: 41932
 MD5sum: 21b4ace4d858b1eb6b1596d45b7241fc
 SHA1: 0c78a0ad6cacee6fd45576c1d09ab269a85b7cc4
 SHA256: ae02724c7008e4d5115701d63810ce78c5d8aba7fed50b6ee49bc7914dff52ff
-Section: Tweaks
-Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
-Author: ratu.sh
-Name: CatMCP CC Toggle
-
-Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu9
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Installed-Size: 320
-Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-roothide-fix
-Filename: debs/com.ratush.catmcpcc_1.0.0+ratu9_iphoneos-arm64e.deb
-Size: 50504
-MD5sum: f2fe6153e6ce0f97425e54fce36347cc
-SHA1: 552a8f078798f41635f99efbb95b06252134f6ad
-SHA256: 94c272d81fdb9cbb6f57633720da1380884f69e65f8ecab0b84dccd711341114
 Section: Tweaks
 Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
 Author: ratu.sh
@@ -377,19 +378,20 @@ Author: chelaxian
 Name: CCHPM
 
 Package: com.ratush.ccopenssh
-Version: 1.0.2
+Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 520
 Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.0.2_iphoneos-arm64e.deb
-Size: 60112
-MD5sum: e748b2caed81be742df01f65ae0378fc
-SHA1: f478b663b720f10394d88aeb2ed19cd792bd3d5e
-SHA256: ded0cd9ee80e66163e9d6b7c14f218657054e8e257f0c53fe720d9ca67ab83d6
+Filename: debs/com.ratush.ccopenssh_1.0.3_iphoneos-arm64e.deb
+Size: 75354
+MD5sum: d52c52b00b524bda554dbcdcee1de0c6
+SHA1: df314e77fa4204ab5eca19fef505b31cb3ebd419
+SHA256: d7ce90eff86e4e5f7eaea4d19fe6004b4accca3e0e88cf8840ad303176ff42c7
 Section: Tweaks
 Description: Control Center and Settings controller for RootHide OpenSSH. The tile reports the real configured TCP listener and the helper applies launchd socket/config/auth settings.
 Author: ratu.sh
+Icon: https://ios.ratu.sh/icons/ccopenssh.png
 Name: CCOPENSSH
 
 Package: com.ratush.ccvpnonoffauto
