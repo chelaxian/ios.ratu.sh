@@ -328,16 +328,16 @@ Author: ratu.sh
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu8
+Version: 1.0.0+ratu9
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 320
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-roothide-fix
-Filename: debs/com.ratush.catmcpcc_1.0.0+ratu8_iphoneos-arm64e.deb
-Size: 50340
-MD5sum: d8331864ef4bb382ecf91786323d5774
-SHA1: 8ed4ed1a7c090890793b93b18daa04c0a23ebd48
-SHA256: b03545cf1e287138f06a478c00d1e95fc3335913c59ec21d306fb5e357cf1c5d
+Filename: debs/com.ratush.catmcpcc_1.0.0+ratu9_iphoneos-arm64e.deb
+Size: 50504
+MD5sum: f2fe6153e6ce0f97425e54fce36347cc
+SHA1: 552a8f078798f41635f99efbb95b06252134f6ad
+SHA256: 94c272d81fdb9cbb6f57633720da1380884f69e65f8ecab0b84dccd711341114
 Section: Tweaks
 Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
 Author: ratu.sh
@@ -377,16 +377,16 @@ Author: chelaxian
 Name: CCHPM
 
 Package: com.ratush.ccopenssh
-Version: 1.0.1
+Version: 1.0.2
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 520
 Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.0.1_iphoneos-arm64e.deb
-Size: 59918
-MD5sum: 7bcc02ed5d4e042fc6b9a0887a0f5ab6
-SHA1: dfd7514483ebb23ca42da479e18634044afb5d3c
-SHA256: 9a9dca7e1208c2e84bb91188c1219447320e8712b358bc8a23bc71e1f2117bec
+Filename: debs/com.ratush.ccopenssh_1.0.2_iphoneos-arm64e.deb
+Size: 60112
+MD5sum: e748b2caed81be742df01f65ae0378fc
+SHA1: f478b663b720f10394d88aeb2ed19cd792bd3d5e
+SHA256: ded0cd9ee80e66163e9d6b7c14f218657054e8e257f0c53fe720d9ca67ab83d6
 Section: Tweaks
 Description: Control Center and Settings controller for RootHide OpenSSH. The tile reports the real configured TCP listener and the helper applies launchd socket/config/auth settings.
 Author: ratu.sh
