@@ -378,16 +378,16 @@ Author: chelaxian
 Name: CCHPM
 
 Package: com.ratush.ccopenssh
-Version: 1.0.3
+Version: 1.0.4
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 520
 Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.0.3_iphoneos-arm64e.deb
-Size: 75354
-MD5sum: d52c52b00b524bda554dbcdcee1de0c6
-SHA1: df314e77fa4204ab5eca19fef505b31cb3ebd419
-SHA256: d7ce90eff86e4e5f7eaea4d19fe6004b4accca3e0e88cf8840ad303176ff42c7
+Filename: debs/com.ratush.ccopenssh_1.0.4_iphoneos-arm64e.deb
+Size: 68802
+MD5sum: afc8d600cd812bd47f7b2e314e8f2427
+SHA1: 8ea2c0f07eaa7d529b3f2ebfd1fde7b45a09c84d
+SHA256: 76b4716c739221808841fe5c8a527a62942b3498e3027fa954a75c1a0caa5c76
 Section: Tweaks
 Description: Control Center and Settings controller for RootHide OpenSSH. The tile reports the real configured TCP listener and the helper applies launchd socket/config/auth settings.
 Author: ratu.sh
