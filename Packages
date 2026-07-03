@@ -495,16 +495,16 @@ Author: ratush
 Name: Safeguard
 
 Package: com.ratush.tgproxyrotation
-Version: 0.7.0
+Version: 0.7.1
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
 Installed-Size: 144
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_0.7.0_iphoneos-arm64e.deb
-Size: 28466
-MD5sum: e2ce509ffaab7ce1a97e80ccfd3f12f9
-SHA1: 4d81f1311b3d03c59d0891d89d1cf15535be4e82
-SHA256: ad0d384d81349d3b713b1e5d452892c93a31c1c699452ad43b0017836503691e
+Filename: debs/com.ratush.tgproxyrotation_0.7.1_iphoneos-arm64e.deb
+Size: 29206
+MD5sum: 47fa1cce0d049af8942b45dbf32ef4bf
+SHA1: 58454667a2e296c9fe18d45ce98fe0d0f4798678
+SHA256: a6e885098779614b0372529402a4ad7f60dbf756048bd42576739abf6df9f78c
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
