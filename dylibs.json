@@ -8,7 +8,7 @@
       "version": "0.14.0",
       "filename": "sideload/TGProxyRotation-0.14.0.dylib",
       "size": 160752,
-      "sha256": "4abc1b455ee1651e907ef3accffa46a1776298d53597957551f2e71439f878e7",
+      "sha256": "4d49aea44adde1e06664026adb327b4210e1258013213e414644adfb7ce9743c",
       "author": "chelaxian",
       "tags": ["sideload", "trollfools", "dylib"],
       "description": "Automatic round-robin proxy rotation for Telegram iOS. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the \"Proxy\" text, or the paperclip in chats, or a three-finger tap)."
