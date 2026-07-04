@@ -72,6 +72,15 @@
     .tag { padding: 4px 7px; border: 1px solid #3a4048; border-radius: 5px; color: #c8cdd4; font-size: 11px; white-space: nowrap; }
     .tag.roothide { border-color: #3b8173; color: #7fd0bd; }
     .tag.rootless { border-color: #326f91; color: #79bfe6; }
+    .tag.sideload { border-color: #6d4ba8; color: #c4a6ef; }
+    .tag.trollfools { border-color: #2f7d4f; color: #7fd2a8; }
+    .tag.dylib { border-color: #7a4fb8; color: #c4a6ef; }
+    .package-name a { text-decoration: none; }
+    .package-name a:hover { color: #2ea9b7; }
+    .package-meta a.tag { text-decoration: none; cursor: pointer; }
+    .package-meta a.tag:hover { color: #fff; border-color: #5b6471; }
+    .package-symbol.dylib { background: #9b6ddb; color: #160a2e; }
+    .muted { color: #858c96; }
     .empty, .loading { padding: 48px 0; text-align: center; color: #949ba5; }
     .error { color: #ef8d80; }
     footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 20px 0 32px; border-top: 1px solid #2c3036; color: #858c96; font-size: 13px; }
@@ -80,8 +89,8 @@
       .header-inner { align-items: flex-start; flex-wrap: wrap; }
       .add-button { width: 100%; }
       .toolbar { grid-template-columns: 1fr; }
-      .segments { display: grid; grid-template-columns: repeat(4, 1fr); }
-      .segments button { padding: 0 6px; font-size: 12px; }
+      .segments { display: grid; grid-template-columns: repeat(5, 1fr); }
+      .segments button { padding: 0 4px; font-size: 11px; }
       .package-row { grid-template-columns: 38px minmax(0, 1fr); }
       .package-symbol { width: 38px; height: 38px; }
       .package-meta { grid-column: 2; justify-content: flex-start; max-width: none; }
@@ -111,6 +120,7 @@
         <button type="button" role="tab" data-filter="tweaks" aria-selected="false">Твики</button>
         <button type="button" role="tab" data-filter="tools" aria-selected="false">Инструменты</button>
         <button type="button" role="tab" data-filter="libraries" aria-selected="false">Библиотеки</button>
+        <button type="button" role="tab" data-filter="dylibs" aria-selected="false">Dylibs</button>
       </div>
     </div>
     <div class="summary"><span id="package-count">Загрузка индекса…</span><span>iOS 15–17</span></div>
@@ -128,6 +138,7 @@
     const search = document.querySelector('#search');
     const tabs = [...document.querySelectorAll('[data-filter]')];
     let packages = [];
+    let dylibs = [];
     let activeFilter = 'all';
 
     const toolSections = new Set(['Development', 'Utilities', 'Packaging', 'Administration', 'Networking', 'Security', 'Archiving', 'Scripting', 'Text_Editors', 'Terminal_Support']);
@@ -149,12 +160,14 @@
       const grouped = new Map();
       stanzas.forEach(item => {
         const key = item.Package;
-        if (!grouped.has(key)) grouped.set(key, { ...item, architectures: new Set(), versions: new Set() });
+        if (!grouped.has(key)) grouped.set(key, { ...item, architectures: new Set(), versions: new Set(), variants: [] });
         const group = grouped.get(key);
         group.architectures.add(item.Architecture || 'all');
         group.versions.add(item.Version || '');
+        group.variants.push({ version: item.Version || '', architecture: item.Architecture || 'all', filename: item.Filename || '', size: Number(item.Size || 0) });
         if (item.Section === 'Tweaks') group.Section = 'Tweaks';
       });
+      grouped.forEach(group => group.variants.sort((a, b) => a.architecture.localeCompare(b.architecture)));
       return [...grouped.values()].sort((a, b) => (a.Name || a.Package).localeCompare(b.Name || b.Package));
     }
 
@@ -165,11 +178,27 @@
       return toolSections.has(item.Section) ? 'tools' : 'tools';
     }
 
+    function fmtSize(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+
+    // Ссылка на .deb первого варианта (по умолчанию — для клика по названию).
+    function debHref(item) {
+      const f = item.variants && item.variants[0] && item.variants[0].filename;
+      return f ? `/${f}` : null;
+    }
+
     function archTags(item) {
-      return [...item.architectures].sort().map(arch => {
+      if (!item.variants || !item.variants.length) return '';
+      return item.variants.map(v => {
+        const arch = v.architecture;
         const cls = arch === 'iphoneos-arm64e' ? 'roothide' : arch === 'iphoneos-arm64' ? 'rootless' : '';
         const label = arch === 'iphoneos-arm64e' ? 'RootHide' : arch === 'iphoneos-arm64' ? 'Rootless' : arch;
-        return `<span class="tag ${cls}">${label}</span>`;
+        if (!v.filename) return `<span class="tag ${cls}">${escapeHtml(label)}</span>`;
+        return `<a class="tag ${cls}" href="/${escapeAttr(v.filename)}" download title="Скачать .deb (${escapeAttr(label)})">${escapeHtml(label)}</a>`;
       }).join('');
     }
 
@@ -177,19 +206,70 @@
       return [...item.versions].sort().map(version => `<span class="tag">${escapeHtml(version)}</span>`).join('');
     }
 
+    function dylibTags(item) {
+      return (item.tags || []).map(tag => `<a class="tag ${escapeAttr(tag)}" href="${escapeAttr(item.filename || '#')}" download title="Скачать .dylib">${escapeHtml(tag)}</a>`).join('');
+    }
+
     function escapeHtml(value = '') {
       return value.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+    }
+    function escapeAttr(value = '') { return escapeHtml(value); }
+
+    // Оборачивает название пакета в прямую ссылку на .deb, если доступен filename.
+    function nameHtml(item) {
+      const name = escapeHtml(item.Name || item.Package);
+      const href = debHref(item);
+      return href ? `<a href="${escapeAttr(href)}" download>${name}</a>` : name;
+    }
+
+    function renderDylibs(visible) {
+      if (!visible.length) return '';
+      const rows = visible.map(item => {
+        const size = fmtSize(item.size);
+        const name = escapeHtml(item.name || item.package);
+        const href = item.filename ? `/${escapeAttr(item.filename)}` : null;
+        const nameLink = href ? `<a href="${escapeAttr(href)}" download>${name}</a>` : name;
+        const meta = `${escapeHtml(item.version || '')}${size ? ' · ' + escapeHtml(size) : ''}${item.sha256 ? ' · sha256 ' + escapeHtml(item.sha256.slice(0, 8)) + '…' : ''}`;
+        return `<li class="package-row">
+            <span class="package-symbol dylib" aria-hidden="true">⌬</span>
+            <div>
+              <h3 class="package-name">${nameLink}</h3>
+              <div class="package-id">${escapeHtml(item.package || '')}${item.author ? ' · ' + escapeHtml(item.author) : ''}</div>
+              <p class="package-description">${escapeHtml(item.description || '')}</p>
+              <div class="package-id muted">Инъекция через Sideloadly / TrollFools. ${escapeHtml(meta)}</div>
+            </div>
+            <div class="package-meta">${dylibTags(item)}</div>
+          </li>`;
+      }).join('');
+      return `<section class="package-group"><h2 class="group-heading"><span>Dylibs — для инъекции через Sideloadly / TrollFools</span><span class="group-count">${visible.length}</span></h2><ul class="package-list">${rows}</ul></section>`;
     }
 
     function render() {
       const query = search.value.trim().toLocaleLowerCase('ru');
+
+      if (activeFilter === 'dylibs') {
+        const visible = dylibs.filter(item => {
+          const haystack = [item.name, item.package, item.description].join(' ').toLocaleLowerCase('ru');
+          return !query || haystack.includes(query);
+        });
+        countLabel.textContent = `${visible.length} dylib`;
+        catalog.className = '';
+        catalog.innerHTML = visible.length
+          ? renderDylibs(visible)
+          : '<div class="empty">Пока нет ни одной .dylib. Положи файл в <code>sideload/</code> и добавь запись в <code>dylibs.json</code>.</div>';
+        return;
+      }
+
       const visible = packages.filter(item => {
         const kind = kindOf(item);
         const haystack = [item.Name, item.Package, item.Description, item.Section].join(' ').toLocaleLowerCase('ru');
         return (activeFilter === 'all' || kind === activeFilter) && (!query || haystack.includes(query));
       });
-      countLabel.textContent = `${visible.length} из ${packages.length} пакетов`;
-      if (!visible.length) { catalog.className = 'empty'; catalog.textContent = 'Ничего не найдено'; return; }
+      const totalDylibs = dylibs.length;
+      const totalCount = packages.length + totalDylibs;
+      const visibleCount = activeFilter === 'all' ? visible.length + totalDylibs : visible.length;
+      countLabel.textContent = `${visibleCount} из ${totalCount}`;
+      if (!visible.length && !(activeFilter === 'all' && totalDylibs)) { catalog.className = 'empty'; catalog.textContent = 'Ничего не найдено'; return; }
 
       const groups = [
         ['tweaks', 'Твики'],
@@ -197,7 +277,7 @@
         ['libraries', 'Системные компоненты и библиотеки']
       ];
       catalog.className = '';
-      catalog.innerHTML = groups.map(([kind, title]) => {
+      const aptHtml = groups.map(([kind, title]) => {
         const items = visible.filter(item => kindOf(item) === kind);
         if (!items.length) return '';
         const rows = items.map(item => {
@@ -206,7 +286,7 @@
           return `<li class="package-row">
             <span class="package-symbol ${iconClass}" aria-hidden="true">${symbol}</span>
             <div>
-              <h3 class="package-name">${escapeHtml(item.Name || item.Package)}</h3>
+              <h3 class="package-name">${nameHtml(item)}</h3>
               <div class="package-id">${escapeHtml(item.Package)}</div>
               <p class="package-description">${escapeHtml(item.Description || '')}</p>
             </div>
@@ -215,6 +295,8 @@
         }).join('');
         return `<section class="package-group"><h2 class="group-heading"><span>${title}</span><span class="group-count">${items.length}</span></h2><ul class="package-list">${rows}</ul></section>`;
       }).join('');
+      const dylibHtml = (activeFilter === 'all' && totalDylibs) ? renderDylibs(dylibs) : '';
+      catalog.innerHTML = aptHtml + dylibHtml;
     }
 
     tabs.forEach(tab => tab.addEventListener('click', () => {
@@ -223,6 +305,13 @@
       render();
     }));
     search.addEventListener('input', render);
+
+    // Сначала подтягиваем dylibs (они не зависят от APT-индекса).
+    fetch('/dylibs.json', { cache: 'no-store' })
+      .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
+      .then(data => { dylibs = (data && data.dylibs) || []; })
+      .catch(() => { dylibs = []; })
+      .finally(() => render());
 
     fetch('/Packages', { cache: 'no-store' })
       .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })

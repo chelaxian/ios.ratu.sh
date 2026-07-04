@@ -11,6 +11,7 @@ index.html text eol=lf
 
 # Debian packages and repo assets are binary artifacts.
 *.deb binary
+*.dylib binary
 *.png binary
 *.bz2 binary
 *.gz binary

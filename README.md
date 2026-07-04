@@ -26,7 +26,25 @@ Current project families:
 
 The website reads `Packages` directly and merges architecture variants into one
 catalog entry. Adding or removing a package therefore does not require editing the
-HTML package list.
+HTML package list. Tweak names and the per-architecture tags next to each entry
+are direct download links to the `.deb` file (the name links to the first
+variant; each architecture tag links to its own `.deb`).
+
+## Dylibs (sideload / TrollFools)
+
+The `Dylibs` section lists standalone `.dylib` files for injection via
+Sideloadly / TrollFools / TrollStore — i.e. without a jailbreak. Dylibs are not
+part of the APT index, so they are described by a separate manifest,
+[`dylibs.json`](dylibs.json), which the website loads at runtime.
+
+To publish a dylib:
+
+1. Drop the file into `sideload/` (e.g. `sideload/TGProxyRotation-0.14.0.dylib`).
+2. Append an entry to `dylibs.json` — `filename`, `size`, and `sha256` of the
+   file, plus `tags` (typically `["sideload", "trollfools", "dylib"]`). The
+   `description` normally mirrors the corresponding tweak's `Description` from
+   `Packages`.
+3. Commit and push — no index rebuild is needed.
 
 ## Publishing
 

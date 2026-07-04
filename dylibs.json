@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$comment": "Манифест раздела Dylibs на ios.ratu.sh. Каждая запись — отдельная .dylib для инъекции через Sideloadly / TrollFools / TrollStore. Описание каждой записи по возможности повторяет описание соответствующего твика в Packages (дословно), но сама .dylib не входит в APT-индекс. Чтобы добавить dylib: положи файл в sideload/ и допиши запись сюда.",
+  "dylibs": [
+    {
+      "name": "TGProxyRotation",
+      "package": "com.ratush.tgproxyrotation",
+      "version": "0.14.0",
+      "filename": "sideload/TGProxyRotation-0.14.0.dylib",
+      "size": 160752,
+      "sha256": "4abc1b455ee1651e907ef3accffa46a1776298d53597957551f2e71439f878e7",
+      "author": "chelaxian",
+      "tags": ["sideload", "trollfools", "dylib"],
+      "description": "Automatic round-robin proxy rotation for Telegram iOS. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the \"Proxy\" text, or the paperclip in chats, or a three-finger tap)."
+    }
+  ]
+}
