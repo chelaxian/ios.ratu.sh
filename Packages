@@ -130,6 +130,21 @@ Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
 Name: catmcp
 
+Package: com.choco.tg
+Version: 1.2.1
+Architecture: iphoneos-arm64e
+Maintainer: waruhachi
+Installed-Size: 28292
+Filename: debs/com.choco.tg_1.2.1_iphoneos-arm64e.deb
+Size: 3379568
+MD5sum: 5e9172723a9394e2e5bfaf688102dbbe
+SHA1: b1ffe0686367e362e3a19052aa811989b4593f4d
+SHA256: 6b206855ca24664dde1e8c8d46e5d19a308c58a4106b033d366d8f596a3ec638
+Section: Tweaks
+Description: A simple Tweak For Telegram iOS
+Author: choco
+Name: TGExtra
+
 Package: com.level3tjg.offloader
 Version: 0.0.6+roothide15
 Architecture: iphoneos-arm64e

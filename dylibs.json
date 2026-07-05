@@ -16,6 +16,21 @@
         "dylib"
       ],
       "description": "Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic: injects into any MTProtoKit-based client and auto-detects its app-group proxy DB. Reads the client's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, supports an external online proxy list (cached for instant startup), and offers a floating RU/EN control panel. Open the panel with a long press anywhere, a three-finger tap, or the shield icon."
+    },
+    {
+      "name": "TGExtra",
+      "package": "com.choco.tg",
+      "version": "1.2.1",
+      "filename": "sideload/TGExtra-1.2.1.dylib",
+      "size": 28708160,
+      "sha256": "ce928a244e5f09ac75ff83afbd7fe9d387a4557da1e37f87a282ab7255e93d61",
+      "author": "choco",
+      "tags": [
+        "sideload",
+        "trollfools",
+        "dylib"
+      ],
+      "description": "A simple Telegram iOS tweak (works with Telegram and Swiftgram). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak."
     }
   ]
 }
