@@ -15,7 +15,7 @@
         "trollfools",
         "dylib"
       ],
-      "description": "Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic: injects into any MTProtoKit-based client and auto-detects its app-group proxy DB. Reads the client's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, supports an external online proxy list (cached for instant startup), and offers a floating RU/EN control panel. Open the panel with a long press anywhere, a three-finger tap, or the shield icon."
+      "description": "Automatic round-robin proxy rotation for Telegram iOS and its forks — client-agnostic. Injects into any MTProtoKit-based client via the MTContext class (not a fixed bundle id), so it works out of the box with the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios), Nicegram / Turrit (com.seastar.turrit), and any other MTProtoKit fork that keeps the account DB at the standard telegram-data/accounts-metadata path. The active client's app-group proxy DB is auto-detected from this process's own entitlements (no hardcoded container). Reads the live saved proxy list, rotates after 5/10/15/30/60s of unavailability, supports an external online proxy list (cached for instant startup), and offers a floating RU/EN control panel. Open the panel with a long press anywhere, a three-finger tap, or the shield icon."
     },
     {
       "name": "TGExtra",
