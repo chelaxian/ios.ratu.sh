@@ -18,21 +18,6 @@
       "description": "Automatic round-robin proxy rotation for Telegram iOS and its forks — client-agnostic. Injects into any MTProtoKit-based client via the MTContext class (not a fixed bundle id), so it works out of the box with the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios), Nicegram / Turrit (com.seastar.turrit), and any other MTProtoKit fork that keeps the account DB at the standard telegram-data/accounts-metadata path. The active client's app-group proxy DB is auto-detected from this process's own entitlements (no hardcoded container). Reads the live saved proxy list, rotates after 5/10/15/30/60s of unavailability, supports an external online proxy list (cached for instant startup), and offers a floating RU/EN control panel. Open the panel with a long press anywhere, a three-finger tap, or the shield icon."
     },
     {
-      "name": "TGExtra",
-      "package": "com.choco.tg",
-      "version": "1.2.1",
-      "filename": "sideload/TGExtra-1.2.1.dylib",
-      "size": 28708160,
-      "sha256": "ce928a244e5f09ac75ff83afbd7fe9d387a4557da1e37f87a282ab7255e93d61",
-      "author": "choco",
-      "tags": [
-        "sideload",
-        "trollfools",
-        "dylib"
-      ],
-      "description": "A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak.\n\n⚠️ SIDELLOAD USERS: DOWNLOAD TWO FILES — TGExtra.dylib + TGExtraResources.dylib — and inject BOTH. TGExtraResources.dylib contains translations for all 10 languages (English/Chinese/Japanese/Russian etc.); without it the UI shows raw keys instead of translations."
-    },
-    {
       "name": "Lead",
       "package": "swiftgram.lead",
       "version": "12.7",
@@ -47,23 +32,6 @@
         "telegram"
       ],
       "description": "Lead 12.7 (сборка от 11.05.26) — твик для Telegram-клиентов на iOS, фактически первый dylib, способный сохранять удалённые сообщения. Инъектируется практически в любой Telegram-клиент (полная поддержка Telegram 12.7 и Turrit). Функции: Ghost Mode (полная невидимость — никто не видит онлайн, набор текста и просмотр сообщений), нечиталка (чтение без отметки «прочитано»), Anti-Revoke (удалённые сообщения не исчезают у тебя), Anti-Edit (просмотр оригинального текста после редактирования), No Ads (удаление всей рекламы и спонсорских постов), сохранение ограниченного медиа (фото/видео/файлы из закрытых и ограниченных чатов), анти-скриншот (скриншоты без уведомления отправителя), анти-самоуничтожение (исчезающие фото и видео больше не исчезают), защита от случайных звонков (окно подтверждения перед вызовом), информационный баннер с новостями и обновлениями в меню твика, красивые иконки для всех настроек в разделе «Приватность и дополнения», исправление крашей и багов (включая вылеты Siri Entitlement). Меню Lead открывается зажатием кнопки «Помощь» в настройках. По набору функций повторяет TGExtra."
-    },
-    {
-      "name": "TGExtraResources",
-      "package": "com.choco.tg.resources",
-      "version": "1.2.1",
-      "filename": "sideload/TGExtraResources-1.2.1.dylib",
-      "size": 316208,
-      "sha256": "0b75cdd8d772c28044bee017f001406dfd922a3d246de6108dc4d03045acdd42",
-      "author": "chelaxian",
-      "tags": [
-        "sideload",
-        "trollfools",
-        "dylib",
-        "companion",
-        "translations"
-      ],
-      "description": "Companion-дилиб для TGExtra — содержит переводы для всех 10 языков (английский, китайский, японский, русский, испанский, французский, итальянский, арабский, вьетнамский, тайваньский). Свиззлит локализационный движок TGExtra в рантайме, чтобы интерфейс корректно отображался под sideload (Sideloadly/TrollFools инъекция в IPA, БЕЗ джейлбрейка). Без этой дилибы твик показывает сырые ключи вместо переводов, селектор языка выдаёт «Failed to load language localization data», и доступен только английский.\n\n◉ НАДО ИНЖЕКТИТЬ ОБА ФАЙЛА: TGExtra.dylib И TGExtraResources.dylib (Sideloadly/TrollFools поддерживают несколько dylib). Порядок загрузки не важен — shim повторяет ресолв классов ~8 секунд после загрузки."
     }
   ]
 }
