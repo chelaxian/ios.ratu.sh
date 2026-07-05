@@ -30,7 +30,7 @@
         "trollfools",
         "dylib"
       ],
-      "description": "A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak."
+      "description": "A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak.\n\n⚠️ SIDELLOAD USERS: DOWNLOAD TWO FILES — TGExtra.dylib + TGExtraResources.dylib — and inject BOTH. TGExtraResources.dylib contains translations for all 10 languages (English/Chinese/Japanese/Russian etc.); without it the UI shows raw keys instead of translations."
     },
     {
       "name": "Lead",
@@ -47,6 +47,23 @@
         "telegram"
       ],
       "description": "Lead 12.7 (сборка от 11.05.26) — твик для Telegram-клиентов на iOS, фактически первый dylib, способный сохранять удалённые сообщения. Инъектируется практически в любой Telegram-клиент (полная поддержка Telegram 12.7 и Turrit). Функции: Ghost Mode (полная невидимость — никто не видит онлайн, набор текста и просмотр сообщений), нечиталка (чтение без отметки «прочитано»), Anti-Revoke (удалённые сообщения не исчезают у тебя), Anti-Edit (просмотр оригинального текста после редактирования), No Ads (удаление всей рекламы и спонсорских постов), сохранение ограниченного медиа (фото/видео/файлы из закрытых и ограниченных чатов), анти-скриншот (скриншоты без уведомления отправителя), анти-самоуничтожение (исчезающие фото и видео больше не исчезают), защита от случайных звонков (окно подтверждения перед вызовом), информационный баннер с новостями и обновлениями в меню твика, красивые иконки для всех настроек в разделе «Приватность и дополнения», исправление крашей и багов (включая вылеты Siri Entitlement). Меню Lead открывается зажатием кнопки «Помощь» в настройках. По набору функций повторяет TGExtra."
+    },
+    {
+      "name": "TGExtraResources",
+      "package": "com.choco.tg.resources",
+      "version": "1.2.1",
+      "filename": "sideload/TGExtraResources-1.2.1.dylib",
+      "size": 316208,
+      "sha256": "0b75cdd8d772c28044bee017f001406dfd922a3d246de6108dc4d03045acdd42",
+      "author": "chelaxian",
+      "tags": [
+        "sideload",
+        "trollfools",
+        "dylib",
+        "companion",
+        "translations"
+      ],
+      "description": "Companion-дилиб для TGExtra — содержит переводы для всех 10 языков (английский, китайский, японский, русский, испанский, французский, итальянский, арабский, вьетнамский, тайваньский). Свиззлит локализационный движок TGExtra в рантайме, чтобы интерфейс корректно отображался под sideload (Sideloadly/TrollFools инъекция в IPA, БЕЗ джейлбрейка). Без этой дилибы твик показывает сырые ключи вместо переводов, селектор языка выдаёт «Failed to load language localization data», и доступен только английский.\n\n◉ НАДО ИНЖЕКТИТЬ ОБА ФАЙЛА: TGExtra.dylib И TGExtraResources.dylib (Sideloadly/TrollFools поддерживают несколько dylib). Порядок загрузки не важен — shim повторяет ресолв классов ~8 секунд после загрузки."
     }
   ]
 }
