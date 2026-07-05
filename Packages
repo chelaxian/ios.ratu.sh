@@ -412,21 +412,21 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.5.18
+Version: 0.5.19
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 1072
+Installed-Size: 1080
 Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.5.18_iphoneos-arm64e.deb
-Size: 163184
-MD5sum: 910708f25f2469c5e23757e78f6feb11
-SHA1: 7badd3eb794fcaa9d096e0b325cf9e049f54672e
-SHA256: b96a1e986a22727705fc9d703580f3703ee024a0d3cd0b4708cc057a3f6c8f8b
+Filename: debs/com.ratush.etchosts17_0.5.19_iphoneos-arm64e.deb
+Size: 164242
+MD5sum: 76e8b3dc7745ab7639a6d987858de3e9
+SHA1: 63545d71718b5a3bcd5d7b466c004cfee89bb313
+SHA256: 963f13ab5ad9b7602e86ed0a25a4602e6d7a86ad04fe28df23e4b01e44406e73
 Section: Tweaks
 Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
- Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. On this sealed iOS 17 device /etc/hosts is unwritable, so the tweak runs a local resolver daemon plus a system-resolver redirect helper (SCDynamicStore) that points ONLY the global resolver (State:/Network/Global/DNS) at 127.0.0.1 -- the listed hosts then beat Wi-Fi, cellular, Ethernet and full-tunnel VPN DNS, true desktop /etc/hosts behavior. The per-service DNS keys are deliberately never touched (they come from the DHCP/PDP lease and configd will not recompute them), so clearing the override always restores fully working stock DNS. Reversibility is guaranteed on every path: the helper snapshots the real global resolver before overriding it and restores it on disable / unhealthy daemon / VPN cede / SIGTERM, a prerm restores stock DNS before the package files are removed, and it never applies the override until the local daemon has actually answered once (so a slow or jetsam-killed daemon never leaves DNS pointing at a dead 127.0.0.1). Under a VPN the helper captures the tunnel's own DNS servers and the daemon forwards non-listed names to them, so everything else keeps resolving through the VPN. If the tweak is disabled or the local daemon stops answering, the redirect clears automatically and DNS falls back to the system. The optional "Use DoH/DoT profile" toggle installs a scoped DNS-over-TLS profile (com.apple.dnsSettings.managed, per-device CA auto-trusted) whose SupplementalMatchDomains make YOUR listed hosts win over another encrypted-DNS profile (ControlD/NextDNS/AdGuard) while that profile keeps filtering everything else; without a VPN the redirect then cedes to it, under a VPN the local resolver always takes over. Scoped mode overrides only the listed hosts; Global mode routes all DNS through the local resolver. In profile mode, adding/removing a hostname needs a one-tap profile re-install (editing an IP is live; Global mode avoids re-installs). Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
+ Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. On this sealed iOS 17 device /etc/hosts is unwritable, so the tweak runs a local resolver daemon plus a system-resolver redirect helper (SCDynamicStore) that points ONLY the global resolver (State:/Network/Global/DNS) at 127.0.0.1 -- the listed hosts then beat Wi-Fi, cellular, Ethernet and full-tunnel VPN DNS, true desktop /etc/hosts behavior. The per-service DNS keys are deliberately never touched (they come from the DHCP/PDP lease and configd will not recompute them), so clearing the override always restores fully working stock DNS. Reversibility is guaranteed on every path: the helper snapshots the real global resolver before overriding it and restores it on disable / unhealthy daemon / VPN cede / SIGTERM, a prerm restores stock DNS before the package files are removed, and it never applies the override until the local daemon has actually answered once (so a slow or jetsam-killed daemon never leaves DNS pointing at a dead 127.0.0.1). Under a VPN the helper captures the tunnel's own DNS servers and the daemon forwards non-listed names to them, so everything else keeps resolving through the VPN. If the tweak is disabled or the local daemon stops answering, the redirect clears automatically and DNS falls back to the system. The optional "Use DoH/DoT profile" toggle installs a scoped DNS-over-TLS profile (com.apple.dnsSettings.managed, per-device CA auto-trusted) whose SupplementalMatchDomains make YOUR listed hosts win over another encrypted-DNS profile (ControlD/NextDNS/AdGuard) while that profile keeps filtering everything else; without a VPN the redirect then cedes to it, under a VPN the local resolver always takes over. The UI is intentionally minimal -- two toggles (Enable, and an optional "beat encrypted DNS profiles"); the redundant Global-mode and strict-allowlist toggles were removed (the redirect is inherently global and additive). The resolver daemon serves UDP and TCP on :53, handles queries on a worker pool and forwards misses to all captured upstreams in parallel (so a slow or dead upstream never stalls system DNS), and starts its DoT/profile servers (and loads OpenSSL) only when profile mode is on, keeping it small under the jetsam limit. In profile mode, adding/removing a hostname needs a one-tap profile re-install (editing an IP is live). Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
 Author: ratush
 Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
