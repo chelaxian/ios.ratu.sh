@@ -31,6 +31,22 @@
         "dylib"
       ],
       "description": "A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak."
+    },
+    {
+      "name": "Lead",
+      "package": "swiftgram.lead",
+      "version": "12.7",
+      "filename": "sideload/Lead-12.7.dylib",
+      "size": 25411568,
+      "sha256": "7b844ca69b9a1c1d10328b3915aa15a25a5ff49a4922c856fe31d446ce1e7c7a",
+      "author": "Swiftgram",
+      "tags": [
+        "sideload",
+        "trollfools",
+        "dylib",
+        "telegram"
+      ],
+      "description": "Lead 12.7 (сборка от 11.05.26) — твик для Telegram-клиентов на iOS, фактически первый dylib, способный сохранять удалённые сообщения. Инъектируется практически в любой Telegram-клиент (полная поддержка Telegram 12.7 и Turrit). Функции: Ghost Mode (полная невидимость — никто не видит онлайн, набор текста и просмотр сообщений), нечиталка (чтение без отметки «прочитано»), Anti-Revoke (удалённые сообщения не исчезают у тебя), Anti-Edit (просмотр оригинального текста после редактирования), No Ads (удаление всей рекламы и спонсорских постов), сохранение ограниченного медиа (фото/видео/файлы из закрытых и ограниченных чатов), анти-скриншот (скриншоты без уведомления отправителя), анти-самоуничтожение (исчезающие фото и видео больше не исчезают), защита от случайных звонков (окно подтверждения перед вызовом), информационный баннер с новостями и обновлениями в меню твика, красивые иконки для всех настроек в разделе «Приватность и дополнения», исправление крашей и багов (включая вылеты Siri Entitlement). Меню Lead открывается зажатием кнопки «Помощь» в настройках. По набору функций повторяет TGExtra."
     }
   ]
 }
