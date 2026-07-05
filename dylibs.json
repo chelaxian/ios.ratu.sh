@@ -5,10 +5,10 @@
     {
       "name": "TGProxyRotation",
       "package": "com.ratush.tgproxyrotation",
-      "version": "0.15.1",
-      "filename": "sideload/TGProxyRotation-0.15.1.dylib",
-      "size": 162064,
-      "sha256": "bd5f5023d22a87acafc168ea8bcb177193befdc38b0bd2509fab56ab70a5b210",
+      "version": "1.0.1",
+      "filename": "sideload/TGProxyRotation-1.0.1.dylib",
+      "size": 162224,
+      "sha256": "a2de8f3184c82324da0bbe67456938804cd6d46b3fd6dcff780277d5ee5e0335",
       "author": "chelaxian",
       "tags": [
         "sideload",
