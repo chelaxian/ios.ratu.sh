@@ -136,12 +136,12 @@ Architecture: iphoneos-arm64e
 Maintainer: waruhachi
 Installed-Size: 28292
 Filename: debs/com.choco.tg_1.2.1_iphoneos-arm64e.deb
-Size: 3379568
-MD5sum: 5e9172723a9394e2e5bfaf688102dbbe
-SHA1: b1ffe0686367e362e3a19052aa811989b4593f4d
-SHA256: 6b206855ca24664dde1e8c8d46e5d19a308c58a4106b033d366d8f596a3ec638
+Size: 3391792
+MD5sum: 812b87d47c5538490e374b87d83e17d1
+SHA1: f388ca3d438c54696e334165d5f32c57e681d0a8
+SHA256: 34435edee94a90751fbf3f31ea83530aba9de9b3ce49507e7d8133806141fdbc
 Section: Tweaks
-Description: A simple Tweak For Telegram iOS
+Description: A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected).
 Author: choco
 Name: TGExtra
 

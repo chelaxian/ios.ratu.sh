@@ -30,7 +30,7 @@
         "trollfools",
         "dylib"
       ],
-      "description": "A simple Telegram iOS tweak (works with Telegram and Swiftgram). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak."
+      "description": "A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected). Inject as a .dylib via Sideloadly or TrollFools when running without a jailbreak."
     }
   ]
 }
