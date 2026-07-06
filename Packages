@@ -100,22 +100,6 @@ Description: GnuPG keys for the Chariz repository
 
 Package: com.catmcp.daemon
 Version: 1.0.3
-Architecture: iphoneos-arm64
-Maintainer: 0x530c<0x530c@gmail.com>
-Installed-Size: 5256
-Depends: mobilesubstrate, preferenceloader
-Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
-Size: 1733498
-MD5sum: e94d766d1b363753b65e57794468f93b
-SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
-SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
-Section: Tweaks
-Description: iOS MCP Server
-Author: 0x530c<0x530c@gmail.com>
-Name: catmcp
-
-Package: com.catmcp.daemon
-Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: 0x530c<0x530c@gmail.com>
 Installed-Size: 5256
@@ -125,6 +109,22 @@ Size: 1942284
 MD5sum: 22925af20f08af36ae57e3ef8d254a98
 SHA1: 4ee31a6818440b4cc635110a461060625173d906
 SHA256: 504ddfb1e0bd5311dbb74c9d340daef6d31295f5ec13de38de0023c96794d458
+Section: Tweaks
+Description: iOS MCP Server
+Author: 0x530c<0x530c@gmail.com>
+Name: catmcp
+
+Package: com.catmcp.daemon
+Version: 1.0.3
+Architecture: iphoneos-arm64
+Maintainer: 0x530c<0x530c@gmail.com>
+Installed-Size: 5256
+Depends: mobilesubstrate, preferenceloader
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
+Size: 1733498
+MD5sum: e94d766d1b363753b65e57794468f93b
+SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
+SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
 Section: Tweaks
 Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
@@ -625,6 +625,22 @@ Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64e.deb
+Size: 50056
+MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
+SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
+SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -640,16 +656,16 @@ Author: chelaxian
 Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
-Version: 1.0.1
-Architecture: iphoneos-arm64e
+Version: 1.0.2
+Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64e.deb
-Size: 50056
-MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
-SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
-SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
+Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64.deb
+Size: 50788
+MD5sum: 3bfc5fbdeacf8efe2e65ea61f2721efc
+SHA1: fdffbbec384bca3217da5346eb4afe33cc3e7422
+SHA256: d9b8dbca4a8f257ab4411396a7556ffbfc2a418a10fee6e420e42aae0f05405d
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -666,22 +682,6 @@ Size: 50738
 MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
 SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
 SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.2
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64.deb
-Size: 38378
-MD5sum: 770e4e7be8ec3bb7e81aac7697cdd9e1
-SHA1: 531497a963bed77884bdeac848d5c7eb6c6c3322
-SHA256: 148ed510a13ca28251a16b72bfb9d222f6f37f49e44daf485086ed6c2f43856f
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
