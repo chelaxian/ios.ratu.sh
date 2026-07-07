@@ -100,22 +100,6 @@ Description: GnuPG keys for the Chariz repository
 
 Package: com.catmcp.daemon
 Version: 1.0.3
-Architecture: iphoneos-arm64e
-Maintainer: 0x530c<0x530c@gmail.com>
-Installed-Size: 5256
-Depends: mobilesubstrate, preferenceloader
-Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64e.deb
-Size: 1942284
-MD5sum: 22925af20f08af36ae57e3ef8d254a98
-SHA1: 4ee31a6818440b4cc635110a461060625173d906
-SHA256: 504ddfb1e0bd5311dbb74c9d340daef6d31295f5ec13de38de0023c96794d458
-Section: Tweaks
-Description: iOS MCP Server
-Author: 0x530c<0x530c@gmail.com>
-Name: catmcp
-
-Package: com.catmcp.daemon
-Version: 1.0.3
 Architecture: iphoneos-arm64
 Maintainer: 0x530c<0x530c@gmail.com>
 Installed-Size: 5256
@@ -125,6 +109,22 @@ Size: 1733498
 MD5sum: e94d766d1b363753b65e57794468f93b
 SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
 SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
+Section: Tweaks
+Description: iOS MCP Server
+Author: 0x530c<0x530c@gmail.com>
+Name: catmcp
+
+Package: com.catmcp.daemon
+Version: 1.0.3
+Architecture: iphoneos-arm64e
+Maintainer: 0x530c<0x530c@gmail.com>
+Installed-Size: 5256
+Depends: mobilesubstrate, preferenceloader
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64e.deb
+Size: 1942284
+MD5sum: 22925af20f08af36ae57e3ef8d254a98
+SHA1: 4ee31a6818440b4cc635110a461060625173d906
+SHA256: 504ddfb1e0bd5311dbb74c9d340daef6d31295f5ec13de38de0023c96794d458
 Section: Tweaks
 Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
@@ -427,21 +427,21 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.etchosts17
-Version: 0.5.20
+Version: 0.6.2
 Architecture: iphoneos-arm64e
 Maintainer: ratush
-Installed-Size: 1112
-Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3
+Installed-Size: 1132
+Depends: firmware (>= 17.0), ellekit, preferenceloader, com.opa334.libsandy, python3, sqlite3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.5.20_iphoneos-arm64e.deb
-Size: 173038
-MD5sum: 318e3353e28c4d981b4cb69be91e50bb
-SHA1: d104fe2442d647944db11ec7adb3a6b9f8d76056
-SHA256: fe1f2122f7baa7d376d06b66d81fb92ccef8916827eea4c4eb7efd07597bf478
+Filename: debs/com.ratush.etchosts17_0.6.2_iphoneos-arm64e.deb
+Size: 189886
+MD5sum: e02d56e375c036dbc6676efd1a83a508
+SHA1: ccef2d4f098b1ae6e7700a648b2828d1558f6499
+SHA256: e44cacce88ed704562d205bfafea74dcf4947ebf6bb4efb7acc08c76b96a601f
 Section: Tweaks
 Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
- Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. On this sealed iOS 17 device /etc/hosts is unwritable, so the tweak runs a local resolver daemon plus a system-resolver redirect helper (SCDynamicStore) that points ONLY the global resolver (State:/Network/Global/DNS) at 127.0.0.1 -- the listed hosts then beat Wi-Fi, cellular, Ethernet and full-tunnel VPN DNS, true desktop /etc/hosts behavior. The per-service DNS keys are deliberately never touched (they come from the DHCP/PDP lease and configd will not recompute them), so clearing the override always restores fully working stock DNS. Reversibility is guaranteed on every path: the helper snapshots the real global resolver before overriding it and restores it on disable / unhealthy daemon / VPN cede / SIGTERM, a prerm restores stock DNS before the package files are removed, and it never applies the override until the local daemon has actually answered once (so a slow or jetsam-killed daemon never leaves DNS pointing at a dead 127.0.0.1). Under a VPN the helper captures the tunnel's own DNS servers and the daemon forwards non-listed names to them, so everything else keeps resolving through the VPN. If the tweak is disabled or the local daemon stops answering, the redirect clears automatically and DNS falls back to the system. The optional "Use DoH/DoT profile" toggle installs a scoped DNS-over-TLS profile (com.apple.dnsSettings.managed, per-device CA auto-trusted) whose SupplementalMatchDomains make YOUR listed hosts win over another encrypted-DNS profile (ControlD/NextDNS/AdGuard) while that profile keeps filtering everything else; without a VPN the redirect then cedes to it, under a VPN the local resolver always takes over. The UI is intentionally minimal -- two toggles (Enable, and an optional "beat encrypted DNS profiles"); the redundant Global-mode and strict-allowlist toggles were removed (the redirect is inherently global and additive). The resolver daemon serves UDP and TCP on :53, handles queries on a worker pool and forwards misses to all captured upstreams in parallel (so a slow or dead upstream never stalls system DNS), and starts its DoT/profile servers (and loads OpenSSL) only when profile mode is on, keeping it small under the jetsam limit. In profile mode, adding/removing a hostname needs a one-tap profile re-install (editing an IP is live). Preferences are owned solely by the Settings bundle so presets and toggles persist; the daemon is read-only with respect to them.
+ Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. On this sealed iOS 17 device /etc/hosts is unwritable and mDNSResponder is a non-injectable platform binary, so the PRIMARY override mechanism is a scoped managed-DNS profile (com.apple.dnsSettings.managed) generated by the bundled daemon and installed via the Settings bundle. Its SupplementalMatchDomains list exactly the overridden hosts, so iOS routes ONLY those names to the local daemon over an encrypted transport (DNS-over-TLS :853 by default, or DNS-over-HTTPS :8443 if a network middleboxes :853), winning over an active managed DoH/DoT resolver (ControlD/NextDNS/AdGuard) AND VPN DNS for the listed hosts, while everything else keeps its normal path through the primary resolver -- true desktop /etc/hosts behaviour where the hosts file is the absolute winner. Two profile modes: Block answers matched hosts from the editor map (0.0.0.0 etc.); Upstream forwards matched hosts to a chosen real DoT server (e.g. dns.google) so the host is still routed to us (we win for it) but resolved through that upstream instead of a static address. The per-device CA is bundled as a trusted root so iOS trusts the daemon's certificate without a manual Full Trust step. The user enables the profile ONCE in Settings > General > VPN & Device Management > DNS (saveToPreferences cannot enable it silently -- this is an Apple gate). The SECONDARY mechanism, kept for plain-DNS networks and full-tunnel VPN DNS, is the system-resolver redirect (SCDynamicStore) that points ONLY State:/Network/Global/DNS at 127.0.0.1; the per-service DNS keys are deliberately never touched (they come from the DHCP/PDP lease and configd will not recompute them), so clearing the override always restores fully working stock DNS. Reversibility is guaranteed on every path: the redirect helper snapshots the real global resolver before overriding it and restores it on disable / unhealthy daemon / VPN cede / SIGTERM, a prerm restores stock DNS before the package files are removed, the scoped profile is removed via the entitled NEDNSSettings helper, State: keys are ephemeral (gone after reboot), and it never applies the redirect until the local daemon has actually answered once (so a slow or jetsam-killed daemon never leaves DNS pointing at a dead 127.0.0.1). Under a VPN the helper captures the tunnel's own DNS servers and the daemon forwards non-listed names to them, so everything else keeps resolving through the VPN. If the tweak is disabled or the local daemon stops answering, the redirect clears automatically and DNS falls back to the system; if the jailbreak is lost, the installed profile becomes inert (no listener to talk to) and DNS simply falls back to the primary resolver. The DoT (:853), DoH (:8443) and profile-HTTP (:53580) listeners start unconditionally at daemon boot so enabling the profile in Settings works immediately without a daemon restart. The resolver daemon also serves UDP and TCP on :53, handles queries on a worker pool and forwards misses to all captured upstreams in parallel (so a slow or dead upstream never stalls system DNS); OpenSSL is imported once when the DoT listener first starts (off the UDP :53 hot path). In scoped mode, adding/removing a hostname needs a one-tap profile re-install (editing an IP or switching mode is live). Preferences are owned solely by the Settings bundle so presets, toggles, transport, mode and upstream persist; the daemon is read-only with respect to them.
 Author: ratush
 Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
@@ -478,6 +478,22 @@ Section: Tweaks
 Description: Forces Instagram Home Feed to open in the compact 3-column Rocket grid layout, matching the Profile-style grid.
 Author: chelaxian
 Name: Instagram 3x3 Grid Feed
+
+Package: com.ratush.isdig
+Version: 1.0.0
+Architecture: iphoneos-arm64e
+Maintainer: ratush
+Depends: firmware (>= 15.0), python3
+Filename: debs/com.ratush.isdig_1.0.0_iphoneos-arm64e.deb
+Size: 5542
+MD5sum: feee72fc6bd9253630ae34b2cf406de0
+SHA1: 3172702763eba8e4a6c7c7afda53eb779dbb97e3
+SHA256: e8990ec4e814378d3e73cfee1cbdd43a136302919b8b9b8d76b575d9788d76bf
+Section: Network
+Description: Standalone dig-like DNS lookup tool for jailbroken iOS.
+ A pure-python (stdlib-only) replacement for dig/host/nslookup that runs on the device's bundled python3 with NO compilation and NO external dependencies. Supports UDP, TCP, DNS-over-TLS (DoT), DNS-over-HTTPS (DoH); record types A, AAAA, NS, MX, TXT, CNAME, SOA, SRV, CAA, PTR, ANY; +short, +json, +trace, and reverse (-x) lookups. Useful for /iosjail diagnostics where dig/kdig/dnsutils are absent from all Sileo/Procursus repos. Usage: isdig example.com; isdig @1.1.1.1 example.com; isdig @tls://1.1.1.1 example.com; isdig @https://dns.google/dns-query example.com; isdig -t MX gmail.com +short; isdig -x 1.1.1.1.
+Author: ratush
+Name: isdig (dig for iOS)
 
 Package: com.ratush.jetsamfix
 Version: 1.0.0
@@ -561,22 +577,6 @@ Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
 Version: 0.15.1
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_0.15.1_iphoneos-arm64e.deb
-Size: 48978
-MD5sum: 6a9c6b948516262442cd27dc0d0c72ac
-SHA1: ec20138785cca50a59f7a5e479a80053c749daa4
-SHA256: 3814f45e13dada7f5d0cef8d709f06c5fa3f3966f03a3e3a593ee6eed32f8302
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 0.15.1
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -586,6 +586,22 @@ Size: 37282
 MD5sum: 1d86bd8125a3efabef372fe7e8418251
 SHA1: 5cbc534bf013add04f4ba2f39eba67af8e7e8764
 SHA256: 8af98e7f9c686ef5b4da437212e4b46c09ed94f23a122c12e3c02d63cdaba588
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 0.15.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_0.15.1_iphoneos-arm64e.deb
+Size: 48978
+MD5sum: 6a9c6b948516262442cd27dc0d0c72ac
+SHA1: ec20138785cca50a59f7a5e479a80053c749daa4
+SHA256: 3814f45e13dada7f5d0cef8d709f06c5fa3f3966f03a3e3a593ee6eed32f8302
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -625,22 +641,6 @@ Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.1
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64e.deb
-Size: 50056
-MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
-SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
-SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -650,6 +650,22 @@ Size: 37954
 MD5sum: 49181f195e7bda988ed71019d8d0324c
 SHA1: a3c0a3ca1d5f0dcd55751b088f2ec8c21f254363
 SHA256: 1108f697efe696fcbe92a37b51a5895f49a69f7ecc1a9f8acfa83ac0d892537f
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64e.deb
+Size: 50056
+MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
+SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
+SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
