@@ -3594,6 +3594,21 @@ Section: Administration
 Priority: important
 Description: killall, renice, script, time, which, getopt, what, hexdump, su
 
+Package: socat
+Version: 1.7.4.3
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Filename: debs/socat_1.7.4.3_iphoneos-arm64e.deb
+Size: 109120
+MD5sum: f29e02eff11926aa78eb994f0f5a851f
+SHA1: dbc72bfe99320816116990539011536baf2d2a7a
+SHA256: 6e55f044837dab0dd0a75e7a248cc065e802ffcaa6e50b65e6db7f69b251b0f9
+Section: Networking
+Homepage: http://www.dest-unreach.org/socat/
+Description: SOcket CAT — bidirectional data transfer between two channels (TCP/UDP/UNIX sockets, no SSL)
+Author: Gerhard Rieger
+Name: socat
+
 Package: sqlite3
 Version: 3.34.1
 Architecture: iphoneos-arm64e
