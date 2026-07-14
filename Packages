@@ -62,6 +62,30 @@ Priority: optional
 Homepage: http://www.gnu.org/software/bash/
 Description: the best shell ever written by Brian Fox
 
+Package: bison
+Version: 3.8.2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 2536
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), m4, libintl8, libreadline8, libtextstyle0v5
+Filename: debs/bison_3.8.2_iphoneos-arm64e.deb
+Size: 661776
+MD5sum: 5e894a8c5f68cdc4633474f8d652b0f8
+SHA1: 529850ec37b8ce5acf1a382dacf80e8337f77705
+SHA256: 1996a4a36d3fbb70aa02ac9d92f35a9fbff1dbaeead1f83ca5b6755521ecf723
+Section: Development
+Priority: optional
+Description: YACC-compatible parser generator
+ Bison is a general-purpose parser generator that converts a
+ grammar description for an LALR(1) context-free grammar into a C
+ program to parse that grammar.  Once you are proficient with Bison, you
+ may use it to develop a wide range of language parsers, from those used
+ in simple desk calculators to complex programming languages.
+ .
+ Bison is upward compatible with Yacc: all properly-written Yacc
+ grammars ought to work with Bison with no change.  Anyone familiar with
+ Yacc should be able to use Bison with little trouble.
+
 Package: ca-certificates
 Version: 20231210
 Architecture: all
@@ -934,6 +958,26 @@ Author: Evelyn
 Icon: https://ellekit.space/logos/logo.png
 Name: ElleKit
 
+Package: exa
+Version: 0.10.1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 736
+Depends: roothide (>= 0.0.7), libiosexec1 (>= 1.3.1)
+Filename: debs/exa_0.10.1_iphoneos-arm64e.deb
+Size: 356436
+MD5sum: ffce16fcaa6f72ec4ee854a66559cff4
+SHA1: 127947e85f528f70855ea700b9bdf2ee40d49d90
+SHA256: 758fe81108fb37c2dc509c46a522077ce20d78625641f2a9ebcc4bfb387aeada
+Section: Utilities
+Priority: optional
+Description: Modern replacement for ls.
+ Exa is a modern day replacement for the venerable file-listing command-line program
+ ls that ships with Unix and Linux operating systems, giving it more features and better
+ defaults. It uses colors to distinguish file types and metadata. It knows about symlinks,
+ extended attributes, and Git. And it's small, fast, and just one single binary.
+Author: Benjamin Sago <auto@bsago.me>
+
 Package: file
 Version: 5.43
 Architecture: iphoneos-arm64e
@@ -987,6 +1031,30 @@ Multi-Arch: foreign
 Homepage: http://www.gnu.org/software/findutils/
 Description: indexes and searches filesystems
 
+Package: flex
+Version: 2.6.4-2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 780
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), m4
+Recommends: libfl-dev
+Filename: debs/flex_2.6.4-2_iphoneos-arm64e.deb
+Size: 205676
+MD5sum: 92c6312303ad834fcfa296468a74c730
+SHA1: 776e2539f1d15961cae160a7bc99e2459707ebf6
+SHA256: f33a105d2b5188794c287104bc42c91978e3de90b3583e25bda46bdbec9efc9e
+Section: Development
+Priority: optional
+Description: fast lexical analyzer generator
+ Flex is a tool for generating scanners: programs which recognized lexical
+ patterns in text. It reads the given input files for a description of a
+ scanner to generate. The description is in the form of pairs of regular
+ expressions and C code, called rules. Flex generates as output a C source
+ file, lex.yy.c, which defines a routine yylex().  This file is compiled
+ and linked with the -lfl library to produce an executable. When the
+ executable is run, it analyzes its input for occurrences of the regular
+ expressions. Whenever it finds one, it executes the corresponding C code.
+
 Package: gawk
 Version: 5.1.0-2
 Architecture: iphoneos-arm64e
@@ -1014,6 +1082,29 @@ Description: GNU awk, a pattern scanning and processing language
  Weinberger, with the additional features defined in the System V Release
  4 version of UNIX awk. Gawk also provides more recent Bell Labs awk
  extensions, and some GNU-specific extensions.
+
+Package: git
+Version: 2.39.1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 29796
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libcurl4, libssl3, libintl8, libpcre2-8-0, libidn2-0, firmware (>= 14.0) | libexpat1, pager
+Filename: debs/git_2.39.1_iphoneos-arm64e.deb
+Size: 10074034
+MD5sum: 8eb28a30eeb88b1e34d85b14762dec0b
+SHA1: 5cc287e562373a6d2032ff79bf3abf3489f349b3
+SHA256: 8d9d1ca99a7655c9932b8c585c93c45383828249e6457ba1c775d8fb5f8fd0f0
+Section: Data_Storage
+Priority: optional
+Description: fast, scalable, distributed revision control system
+ Git is popular version control system designed to handle very large
+ projects with speed and efficiency; it is used for many high profile
+ open source projects, most notably the Linux kernel.
+ .
+ Git falls in the category of distributed source code management tools.
+ Every Git working directory is a full-fledged repository with full
+ revision tracking capabilities, not dependent on network access or a
+ central server.
 
 Package: gpgv
 Version: 2.3.6
@@ -1112,6 +1203,54 @@ Description: interactive processes viewer
  .
  Tasks related to processes (killing, renicing) can be done without entering their PIDs.
 
+Package: ideviceinstaller
+Version: 1.1.1-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 124
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libimobiledevice6, usbmuxd, libplist3, libzip5 (>= 1.7.3)
+Filename: debs/ideviceinstaller_1.1.1-1_iphoneos-arm64e.deb
+Size: 25090
+MD5sum: 5a66f224039d594eb2bb4ac441469e2d
+SHA1: 92c99aa224e51d28892e757f4bce3a97c2df5755
+SHA256: 1a1029c35c34b8b9c19c51062c17f1cf034a570a6eb7e433fc7c580c3987dcda
+Section: Utilities
+Homepage: https://libimobiledevice.org/
+Description: A command-line application to manage apps and app archives on iOS devices.
+
+Package: jq
+Version: 1.6
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 740
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libjq1 (= 1.6), libonig5
+Filename: debs/jq_1.6_iphoneos-arm64e.deb
+Size: 295932
+MD5sum: 377d22c66eebab7571a86e655dce476e
+SHA1: 09a5b51bc1569309e41e96fff48885afc99c73ed
+SHA256: 2f70680d755fbc53c0064c4747ffdf86855d145d140e7ea7af551de3135ddc4c
+Section: Utilities
+Priority: optional
+Homepage: https://stedolan.github.io/jq/
+Description: a lightweight and flexible command-line JSON processor
+
+Package: jtool2
+Version: 2020.12.21
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 960
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/jtool2_2020.12.21_iphoneos-arm64e.deb
+Size: 294858
+MD5sum: f8add92eb15abce01edf4403fed033af
+SHA1: 067f0eabd74d714093cb6abb28c309eb8d71dea8
+SHA256: 65bbc06c808e35362374259db5904a9f317282a4c86658102d88a5fd7c5dcb95
+Section: Development
+Priority: optional
+Homepage: http://newosxbook.com/tools/jtool.html
+Description: otool, but better (non-opensource)
+Author: Jonathan Levin
+
 Package: launchctl
 Version: 1:1.1.1-2
 Architecture: iphoneos-arm64e
@@ -1144,6 +1283,23 @@ Section: Development
 Priority: optional
 Description: pseudo-codesign Mach-O files
 Author: Jay Freeman (saurik) <saurik@saurik.com>
+
+Package: less
+Version: 608
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 468
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6, libpcre2-8-0
+Replaces: system-cmds (<= 433.4-11)
+Provides: more, pager
+Filename: debs/less_608_iphoneos-arm64e.deb
+Size: 156756
+MD5sum: 682d402566e5d06dc5e36bfec3592e7c
+SHA1: a240c4b9011e62f38e951100e701fe81edf3cc28
+SHA256: 5a5be25062b3b6912673dd48ef981e80b13d25673659685ed7460a4293bcaefa
+Section: Utilities
+Priority: important
+Description: provides less information than more does
 
 Package: libapt-pkg6.0
 Version: 2.6.0-2
@@ -1199,6 +1355,40 @@ Section: Development
 Priority: optional
 Homepage: https://www.brotli.org/
 Description: Shared libraries for the Brotli compression format
+
+Package: libcapstone5
+Version: 5.0~git20230223.6e6e602
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 6156
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libcapstone5_5.0~git20230223.6e6e602_iphoneos-arm64e.deb
+Size: 875290
+MD5sum: eeb2a27b9d2810d970509b247708c349
+SHA1: bfddbfafb1d9f7b405a6330576a9cec5176860aa
+SHA256: 0cda03bce32ab8ccf0e2ec08413ed9a42db26e789b96bd1ce4c576eff54cd208
+Section: Development
+Priority: optional
+Homepage: https://www.capstone-engine.org/
+Description: lightweight multi-architecture disassembly framework - library
+ Capstone is a lightweight multi-platform, multi-architecture disassembly
+ framework.
+ .
+ Features:
+  - Support hardware architectures: ARM, ARM64 (aka ARMv8), Mips, PowerPC &
+ Intel.
+  - Clean/simple/lightweight/intuitive architecture-neutral API.
+  - Provide details on disassembled instructions (called "decomposer" by some
+ others).
+  - Provide some semantics of the disassembled instruction, such as list of
+ implicit registers read & written.
+  - Implemented in pure C language, with bindings for Java, OCaml and Python
+ ready to use and Ruby, C#, GO & Vala available on git repos.
+  - Native support for Windows & *nix (with OS X, Linux, *BSD & Solaris
+ confirmed).
+  - Thread-safe by design.
+  - Special support for embedding into firmware or OS kernel.
+  - Distributed under the open source BSD license.
 
 Package: libcrypt2
 Version: 4.4.33
@@ -1260,6 +1450,59 @@ Description: BSD editline and history libraries
  .
  It slightly resembles GNU readline.
 
+Package: libevent-2.1-7
+Version: 2.1.12-3
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 372
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libevent-core-2.1-7 (= 2.1.12-3)
+Filename: debs/libevent-2.1-7_2.1.12-3_iphoneos-arm64e.deb
+Size: 141102
+MD5sum: 234b8123b713c773973c3873be1d8698
+SHA1: f27d03a15a6487d83d4c2e77506f714b45319632
+SHA256: 3cd8a7975d1a2e771e3d69b5e80d085167841a0334351981e7bc81e89372a79b
+Section: Libraries
+Description: Asynchronous event notification library
+ Libevent is an asynchronous event notification library that provides a
+ mechanism to execute a callback function when a specific event occurs
+ on a file descriptor or after a timeout has been reached.
+ .
+ It is meant to replace the asynchronous event loop found in
+ event driven network servers. Currently, libevent supports /dev/poll,
+ kqueue(2), event ports, select(2), poll(2) and epoll(4).
+ .
+ For backward compatibility and to transition to "libevent_core only"
+ or "libevent_core + libevent_extra", the libevent source package builds
+ the libevent library that includes everything in libevent_core and
+ libevent_extra.
+
+Package: libevent-core-2.1-7
+Version: 2.1.12-3
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 228
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libevent-core-2.1-7_2.1.12-3_iphoneos-arm64e.deb
+Size: 79444
+MD5sum: 86d756a5f05c71219be813400c3e9cb7
+SHA1: 8e992a54fd6169afaa0e22d77a842763d3d800f5
+SHA256: ab8d890d7aed9d403f65c5edb1fd3688c1021ccdd417b4f97013b8f2081fc5b4
+Section: Libraries
+Description: Asynchronous event notification library (core)
+ Libevent is an asynchronous event notification library that provides a
+ mechanism to execute a callback function when a specific event occurs
+ on a file descriptor or after a timeout has been reached.
+ .
+ It is meant to replace the asynchronous event loop found in
+ event driven network servers. Currently, libevent supports /dev/poll,
+ kqueue(2), event ports, select(2), poll(2) and epoll(4).
+ .
+ The libevent_core library includes event loops, timers, buffer code,
+ and various small compatibility functions.
+ .
+ If you're writing software that only uses libevent's event loop, you
+ should link against only the libevent_core library.
+
 Package: libffi8
 Version: 3.4.2
 Architecture: iphoneos-arm64e
@@ -1278,6 +1521,56 @@ Description: Foreign Function Interface library runtime
  A foreign function interface is the popular name for the interface that
  allows code written in one language to call code written in another
  language.
+
+Package: libfl-dev
+Version: 2.6.4-2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 40
+Depends: roothide (>= 0.0.6), libfl2 (>= 2.6.4-2)
+Filename: debs/libfl-dev_2.6.4-2_iphoneos-arm64e.deb
+Size: 19016
+MD5sum: c3b3632307e088d1165f6ae98ee729de
+SHA1: dfe59850659401be454a9b38c40ff7f6c8b56a44
+SHA256: 23dd4527b9fcf5e1ec2709f72354f7f30147c6e7c72710e943add4848cd79127
+Section: Development
+Priority: optional
+Description: static library for flex (a fast lexical analyzer generator)
+ Flex is a tool for generating scanners: programs which recognized lexical
+ patterns in text. It reads the given input files for a description of a
+ scanner to generate. The description is in the form of pairs of regular
+ expressions and C code, called rules. Flex generates as output a C source
+ file, lex.yy.c, which defines a routine yylex().  This file is compiled
+ and linked with the -lfl library to produce an executable. When the
+ executable is run, it analyzes its input for occurrences of the regular
+ expressions. Whenever it finds one, it executes the corresponding C code.
+ .
+ This package contains the static library for flex.
+
+Package: libfl2
+Version: 2.6.4-2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 76
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libfl2_2.6.4-2_iphoneos-arm64e.deb
+Size: 14514
+MD5sum: d22a791d77eac4166324e23161c44833
+SHA1: 385b8d21d2e65e7844d0308684539ccaf5b26bc4
+SHA256: 03c49492ad701b1dc16f31ee62f67388d89d6927acc0c08a0e5ff5f57c34f899
+Section: Libraries
+Priority: optional
+Description: SHARED library for flex (a fast lexical analyzer generator)
+ Flex is a tool for generating scanners: programs which recognized lexical
+ patterns in text. It reads the given input files for a description of a
+ scanner to generate. The description is in the form of pairs of regular
+ expressions and C code, called rules. Flex generates as output a C source
+ file, lex.yy.c, which defines a routine yylex().  This file is compiled
+ and linked with the -lfl library to produce an executable. When the
+ executable is run, it analyzes its input for occurrences of the regular
+ expressions. Whenever it finds one, it executes the corresponding C code.
+ .
+ This package contains the shared library for flex.
 
 Package: libgcrypt20
 Version: 1.10.1
@@ -1321,6 +1614,26 @@ Description: GNU dbm database routines (runtime version)
  The basic use of 'gdbm' is to store key/data pairs in a data file, thus
  providing a persistent version of the 'dictionary' Abstract Data Type
  ('hash' to perl programmers).
+
+Package: libglib2.0-0
+Version: 2.68.2-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 12144
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libffi8, libintl8, libpcre1
+Conflicts: glib (<< 1:0)
+Replaces: glib (<< 1:0)
+Provides: glib (= 1:0)
+Filename: debs/libglib2.0-0_2.68.2-1_iphoneos-arm64e.deb
+Size: 3076892
+MD5sum: f927a45f1587860596f6524769c24149
+SHA1: d305d2d76f580fae03f68219578e5c06e7a7177f
+SHA256: 0075f5a31f7aaa14838b076e4e7f3f819a382b73d66cb2ae32ccbf7be39cd229
+Section: Libraries
+Priority: important
+Multi-Arch: foreign
+Homepage: http://www.gtk.org/
+Description: GLib library of C routines
 
 Package: libgmp10
 Version: 6.2.1-3
@@ -1434,6 +1747,36 @@ Multi-Arch: foreign
 Homepage: https://www.gnu.org/software/libidn/#libidn2
 Description: Internationalized domain names (IDNA2008/TR46) library
 
+Package: libimobiledevice-glue1.0-0
+Version: 1.0.0+git20220522.d2ff796
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 120
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libplist3 (>= 2.2.0)
+Filename: debs/libimobiledevice-glue1.0-0_1.0.0+git20220522.d2ff796_iphoneos-arm64e.deb
+Size: 26956
+MD5sum: 2cdf79b4a5956dbed7bfc9fe4a9e1cac
+SHA1: a081a14338e50650b8195bebc63c84333aabebb5
+SHA256: 2166d71c3ad7584d546636a1e447d74ac53087821f1e32c48f96a63196054146
+Section: Development
+Priority: standard
+Description: A library with common code used by libraries and tools around the libimobiledevice project
+
+Package: libimobiledevice6
+Version: 1.3.0+git20220702.2eec1b9-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 284
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3 (>= 1.1.0), libplist3 (>= 2.2.0), libimobiledevice-glue1.0-0 (>= 1.0.0), libusbmuxd6 (>= 2.0.2)
+Filename: debs/libimobiledevice6_1.3.0+git20220702.2eec1b9-1_iphoneos-arm64e.deb
+Size: 127540
+MD5sum: 68b9aecaab5b17830dcb00a2e2bfee80
+SHA1: 571e50113eeb03175cb6586d35e59180e49a3872
+SHA256: 15f4fd9c239d9acd432cc5381164d65d2094b81145a7128bcec33bd6848242f1
+Section: Development
+Priority: standard
+Description: A library for communicating with iPhone and other Apple devices
+
 Package: libintl8
 Version: 0.21.1
 Architecture: iphoneos-arm64e
@@ -1467,6 +1810,129 @@ Priority: required
 Homepage: http://github.com/ProcursusTeam/libiosexec
 Description: shim for execve w/ shell script support
 
+Package: libjq1
+Version: 1.6
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 296
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libonig5
+Filename: debs/libjq1_1.6_iphoneos-arm64e.deb
+Size: 115608
+MD5sum: 45c5f03cab5a119746c8433b35428e35
+SHA1: faa1e0dfe4f003e410fc215f32c55d2f2a5a8ec2
+SHA256: 447a52914f03c47557178781f9614bd30f188c64473bd2e6ba48ad6a64b7ce13
+Section: Development
+Priority: optional
+Homepage: https://stedolan.github.io/jq/
+Description: a lightweight and flexible command-line JSON processor - shared library
+
+Package: liblua5.1-0
+Version: 5.1.5-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 216
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/liblua5.1-0_5.1.5-1_iphoneos-arm64e.deb
+Size: 83220
+MD5sum: 33b6095e0ca08e9d246c821b6b914d35
+SHA1: 619ddaab9fe79b4008d000980574079892b0d866
+SHA256: 26e3296f794a5db30eef172d36bb3381f7ea13154b29891bfbf062209876e0e1
+Section: Libraries
+Priority: standard
+Description: Shared library for the Lua interpreter version 5.1
+ Lua is a powerful, light-weight programming language designed for extending
+ applications.  The language engine is accessible as a library, having a C
+ API which allows the application to exchange data with Lua programs and also
+ to extend Lua with C functions.  Lua is also used as a general-purpose,
+ stand-alone language through the simple command line interpreter provided.
+ .
+ This package contains runtime libraries.  You shouldn't need to install it
+ explicitly.
+
+Package: liblua5.2-0
+Version: 5.2.4-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 204
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/liblua5.2-0_5.2.4-1_iphoneos-arm64e.deb
+Size: 83056
+MD5sum: c9b59afa9e47f334cdfa7810cf1c8f31
+SHA1: 5b778a11dafe5161fd6be57f82f3461149c839a5
+SHA256: 01be8ada4e79d8067354636c16a34b5775ecd64431e6a0ca36fe85cff66dfac1
+Section: Libraries
+Priority: standard
+Description: Shared library for the Lua interpreter version 5.2
+ Lua is a powerful, light-weight programming language designed for extending
+ applications.  The language engine is accessible as a library, having a C
+ API which allows the application to exchange data with Lua programs and also
+ to extend Lua with C functions.  Lua is also used as a general-purpose,
+ stand-alone language through the simple command line interpreter provided.
+ .
+ This package contains runtime libraries.  You shouldn't need to install it
+ explicitly.
+
+Package: liblua5.3-0
+Version: 5.3.3-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 236
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/liblua5.3-0_5.3.3-1_iphoneos-arm64e.deb
+Size: 92874
+MD5sum: db4d524554077d90125498158279dc4f
+SHA1: 682ed58c9c1508347ad7c442cc277146cc0e8942
+SHA256: 6b266cd5c68a6ab44640c0734e91cd537ceea318468cc892736e838188a6bba5
+Section: Libraries
+Priority: standard
+Description: Shared library for the Lua interpreter version 5.3
+ Lua is a powerful, light-weight programming language designed for extending
+ applications.  The language engine is accessible as a library, having a C
+ API which allows the application to exchange data with Lua programs and also
+ to extend Lua with C functions.  Lua is also used as a general-purpose,
+ stand-alone language through the simple command line interpreter provided.
+ .
+ This package contains runtime libraries.  You shouldn't need to install it
+ explicitly.
+
+Package: libluajit-5.1-2
+Version: 2.1.0~beta3+git377a848
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 292
+Depends: roothide (>= 0.0.7), libiosexec1 (>= 1.3.1), libluajit-5.1-common (= 2.1.0~beta3+git377a848)
+Filename: debs/libluajit-5.1-2_2.1.0~beta3+git377a848_iphoneos-arm64e.deb
+Size: 136750
+MD5sum: 6804b3499ffe11e3c91ae6f14d46a10d
+SHA1: fdfb289ff5557dc6ada1198ce04b0f63917a7ae7
+SHA256: 87ffed9a44348dd0d3fea66492d2412b56512aaef06620ac1e7e4b16b7da08e0
+Section: Libraries
+Priority: optional
+Description: Just in time compiler for Lua - library version
+ LuaJIT implements the full set of language features defined by Lua 5.1. The
+ virtual machine (VM) is API- and ABI-compatible to the standard Lua interpreter
+ and can be deployed as a drop-in replacement.
+ .
+ This package contains an embeddable version of LuaJIT that can be used as a
+ replacement of the standard liblua-5.1 shared library.
+
+Package: libluajit-5.1-common
+Version: 2.1.0~beta3+git377a848
+Architecture: all
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 236
+Depends: roothide (>= 0.0.7)
+Filename: debs/libluajit-5.1-common_2.1.0~beta3+git377a848_all.deb
+Size: 53792
+MD5sum: 964a4c9bc95eb9c2f65acc7eafbfd950
+SHA1: 9cb974a40f473bd6a1901a6457cb57306e82c3c8
+SHA256: a22696313fd0c7130e519905c11b51e3bd23f16354c423ddd332663b30d5488e
+Section: Development
+Priority: optional
+Description: Just in time compiler for Lua - common files
+ This package contains files needed by the LuaJIT interpreter/jitter as well
+ by its embeddable (i.e. library) version.
+
 Package: liblz4-1
 Version: 1.9.3
 Architecture: iphoneos-arm64e
@@ -1483,6 +1949,32 @@ Section: Libraries
 Priority: important
 Homepage: http://tukaani.org/lzma/
 Description: Fast LZ compression algorithm library - runtime
+
+Package: liblzma-dev
+Version: 5.4.1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 908
+Depends: roothide (>= 0.0.6), liblzma5 (>= 5.4.1)
+Conflicts: xz (<<1:0), lzma (<<3:0)
+Replaces: xz, lzma
+Filename: debs/liblzma-dev_5.4.1_iphoneos-arm64e.deb
+Size: 360874
+MD5sum: 210a4a41c52933ceb272bb0ec330ab53
+SHA1: 52aadf39142a637efbc399afa1492dd7843a5b52
+SHA256: fdf01137506d417db5c1560c56d656545da00e06da6e87992e7893411a521ad7
+Section: Development
+Priority: standard
+Homepage: https://tukaani.org/xz/
+Description: XZ-format compression library - development files
+ XZ is the successor to the Lempel-Ziv/Markov-chain Algorithm
+ compression format, which provides memory-hungry but powerful
+ compression (often better than bzip2) and fast, easy decompression.
+ .
+ The native format of liblzma is XZ; it also supports raw (headerless)
+ streams and the older LZMA format used by lzma. (For 7-Zip's related
+ format, use the p7zip package instead.) This package provides the
+ development library needed to build programs using liblzma.
 
 Package: liblzma5
 Version: 5.4.1
@@ -1508,6 +2000,27 @@ Description: XZ-format compression library
  The native format of liblzma is XZ; it also supports raw (headerless)
  streams and the older LZMA format used by lzma. (For 7-Zip's related
  format, use the p7zip package instead.)
+
+Package: libmagic-dev
+Version: 5.43
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 400
+Depends: roothide (>= 0.0.6), libmagic1 (= 5.43), liblzma-dev
+Conflicts: file (<< 5.43)
+Replaces: file (<< 5.43)
+Filename: debs/libmagic-dev_5.43_iphoneos-arm64e.deb
+Size: 216698
+MD5sum: b6ed4e0b6c75900fbe3f1cbb3e6cca35
+SHA1: c7b55924ce0e41b16971f52c1e68154d4031ce53
+SHA256: 8a149fc1080bb265f634875c510baecc6a1b2776a2c8b752bba8e9acf2837a20
+Section: Development
+Priority: important
+Description: Recognize the type of data in a file using "magic" numbers - development
+ This library can be used to classify files according to magic number
+ tests.
+ .
+ This package contains the development files.
 
 Package: libmagic1
 Version: 5.43
@@ -1567,6 +2080,24 @@ Description: multiple precision floating-point computation
  ANSI/IEEE-754 standard for double-precision floating-point arithmetic
  (53-bit mantissa).
 
+Package: libmsgpackc2
+Version: 3.3.0
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 80
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libmsgpackc2_3.3.0_iphoneos-arm64e.deb
+Size: 14232
+MD5sum: b1090e325f9500cedac2a654f60ce0a1
+SHA1: 038f5b939c28d967f5e6a9b713baec44037b341a
+SHA256: b56ad8630531a9f613cc12c4db457ff4cef26dc3bb4534b30c2291e6b48c5f3f
+Section: Libraries
+Priority: optional
+Description: binary-based efficient object serialization library
+ MessagePack is a binary-based efficient object serialization library.
+ It enables to exchange structured objects between many languages like JSON.
+ But unlike JSON, it is very fast and small.
+
 Package: libncursesw6
 Version: 6.4
 Architecture: iphoneos-arm64e
@@ -1601,6 +2132,27 @@ Priority: optional
 Homepage: http://www.lysator.liu.se/~nisse/nettle/
 Description: low level cryptographic library (symmetric and one-way cryptos)
 
+Package: libnghttp2-dev
+Version: 1.52.0
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 664
+Depends: roothide (>= 0.0.6), libnghttp2-14 (= 1.52.0)
+Filename: debs/libnghttp2-dev_1.52.0_iphoneos-arm64e.deb
+Size: 273026
+MD5sum: 7d809a1445c8ea2241712433d3bb0032
+SHA1: 09d6209f7ef5f6c2f129abb4533e598e3b720fa6
+SHA256: 3d6f3ae932747f3bb4f97e001b8772715b4135ee9adb5fcf21f19d3fab9f5f6f
+Section: Development
+Priority: standard
+Homepage: https://nghttp2.org/
+Description: library implementing HTTP/2 protocol (development files)
+ This is an implementation of the Hypertext Transfer Protocol version
+ 2 in C. The framing layer of HTTP/2 is implemented as a reusable C
+ library.
+ .
+ This package installs development files.
+
 Package: libnpth0
 Version: 1.6-2
 Architecture: iphoneos-arm64e
@@ -1619,6 +2171,21 @@ Section: Libraries
 Priority: optional
 Multi-Arch: foreign
 Description: replacement for GNU Pth using system threads
+
+Package: libonig5
+Version: 6.9.6
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 560
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libonig5_6.9.6_iphoneos-arm64e.deb
+Size: 174554
+MD5sum: 9b58ae449cd946e144412bf386c6c08c
+SHA1: 881c06293512974e168f505095103d1d7131aaf0
+SHA256: f7edae959d2d1b9cf06d534a28dc0032863db526f42428c6120cf6465599d851
+Section: Development
+Priority: optional
+Description: regular expression library
 
 Package: libp11-kit0
 Version: 0.24.1
@@ -1759,6 +2326,30 @@ Description: New Perl Compatible Regular Expression Library- 8 bit runtime files
  .
  This package contains the 8 bit runtime library.
 
+Package: libpcre2-dev
+Version: 10.40-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 3224
+Depends: roothide (>= 0.0.6)
+Conflicts: pcre2 (<<1:0), libpcre2 (<< 10.40-1)
+Filename: debs/libpcre2-dev_10.40-1_iphoneos-arm64e.deb
+Size: 1892322
+MD5sum: 785087814f24e919f4df4c7a8d605afc
+SHA1: 90eceefb82ac4eaca95e87e215c9c908e5437f8a
+SHA256: 814ad1f7d85b8c649a793bb510f760758403b9753f47cd27556a6a79f3e9322f
+Section: Development
+Priority: standard
+Multi-Arch: foreign
+Description: New Perl Compatible Regular Expression Library - development files
+ This is PCRE2, the new implementation of PCRE, a library of functions
+ to support regular expressions whose syntax and semantics are as
+ close as possible to those of the Perl 5 language. New projects
+ should use this library in preference to the older library.
+ .
+ This package contains the development files, including headers,
+ static libraries, and documentation.
+
 Package: libplist3
 Version: 2.2.0+git20230130.4b50a5a
 Architecture: iphoneos-arm64e
@@ -1777,6 +2368,28 @@ Section: Development
 Priority: standard
 Description: Library for handling Apple binary and XML property lists
 
+Package: libpopt0
+Version: 1.18
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 224
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libpopt0_1.18_iphoneos-arm64e.deb
+Size: 40926
+MD5sum: b5a99412b389ba5380d6ee822b5cb923
+SHA1: 4d343a9be44977b4536fcfa399fc075cfdaab758
+SHA256: 9d041bc827d7136d99cb6a6370e49a41fbc3849e33074e89a1ba6aefe56b932a
+Section: Libraries
+Description: lib for parsing cmdline parameters
+ Popt was heavily influenced by the getopt() and getopt_long() functions,
+ but it allows more powerful argument expansion. It can parse arbitrary
+ argv[] style arrays and automatically set variables based on command
+ line arguments. It also allows command line arguments to be aliased via
+ configuration files and includes utility functions for parsing arbitrary
+ strings into argv[] arrays using shell-like rules.
+ .
+ This package contains the runtime library.
+
 Package: libpython3.9
 Version: 3.9.9-2
 Architecture: iphoneos-arm64e
@@ -1793,6 +2406,81 @@ SHA256: 93d57020b80f510748764248eb782e27101d0df78d8a651dda9d7c99b25f8111
 Section: Libraries
 Priority: optional
 Description: Interpreted, interactive, object-oriented programming language. Contains the standard library and other shared libraries.
+
+Package: libradare2-5.8
+Version: 5.8.2-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 12792
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libradare2-common (= 5.8.2-1), libcapstone5, libssl3, libuv1, libzip5, liblz4-1, libxxhash0, libmagic1
+Filename: debs/libradare2-5.8_5.8.2-1_iphoneos-arm64e.deb
+Size: 4203618
+MD5sum: c1cb83dfe026024184056ab3abd2b8b9
+SHA1: fe997177ea0e317431c1d245be51d15b28390e8c
+SHA256: 15593816bda3101602489104b99e6799a77dfe52f5490c58c9bca744c25aa5f4
+Section: Libraries
+Priority: optional
+Homepage: https://www.radare.org
+Description: libraries from the radare2 suite
+ The project aims to create a complete, portable, multi-architecture,
+ unix-like toolchain for reverse engineering.
+ .
+ It is composed by an hexadecimal editor (radare) with a wrapped IO
+ layer supporting multiple backends for local/remote files, debugger
+ (OS X, BSD, Linux, W32), stream analyzer, assembler/disassembler (rasm)
+ for x86, ARM, PPC, m68k, Java, MSIL, SPARC, code analysis modules and
+ scripting facilities. A bindiffer named radiff, base converter (rax),
+ shellcode development helper (rasc), a binary information extractor
+ supporting PE, mach0, ELF, class, etc. named rabin, and a block-based
+ hash utility called rahash.
+ .
+ This package provides the libraries from radare2.
+
+Package: libradare2-common
+Version: 5.8.2-1
+Architecture: all
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 10556
+Depends: roothide (>= 0.0.6)
+Filename: debs/libradare2-common_5.8.2-1_all.deb
+Size: 3122196
+MD5sum: 6cc524b1a407139c036621e08d55230b
+SHA1: 38f44f8737535150afe4b04a42862bf81ba5b9a9
+SHA256: 37b82f4e17e20335243de95e08ac154db03cbf234ba0abe5c05737fb55dadf97
+Section: Development
+Priority: optional
+Homepage: https://www.radare.org
+Description: arch independent files from the radare2 suite
+ The project aims to create a complete, portable, multi-architecture,
+ unix-like toolchain for reverse engineering.
+ .
+ It is composed by an hexadecimal editor (radare) with a wrapped IO
+ layer supporting multiple backends for local/remote files, debugger
+ (OS X, BSD, Linux, W32), stream analyzer, assembler/disassembler (rasm)
+ for x86, ARM, PPC, m68k, Java, MSIL, SPARC, code analysis modules and
+ scripting facilities. A bindiffer named radiff, base converter (rax),
+ shellcode development helper (rasc), a binary information extractor
+ supporting PE, mach0, ELF, class, etc. named rabin, and a block-based
+ hash utility called rahash.
+ .
+ This package provides the arch independent files from radare2.
+
+Package: libreadline-dev
+Version: 8.2.0-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 728
+Depends: roothide (>= 0.0.6), libreadline8 (= 8.2.0-1), libncursesw6
+Conflicts: readline (<< 8.2.0-1)
+Replaces: readline (<< 8.2.0-1)
+Filename: debs/libreadline-dev_8.2.0-1_iphoneos-arm64e.deb
+Size: 336702
+MD5sum: 90595124972966fe597bd60f85312291
+SHA1: 3c133b3c0b2ab86db0d62a4a35cf1446ee6a8ce8
+SHA256: 6704145f4c08ed79444c5b5685a6d3b0ca179501425a5d3f48de0d342f5f6b31
+Section: Development
+Priority: optional
+Description: GNU readline and history libraries, development files
 
 Package: libreadline8
 Version: 8.2.0-1
@@ -1811,6 +2499,50 @@ SHA256: 0fc7b5369799029b5cd34ac5687108642fdf5577c979032e2d41e771ee2b0d12
 Section: Libraries
 Priority: required
 Description: GNU readline and history libraries, run-time libraries
+
+Package: libsodium23
+Version: 1.0.18
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 256
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libsodium23_1.0.18_iphoneos-arm64e.deb
+Size: 109298
+MD5sum: 0dbf67ccdb17a3330240516b3256b6fc
+SHA1: 9fd07aa733273fd67776c35c431bf4bbccc3ec35
+SHA256: 3684553d96d9fbbe161eb3319a2a09cb612832a790d9f18681fd66e200edeb36
+Section: Libraries
+Homepage: https://doc.libsodium.org/
+Description: Network communication, cryptography and signaturing library
+ NaCl (pronounced "salt") is a new easy-to-use high-speed software library for
+ network communication, encryption, decryption, signatures, etc.
+ .
+ NaCl's goal is to provide all of the core operations needed to build
+ higher-level cryptographic tools.
+ .
+ Sodium is a portable, cross-compilable, installable, packageable fork of NaCl,
+ with a compatible API.
+
+Package: libssl-dev
+Version: 3.0.8
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 14448
+Depends: roothide (>= 0.0.6), libssl3 (= 3.0.8)
+Filename: debs/libssl-dev_3.0.8_iphoneos-arm64e.deb
+Size: 5703902
+MD5sum: bed78e9a13371cbe113f7d0d0b62c5be
+SHA1: 4b3101b2e6592ba632d933398bf05207bd53f7de
+SHA256: 1bef8192c112c76cefeeda9bf204aa13e08acc56a4d354d60db614eb907d8f5a
+Section: Development
+Priority: standard
+Description: Secure Sockets Layer toolkit - development files
+ This package is part of the OpenSSL project's implementation of the SSL
+ and TLS cryptographic protocols for secure communication over the
+ Internet.
+ .
+ It contains development libraries, header files, and manpages for libssl
+ and libcrypto.
 
 Package: libssl3
 Version: 3.0.8
@@ -1862,6 +2594,88 @@ Description: Manage ASN.1 structures (runtime)
  .
  This package contains runtime libraries.
 
+Package: libtermkey1
+Version: 0.22
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 92
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libunibilium4
+Filename: debs/libtermkey1_0.22_iphoneos-arm64e.deb
+Size: 16546
+MD5sum: aec9f002954c077a00d43f1dfd94b7c0
+SHA1: 6f2f8d5181a0d5b43336d391a509b156d15f6142
+SHA256: f6adab20c342f8672de4f38141156b088e92ac6d4c5d24704212b0fc5dc99efc
+Section: Libraries
+Priority: optional
+Description: library for processing keyboard input
+ This library allows easy processing of keyboard entry from terminal-based
+ programs. It handles all the necessary logic to recognise special keys, UTF-8
+ combining, and so on, with a simple interface.  It provides the following
+ features:
+ .
+  * Follows terminfo for every sequence listed there, only falling back on
+    other methods to deal with unrecognised input.
+  * Recognises special keys (such as arrow and function keys), including
+    "modified" keys like Ctrl-Left.
+  * Recognises XTerm-style mouse position/button reporting.
+  * MIT licenced to allow almost all projects to use it; both Open Source
+    and Commercial.
+  * Small API - just three functions are needed in simple common cases.
+  * Both synchronous (blocking) and asynchronous (non-blocking) APIs are
+    supported.
+
+Package: libtextstyle0v5
+Version: 0.21.1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 484
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6
+Filename: debs/libtextstyle0v5_0.21.1_iphoneos-arm64e.deb
+Size: 220042
+MD5sum: 5a22252b90f377b09d02b76c6ff97359
+SHA1: 0389dbcdeb13be8a105f35c0e15fced24cfdf54c
+SHA256: 71e8bddda1ec35bd1954cb4f2da6c8d2723b84111d5b25d7f2a12d13df886c9d
+Section: Libraries
+Homepage: http://www.gnu.org/software/gettext/
+Description: internationalization helper for strings
+
+Package: libtree-sitter0
+Version: 0.20.8
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 196
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libtree-sitter0_0.20.8_iphoneos-arm64e.deb
+Size: 78330
+MD5sum: a29eb4ae8b4fa16e003f1a9115f79727
+SHA1: 983bbe002e2c9a68b83af2777dce3ace893f2f42
+SHA256: 5da11b35db041f1b13b6e4a7c2396a29a4e42f312ef39a73e99581a81968a5d6
+Section: Libraries
+Priority: optional
+Homepage: https://tree-sitter.github.io/tree-sitter/
+Description: incremental parsing system for programming tools
+ Tree-sitter is a parser generator tool and an incremental parsing library. It
+ can build a concrete syntax tree for a source file and efficiently update the
+ syntax tree as the source file is edited.
+
+Package: libunibilium4
+Version: 2.1.0
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 76
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libunibilium4_2.1.0_iphoneos-arm64e.deb
+Size: 19690
+MD5sum: 10a97576f1c0eae6b6a25859733c934e
+SHA1: 0a0a270aa989da51609e1bc8a967c504f2701977
+SHA256: dc8926f36245f8f94b9b6f71033d1daeb0bd42ba5f1e405d4997873bb92155fc
+Section: Libraries
+Priority: optional
+Description: simple, self-contained terminfo library
+ Unibilium is a very basic terminfo library. It doesn't depend on curses or any
+ other library. It also doesn't use global variables, so it should be
+ thread-safe.
+
 Package: libunistring5
 Version: 1.1
 Architecture: iphoneos-arm64e
@@ -1878,6 +2692,100 @@ Priority: optional
 Multi-Arch: foreign
 Homepage: https://www.gnu.org/software/libunistring/
 Description: Unicode string library for C
+
+Package: libusb-1.0-0
+Version: 1.0.26
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 188
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libusb-1.0-0_1.0.26_iphoneos-arm64e.deb
+Size: 57724
+MD5sum: c5e9c8ff0bff8f0fcc1ca0c23f1a98ab
+SHA1: 50d00e10f9962f5d782137f203d442ffc3430d45
+SHA256: 7c0b00b8545ab5a77554f4cb0847e94cdc2b3ea2d4d81151786a189808aa16da
+Section: Development
+Description: userspace USB programming library
+ Library for programming USB applications.
+ .
+ This package contains what you need to run programs that use this
+ library.
+
+Package: libusbmuxd6
+Version: 2.0.2+git20220504.36ffb7a
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 124
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libplist3, libimobiledevice-glue1.0-0 (>= 1.0.0)
+Filename: debs/libusbmuxd6_2.0.2+git20220504.36ffb7a_iphoneos-arm64e.deb
+Size: 25830
+MD5sum: 7508ada0f02f051480682809ea2e5044
+SHA1: bcc4487af873741148a451098d9680d59806bbd0
+SHA256: fd16162138abe99856fb205ca57b90364bbbc275c7f5096799f89100aa077756
+Section: Development
+Priority: standard
+Description: A client library to multiplex connections from and to iOS devices
+
+Package: libutf8proc2
+Version: 2.5.0-2
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 344
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Conflicts: libutf8proc (<< 2.5.0-2)
+Replaces: libutf8proc (<< 2.5.0-2)
+Filename: debs/libutf8proc2_2.5.0-2_iphoneos-arm64e.deb
+Size: 74838
+MD5sum: 881d82067e002e77465785e18b108f02
+SHA1: 38b7747c3bf0c150a84e85f28420a8bb88372e1f
+SHA256: 8b6eb93f7ba4b8c807343821b8d60d161a8b6becf9a6f9db4f9a88947ece47f5
+Section: Libraries
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://juliastrings.github.io/utf8proc/
+Description: C library for processing UTF-8 Unicode data (shared library)
+ utf8proc is a small, clean C library that provides Unicode normalization,
+ case-folding, and other operations for data in the UTF-8 encoding, supporting
+ Unicode version 8.0.
+ .
+ This package contains a shared version of the library.
+
+Package: libuv1
+Version: 1.44.1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 216
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libiosexec1
+Filename: debs/libuv1_1.44.1_iphoneos-arm64e.deb
+Size: 80294
+MD5sum: f8e00463f26739dedf1fb0aaeff9b65f
+SHA1: 4cb224f20991a9ec6c4b55a7e3d87843af75b981
+SHA256: ebc37bb46169986a505dc2a7aa6b8dac147b7a25683c3c3c867ed7f3b21df383
+Section: Libraries
+Priority: optional
+Multi-Arch: foreign
+Description: asynchronous event notification library - runtime library
+
+Package: libvterm0
+Version: 0.3.1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 108
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/libvterm0_0.3.1_iphoneos-arm64e.deb
+Size: 31066
+MD5sum: 1a4346833f4babfb64e19f2e0c1d34ea
+SHA1: 214ac6f08a9302e964af7f75f701b7a294e45008
+SHA256: 2bdd3c3dc4786df38094cb02d0628e7c97bc4b064ceb9d86996f42961263924c
+Section: Libraries
+Priority: optional
+Description: abstract terminal library
+ An abstract C99 library which implements a VT220 or xterm-like terminal
+ emulator. It doesn't use any particular graphics toolkit or output
+ system, instead it invokes callback function pointers that its embedding
+ program should provide it to draw on its behalf. It avoids calling
+ malloc() during normal running state, allowing it to be used in embedded
+ kernel situations.
 
 Package: libxar1
 Version: 1.8.0.487.100.1-1
@@ -1934,6 +2842,27 @@ Description: next gen zlib compression library - runtime
  next generation zlib library implementing the deflate compression method
  found in gzip and PKZIP. This package includes the shared library.
 
+Package: libzip5
+Version: 1.9.2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 188
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5), libzstd1, libssl3
+Filename: debs/libzip5_1.9.2_iphoneos-arm64e.deb
+Size: 65694
+MD5sum: 50f3ddf974ccd868bdaf6077e65a0579
+SHA1: e3c5439e8ef04a93cfa3871bea7be0de7ba09f49
+SHA256: aedc3292f6681f2577094eaaffa8983e9e1eea83f67bdaa88ecf6db959f77136
+Section: Libraries
+Priority: optional
+Description: library for reading, creating, and modifying zip archives (runtime)
+ libzip is a C library for reading, creating, and modifying zip archives. Files
+ can be added from data buffers, files, or compressed data copied directly from
+ other zip archives. Changes made without closing the archive can be reverted.
+ .
+ This package contains the files necessary for running applications that
+ use the libzip library.
+
 Package: libzstd1
 Version: 1.5.5
 Architecture: iphoneos-arm64e
@@ -1951,6 +2880,39 @@ Description: fast lossless compression algorithm
  real-time compression scenarios at zlib-level compression ratio.
  .
  This package contains the shared library.
+
+Package: lua-luv
+Version: 1.44.2-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 1320
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libuv1, liblua5.1-0, liblua5.2-0, liblua5.3-0, libluajit-5.1-2
+Filename: debs/lua-luv_1.44.2-1_iphoneos-arm64e.deb
+Size: 158848
+MD5sum: ee1a16d1f11166da3d1158cf588349ec
+SHA1: cadcb4dd0f1f05b896a6f3820a4a77b56087241e
+SHA256: 628e3fd215bcfc4118e9d4712ae6439f8cd05a97293dccb053d68870ac0e0bba
+Section: Libraries
+Priority: optional
+Description: libuv bindings for Lua
+ libuv is a multi-platform support library with a focus on asynchronous I/O.
+ .
+ This package provides libuv bindings for the Lua programming language.
+
+Package: m4
+Version: 1.4.19-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 540
+Depends: roothide (>= 0.0.7), libiosexec1 (>= 1.3.1)
+Filename: debs/m4_1.4.19-1_iphoneos-arm64e.deb
+Size: 202762
+MD5sum: f120d452f27a9517c73c2b4f022d80c3
+SHA1: 1576f93394410aec600d5f8aef6b4e0439d24bb5
+SHA256: 79c767d7974e81e1b4127bf567066c9be44cba304839a2548427e5bc9d3933d1
+Section: Development
+Priority: optional
+Description: Macro processing language
 
 Package: nano
 Version: 7.2
@@ -1986,6 +2948,45 @@ Description: Completely free, modern clone of Pico.
  - Toggling features while running
  - Full internationalization support
 
+Package: ncat
+Version: 7.92
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 264
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpcre1, libssl3, nmap-common (= 7.92), liblua5.3-0
+Conflicts: nmap-utils
+Replaces: nmap-utils
+Filename: debs/ncat_7.92_iphoneos-arm64e.deb
+Size: 107362
+MD5sum: 0ca048f9dab1c3b82a7bb2b41bae6255
+SHA1: 127fb45dcb05ae8f058367c7b22344f90f6bc562
+SHA256: 0e2fc118416e619a3847ccaad5ab2c2147c3bd1d48f5e895ec27f47eee53b9d6
+Section: Networking
+Priority: optional
+Description: NMAP netcat reimplementation
+ ncat is a reimplementation of Netcat by the NMAP project, providing
+ most of the features present in the original implementations, along
+ with some new features such as IPv6 and SSL support. Port scanning
+ support has been removed.
+
+Package: ncdu
+Version: 1.15.1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 124
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6
+Filename: debs/ncdu_1.15.1_iphoneos-arm64e.deb
+Size: 44092
+MD5sum: 77b4288c5c75fd195bb1f4eb2c9e3906
+SHA1: 44d0dc42ae451dc99338b811979f0bbdcdd6d4e3
+SHA256: 371674d6093b0f36e3d3d3d05006179003577fd7c44168527ade87e6f355cd9e
+Section: Utilities
+Homepage: http://dev.yorhel.nl/ncdu/
+Description: ncurses disk usage viewer
+ Ncdu is a ncurses-based du viewer. It provides a fast and easy-to-use interface
+ through famous du utility. It allows one to browse through the directories and
+ show percentages of disk usage with ncurses library.
+
 Package: ncurses-term
 Version: 6.4
 Architecture: all
@@ -2003,6 +3004,47 @@ Section: System
 Priority: required
 Description: This package contains terminfo data files to support most types of terminals.
 
+Package: neovim
+Version: 0.9.0
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 29832
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8, lua-luv, libuv1, libmsgpackc2, libvterm0, libtermkey1, libunibilium4, libluajit-5.1-2, libtree-sitter0
+Filename: debs/neovim_0.9.0_iphoneos-arm64e.deb
+Size: 7881500
+MD5sum: 491a65b889a1380625aadd294c006b3c
+SHA1: 2b90703db4a57b0ecdaa35b72d176fbf357445cb
+SHA256: ed8d4a4cfe52e4f9ffcb22b851c2ab8716e09817c92cf61a791e1a80408766db
+Section: Text_Editors
+Priority: optional
+Homepage: https://neovim.io/
+Description: heavily refactored vim fork
+ Neovim is a fork of Vim focused on modern code and features, rather than
+ running in legacy environments.
+ .
+ msgpack API enables structured communication to/from any programming language.
+ Remote plugins run as co-processes that communicate with Neovim safely and
+ asynchronously.
+ .
+ GUIs (or TUIs) can easily embed Neovim or communicate via TCP sockets using
+ the discoverable msgpack API.
+
+Package: netcat
+Version: 0.7.1-2
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 156
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8
+Filename: debs/netcat_0.7.1-2_iphoneos-arm64e.deb
+Size: 42588
+MD5sum: 8b6643f4adb7103756653be51edf4c0b
+SHA1: 01bc61cf1d717c3c16dc84c4bf2e7b77986dfc9a
+SHA256: 4b5fc861ab9fbd2a5d939abef4b0a401246f79fb9da37eff03bd5de9f9458ec8
+Section: Networking
+Priority: important
+Multi-Arch: foreign
+Description: simple socket manipulation tool
+
 Package: network-cmds
 Version: 641-1
 Architecture: iphoneos-arm64e
@@ -2017,6 +3059,59 @@ SHA256: 68c50ab1c2ca7632b53b4ee3cd025dce2ee618c565db5d08f714735208661e67
 Section: Networking
 Priority: important
 Description: arp, ndp, traceroute, mnc, mtest, traceroute6, ifconfig, ip6addrctl, netstat, ping6, route, rtsol
+
+Package: nmap
+Version: 7.92
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 3676
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpcre1, libssl3, nmap-common (= 7.92), liblua5.3-0, libssh2-1, libpcapa
+Conflicts: nmap-utils
+Replaces: nmap-utils
+Filename: debs/nmap_7.92_iphoneos-arm64e.deb
+Size: 1585576
+MD5sum: ff64831ce62a6d29e322136dedabf045
+SHA1: 7cc4f5b6647a4f31c186314b663c2f23d84bb035
+SHA256: f4124313ef54b666615faa366415d7b509a9e5d3af2c3b56b7fbd8532a6c6482
+Section: Networking
+Priority: optional
+Description: The Network Mapper
+ Nmap is a utility for network exploration or security auditing. It
+ supports ping scanning (determine which hosts are up), many port
+ scanning techniques, version detection (determine service protocols and
+ application versions listening behind ports), and TCP/IP fingerprinting
+ (remote host OS or device identification). Nmap also offers flexible
+ target and port specification, decoy/stealth scanning, sunRPC scanning,
+ and more. Most Unix and Windows platforms are supported in both GUI and
+ commandline modes. Several popular handheld devices are also supported,
+ including the Sharp Zaurus and the iPAQ.
+
+Package: nmap-common
+Version: 7.92
+Architecture: all
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 21800
+Depends: roothide (>= 0.0.6)
+Recommends: nmap
+Filename: debs/nmap-common_7.92_all.deb
+Size: 5021864
+MD5sum: f300f97176cbeb4ea75024296d290d24
+SHA1: d92f3658382a83118429d7a508c48deb68d0ca12
+SHA256: 936b3c1098c715b44a9c917e4ff34219181b1cacaf0d1e9aa9b94a4a0e7c6169
+Section: Networking
+Priority: optional
+Description: Architecture independent files for nmap
+ Nmap is a utility for network exploration or security auditing. It
+ supports ping scanning (determine which hosts are up), many port
+ scanning techniques, version detection (determine service protocols and
+ application versions listening behind ports), and TCP/IP fingerprinting
+ (remote host OS or device identification). Nmap also offers flexible
+ target and port specification, decoy/stealth scanning, sunRPC scanning,
+ and more. Most Unix and Windows platforms are supported in both GUI and
+ commandline modes. Several popular handheld devices are also supported,
+ including the Sharp Zaurus and the iPAQ.
+ .
+ This package contains the nmap files shared by all architectures.
 
 Package: openssh
 Version: 1:0
@@ -2140,6 +3235,23 @@ Description: 7z and 7za file archivers with high compression ratio
     HFS, ISO, LZH, LZMA, LZMA2, MBR, MSI, MSLZ, NSIS, NTFS, RPM, SquashFS, UDF,
     VHD, WIM, XAR and Z.
 
+Package: pkg-config
+Version: 0.29.2-3
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 148
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libglib2.0-0 (>= 2.65.0), libintl8
+Filename: debs/pkg-config_0.29.2-3_iphoneos-arm64e.deb
+Size: 46676
+MD5sum: f63e07aa8fb059dde891fca920080b22
+SHA1: e9c1b6042093f74905f0017aedfab0bf12bdf8ce
+SHA256: 587106467b43da5b2e54c9ab6cc792dbef6fe884fbbc83d3174998f1428047d1
+Section: Utilities
+Priority: important
+Multi-Arch: foreign
+Homepage: https://www.freedesktop.org/wiki/Software/pkg-config/
+Description: manage compile and link flags for libraries
+
 Package: plutil
 Version: 0.2.2+2
 Architecture: iphoneos-arm64e
@@ -2237,6 +3349,33 @@ Section: Scripting
 Priority: optional
 Description: Interpreted, interactive, object-oriented programming language.
 
+Package: radare2
+Version: 5.8.2-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 868
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libradare2-5.8 (= 5.8.2-1)
+Filename: debs/radare2_5.8.2-1_iphoneos-arm64e.deb
+Size: 62680
+MD5sum: 2d1610953634c56fe066eb793d786800
+SHA1: 601694a320016f95d7746aa8f0290b55a340432e
+SHA256: 4e56d2a89959cf61550483f0a3be55033ff0f5c3e9b1bb964d539160b7fb3db7
+Section: Utilities
+Priority: optional
+Homepage: https://www.radare.org
+Description: free and advanced command line hexadecimal editor
+ The project aims to create a complete, portable, multi-architecture,
+ unix-like toolchain for reverse engineering.
+ .
+ It is composed by an hexadecimal editor (radare) with a wrapped IO
+ layer supporting multiple backends for local/remote files, debugger
+ (OS X, BSD, Linux, W32), stream analyzer, assembler/disassembler (rasm)
+ for x86, ARM, PPC, m68k, Java, MSIL, SPARC, code analysis modules and
+ scripting facilities. A bindiffer named radiff, base converter (rax),
+ shellcode development helper (rasc), a binary information extractor
+ supporting PE, mach0, ELF, class, etc. named rabin, and a block-based
+ hash utility called rahash.
+
 Package: re.frida.server
 Version: 16.1.4
 Architecture: iphoneos-arm64e
@@ -2255,6 +3394,39 @@ Description: Observe and reprogram running programs.
 Author: Frida Developers <oleavr@nowsecure.com>
 Name: Frida
 
+Package: ripgrep
+Version: 12.1.1-1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 3824
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpcre2-8-0
+Filename: debs/ripgrep_12.1.1-1_iphoneos-arm64e.deb
+Size: 1460134
+MD5sum: 8a0800457d544e477fd89c5152909bc3
+SHA1: 8acb6121640274bcae6b3b7fd0db18b8b5ff55ff
+SHA256: d9bacbf2c8f19219ba003f964f83368673c153858d371615969c5577c641fb5d
+Section: Utilities
+Priority: optional
+Description: Recursively searches directories for a regex pattern
+ ripgrep is a line-oriented search tool that recursively searches your current
+ directory for a regex pattern while respecting your gitignore rules and
+ automatically skip hidden files/directories (smart filtering) and binary files.
+ ripgrep is similar to other popular search tools like The Silver Searcher, ack
+ and grep.
+ .
+ ripgrep is generally faster than both The Silver Searcher and GNU grep. It
+ defaults to recursive directory search and won't search files ignored by your
+ `.gitignore` files. Use ripgrep if you like speed, filtering by default, fewer
+ bugs, and Unicode support.
+ .
+ On the other hand, if you like multiline search, then ripgrep may not quite
+ meet your needs (yet), and it will never support fancy regex features such as
+ backreferences or lookaround
+ .
+ This package contains the following binaries built from the Rust crate
+ "ripgrep":
+  - rg
+
 Package: roothide
 Version: 0.1.0
 Architecture: iphoneos-arm64e
@@ -2271,6 +3443,33 @@ Priority: required
 Description: roothide core package
 Author: roothide
 Name: roothide core
+
+Package: rsync
+Version: 3.2.4-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 628
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3, libzstd1, liblz4-1, libxxhash0, libpopt0
+Suggests: openssh-client, openssh-server
+Filename: debs/rsync_3.2.4-1_iphoneos-arm64e.deb
+Size: 346674
+MD5sum: 833c213bb373909e34a2b6e52e7e02ca
+SHA1: 223ec71b9c9c90885601ef83a2f24a23e593d65f
+SHA256: f9c41e239cf8ddae6a37594b287445e99cecc0134cb378123b347fdedafd61b9
+Section: Networking
+Priority: important
+Homepage: http://rsync.samba.org/
+Description: fast, versatile, remote (and local) file-copying tool
+ rsync is a fast and versatile file-copying tool which can copy locally
+ and to/from a remote host. It offers many options to control its behavior,
+ and its remote-update protocol can minimize network traffic to make
+ transferring updates between machines fast and efficient.
+ .
+ It is widely used for backups and mirroring and as an improved copy
+ command for everyday use.
+ .
+ This package provides both the rsync command line tool and optional
+ daemon functionality.
 
 Package: ru.danpashin.twackup
 Version: 2.0.27
@@ -2380,6 +3579,22 @@ Section: Administration
 Priority: important
 Description: killall, renice, script, time, which, getopt, what, hexdump, su
 
+Package: sqlite3
+Version: 3.34.1
+Architecture: iphoneos-arm64e
+Maintainer: roothide <roothideDev@twitter>
+Installed-Size: 316
+Depends: roothide (>= 0.0.8), libiosexec1 (>= 1.3.1), libsqlite3-1 (= 3.34.1), libreadline8, libncursesw6
+Filename: debs/sqlite3_3.34.1_iphoneos-arm64e.deb
+Size: 116968
+MD5sum: 590c4f3cbf1ad777930910d27b795631
+SHA1: ba93e989bd41a0674b61949defc1babe0c7f6f09
+SHA256: 8a4bb577abfff55ee79132d6a897bce31447aa1b896f86d51f1bff09cd525846
+Section: Data_Storage
+Priority: standard
+Homepage: https://www.sqlite.org/
+Description: Command line interface for SQLite 3
+
 Package: system-cmds
 Version: 950-2
 Architecture: iphoneos-arm64e
@@ -2415,6 +3630,31 @@ Priority: required
 Homepage: http://www.gnu.org/software/tar/
 Description: tool for making tape archives
 
+Package: tcpdump
+Version: 4.99.1-1
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 1220
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3, libpcapa
+Filename: debs/tcpdump_4.99.1-1_iphoneos-arm64e.deb
+Size: 535508
+MD5sum: 52b78fb4784f1218df1b968ab3a28e17
+SHA1: 56629c464a75602414830b9de4dfecff80075757
+SHA256: 67af0b6cdfad21241bf49713fbbaaf98bededc23950bb8a488bb202ed22439ae
+Section: Utilities
+Priority: optional
+Homepage: http://www.tcpdump.org/
+Description: command-line network traffic analyzer
+ This program allows you to dump the traffic on a network. tcpdump
+ is able to examine IPv4, ICMPv4, IPv6, ICMPv6, UDP, TCP, SNMP, AFS
+ BGP, RIP, PIM, DVMRP, IGMP, SMB, OSPF, NFS and many other packet
+ types.
+ .
+ It can be used to print out the headers of packets on a network
+ interface, filter packets that match a certain expression. You can
+ use this tool to track down network problems, to detect attacks
+ or to monitor network activities.
+
 Package: tig
 Version: 2.6.1
 Architecture: iphoneos-arm64e
@@ -2430,6 +3670,21 @@ Homepage: https://jonas.github.io/tig/
 Description: Text-mode interface for Git (ncurses-based repository browser)
 Author: Jonas Fonseca <jonas.fonseca@gmail.com>
 Name: tig
+
+Package: tmux
+Version: 3.3a
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 868
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libevent-2.1-7, libutf8proc2, libncursesw6, gettext-localizations
+Filename: debs/tmux_3.3a_iphoneos-arm64e.deb
+Size: 399588
+MD5sum: a77ef9aa86d5d7c27c00f663e218b424
+SHA1: 86929c51e25dd7453adf9c103918b79eeef315ec
+SHA256: 47ca30fb57afd9edbe2a5150518b0dce4061a64e4fba06ff7420031f82134bf3
+Section: Terminal_Support
+Priority: important
+Description: multiplexes a terminal into many
 
 Package: tree
 Version: 2.2.1
@@ -2465,6 +3720,25 @@ Section: Utilities
 Priority: required
 Description: Command line access for UIKit/LaunchServices/CoreServices
 
+Package: unrar
+Version: 6.2.6
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 420
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
+Filename: debs/unrar_6.2.6_iphoneos-arm64e.deb
+Size: 194732
+MD5sum: b9a43dc1cb054a94c9595cc0c767d58c
+SHA1: 9b4e9d57170321ccf2b2fffe8bfd570d89f49491
+SHA256: 4a33f8b8616feefd314fd9c29cd3f37606fb2f9a782456e6dbe2bfd1c651846c
+Section: Archiving
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://www.rarlab.com/rar_add.htm
+Description: Unarchiver for .rar files (non-free version)
+ Unrar can extract files from .rar archives. If you want to create .rar
+ archives, install package rar.
+
 Package: unzip
 Version: 6.0-28
 Architecture: iphoneos-arm64e
@@ -2479,6 +3753,39 @@ SHA256: a1a11a8c883beb83d5697a56ec0397e2b4a1322380b9eceacb2eb3bd7e46e14b
 Section: Archiving
 Priority: important
 Description: de-compesses files in zip format
+
+Package: usbmuxd
+Version: 1.1.1+git20220619.f50e52f-2
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 144
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libplist3 (>= 2.2.0), libusb-1.0-0 (>= 1.0.9), libimobiledevice-glue1.0-0 (>= 1.0.0), libimobiledevice6 (>= 1.3.0)
+Filename: debs/usbmuxd_1.1.1+git20220619.f50e52f-2_iphoneos-arm64e.deb
+Size: 38898
+MD5sum: 7055a57d760bc491fac856a7fe81390c
+SHA1: 05e4f6f4adc8d76873d26fc80a7b6812e96f739d
+SHA256: 5dac336738ca6ec43fda2c94bc103516e544da86b585648077f39753083bb211
+Section: Administration
+Priority: standard
+Description: USB multiplexor daemon for iPhone and iPod Touch devices
+
+Package: vim
+Version: 9.0.1000
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 43224
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6, xxd, libintl8, libsodium23
+Filename: debs/vim_9.0.1000_iphoneos-arm64e.deb
+Size: 10953606
+MD5sum: 9a73749871119dcb42348118083c6482
+SHA1: ed4cc3d989200c0a8b56e0c5277a24e8b2672a3e
+SHA256: e4f1cff25fcba481ebf7427892751e4f6c33b66c6692230554f753ee1d6a6ebe
+Section: Text_Editors
+Priority: standard
+Description: Vi IMproved - enhanced vi editor
+ Vim is an almost compatible version of the UNIX editor Vi.
+ .
+ Many new features have been added: multi level undo, syntax highlighting, command line history, on-line help, filename completion, block operations, folding, Unicode support, etc.
 
 Package: wget
 Version: 1.21.3-1
@@ -2499,6 +3806,23 @@ Description: retrieves files from the web
  Wget works particularly well with slow or unstable connections by continuing to retrieve a document until the document is fully downloaded. Re-getting files from where it left off works on servers (both HTTP and FTP) that support it. Both HTTP and FTP retrievals can be time stamped, so Wget can see if the remote file has changed since the last retrieval and automatically retrieve the new version if it has.
  .
  Wget supports proxy servers; this can lighten the network load, speed up retrieval, and provide access behind firewalls.
+
+Package: xxd
+Version: 9.0.1000
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 120
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8
+Conflicts: vim (<< 8.2.0650)
+Filename: debs/xxd_9.0.1000_iphoneos-arm64e.deb
+Size: 37616
+MD5sum: c563d61a158f7e69254ea98947d8f035
+SHA1: 75f17b8ef70322376b6c275ed023766a1ea70751
+SHA256: 7c2097f8b36e96421b3e382f45508c8dce107a08107f7efa8d1c82dc921a9af7
+Section: Text_Editors
+Priority: standard
+Description: tool to make (or reverse) a hex dump
+ xxd creates a hex dump of a given file or standard input. It can also convert a hex dump back to its original binary form.
 
 Package: xyz.cypwn.cr4shed
 Version: 4.3.1-2+roothide4
@@ -2631,4 +3955,23 @@ SHA256: 443297b6ec9659a9f8d8a4360b69df3e2db501af60f37639c8da4a3584174215
 Section: Terminal_Support
 Priority: required
 Description: a shell with interactive features
+
+Package: zstd
+Version: 1.5.5
+Architecture: iphoneos-arm64e
+Maintainer: RootHide <RootHideDev@twitter>
+Installed-Size: 844
+Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libzstd1 (= 1.5.5), liblz4-1, liblzma5 (>= 5.2.5)
+Filename: debs/zstd_1.5.5_iphoneos-arm64e.deb
+Size: 324698
+MD5sum: 01b99bd0a0ff05f8bd20fabad7c16f05
+SHA1: a50147e8d2363d17dbc4ab531322ee3a1aee3702
+SHA256: 8d9b32f7347e10f5d83d0769d18d89529455dff006f7e469f37d2e6bd73d94c8
+Section: Archiving
+Priority: standard
+Description: fast lossless compression algorithm -- CLI tool
+ Zstd, short for Zstandard, is a fast lossless compression algorithm, targeting
+ real-time compression scenarios at zlib-level compression ratio.
+ .
+ This package contains the CLI program implementing zstd.
 
