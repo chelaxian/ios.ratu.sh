@@ -3735,17 +3735,16 @@ Package: tree
 Version: 2.2.1
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 140
 Filename: debs/tree_2.2.1_iphoneos-arm64e.deb
-Size: 29392
-MD5sum: 25078ef2a35ff12ed0380d8abc003e57
-SHA1: 53181fa1345be393596a63f3539d0006a781c1fc
-SHA256: b0eaf0873097ff8baa7322f50a38b7a487981a160d0a8d82009231952ee60565
+Size: 32016
+MD5sum: 3fc40424e0fa36d8470d070fd1c1eafa
+SHA1: 926610b5cd0d638210c321a0733595da36d2f40c
+SHA256: 224c2ef449e048622254f173e60b33b28c2aa0a266c50a2ef3637a8f83737332
 Section: Utilities
-Homepage: https://gitlab.com/OldManProgrammer/unix-tree
-Description: Recursive directory listing command that produces a depth-indented, optionally colorized listing of files and directories.
+Homepage: https://github.com/Old-Man-Programmer/tree
+Description: Recursive directory listing command (jbroot-aware via libvrootapi)
 Author: Steve Baker
-Name: tree
+Name: Tree
 
 Package: uikittools
 Version: 2.1.6-4
