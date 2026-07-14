@@ -3953,6 +3953,22 @@ Description: XZ-format compression utilities
   * improved support for multithreading (not used in xz-utils);
   * support for flushing the encoder.
 
+Package: yara
+Version: 4.5.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Depends: libssl3
+Filename: debs/yara_4.5.1_iphoneos-arm64e.deb
+Size: 183312
+MD5sum: eccaac67d78af39b01ae698ed19f50f8
+SHA1: 7f0e156693c7a7efd5780a77a649a6b728126510
+SHA256: cda395456087f0ce8b2a41675e838d0623f6e99c007b0abc2a7d5fd20fc5bbce
+Section: Development
+Homepage: https://github.com/VirusTotal/yara
+Description: Pattern matching tool for malware researchers (file scanning, no process scan)
+Author: VirusTotal
+Name: YARA
+
 Package: zip
 Version: 3.0-12
 Architecture: iphoneos-arm64e
