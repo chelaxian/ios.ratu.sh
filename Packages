@@ -3317,6 +3317,21 @@ Section: Administration
 Priority: standard
 Description: makes packaging for /etc/profile reasonable
 
+Package: proxychains4
+Version: 4.17
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Filename: debs/proxychains4_4.17_iphoneos-arm64e.deb
+Size: 27672
+MD5sum: 409e9d970e2cc4d092b54b819fd53b77
+SHA1: 15b1e6c1a2dc16d3aee88d4ffa1ce6ba61aea437
+SHA256: c521d7282b6c168776fa18b98cd3ceb8b4fb844fe64a7e7e06762bb32e4bb80a
+Section: Networking
+Homepage: https://github.com/rofl0r/proxychains-ng
+Description: HTTP/SOCKS4a/SOCKS5 tunneling proxifier with DNS routing
+Author: rofl0r
+Name: Proxychains-ng
+
 Package: python3
 Version: 3.9.9-2
 Architecture: iphoneos-arm64e
