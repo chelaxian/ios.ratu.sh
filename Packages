@@ -1251,6 +1251,21 @@ Homepage: http://newosxbook.com/tools/jtool.html
 Description: otool, but better (non-opensource)
 Author: Jonathan Levin
 
+Package: keystone
+Version: 0.9.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Filename: debs/keystone_0.9.2_iphoneos-arm64e.deb
+Size: 877028
+MD5sum: 3b493e135bb31756f35c7158c27aa971
+SHA1: f162d1bc2322f91d80742cd16b82ec76d6bb256f
+SHA256: 477084edb8cc121791c826a3f04063d19d084391407495b8543423c19f5d2b01
+Section: Development
+Homepage: https://github.com/keystone-engine/keystone
+Description: Lightweight multi-architecture assembler framework (kstool CLI)
+Author: keystone-engine
+Name: Keystone Assembler
+
 Package: launchctl
 Version: 1:1.1.1-2
 Architecture: iphoneos-arm64e
