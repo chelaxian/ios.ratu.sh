@@ -2415,6 +2415,22 @@ Priority: required
 Homepage: http://www.gnu.org/software/tar/
 Description: tool for making tape archives
 
+Package: tig
+Version: 2.6.1
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Depends: libncursesw6
+Filename: debs/tig_2.6.1_iphoneos-arm64e.deb
+Size: 155844
+MD5sum: f8b91a8eaad597743d818966936c359e
+SHA1: 3c4f3d9203a0ec51a721f953ec28d14efbb5256e
+SHA256: 9c0639837c829c537d9ce25c9cf38a91313cc58536fb819d9a9df8d0e56aced0
+Section: Development
+Homepage: https://jonas.github.io/tig/
+Description: Text-mode interface for Git (ncurses-based repository browser)
+Author: Jonas Fonseca <jonas.fonseca@gmail.com>
+Name: tig
+
 Package: tree
 Version: 2.2.1
 Architecture: iphoneos-arm64e
