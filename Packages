@@ -450,6 +450,24 @@ Description: Control Center VPN toggle. Short tap toggles the last-active system
 Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
+Package: com.ratush.crontweak
+Version: 1.1.0
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 280
+Depends: preferenceloader, firmware (>= 17.0)
+Filename: debs/com.ratush.crontweak_1.1.0_iphoneos-arm64e.deb
+Size: 40752
+MD5sum: 08713729f73f722d748e8c4645f9f9f9
+SHA1: b7798724d1da0e7bc20ef853b33f89514c8b9ced
+SHA256: e94cdaf515a256df8f5128a6ff4c498a9e897cd95960f014e898baa18672db62
+Section: Tweaks
+Homepage: https://ios.ratu.sh/
+Description: crontab-syntax scheduler. Write cron-style lines (min hour dom mon dow command) in Settings, they auto-convert to native launchd LaunchDaemons.
+Author: chelaxian
+Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
+Name: CronTweak
+
 Package: com.ratush.etchosts17
 Version: 0.8.1
 Architecture: iphoneos-arm64e
