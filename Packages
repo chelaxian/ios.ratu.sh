@@ -507,17 +507,17 @@ Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
 
 Package: com.ratush.hppe
-Version: 1.4.50
+Version: 1.4.56
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 648
+Installed-Size: 664
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy
 Recommends: com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_1.4.50_iphoneos-arm64e.deb
-Size: 152948
-MD5sum: 96b97f1db561e64b5a8c9b733bf71f04
-SHA1: a196b134c6f22c284903c15bd482d4f0a55a672c
-SHA256: 0b790bcba260af5d7cf42f76a01a1d46755c03c63c0519d151ef75eeaf2f7123
+Filename: debs/com.ratush.hppe_1.4.56_iphoneos-arm64e.deb
+Size: 157134
+MD5sum: fb89f4371c2cbb8697e57eb670755042
+SHA1: 1601acc155099d902d0947348a000c5cdf78be3e
+SHA256: 6fa2861992031409443d760aee0f2b481b7f31a7b3329b5ab1fe452d0e8428a7
 Section: Tweaks
 Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
 Author: chelaxian
