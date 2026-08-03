@@ -124,22 +124,6 @@ Description: GnuPG keys for the Chariz repository
 
 Package: com.catmcp.daemon
 Version: 1.0.3
-Architecture: iphoneos-arm64
-Maintainer: 0x530c<0x530c@gmail.com>
-Installed-Size: 5256
-Depends: mobilesubstrate, preferenceloader
-Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
-Size: 1733498
-MD5sum: e94d766d1b363753b65e57794468f93b
-SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
-SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
-Section: Tweaks
-Description: iOS MCP Server
-Author: 0x530c<0x530c@gmail.com>
-Name: catmcp
-
-Package: com.catmcp.daemon
-Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: 0x530c<0x530c@gmail.com>
 Installed-Size: 5256
@@ -149,6 +133,22 @@ Size: 1942284
 MD5sum: 22925af20f08af36ae57e3ef8d254a98
 SHA1: 4ee31a6818440b4cc635110a461060625173d906
 SHA256: 504ddfb1e0bd5311dbb74c9d340daef6d31295f5ec13de38de0023c96794d458
+Section: Tweaks
+Description: iOS MCP Server
+Author: 0x530c<0x530c@gmail.com>
+Name: catmcp
+
+Package: com.catmcp.daemon
+Version: 1.0.3
+Architecture: iphoneos-arm64
+Maintainer: 0x530c<0x530c@gmail.com>
+Installed-Size: 5256
+Depends: mobilesubstrate, preferenceloader
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
+Size: 1733498
+MD5sum: e94d766d1b363753b65e57794468f93b
+SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
+SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
 Section: Tweaks
 Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
@@ -507,17 +507,17 @@ Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
 
 Package: com.ratush.hppe
-Version: 1.4.56
+Version: 1.4.65
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
-Installed-Size: 664
+Installed-Size: 680
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy
 Recommends: com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_1.4.56_iphoneos-arm64e.deb
-Size: 157134
-MD5sum: fb89f4371c2cbb8697e57eb670755042
-SHA1: 1601acc155099d902d0947348a000c5cdf78be3e
-SHA256: 6fa2861992031409443d760aee0f2b481b7f31a7b3329b5ab1fe452d0e8428a7
+Filename: debs/com.ratush.hppe_1.4.65_iphoneos-arm64e.deb
+Size: 162556
+MD5sum: 50d07603da21463cfc277d9c6e1cf648
+SHA1: d530c6b0664e19fed85b61bc94fcc4d2ba8a5f17
+SHA256: 3cee0d671c78dd3de3b71b95073561c19709b6a791cb352ee0664c3a64ca8dec
 Section: Tweaks
 Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
 Author: chelaxian
@@ -669,22 +669,6 @@ Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.0
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.0_iphoneos-arm64.deb
-Size: 37876
-MD5sum: a16c7ad2e6d388d33c887ff3e1ba30d9
-SHA1: 43e58726c2d6564e09d5c362276d2980377778d9
-SHA256: 77e270d1ce220b51e7aa910236f64aaa481657ad181f93f25efd5e2ae7dd60a7
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.0
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
 Installed-Size: 164
@@ -700,16 +684,16 @@ Author: chelaxian
 Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
-Version: 1.0.1
+Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64.deb
-Size: 37954
-MD5sum: 49181f195e7bda988ed71019d8d0324c
-SHA1: a3c0a3ca1d5f0dcd55751b088f2ec8c21f254363
-SHA256: 1108f697efe696fcbe92a37b51a5895f49a69f7ecc1a9f8acfa83ac0d892537f
+Filename: debs/com.ratush.tgproxyrotation_1.0.0_iphoneos-arm64.deb
+Size: 37876
+MD5sum: a16c7ad2e6d388d33c887ff3e1ba30d9
+SHA1: 43e58726c2d6564e09d5c362276d2980377778d9
+SHA256: 77e270d1ce220b51e7aa910236f64aaa481657ad181f93f25efd5e2ae7dd60a7
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -726,6 +710,22 @@ Size: 50056
 MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
 SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
 SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64.deb
+Size: 37954
+MD5sum: 49181f195e7bda988ed71019d8d0324c
+SHA1: a3c0a3ca1d5f0dcd55751b088f2ec8c21f254363
+SHA256: 1108f697efe696fcbe92a37b51a5895f49a69f7ecc1a9f8acfa83ac0d892537f
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
