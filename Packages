@@ -295,25 +295,6 @@ Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by che
 Name: Appabetical
 
 Package: com.ratush.catmcp-roothide-fix
-Version: 1.7.28
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Installed-Size: 704
-Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
-Conflicts: com.ratush.catmcp-touch-bridge
-Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-roothide-fix_1.7.28_roothide_iphoneos-arm64e.deb
-Size: 35570
-MD5sum: 8568155a8e499208e4f1d49fd17c0cc7
-SHA1: 18c60ba63b7af4bdfb3250421bee667f2666ef53
-SHA256: d8de6c0ab8d86029e7243753a76d3ac0a4d8b1ee4b472920b005e33c9fb34962
-Section: Tweaks
-Priority: optional
-Description: RootHide-safe CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
-Author: ratu.sh
-Name: catmcp_fix_roothide
-
-Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.29
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
@@ -365,22 +346,6 @@ Section: Tweaks
 Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
 Author: ratu.sh
 Icon: https://ios.ratu.sh/icons/catmcpcc.png
-Name: CatMCP CC Toggle
-
-Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu7
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Installed-Size: 320
-Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-roothide-fix
-Filename: debs/com.ratush.catmcpcc_1.0.0+ratu7_iphoneos-arm64e.deb
-Size: 41932
-MD5sum: 21b4ace4d858b1eb6b1596d45b7241fc
-SHA1: 0c78a0ad6cacee6fd45576c1d09ab269a85b7cc4
-SHA256: ae02724c7008e4d5115701d63810ce78c5d8aba7fed50b6ee49bc7914dff52ff
-Section: Tweaks
-Description: Control Center toggle for the CatMCP server on RootHide. The tile flips the `enabled` key in com.catmcp.server.plist (same source the CatMCP Settings switch uses) and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately. Ground truth is a TCP connect to localhost:9000.
-Author: ratu.sh
 Name: CatMCP CC Toggle
 
 Package: com.ratush.ccgapcloser
@@ -449,24 +414,6 @@ Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
-
-Package: com.ratush.crontweak
-Version: 1.1.0
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 280
-Depends: preferenceloader, firmware (>= 17.0)
-Filename: debs/com.ratush.crontweak_1.1.0_iphoneos-arm64e.deb
-Size: 40752
-MD5sum: 08713729f73f722d748e8c4645f9f9f9
-SHA1: b7798724d1da0e7bc20ef853b33f89514c8b9ced
-SHA256: e94cdaf515a256df8f5128a6ff4c498a9e897cd95960f014e898baa18672db62
-Section: Tweaks
-Homepage: https://ios.ratu.sh/
-Description: crontab-syntax scheduler. Write cron-style lines (min hour dom mon dow command) in Settings, they auto-convert to native launchd LaunchDaemons.
-Author: chelaxian
-Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
-Name: CronTweak
 
 Package: com.ratush.crontweak
 Version: 1.2.0
@@ -556,22 +503,6 @@ Author: ratush
 Name: isdig (dig for iOS)
 
 Package: com.ratush.jetsamfix
-Version: 1.0.0
-Architecture: iphoneos-arm64e
-Maintainer: ratush
-Installed-Size: 356
-Depends: firmware (>= 14.0)
-Filename: debs/com.ratush.jetsamfix_1.0.0_iphoneos-arm64e.deb
-Size: 28372
-MD5sum: dfb8cca934ea4b0336762323ff4af63c
-SHA1: 590ccd4565d12981fedeb3842a3ca871c217a5f5
-SHA256: 7e770c2cffc043cf6e6fdeff90bd3658328dd201a963599adc10332107a40e85
-Section: Tweaks
-Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to stop OOM/safe-mode crashes on iOS 17. Runs as a launchd daemon; control via `jetsamfix status|apply|lenient on|off`.
-Author: ratush
-Name: JetsamFix
-
-Package: com.ratush.jetsamfix
 Version: 1.0.1
 Architecture: iphoneos-arm64e
 Maintainer: ratush
@@ -588,22 +519,6 @@ Author: ratush
 Name: JetsamFix
 
 Package: com.ratush.safeguard
-Version: 1.2.0
-Architecture: iphoneos-arm64e
-Maintainer: ratush
-Installed-Size: 356
-Depends: com.ratush.jetsamfix, firmware (>= 14.0)
-Filename: debs/com.ratush.safeguard_1.2.0_iphoneos-arm64e.deb
-Size: 35794
-MD5sum: b6f11ee28129c8d19934e6526dcd84ae
-SHA1: 684ae4e757fe59a29a377562e78758610d81ce2c
-SHA256: b6b0c2af1c8927b31cef802c95d54eca5fcf0b7fe68bdf417b63372676e7bfff
-Section: Tweaks
-Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills an allowlisted hog once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds a floor (kill_min_rss_mb) — so a small/idle instance you still need (a frida-server at ~10MB) is tolerated, while a ballooned one (150MB+) is killed. Acting at AMBER, not only RED, because a starved process can SIGSEGV before free memory ever crosses the RED line. Detection is syscall-based (container-safe). Pairs with JetsamFix (which holds the passive policy floor). Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
-Author: ratush
-Name: Safeguard
-
-Package: com.ratush.safeguard
 Version: 1.2.1
 Architecture: iphoneos-arm64e
 Maintainer: ratush
@@ -618,118 +533,6 @@ Section: Tweaks
 Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills only allowlisted hogs once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds kill_min_rss_mb. Release build removes debug entitlement and non-rotating launchd redirect logs; user apps remain advisory-only. Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
 Author: ratush
 Name: Safeguard
-
-Package: com.ratush.tgproxyrotation
-Version: 0.15.0
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 180
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_0.15.0_iphoneos-arm64e.deb
-Size: 42194
-MD5sum: 005c4a637deca30ea6fb3c7d5997e3aa
-SHA1: 45d47adb1764d3eb821d1a42f63531d194317c66
-SHA256: b294dbabf14803e621d6a3141dabfc7c7db802eeda5583a3626fb16c639f0328
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 0.15.1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_0.15.1_iphoneos-arm64.deb
-Size: 37282
-MD5sum: 1d86bd8125a3efabef372fe7e8418251
-SHA1: 5cbc534bf013add04f4ba2f39eba67af8e7e8764
-SHA256: 8af98e7f9c686ef5b4da437212e4b46c09ed94f23a122c12e3c02d63cdaba588
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 0.15.1
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_0.15.1_iphoneos-arm64e.deb
-Size: 48978
-MD5sum: 6a9c6b948516262442cd27dc0d0c72ac
-SHA1: ec20138785cca50a59f7a5e479a80053c749daa4
-SHA256: 3814f45e13dada7f5d0cef8d709f06c5fa3f3966f03a3e3a593ee6eed32f8302
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.0
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.0_iphoneos-arm64.deb
-Size: 37876
-MD5sum: a16c7ad2e6d388d33c887ff3e1ba30d9
-SHA1: 43e58726c2d6564e09d5c362276d2980377778d9
-SHA256: 77e270d1ce220b51e7aa910236f64aaa481657ad181f93f25efd5e2ae7dd60a7
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.0
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.0_iphoneos-arm64e.deb
-Size: 49958
-MD5sum: 3b729e750f445fe7568e8bd90992f7de
-SHA1: 4828de1595011d8f1fec5d18a98223128ef011b8
-SHA256: 7651d3a0c18253c95a33957c5fb15873f04b40d12dcf21eb81d3f3c4b97fcfd9
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64.deb
-Size: 37954
-MD5sum: 49181f195e7bda988ed71019d8d0324c
-SHA1: a3c0a3ca1d5f0dcd55751b088f2ec8c21f254363
-SHA256: 1108f697efe696fcbe92a37b51a5895f49a69f7ecc1a9f8acfa83ac0d892537f
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.1
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.1_iphoneos-arm64e.deb
-Size: 50056
-MD5sum: 5f9b8f2838d47e57abbef9e8ce6dfdd4
-SHA1: 26f6081c4d841cb29a047ef2408ea70e17b24c74
-SHA256: a606b5ba64bf92c5dd6433690691eb2e9a33b49b072c8dbef8b61d4845a2ea38
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.2
