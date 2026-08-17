@@ -294,6 +294,22 @@ Description: Alphabetically sort Home Screen icons and folder contents. Latin A-
 Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by chelaxian
 Name: Appabetical
 
+Package: com.ratush.appabetical
+Version: 1.0.16+rootless1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 260
+Depends: ellekit, preferenceloader (>= 2.2)
+Filename: debs/com.ratush.appabetical_1.0.16+rootless1_iphoneos-arm64.deb
+Size: 32148
+MD5sum: dd29a396ae404ee1bf6347b69e7aacd5
+SHA1: d51afefc1b6ee4cd46ed8bb49ea6bd9f1984bd63
+SHA256: 108fdcd60ca5dd38f751c01c4f7b4a681c29e54424b2cf2b9dafb11fa65fe91d
+Section: Tweaks
+Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). RootHide port of Avangelista/Appabetical.
+Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by chelaxian
+Name: Appabetical
+
 Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.29
 Architecture: iphoneos-arm64e
