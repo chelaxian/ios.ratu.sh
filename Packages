@@ -187,16 +187,16 @@ Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+rootless15
+Version: 0.0.6+rootless16
 Architecture: iphoneos-arm64
 Maintainer: level3tjg
 Installed-Size: 332
 Depends: ellekit, firmware (>= 11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+rootless15_iphoneos-arm64.deb
-Size: 39996
-MD5sum: 3197e7fa58677230967d81d53a8535f9
-SHA1: 352c9cbf2dd6e3756792ddfff1d27f6a93034d5c
-SHA256: f57c20c017de8671de1cd27fac691a9f4d8d1e31174ec248a883b1e69db8c06a
+Filename: debs/com.level3tjg.offloader_0.0.6+rootless16_iphoneos-arm64.deb
+Size: 38460
+MD5sum: a39a5406564da9087d59c470b7107062
+SHA1: 3415d488e908160265f4b93b7cab7c840fc6fcc1
+SHA256: 13411e6223d8a576f2480d776d405f0dc390e37d1ceba7e304bbfaa6d1af8602
 Section: Tweaks
 Description: Offload apps from the 3D touch menu and more (rootless)
 Author: level3tjg
