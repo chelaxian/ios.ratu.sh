@@ -469,6 +469,22 @@ Description: Forces Instagram Home Feed to open in the compact 3-column Rocket g
 Author: chelaxian
 Name: Instagram 3x3 Grid Feed
 
+Package: com.ratush.iggridfeed
+Version: 0.5.2+rootless1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 88
+Depends: firmware (>= 15.0), ellekit
+Filename: debs/com.ratush.iggridfeed_0.5.2+rootless1_iphoneos-arm64.deb
+Size: 7142
+MD5sum: 234f5c1bbf90b8c150423169f4a2329c
+SHA1: 0590c1a0ab3098bfdeb7d7c03f5f7c1085cc0548
+SHA256: 85e4d5717f8ffbb8b92ea6cae8a77b2afc5f1a41bfabe4dbb52b2b9657347188
+Section: Tweaks
+Description: Turns the Instagram Home/Feed tab into a Profile-style 3x3 thumbnail grid.
+Author: chelaxian
+Name: Instagram 3x3 Grid Feed
+
 Package: com.ratush.isdig
 Version: 1.0.0
 Architecture: iphoneos-arm64e
