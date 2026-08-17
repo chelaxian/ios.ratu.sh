@@ -186,23 +186,6 @@ Author: level3tjg
 Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
-Package: com.level3tjg.offloader
-Version: 0.0.6+rootless16
-Architecture: iphoneos-arm64
-Maintainer: level3tjg
-Installed-Size: 332
-Depends: ellekit, firmware (>= 11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+rootless16_iphoneos-arm64.deb
-Size: 38460
-MD5sum: a39a5406564da9087d59c470b7107062
-SHA1: 3415d488e908160265f4b93b7cab7c840fc6fcc1
-SHA256: 13411e6223d8a576f2480d776d405f0dc390e37d1ceba7e304bbfaa6d1af8602
-Section: Tweaks
-Description: Offload apps from the 3D touch menu and more (rootless)
-Author: level3tjg
-Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
-Name: Offloader
-
 Package: com.muirey03.libmryipc
 Version: 2.0.1
 Architecture: iphoneos-arm64
@@ -294,22 +277,6 @@ Description: Alphabetically sort Home Screen icons and folder contents. Latin A-
 Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by chelaxian
 Name: Appabetical
 
-Package: com.ratush.appabetical
-Version: 1.0.16+rootless1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 260
-Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.appabetical_1.0.16+rootless1_iphoneos-arm64.deb
-Size: 32148
-MD5sum: dd29a396ae404ee1bf6347b69e7aacd5
-SHA1: d51afefc1b6ee4cd46ed8bb49ea6bd9f1984bd63
-SHA256: 108fdcd60ca5dd38f751c01c4f7b4a681c29e54424b2cf2b9dafb11fa65fe91d
-Section: Tweaks
-Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). RootHide port of Avangelista/Appabetical.
-Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by chelaxian
-Name: Appabetical
-
 Package: com.ratush.catmcp-roothide-fix
 Version: 1.7.29
 Architecture: iphoneos-arm64e
@@ -380,22 +347,6 @@ Description: Move iOS Control Center modules upward and tune portrait/landscape 
 Author: chelaxian
 Name: CCGapCloser
 
-Package: com.ratush.ccgapcloser
-Version: 0.4.7+rootless1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 196
-Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.ccgapcloser_0.4.7+rootless1_iphoneos-arm64.deb
-Size: 16622
-MD5sum: 6b68372ff613a37c33d2b2371e2d60e0
-SHA1: 2413e644ef180d9738a7c0876d145d203759af11
-SHA256: d5501b8ce6feebb8640b60c1361c95ddc6a6cbad9ba188ae2951692f245a5b00
-Section: Tweaks
-Description: Move iOS Control Center modules upward and tune portrait/landscape top offsets.
-Author: chelaxian
-Name: CCGapCloser
-
 Package: com.ratush.cchppe
 Version: 1.0.1
 Architecture: iphoneos-arm64e
@@ -410,23 +361,6 @@ SHA1: fdede7ccf44add5bab695e23b7c1b24e964b4f2b
 SHA256: 811b5cce723142204885df5e5ec91e9ac93a01e85a292868ea4d548476d55aaf
 Section: Tweaks
 Description: Control Center tile for HPPE. Turns the whole Hidden Photos Picker Enabler tweak on and off (the same master switch as Settings -> HPPE -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
-Author: chelaxian
-Name: CCHPM
-
-Package: com.ratush.cchppe
-Version: 1.0.1+rootless1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 100
-Depends: ellekit, com.ratush.hppe, com.opa334.ccsupport
-Recommends: com.ratush.hppe
-Filename: debs/com.ratush.cchppe_1.0.1+rootless1_iphoneos-arm64.deb
-Size: 8978
-MD5sum: 19e7a993755c4cc69941f913cc77ca9c
-SHA1: a22a339b851025a9c3d545c43b18449e04f77467
-SHA256: 3bad547a03fcd1d9081afa9273de2da746fcb24b0814bf1fea64cf48e434d7f2
-Section: Tweaks
-Description: Control Center tile for Hidden Photos Manager. Turns the whole tweak on and off (the same master switch as Settings -> Hidden Photos Manager -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
 Author: chelaxian
 Name: CCHPM
 
@@ -501,23 +435,6 @@ Description: Editable /etc/hosts-style DNS overrides for RootHide iOS 17.
 Author: ratush
 Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
-
-Package: com.ratush.hppe
-Version: 1.4.46+rootless1
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 412
-Depends: firmware (>= 15.0), ellekit, preferenceloader, com.opa334.libsandy
-Recommends: com.noisyflake.albummanager
-Filename: debs/com.ratush.hppe_1.4.46+rootless1_iphoneos-arm64.deb
-Size: 99760
-MD5sum: 19c2bf4378879938133f0ffb30075ce4
-SHA1: c07d5b1aa9b0d4bd4363bf38cae49d6a0fb9b5ff
-SHA256: b56eff92e5662b76888db79ed0dd9acdc398f83759d1cd616208d0ca45fe9349
-Section: Tweaks
-Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
-Author: chelaxian
-Name: Hidden Photos Manager
 
 Package: com.ratush.hppe
 Version: 1.5.25
