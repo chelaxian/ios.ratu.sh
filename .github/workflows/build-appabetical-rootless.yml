@@ -1,0 +1,37 @@
+name: Build Appabetical rootless
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/Appabetical-rootless/**'
+      - '.github/workflows/build-appabetical-rootless.yml'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid || brew install ldid-procursus
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build and require PTRAUTH arm64e
+        run: |
+          cd source/Appabetical-rootless
+          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
+          dpkg-deb -x "$deb" "$tmp"
+          for binary in "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/Appabetical.dylib" "$tmp/var/jb/Library/PreferenceBundles/AppabeticalPrefs.bundle/AppabeticalPrefs"; do
+            lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
+            test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = "02000080"
+          done
+          mkdir artifacts && cp "$deb" artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appabetical-rootless-deb
+          path: source/Appabetical-rootless/artifacts/*.deb
+          if-no-files-found: error
