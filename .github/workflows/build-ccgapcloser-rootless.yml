@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Theos and SDK
         run: |
-          brew install ldid || brew install ldid-procursus
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
           git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
           git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
           cd /tmp/sdks
