@@ -1,0 +1,50 @@
+#!/bin/sh
+
+HELPER="/var/jb/usr/bin/catmcpcchelper"
+BUNDLE_DIR="/var/jb/Library/ControlCenter/Bundles/CatMCPCC.bundle"
+BUNDLE_BIN="${BUNDLE_DIR}/CatMCPCC"
+
+[ -f "${HELPER}" ] && { chown root:wheel "${HELPER}" 2>/dev/null || true; chmod 4755 "${HELPER}" 2>/dev/null || true; } || true
+[ -f "${BUNDLE_BIN}" ] && chmod +x "${BUNDLE_BIN}" 2>/dev/null || true
+
+# Register the module with CCSupport so it appears in
+# Settings -> Control Center -> Customizer. FridaCC/CCVPNOnOffAuto are
+# registered the same way; without this entry the tile never shows up.
+MOD_ID="com.ratush.catmcpcc"
+CCCONF="/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist"
+if [ -f "${CCCONF}" ]; then
+    cp "${CCCONF}" "${CCCONF}.catmcpcc.$(date +%s).bak" 2>/dev/null || true
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "${CCCONF}" "${MOD_ID}" <<'PY' 2>/dev/null || true
+import plistlib, sys
+p, mod = sys.argv[1], sys.argv[2]
+with open(p, "rb") as f:
+    d = plistlib.load(f)
+a = d.get("module-identifiers")
+if not isinstance(a, list):
+    a = []
+if mod not in a:
+    a.append(mod)
+d["module-identifiers"] = a
+with open(p, "wb") as f:
+    plistlib.dump(d, f, fmt=plistlib.FMT_XML)
+PY
+    elif ! grep -q "${MOD_ID}" "${CCCONF}" 2>/dev/null; then
+        # Insert under the module-identifiers <array> via awk.
+        TMPF="${CCCONF}.tmp.$$"
+        awk -v id="${MOD_ID}" '
+            /<key>module-identifiers<\/key>/ {f=1; print; next}
+            f && /<array>/ {print; print "\t\t\t<string>" id "</string>"; f=2; next}
+            {print}
+        ' "${CCCONF}" > "${TMPF}" 2>/dev/null && mv "${TMPF}" "${CCCONF}" 2>/dev/null || rm -f "${TMPF}"
+    fi
+    chown mobile:mobile "${CCCONF}" 2>/dev/null || true
+fi
+
+killall -9 ControlCenterUIKit 2>/dev/null || true
+
+echo
+echo "CatMCP CC toggle registered. Open Settings -> Control Center to add it."
+echo
+
+exit 0

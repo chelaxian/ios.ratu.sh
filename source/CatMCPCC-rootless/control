@@ -1,0 +1,11 @@
+Package: com.ratush.catmcpcc
+Name: CatMCP CC Toggle
+Description: Control Center toggle for the CatMCP server on Dopamine rootless. The tile flips the `enabled` key in com.catmcp.server.plist and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately.
+Icon: https://ios.ratu.sh/icons/catmcpcc.png
+Maintainer: ratu.sh
+Author: ratu.sh
+Section: Tweaks
+Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-rootless-fix
+Architecture: iphoneos-arm64
+Version: 1.0.0+ratu10+rootless1
+Installed-Size: 320
