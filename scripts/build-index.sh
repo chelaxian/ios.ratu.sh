@@ -11,15 +11,23 @@ fi
 
 dpkg-scanpackages -m debs /dev/null > Packages
 
-# Normalize flavour suffixes in repository display versions.
+# Normalize flavour suffixes in repository display versions for tweaks only.
 python3 - <<'PY'
 from pathlib import Path
 import re
 p = Path('Packages')
 s = p.read_text(encoding='utf-8')
-s = re.sub(r'(?m)^Version: ([^\r\n]*?)\+rootless[0-9]*$', r'Version: \1', s)
-s = re.sub(r'(?m)^Version: ([^\r\n]*?)\+roothide[^\r\n]*$', r'Version: \1+rh', s)
-p.write_text(s, encoding='utf-8')
+stanzas = re.split(r'(?=^Package: )', s, flags=re.M)
+out = []
+for stanza in stanzas:
+    if re.search(r'(?m)^Section: Tweaks$', stanza):
+        def clean(m):
+            value = m.group(1)
+            base = value.split('+', 1)[0]
+            return 'Version: ' + (base + '+rh' if '+rh' in value else base)
+        stanza = re.sub(r'(?m)^Version: ([^\r\n]+)$', clean, stanza)
+    out.append(stanza)
+p.write_text(''.join(out), encoding='utf-8')
 PY
 
 bzip2 -c9 Packages > Packages.bz2

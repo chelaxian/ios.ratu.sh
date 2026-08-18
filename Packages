@@ -185,7 +185,7 @@ Author: choco
 Name: TGExtra
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+rh
+Version: 0.0.6
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
@@ -237,7 +237,7 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.muirey03.libmryipc
-Version: 2.0.1+rh
+Version: 2.0.1+roothide3
 Architecture: iphoneos-arm64e
 Maintainer: Muirey03
 Installed-Size: 308
@@ -393,7 +393,7 @@ Author: ratu.sh
 Name: catmcp_fix_roothide
 
 Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu10
+Version: 1.0.0
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 320
@@ -410,7 +410,7 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu10
+Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 304
@@ -544,7 +544,7 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1
+Version: 1.0.1+rootless1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 372
@@ -722,7 +722,7 @@ Author: ratush
 Name: isdig (dig for iOS)
 
 Package: com.ratush.isdig
-Version: 1.0.0
+Version: 1.0.0+rootless1
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Depends: firmware (>= 15.0), python3
@@ -885,7 +885,7 @@ Author: roothide
 Name: PatchLoader
 
 Package: com.snail.autovpn.global
-Version: 1.0.8+rh
+Version: 1.0.8
 Architecture: iphoneos-arm64e
 Maintainer: Snail <mu514983786@gmail.com>
 Installed-Size: 1048
@@ -1905,10 +1905,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 284
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3 (>= 1.1.0), libplist3 (>= 2.2.0), libimobiledevice-glue1.0-0 (>= 1.0.0), libusbmuxd6 (>= 2.0.2)
 Filename: debs/libimobiledevice6_1.3.0+git20220702.2eec1b9-1_iphoneos-arm64e.deb
-Size: 113130
-MD5sum: e11b5c90629b9c6edff27cd38e9a4793
-SHA1: 1070713e4da413436c4595d6e8137fe3376ae826
-SHA256: 088a0213a90b4be39d32ce41c2aa1976d01fa62e3ce531647bbe213f287c8835
+Size: 127540
+MD5sum: 68b9aecaab5b17830dcb00a2e2bfee80
+SHA1: 571e50113eeb03175cb6586d35e59180e49a3872
+SHA256: 15f4fd9c239d9acd432cc5381164d65d2094b81145a7128bcec33bd6848242f1
 Section: Development
 Priority: standard
 Description: A library for communicating with iPhone and other Apple devices
@@ -1920,10 +1920,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 156
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libintl8_0.21.1_iphoneos-arm64e.deb
-Size: 57628
-MD5sum: 234a8501122c319fa74bc407541aea7a
-SHA1: 16b87abeed7fe3ce8beff7ea5a0cfe5b4e4fccbf
-SHA256: 5f6f8502030b448abb306af0b7d72b62baf4736b70e7b57ddd04bb69b2011517
+Size: 63614
+MD5sum: 96da84cf00f1631df6f5c53e17b98831
+SHA1: 040daa3568c18ea33c0a15b6d72f078d435bd32b
+SHA256: d3bd4342afd96c0abd680619a283518c5fb1b897493300d03c3cd87750935394
 Section: System
 Homepage: http://www.gnu.org/software/gettext/
 Description: internationalization helper for strings
@@ -1937,10 +1937,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 76
 Depends: roothide (>= 0.1.0)
 Filename: debs/libiosexec1_1.3.1-2_iphoneos-arm64e.deb
-Size: 9298
-MD5sum: 0a76ed985abe216693d571c088f7e37b
-SHA1: 6d0c84a5850e1e27b04519a15f34a398391f2716
-SHA256: 9f5c8087770f9f03ebd3fd6c32381e15b15f1532aa7bb3afe7910935dbab2ee2
+Size: 10424
+MD5sum: ba21ac39518f4b99fdb3f7261d96550c
+SHA1: 57a9bbc502986d4292a3f9eca0f55ca57d6ac7ce
+SHA256: d72096fcc56928e7e361372683ddfbeee43c80e69e4697c3a121ae36f31a0730
 Section: Libraries
 Priority: required
 Homepage: http://github.com/ProcursusTeam/libiosexec
@@ -1953,10 +1953,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 296
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libonig5
 Filename: debs/libjq1_1.6_iphoneos-arm64e.deb
-Size: 100492
-MD5sum: a778c1009fcda34fc12a26cc753df079
-SHA1: 838f8606ee4749b61876ca09e8c7c62b9461a0c3
-SHA256: 90c3f27b2ee6b23c46ab6e099120497621abfc990630238aa0468c02be458e8f
+Size: 115608
+MD5sum: 45c5f03cab5a119746c8433b35428e35
+SHA1: faa1e0dfe4f003e410fc215f32c55d2f2a5a8ec2
+SHA256: 447a52914f03c47557178781f9614bd30f188c64473bd2e6ba48ad6a64b7ce13
 Section: Development
 Priority: optional
 Homepage: https://stedolan.github.io/jq/
@@ -1969,10 +1969,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 216
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/liblua5.1-0_5.1.5-1_iphoneos-arm64e.deb
-Size: 71574
-MD5sum: 229440e494c16451faa449d2ca3a5755
-SHA1: 6d1b9767c74623c0f4c926841c0bc0e9c6057034
-SHA256: 7f51b8c183e93d0aa68a735467d4ed6d129d6757c9aa59617ae427f5fdb99af2
+Size: 83220
+MD5sum: 33b6095e0ca08e9d246c821b6b914d35
+SHA1: 619ddaab9fe79b4008d000980574079892b0d866
+SHA256: 26e3296f794a5db30eef172d36bb3381f7ea13154b29891bfbf062209876e0e1
 Section: Libraries
 Priority: standard
 Description: Shared library for the Lua interpreter version 5.1
@@ -1992,10 +1992,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 204
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/liblua5.2-0_5.2.4-1_iphoneos-arm64e.deb
-Size: 72120
-MD5sum: c8a2a724736e7dfa8e010bf91fde104f
-SHA1: e272612768ce6cba5444052945ee13d737288410
-SHA256: c27ffd38e12b97f99d42790cb0690ed24d3cb37ac23c8575f7750352be46e413
+Size: 83056
+MD5sum: c9b59afa9e47f334cdfa7810cf1c8f31
+SHA1: 5b778a11dafe5161fd6be57f82f3461149c839a5
+SHA256: 01be8ada4e79d8067354636c16a34b5775ecd64431e6a0ca36fe85cff66dfac1
 Section: Libraries
 Priority: standard
 Description: Shared library for the Lua interpreter version 5.2
@@ -2015,10 +2015,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 236
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/liblua5.3-0_5.3.3-1_iphoneos-arm64e.deb
-Size: 79918
-MD5sum: 34e4536b8a19603da93143c0f9e2ac73
-SHA1: 311d5bdeb7136054d88463906037506b498dc693
-SHA256: 516ff29354877d2062bb01fdb107265f11d5ef34bef10aa2ce2a4ef49ede89a1
+Size: 92874
+MD5sum: db4d524554077d90125498158279dc4f
+SHA1: 682ed58c9c1508347ad7c442cc277146cc0e8942
+SHA256: 6b266cd5c68a6ab44640c0734e91cd537ceea318468cc892736e838188a6bba5
 Section: Libraries
 Priority: standard
 Description: Shared library for the Lua interpreter version 5.3
@@ -2038,10 +2038,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 292
 Depends: roothide (>= 0.0.7), libiosexec1 (>= 1.3.1), libluajit-5.1-common (= 2.1.0~beta3+git377a848)
 Filename: debs/libluajit-5.1-2_2.1.0~beta3+git377a848_iphoneos-arm64e.deb
-Size: 118048
-MD5sum: a50efcc803e36151861ca82e9a921ccc
-SHA1: 8cf521f2709f13b7bde9efc768f12a32eeb7ee91
-SHA256: 5c8281424bf472b38fea2ad6370401622892d0bc67a9644ea89080036b25b131
+Size: 136750
+MD5sum: 6804b3499ffe11e3c91ae6f14d46a10d
+SHA1: fdfb289ff5557dc6ada1198ce04b0f63917a7ae7
+SHA256: 87ffed9a44348dd0d3fea66492d2412b56512aaef06620ac1e7e4b16b7da08e0
 Section: Libraries
 Priority: optional
 Description: Just in time compiler for Lua - library version
@@ -2059,10 +2059,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 236
 Depends: roothide (>= 0.0.7)
 Filename: debs/libluajit-5.1-common_2.1.0~beta3+git377a848_all.deb
-Size: 45062
-MD5sum: 959c1ec54f644f80b2c34cc1e7f63ee7
-SHA1: 27c9eb00f5b192fcf4066caaf502d587c7b027cf
-SHA256: 3e9b9975a9982bd57bff6efff8200c422b260fddda3940e4dfa9e5a1d2213d49
+Size: 53792
+MD5sum: 964a4c9bc95eb9c2f65acc7eafbfd950
+SHA1: 9cb974a40f473bd6a1901a6457cb57306e82c3c8
+SHA256: a22696313fd0c7130e519905c11b51e3bd23f16354c423ddd332663b30d5488e
 Section: Development
 Priority: optional
 Description: Just in time compiler for Lua - common files
@@ -2077,10 +2077,10 @@ Installed-Size: 164
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Conflicts: lz4 (<< 1.9.3)
 Filename: debs/liblz4-1_1.9.3_iphoneos-arm64e.deb
-Size: 50712
-MD5sum: c33b5d0f00d91faab2e428f415b89dac
-SHA1: d0dd88f49a5b96c75ce080e7553da7c13dc1529e
-SHA256: 4a0699abebcfec92380502e4428df0ff73e598faaa3fdacaa028861076444cc0
+Size: 57882
+MD5sum: cdde695f8732ffe61ca23d22cd560e02
+SHA1: 3f0d22aed7eb8457444a6ef099d31ddb85b2accb
+SHA256: f6bce13d1f386e4a499f880c3dec2ae461fed0f488669ee5acc08c7c73cc7b8c
 Section: Libraries
 Priority: important
 Homepage: http://tukaani.org/lzma/
@@ -2095,10 +2095,10 @@ Depends: roothide (>= 0.0.6), liblzma5 (>= 5.4.1)
 Conflicts: xz (<<1:0), lzma (<<3:0)
 Replaces: xz, lzma
 Filename: debs/liblzma-dev_5.4.1_iphoneos-arm64e.deb
-Size: 320586
-MD5sum: 1014b4cf599537574f153f5aeceb4f24
-SHA1: 78c05366a2e3547b0f0c84bfbdebdad2c95d2539
-SHA256: ea7e7677bb7fc97c01b1e2f92f499127ff84041abdaaf6aa11319856595b41ce
+Size: 360874
+MD5sum: 210a4a41c52933ceb272bb0ec330ab53
+SHA1: 52aadf39142a637efbc399afa1492dd7843a5b52
+SHA256: fdf01137506d417db5c1560c56d656545da00e06da6e87992e7893411a521ad7
 Section: Development
 Priority: standard
 Homepage: https://tukaani.org/xz/
@@ -2121,10 +2121,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Conflicts: xz (<<1:0), lzma (<<3:0)
 Replaces: xz, lzma
 Filename: debs/liblzma5_5.4.1_iphoneos-arm64e.deb
-Size: 105600
-MD5sum: 12f73399f5c5d658487287e458e31234
-SHA1: 7a4e4d6602591df47ad432c647aca2c455d21bf2
-SHA256: 65a1a35d7a3bbe002c2b90ecffcdcb298fe98817180a762e68fa156174438dcf
+Size: 115392
+MD5sum: e91eb71c8f47c3e93d6b2fdeb1cc15e7
+SHA1: a0ef965d867f6680f2ce8cc4da17d9210feae184
+SHA256: aa750e31a843bb5b21f94906e3afbb3c20cb7122116828896a5a5388ad57aafb
 Section: Libraries
 Priority: standard
 Homepage: https://tukaani.org/xz/
@@ -2146,10 +2146,10 @@ Depends: roothide (>= 0.0.6), libmagic1 (= 5.43), liblzma-dev
 Conflicts: file (<< 5.43)
 Replaces: file (<< 5.43)
 Filename: debs/libmagic-dev_5.43_iphoneos-arm64e.deb
-Size: 197266
-MD5sum: 81dc66767085ac1de3ab588cec89f294
-SHA1: b2f72cc4bcb5b9e078b1ff0fb545f4048e665f6f
-SHA256: faba325ec97fa21e33a8e5ec2e6ca0272e92b8f5c50700021bb1a223d028cfda
+Size: 216698
+MD5sum: b6ed4e0b6c75900fbe3f1cbb3e6cca35
+SHA1: c7b55924ce0e41b16971f52c1e68154d4031ce53
+SHA256: 8a149fc1080bb265f634875c510baecc6a1b2776a2c8b752bba8e9acf2837a20
 Section: Development
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers - development
@@ -2167,10 +2167,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5)
 Conflicts: file (<< 5.43)
 Replaces: file (<< 5.43)
 Filename: debs/libmagic1_5.43_iphoneos-arm64e.deb
-Size: 365700
-MD5sum: 6e4ef721bb99c9daff58e9a007ba43b0
-SHA1: c811b63c8421b8bb62fd398b50a74f4a604cbcdc
-SHA256: 12fff9e3c3a2418552a46e0662556fc138dcd1326bcf037a2f6b6801067629fe
+Size: 430198
+MD5sum: b6c96fcabf95c9369a89ec2de691ce55
+SHA1: 271bcef843332b3eaa80770dbfaca949245fbd7e
+SHA256: 8b3df39460d2772ee04f7eaf4c54a1a7658d30d4a6293d554efbb8a35e1036bb
 Section: Libraries
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers - library
@@ -2184,10 +2184,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 100
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libmd0_1.0.4-1_iphoneos-arm64e.deb
-Size: 19906
-MD5sum: dfe0daf92b7c98e410cc0cfef91bd683
-SHA1: b33a575547f649518e817c70faac072c09a89a32
-SHA256: 9c5aa6894e09bd0094c3dbeb367aa7e5327554de3b8488d1d6e7724c668799da
+Size: 22738
+MD5sum: 576c24a98087fc3e0506a2c6390f99bf
+SHA1: 6570abb874d7fb256bc8f62e943bcce48a2223dd
+SHA256: c442e40b98cd45e3914f86c5ff6655c3c1381653e087c673fdc002eeb02a72ea
 Section: Libraries
 Priority: optional
 Description: message digest functions from BSD systems - shared library
@@ -2202,10 +2202,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 516
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libgmp10
 Filename: debs/libmpfr6_4.1.0_iphoneos-arm64e.deb
-Size: 208490
-MD5sum: 4969f0039e98acf4ef2f3810f7eb1a24
-SHA1: dcae80cd838990121c41ca20f7efa87bab65d0b6
-SHA256: 9c9f3227ba88aefbcba9fcf69dd1c7c727184ad766778c1cbd5e4969dd1431e1
+Size: 243126
+MD5sum: 3970dc28b62f183249d69597260ea1c7
+SHA1: d2ff2f16cdf0b490a660b99e28d1aa5382ecc11f
+SHA256: 494bba9638926d6fdc3fdf76a2c5adf877cfb89ded6dc15bc73919f7febd7669
 Section: Libraries
 Priority: optional
 Homepage: https://www.mpfr.org
@@ -2223,10 +2223,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 80
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libmsgpackc2_3.3.0_iphoneos-arm64e.deb
-Size: 12888
-MD5sum: 70b59baefaec2003408c84d75abf9e69
-SHA1: 936614db3a69dd1f24ca8d793c893b9f788dd0f7
-SHA256: 07258ccf0a012ef2ea2fc2f8772ac8a61d6a1866c38285b92b7d569a4bcf5420
+Size: 14232
+MD5sum: b1090e325f9500cedac2a654f60ce0a1
+SHA1: 038f5b939c28d967f5e6a9b713baec44037b341a
+SHA256: b56ad8630531a9f613cc12c4db457ff4cef26dc3bb4534b30c2291e6b48c5f3f
 Section: Libraries
 Priority: optional
 Description: binary-based efficient object serialization library
@@ -2244,10 +2244,10 @@ Conflicts: ncurses (<< 6.4)
 Replaces: ncurses (<< 6.4)
 Provides: ncurses (= 6.4)
 Filename: debs/libncursesw6_6.4_iphoneos-arm64e.deb
-Size: 367422
-MD5sum: 73faeebfbd5e33a25907df90e88589ff
-SHA1: 78e09f8f97f97552d8afdb74abab2ce11c7e6f6e
-SHA256: 50afa47cfd837ef6ea35f14df1e68a1b340a1d0fdb81362d83db9b2bc34bef46
+Size: 394906
+MD5sum: c0617db59ddd511a630d4d12a9ecd2ec
+SHA1: 5d339ea4294076622976b3eae0c95958dc840dce
+SHA256: 16711c8b5f98310979bc80e3c0499c815ee038953b4b5aa7b838894543cac7b6
 Section: Libraries
 Priority: required
 Description: shared libraries for terminal handling (wide character support)
@@ -2259,10 +2259,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 320
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libnettle8_3.8.1_iphoneos-arm64e.deb
-Size: 153182
-MD5sum: f457f2754e281db9fff69c39fa1f63ec
-SHA1: 114586145728ce479cca73e268e5e918cdee2e48
-SHA256: 7272e2bdc36a5d46fc58f7565f54ef2050d544e16cca4aa5a76d10ad4fb41f6c
+Size: 178626
+MD5sum: bf5f816c7d15a2f74cf95fc5e2b91ba2
+SHA1: 852c45ede942c841f48de2a885ebd914e70b0645
+SHA256: 1e7df8ed9551d9d8abfbba552d90d3c08998a708ce6d23baa515a6a2685e8195
 Section: Libraries
 Priority: optional
 Homepage: http://www.lysator.liu.se/~nisse/nettle/
@@ -2275,10 +2275,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 664
 Depends: roothide (>= 0.0.6), libnghttp2-14 (= 1.52.0)
 Filename: debs/libnghttp2-dev_1.52.0_iphoneos-arm64e.deb
-Size: 229942
-MD5sum: 61eded1360fd5b43c6f02ab2c9af7134
-SHA1: 0d3ad48bcc0dd177267a0e37ac1ccda9cc562ecc
-SHA256: 12ba58025f971952f9f4c166f80d2b6983ac1ac3fa73a2b6b60f0e0d17e47679
+Size: 273026
+MD5sum: 7d809a1445c8ea2241712433d3bb0032
+SHA1: 09d6209f7ef5f6c2f129abb4533e598e3b720fa6
+SHA256: 3d6f3ae932747f3bb4f97e001b8772715b4135ee9adb5fcf21f19d3fab9f5f6f
 Section: Development
 Priority: standard
 Homepage: https://nghttp2.org/
@@ -2299,10 +2299,10 @@ Conflicts: gnupth, npth (<< 1.6-2)
 Replaces: npth (<< 1.6-2)
 Provides: npth (= 1.6-2)
 Filename: debs/libnpth0_1.6-2_iphoneos-arm64e.deb
-Size: 7116
-MD5sum: e9ff1064c06225c7f279083353eef1ed
-SHA1: cec820a081db9fc54d2caac00dda9100da7c7f62
-SHA256: 8c23ced8e1cfb72d9dd488b6810fd23213fee0fe12db5f5fb4410be08e3f3a51
+Size: 7662
+MD5sum: 22819d24669024c04351f92acc2749f5
+SHA1: bf97776f051cd20719803672b35d7c8e716f58ec
+SHA256: 948f4f936660f66f51f114040630244063e61f3034a50a845b83cfdd62774ed0
 Section: Libraries
 Priority: optional
 Multi-Arch: foreign
@@ -2315,10 +2315,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 560
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libonig5_6.9.6_iphoneos-arm64e.deb
-Size: 141856
-MD5sum: 6945d6b8b2c2e669a88cb5ac00d0077d
-SHA1: c1d57859a6027d7850ddb01d632e22406b462d42
-SHA256: 9e74eaef3db4c449f271bb61fc9197231ef02cade3b175d4df2e366237e3f562
+Size: 174554
+MD5sum: 9b58ae449cd946e144412bf386c6c08c
+SHA1: 881c06293512974e168f505095103d1d7131aaf0
+SHA256: f7edae959d2d1b9cf06d534a28dc0032863db526f42428c6120cf6465599d851
 Section: Development
 Priority: optional
 Description: regular expression library
@@ -2332,10 +2332,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8, libffi8, ca-cert
 Conflicts: p11-kit (<< 0.24.1)
 Replaces: p11-kit (<< 0.24.1)
 Filename: debs/libp11-kit0_0.24.1_iphoneos-arm64e.deb
-Size: 177946
-MD5sum: 14f85f045ebd1fda6e830374c74adf90
-SHA1: 1c0db1e6528ee6d9e6db12ffb01a1b3a50de3b50
-SHA256: 78cd42a57e725763df04d98dee382bb5214252a005871429f780b44d050d06c5
+Size: 210158
+MD5sum: 522bf7b451d24618dd0e4f7ad3c0c02d
+SHA1: 5163201d4fe4d3d1f4eace6a12d8e7c74fba97d4
+SHA256: 6807e69ffc925f0c16cf0622371f6f336ab38a85e24dfbddc30cb2d151c4ee93
 Section: Libraries
 Priority: standard
 Multi-Arch: foreign
@@ -2357,10 +2357,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 616
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpam2
 Filename: debs/libpam-modules_1000.0_iphoneos-arm64e.deb
-Size: 39058
-MD5sum: e0b5210749734bef2739b095f92632cb
-SHA1: c1480ada3ac0df41b2bfff9b844c1fc9ba09ebee
-SHA256: 046cd58362d67a7db07c355eab85c7b8d5a1f174944dc1b745b7f1180ea9b59f
+Size: 42274
+MD5sum: 2b140ad8bd433a0ed4a1f72d0dd30a23
+SHA1: c20c67f855c790357e3d0a601c0e4e45a2d1688b
+SHA256: 776c94d5b3fec2dc0229f7f55b5d66b5b8094896ac534e051b9d17ed9a4a5a4c
 Section: Administration
 Description: Pluggable Authentication Modules for PAM
  This package completes the set of modules for PAM. It includes the
@@ -2373,10 +2373,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 104
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpam-modules
 Filename: debs/libpam2_20190224_iphoneos-arm64e.deb
-Size: 17748
-MD5sum: 315f56ac6ee34b6e4b018a36e893baf0
-SHA1: 938124925c849a93459efaf54f9e0160adcb1c21
-SHA256: c92d33fb9b777bf3398b33ae39af1f887740e1b6f2c10331b862928b018e5a0c
+Size: 20182
+MD5sum: 6e6674a549e7f34e66a80de5ca798c50
+SHA1: 7e9b5a7a4611cf3dfe29006ba31f696903f0e881
+SHA256: 96e9ec7728431eebaceffb3b9ef6693404b2fca864554da973d60f71f1f18886
 Section: Administration
 Description: Pluggable Authentication Modules library
  Contains the shared library for OpenPAM, a library that enables the
@@ -2393,10 +2393,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 324
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3
 Filename: debs/libpcapa_1.10.1-1_iphoneos-arm64e.deb
-Size: 98384
-MD5sum: dda14d146fba150495caccc2923a325b
-SHA1: b33a5677f4ff95f01be89ed98fe5c21b35572c70
-SHA256: b39b4b47254d3cf01b1df3766e273f8f0214f8fc2f1d81e08c0d088def2ee921
+Size: 115576
+MD5sum: 5e51529551176e146a04c858c7c96950
+SHA1: 4016895f244ec0713dcecc4f603fee6c8063fd30
+SHA256: b5af2690c84eff43915f0837ac5c003ae8c43f31eb92b54aa8c1c621cd5eefe9
 Section: Libraries
 Priority: optional
 Homepage: http://www.tcpdump.org/
@@ -2421,10 +2421,10 @@ Conflicts: pcre (<< 1:0), libpcre (<< 1:0)
 Replaces: pcre, libpcre
 Provides: pcre (= 1:0), libpcre (= 8.45-1)
 Filename: debs/libpcre1_8.45-1_iphoneos-arm64e.deb
-Size: 156240
-MD5sum: 943b2192495dc5949480d4c9e54002bc
-SHA1: dee37654b769e34a5bb65ed30f4fa73f1586847c
-SHA256: 753adb6a70c768175b1633a1fa3cacd113e12bb8286d03dc03e734de26f8e591
+Size: 177804
+MD5sum: 69a50dd23c9e124d3acd618d58e88bba
+SHA1: 2b03a0fd3dfb9ca1241702bad9b302c32a1d2704
+SHA256: 190798b8028cf95e329393a299be8bf5747146602b1733d619839a68ff8ba38d
 Section: Libraries
 Priority: standard
 Multi-Arch: foreign
@@ -2447,10 +2447,10 @@ Conflicts: pcre2 (<< 1:0), libpcre2 (<< 1:0)
 Replaces: pcre2, libpcre2
 Provides: pcre2 (= 1:0), libpcre2 (= 10.40-1)
 Filename: debs/libpcre2-8-0_10.40-1_iphoneos-arm64e.deb
-Size: 193180
-MD5sum: 926b9a1160e950ef6c4d3e7cf60b9b08
-SHA1: 538d7055d68289935790e58be5cb17e48c3d0a0a
-SHA256: dcd5bdd343fa427af167f9fbd3ad5b2197eb91e97f501e1a3d1eaec448ba8b7d
+Size: 222488
+MD5sum: a7de1086e23e815a5e6009ded4840bb2
+SHA1: 46372d918c5d883cc26c2b42c63dcf1547d253f0
+SHA256: 6a6fd56986df9dbd42c130fef1e0e10156a4e5878247e30995c2e6d63e7b5235
 Section: Libraries
 Priority: standard
 Multi-Arch: foreign
@@ -2470,10 +2470,10 @@ Installed-Size: 3224
 Depends: roothide (>= 0.0.6)
 Conflicts: pcre2 (<<1:0), libpcre2 (<< 10.40-1)
 Filename: debs/libpcre2-dev_10.40-1_iphoneos-arm64e.deb
-Size: 1597874
-MD5sum: cc510b8d7fdb15bb9cd45c23708506d3
-SHA1: 977a61d6dc00fb542944322cde948bce913b8fb6
-SHA256: 61ba0f9e98b2ac92dc062381393ba68be40d4ab8550f392c710fcfc1a084f16c
+Size: 1892322
+MD5sum: 785087814f24e919f4df4c7a8d605afc
+SHA1: 90eceefb82ac4eaca95e87e215c9c908e5437f8a
+SHA256: 814ad1f7d85b8c649a793bb510f760758403b9753f47cd27556a6a79f3e9322f
 Section: Development
 Priority: standard
 Multi-Arch: foreign
@@ -2496,10 +2496,10 @@ Conflicts: libplist
 Replaces: libplist
 Provides: libplist (= 99)
 Filename: debs/libplist3_2.2.0+git20230130.4b50a5a_iphoneos-arm64e.deb
-Size: 38992
-MD5sum: 7d272bcb4cac301c6ae1f6c22a0479d4
-SHA1: 9d1427a6601ef4e9ac368271ccbbf805b08bbd85
-SHA256: ca6e37f61e54030c43b5b3f32e6e0348ba7525f6e73f8438c7b38a8298cb58f1
+Size: 44936
+MD5sum: c23bc4cdbad22f5517d29ae0184572c1
+SHA1: 7ddd0d885ddb41d83588ae66efd83649244031fd
+SHA256: c1d7d425141db10c15382cbde703206e44aef0977094d72f91c52d37c4118c33
 Section: Development
 Priority: standard
 Description: Library for handling Apple binary and XML property lists
@@ -2511,10 +2511,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 224
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libpopt0_1.18_iphoneos-arm64e.deb
-Size: 35836
-MD5sum: 3bcff33b935e6a8e07191c27de8dfc25
-SHA1: 90bfb50cd8981e1e1ede56f50b69916e0a69a61d
-SHA256: 144c05226e26381910fac1bf3a57de398365933c223e5172d73357f5bc2a22e5
+Size: 40926
+MD5sum: b5a99412b389ba5380d6ee822b5cb923
+SHA1: 4d343a9be44977b4536fcfa399fc075cfdaab758
+SHA256: 9d041bc827d7136d99cb6a6370e49a41fbc3849e33074e89a1ba6aefe56b932a
 Section: Libraries
 Description: lib for parsing cmdline parameters
  Popt was heavily influenced by the getopt() and getopt_long() functions,
@@ -2535,10 +2535,10 @@ Depends: roothide (>= 0.0.9), libiosexec1 (>= 1.3.1-2), libncursesw6 (>= 6.0), l
 Conflicts: python3.9 (<< 3.9.5)
 Replaces: python3.9 (<< 3.9.5)
 Filename: debs/libpython3.9_3.9.9-2_iphoneos-arm64e.deb
-Size: 17702884
-MD5sum: e989682e76a34d573df14604d8f4eb7c
-SHA1: 696b2e396293fbe698fb78a893d48bb3294c7739
-SHA256: 870edb4769c7614503f4756e3d3d4befe1e5c94059a1218f2e30752bc171b629
+Size: 21896312
+MD5sum: aa6e8940841eb4faf7dab5d46378bf27
+SHA1: 308eebc3fb7cdd851f21bdb4f98e79911d0284f2
+SHA256: 93d57020b80f510748764248eb782e27101d0df78d8a651dda9d7c99b25f8111
 Section: Libraries
 Priority: optional
 Description: Interpreted, interactive, object-oriented programming language. Contains the standard library and other shared libraries.
@@ -2550,10 +2550,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 12792
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libradare2-common (= 5.8.2-1), libcapstone5, libssl3, libuv1, libzip5, liblz4-1, libxxhash0, libmagic1
 Filename: debs/libradare2-5.8_5.8.2-1_iphoneos-arm64e.deb
-Size: 3442316
-MD5sum: b1e87f789db4ab6f1faa3efe903e7a53
-SHA1: 9d738c6799250de01d5b9d74e0ea22d66749fdb2
-SHA256: 214de3e29231c40c30f0504df8c6f1f4f14c58a658f3eed5e9efa6a979bb5a06
+Size: 4203618
+MD5sum: c1cb83dfe026024184056ab3abd2b8b9
+SHA1: fe997177ea0e317431c1d245be51d15b28390e8c
+SHA256: 15593816bda3101602489104b99e6799a77dfe52f5490c58c9bca744c25aa5f4
 Section: Libraries
 Priority: optional
 Homepage: https://www.radare.org
@@ -2579,10 +2579,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 10556
 Depends: roothide (>= 0.0.6)
 Filename: debs/libradare2-common_5.8.2-1_all.deb
-Size: 2407742
-MD5sum: 85c69f07ece3f498839396ae94cd760e
-SHA1: 6e48ca42edf0b42d2efb34b7b5b44cc40d4cbb92
-SHA256: e9bc53a321a15478ce59bb0a9c0095fc03e098b8fc41067baa79352da3b92445
+Size: 3122196
+MD5sum: 6cc524b1a407139c036621e08d55230b
+SHA1: 38f44f8737535150afe4b04a42862bf81ba5b9a9
+SHA256: 37b82f4e17e20335243de95e08ac154db03cbf234ba0abe5c05737fb55dadf97
 Section: Development
 Priority: optional
 Homepage: https://www.radare.org
@@ -2610,10 +2610,10 @@ Depends: roothide (>= 0.0.6), libreadline8 (= 8.2.0-1), libncursesw6
 Conflicts: readline (<< 8.2.0-1)
 Replaces: readline (<< 8.2.0-1)
 Filename: debs/libreadline-dev_8.2.0-1_iphoneos-arm64e.deb
-Size: 315514
-MD5sum: 71625892bd925179c77bb792aed3a9b0
-SHA1: f5a1d8ada068889fa68a58d0ff98354b56f8a6f9
-SHA256: 54d104f59ec813bdb9e172b2e96da3613d8b995de469916ec36cf77b73408073
+Size: 336702
+MD5sum: 90595124972966fe597bd60f85312291
+SHA1: 3c133b3c0b2ab86db0d62a4a35cf1446ee6a8ce8
+SHA256: 6704145f4c08ed79444c5b5685a6d3b0ca179501425a5d3f48de0d342f5f6b31
 Section: Development
 Priority: optional
 Description: GNU readline and history libraries, development files
@@ -2628,10 +2628,10 @@ Conflicts: readline (<< 8.2.0-1)
 Replaces: readline (<< 8.2.0-1)
 Provides: readline (= 8.2.0-1)
 Filename: debs/libreadline8_8.2.0-1_iphoneos-arm64e.deb
-Size: 135330
-MD5sum: 3415399a8dba6f914d2b2feb237aa0d4
-SHA1: dae04051964d1fbf3c09848d1261abb5bdf4160a
-SHA256: aac4957b67f8a932c09a8b00dd986cbbeb67e5572446d1f2b999d1d63a5dbecb
+Size: 153672
+MD5sum: def2ee7d966b9d5bbc6fca0b9f0d473f
+SHA1: 226436258952eb656296949f2b085306716d1166
+SHA256: 0fc7b5369799029b5cd34ac5687108642fdf5577c979032e2d41e771ee2b0d12
 Section: Libraries
 Priority: required
 Description: GNU readline and history libraries, run-time libraries
@@ -2643,10 +2643,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 256
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libsodium23_1.0.18_iphoneos-arm64e.deb
-Size: 98012
-MD5sum: 3225ad7d70d92445520c71ef6df79e9a
-SHA1: f6af61bad6cb5dc78a07f15addf7c0f10c80776c
-SHA256: 0c4f5f9f4fee1b30bdd5e700e0c057a06e09aa7364a1aad394376d06f578d2ae
+Size: 109298
+MD5sum: 0dbf67ccdb17a3330240516b3256b6fc
+SHA1: 9fd07aa733273fd67776c35c431bf4bbccc3ec35
+SHA256: 3684553d96d9fbbe161eb3319a2a09cb612832a790d9f18681fd66e200edeb36
 Section: Libraries
 Homepage: https://doc.libsodium.org/
 Description: Network communication, cryptography and signaturing library
@@ -2666,10 +2666,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 14448
 Depends: roothide (>= 0.0.6), libssl3 (= 3.0.8)
 Filename: debs/libssl-dev_3.0.8_iphoneos-arm64e.deb
-Size: 4730290
-MD5sum: c14985d1f6aa1f9c70a1d860b5d8639d
-SHA1: d0870f664b3b62656d94324ebf94aaf3f23a6694
-SHA256: d07d172c7202762c978a1eb782de7b7928cd95f603d3e02eff78bcabf6608599
+Size: 5703902
+MD5sum: bed78e9a13371cbe113f7d0d0b62c5be
+SHA1: 4b3101b2e6592ba632d933398bf05207bd53f7de
+SHA256: 1bef8192c112c76cefeeda9bf204aa13e08acc56a4d354d60db614eb907d8f5a
 Section: Development
 Priority: standard
 Description: Secure Sockets Layer toolkit - development files
@@ -2687,10 +2687,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 4016
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), ca-certificates
 Filename: debs/libssl3_3.0.8_iphoneos-arm64e.deb
-Size: 1482956
-MD5sum: a0a36ff28e7edc0db9909a7a65b0003a
-SHA1: 79767457f96b74583a7133f4a0f16d1ed9ac304f
-SHA256: cc6eb35ecfe7702cabb4940f16a7713039007242c8b249dd33cb2ba7fbefd294
+Size: 1748668
+MD5sum: dec42008a8aa4d5c75bbe5ddd244d00a
+SHA1: 8a62a83b3dd643f9d8d53b8ecd5f9d78f5698dde
+SHA256: 0cc5d03b738b672512f171ccad50f8afdfd9c8ea5dd7eb102a213b9dc76bcc7a
 Section: Libraries
 Priority: standard
 Description: Secure Sockets Layer toolkit - shared libraries
@@ -2710,10 +2710,10 @@ Conflicts: libtasn1 (<< 1:0)
 Replaces: libtasn1 (<< 1:0)
 Provides: libtasn1 (= 4.18.0)
 Filename: debs/libtasn1-6_4.18.0_iphoneos-arm64e.deb
-Size: 39364
-MD5sum: e4411aca29ee9909e35a6c88f6245572
-SHA1: 81ffa5dd31b8fa3595cac505ec6c29064b05dbf5
-SHA256: 01484c22d318e860925039d8df19f30afba8a257fe7b0ab359fe097684b9c229
+Size: 44334
+MD5sum: 3a5cf9f240330f48cc9f3eb064a8a2c3
+SHA1: 115131e39ae2fdf08d332b9e358b3cb097a89fd5
+SHA256: 5a53b6b961bcd2da752ea930091f0325eeba1d730cb89b5fd4144d1338d36f38
 Section: Libraries
 Priority: optional
 Multi-Arch: foreign
@@ -2737,10 +2737,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 92
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libunibilium4
 Filename: debs/libtermkey1_0.22_iphoneos-arm64e.deb
-Size: 14778
-MD5sum: 9e49990f49723c8b40103617afc04f30
-SHA1: e76c06e7ade26ac0f266452a42eb924bf3f4689a
-SHA256: a87cd449100a3875e8f00b80a14b671dac9baf8c75323d06e1892fb0a0e7f604
+Size: 16546
+MD5sum: aec9f002954c077a00d43f1dfd94b7c0
+SHA1: 6f2f8d5181a0d5b43336d391a509b156d15f6142
+SHA256: f6adab20c342f8672de4f38141156b088e92ac6d4c5d24704212b0fc5dc99efc
 Section: Libraries
 Priority: optional
 Description: library for processing keyboard input
@@ -2767,10 +2767,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 484
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6
 Filename: debs/libtextstyle0v5_0.21.1_iphoneos-arm64e.deb
-Size: 191304
-MD5sum: b37c783c9443cf6f9b2d053041fee8ea
-SHA1: 83d56716d9ba14eee1505259270dbef0d3caeed4
-SHA256: b93371ad59b4c5aa02b00e7ac663108f3decb6e5608d20a8dbc66daf53aea506
+Size: 220042
+MD5sum: 5a22252b90f377b09d02b76c6ff97359
+SHA1: 0389dbcdeb13be8a105f35c0e15fced24cfdf54c
+SHA256: 71e8bddda1ec35bd1954cb4f2da6c8d2723b84111d5b25d7f2a12d13df886c9d
 Section: Libraries
 Homepage: http://www.gnu.org/software/gettext/
 Description: internationalization helper for strings
@@ -2782,10 +2782,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 196
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libtree-sitter0_0.20.8_iphoneos-arm64e.deb
-Size: 67906
-MD5sum: 545dd2e8e599825977333dc4271d1e0e
-SHA1: be1b0400c3c298a9735c987c897ea28fc12e3060
-SHA256: 823289d0a4f608ea6797f5154a74558e8736a53de02abbf7d8957a787ba674d5
+Size: 78330
+MD5sum: a29eb4ae8b4fa16e003f1a9115f79727
+SHA1: 983bbe002e2c9a68b83af2777dce3ace893f2f42
+SHA256: 5da11b35db041f1b13b6e4a7c2396a29a4e42f312ef39a73e99581a81968a5d6
 Section: Libraries
 Priority: optional
 Homepage: https://tree-sitter.github.io/tree-sitter/
@@ -2801,10 +2801,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 76
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libunibilium4_2.1.0_iphoneos-arm64e.deb
-Size: 17070
-MD5sum: 9d5adc88b5d0b9b04efdc855ee59c8ab
-SHA1: 35d0a1d377d08906734bc8ce5d80de988808e025
-SHA256: 0ecc66cf70aa7d31ab955d12b03b4ac356c64493eedfb9b0757a4cf01b241b03
+Size: 19690
+MD5sum: 10a97576f1c0eae6b6a25859733c934e
+SHA1: 0a0a270aa989da51609e1bc8a967c504f2701977
+SHA256: dc8926f36245f8f94b9b6f71033d1daeb0bd42ba5f1e405d4997873bb92155fc
 Section: Libraries
 Priority: optional
 Description: simple, self-contained terminfo library
@@ -2819,10 +2819,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 1808
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libunistring5_1.1_iphoneos-arm64e.deb
-Size: 551436
-MD5sum: c22391ca2f2b274621d5403e2482e80e
-SHA1: 123c233c2a7bd319a56fa8252703553464252a8d
-SHA256: 45c195dbf8772bc0781732a8fe7a8d55d0a860917affd358fda28af16ff0352e
+Size: 722518
+MD5sum: 40ed1cf91d3bc73376afd44612201baa
+SHA1: f4ddc3dd9a386e707516ea832ffe885e474f02ea
+SHA256: f5b272b7ca92fdeda6829de6afc34eed2a45c48c773e812145c72a40d7740d3d
 Section: Libraries
 Priority: optional
 Multi-Arch: foreign
@@ -2836,10 +2836,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 188
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libusb-1.0-0_1.0.26_iphoneos-arm64e.deb
-Size: 50026
-MD5sum: 677b912d8b40053d744b55157343c99f
-SHA1: c9fda710114af25ca11b833f863fba5affb10582
-SHA256: 86c769380a22b0388542946cb3044d42ffed245e0bc24b3ca50a4a7397f383a0
+Size: 57724
+MD5sum: c5e9c8ff0bff8f0fcc1ca0c23f1a98ab
+SHA1: 50d00e10f9962f5d782137f203d442ffc3430d45
+SHA256: 7c0b00b8545ab5a77554f4cb0847e94cdc2b3ea2d4d81151786a189808aa16da
 Section: Development
 Description: userspace USB programming library
  Library for programming USB applications.
@@ -2854,10 +2854,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 124
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libplist3, libimobiledevice-glue1.0-0 (>= 1.0.0)
 Filename: debs/libusbmuxd6_2.0.2+git20220504.36ffb7a_iphoneos-arm64e.deb
-Size: 22384
-MD5sum: 08a0d24b43a51f39e14c39c50c5d5d36
-SHA1: c541b8b99edc01b91026abb1b5878af78ee94d23
-SHA256: 8b6a7e37e0ef25574ff2628ea2664d9ef10d160a91a3cd17db573009d6c05627
+Size: 25830
+MD5sum: 7508ada0f02f051480682809ea2e5044
+SHA1: bcc4487af873741148a451098d9680d59806bbd0
+SHA256: fd16162138abe99856fb205ca57b90364bbbc275c7f5096799f89100aa077756
 Section: Development
 Priority: standard
 Description: A client library to multiplex connections from and to iOS devices
@@ -2871,10 +2871,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Conflicts: libutf8proc (<< 2.5.0-2)
 Replaces: libutf8proc (<< 2.5.0-2)
 Filename: debs/libutf8proc2_2.5.0-2_iphoneos-arm64e.deb
-Size: 58166
-MD5sum: 938dad8ec82bb2fd73267e52e4b9199d
-SHA1: cf33bf766390ba1666dceeea7b3039e2d0643689
-SHA256: 3f0c3a93207b8acd7df8a12aeb65972f803ffcd9e1d4c1a48964764362c320b4
+Size: 74838
+MD5sum: 881d82067e002e77465785e18b108f02
+SHA1: 38b7747c3bf0c150a84e85f28420a8bb88372e1f
+SHA256: 8b6eb93f7ba4b8c807343821b8d60d161a8b6becf9a6f9db4f9a88947ece47f5
 Section: Libraries
 Priority: optional
 Multi-Arch: foreign
@@ -2893,10 +2893,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 216
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libiosexec1
 Filename: debs/libuv1_1.44.1_iphoneos-arm64e.deb
-Size: 69694
-MD5sum: 90cc815869e642abf8c5b0687bc20b36
-SHA1: bd0114ec49d681e8c5ffa12c82870581714b99a8
-SHA256: 81b549639de5507900802c319c3f4309b54ca12095945281b23ae2f79c1fb52e
+Size: 80294
+MD5sum: f8e00463f26739dedf1fb0aaeff9b65f
+SHA1: 4cb224f20991a9ec6c4b55a7e3d87843af75b981
+SHA256: ebc37bb46169986a505dc2a7aa6b8dac147b7a25683c3c3c867ed7f3b21df383
 Section: Libraries
 Priority: optional
 Multi-Arch: foreign
@@ -2909,10 +2909,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 108
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libvterm0_0.3.1_iphoneos-arm64e.deb
-Size: 27128
-MD5sum: 3603debd75d45c03fc918b82ad7f4d15
-SHA1: b8800b8eb39544650a58b970953c7b5cb8587c2c
-SHA256: a1c312ad6af6bb09aa1486fc103ea7e8cd13bae30dff41bdc8975b1471a12cc5
+Size: 31066
+MD5sum: 1a4346833f4babfb64e19f2e0c1d34ea
+SHA1: 214ac6f08a9302e964af7f75f701b7a294e45008
+SHA256: 2bdd3c3dc4786df38094cb02d0628e7c97bc4b064ceb9d86996f42961263924c
 Section: Libraries
 Priority: optional
 Description: abstract terminal library
@@ -2932,10 +2932,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libssl3
 Conflicts: xar (<< 1.8.0.487.100.1-1)
 Replaces: xar (<< 1.8.0.487.100.1-1)
 Filename: debs/libxar1_1.8.0.487.100.1-1_iphoneos-arm64e.deb
-Size: 36252
-MD5sum: d24e0ce34df1e2716a09d4e91e386998
-SHA1: c1186d1aa58393177a83e85198ffbf9be73d16b2
-SHA256: cc0e9ea5f613a75e3758557d9bcb4fac6c0116096e6e5d630429839277044927
+Size: 41958
+MD5sum: df772713ef97fe763720f8eafb5bd55f
+SHA1: 0d6f487ec3ec1931c44fbca0ddbed0320879bc58
+SHA256: edfa5fbadd01b0e9ee3c5bd9794bfe19a7bff403a9977061fa9de7463028d579
 Section: Libraries
 Priority: optional
 Homepage: https://mackyle.github.io/xar/
@@ -2948,10 +2948,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 56
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libxxhash0_0.8.1_iphoneos-arm64e.deb
-Size: 10358
-MD5sum: f6be508957095de9bb039415f7d17172
-SHA1: c3c8e04d24a17d244115d15424f0e4449ac2992f
-SHA256: bb60ca54396b52c3be406f7326ffeb7f64b96f6f069a780820937c1fb5df597e
+Size: 11698
+MD5sum: 68dc1da0d2bf8f196ac0f4be4905efcf
+SHA1: 21d127801978f1a795460a3d63013290a9762270
+SHA256: 637377f81c5b7e41fe6dfae5490b5b68431dcf4774c960d4a3f91db09fe94242
 Section: Libraries
 Description: shared library for xxhash
  xxHash is an Extremely fast Hash algorithm, running at RAM speed limits.
@@ -2968,10 +2968,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 152
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1)
 Filename: debs/libz-ng2_2.0.6_iphoneos-arm64e.deb
-Size: 53766
-MD5sum: f16f7a49fc1a7aa4b15131c0556af48e
-SHA1: fd2d26985817cd22e48b8b7b1a1cf175a79a9cd4
-SHA256: 061cf2178196730eb0f2bd5d058efbe46f05225eeadd8b5854171515d4e10e7d
+Size: 61816
+MD5sum: 06cf6d5d6438532045064feacb1f3ba5
+SHA1: 6661a7f579dbca73c60773646f9ec06668a7fd62
+SHA256: b006f22c105d41caf78cd8dab82e2f75a3ec45a95f73e4fe2acff77cfce3ca03
 Section: Libraries
 Priority: standard
 Description: next gen zlib compression library - runtime
@@ -2985,10 +2985,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 188
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5), libzstd1, libssl3
 Filename: debs/libzip5_1.9.2_iphoneos-arm64e.deb
-Size: 57668
-MD5sum: 5a8c776c7af3c94c1e9a238682d6c3c3
-SHA1: 4a9ee5cedb93278a230fe1dfac3d61da800b6764
-SHA256: 2233355ab0e6b14b6d344ec310e661f6707dcab1b2c685a17a204510ee691725
+Size: 65694
+MD5sum: 50f3ddf974ccd868bdaf6077e65a0579
+SHA1: e3c5439e8ef04a93cfa3871bea7be0de7ba09f49
+SHA256: aedc3292f6681f2577094eaaffa8983e9e1eea83f67bdaa88ecf6db959f77136
 Section: Libraries
 Priority: optional
 Description: library for reading, creating, and modifying zip archives (runtime)
@@ -3006,10 +3006,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 668
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), liblz4-1, liblzma5 (>= 5.2.5)
 Filename: debs/libzstd1_1.5.5_iphoneos-arm64e.deb
-Size: 214444
-MD5sum: cc222cc4b364c059baa0114255315940
-SHA1: bbcc708ed20b0ec6c19533afa140139d739c8215
-SHA256: 53686633e4ba03ec9aa8df78f01757a5dd03f0381047d565afac35dfc3ad143e
+Size: 251514
+MD5sum: 6ab008117a83f767c97c9874fb1d411f
+SHA1: 21416befbd41c4b1a8a8db28f3fc4d93487b326c
+SHA256: 8812dc4536d94bf19432c1bea000bf9896cd685e0adc57feee39704b33545277
 Section: Libraries
 Description: fast lossless compression algorithm
  Zstd, short for Zstandard, is a fast lossless compression algorithm, targeting
@@ -3024,10 +3024,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 1320
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libuv1, liblua5.1-0, liblua5.2-0, liblua5.3-0, libluajit-5.1-2
 Filename: debs/lua-luv_1.44.2-1_iphoneos-arm64e.deb
-Size: 131462
-MD5sum: 45b8103965a92ffe2bf1914f98f870cf
-SHA1: d291d9e22cd7415660e21df847bf2234cc395f09
-SHA256: e17b5502890d60de28db5bacb39ce5adea5e03efc96c26cf7a15ec4484b902fe
+Size: 158848
+MD5sum: ee1a16d1f11166da3d1158cf588349ec
+SHA1: cadcb4dd0f1f05b896a6f3820a4a77b56087241e
+SHA256: 628e3fd215bcfc4118e9d4712ae6439f8cd05a97293dccb053d68870ac0e0bba
 Section: Libraries
 Priority: optional
 Description: libuv bindings for Lua
@@ -3042,10 +3042,10 @@ Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 540
 Depends: roothide (>= 0.0.7), libiosexec1 (>= 1.3.1)
 Filename: debs/m4_1.4.19-1_iphoneos-arm64e.deb
-Size: 176016
-MD5sum: c962f6aa92b98bd371ec719cf883bd9a
-SHA1: e53bf9372b9e99f14a83c361149adacab40e5be3
-SHA256: 12d1674dc066834dc365a10ddf29c78a8db8676abc2840a1089030606e93e85d
+Size: 202762
+MD5sum: f120d452f27a9517c73c2b4f022d80c3
+SHA1: 1576f93394410aec600d5f8aef6b4e0439d24bb5
+SHA256: 79c767d7974e81e1b4127bf567066c9be44cba304839a2548427e5bc9d3933d1
 Section: Development
 Priority: optional
 Description: Macro processing language
@@ -3057,10 +3057,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 2764
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libmagic1, libncursesw6, libintl8
 Filename: debs/nano_7.2_iphoneos-arm64e.deb
-Size: 639532
-MD5sum: 9a918ffb6ed08d7a39174388438a99f7
-SHA1: c660c19b4ce8bedf8ac63dbf03b4662484b40a18
-SHA256: 0a17df8f1e681e80bc836db152602ae0ecf67697e853a078f54a94eeee78e8f7
+Size: 769136
+MD5sum: 458a5035d03869b58dc4fd4b077a0306
+SHA1: c882b70598df786d15cd25b2150d28aac9789518
+SHA256: dd656374f196a000d085fb6c6ab04b357ab89bc56fd0a34bdc195f5946114898
 Section: Text_Editors
 Priority: standard
 Homepage: https://www.nano-editor.org/
@@ -3093,10 +3093,10 @@ Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libpcre1, libssl3, nmap-co
 Conflicts: nmap-utils
 Replaces: nmap-utils
 Filename: debs/ncat_7.92_iphoneos-arm64e.deb
-Size: 94106
-MD5sum: 790faf80c7c7a55bbec41ab023b0f9ea
-SHA1: 8585ad15618ebd99c0c0d914dac2bb362836a2e4
-SHA256: dce2db04fb25b81024534a8a58c613f9f64903a3a72f9870fd467893ab2ec1f0
+Size: 107362
+MD5sum: 0ca048f9dab1c3b82a7bb2b41bae6255
+SHA1: 127fb45dcb05ae8f058367c7b22344f90f6bc562
+SHA256: 0e2fc118416e619a3847ccaad5ab2c2147c3bd1d48f5e895ec27f47eee53b9d6
 Section: Networking
 Priority: optional
 Description: NMAP netcat reimplementation
@@ -3112,10 +3112,10 @@ Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 124
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libncursesw6
 Filename: debs/ncdu_1.15.1_iphoneos-arm64e.deb
-Size: 39150
-MD5sum: 6783c55ed29bdc54c3b7e9504e5b8e43
-SHA1: 1168cea580e591768cb76a9f9e515a8af26ff3f9
-SHA256: e5c9f6dc1c66d7cc6e8e5400e87be634ae17be3a3f85e2398cb66badd6db3e5f
+Size: 44092
+MD5sum: 77b4288c5c75fd195bb1f4eb2c9e3906
+SHA1: 44d0dc42ae451dc99338b811979f0bbdcdd6d4e3
+SHA256: 371674d6093b0f36e3d3d3d05006179003577fd7c44168527ade87e6f355cd9e
 Section: Utilities
 Homepage: http://dev.yorhel.nl/ncdu/
 Description: ncurses disk usage viewer
@@ -3132,10 +3132,10 @@ Depends: roothide (>= 0.0.6), libncursesw6 (= 6.4)
 Conflicts: ncurses (<< 6.4)
 Replaces: ncurses (<< 6.4)
 Filename: debs/ncurses-term_6.4_all.deb
-Size: 477530
-MD5sum: fd21b2cc118ff24795b63386150787d3
-SHA1: 2fff5794902031a434b007f04f4a93b0e2ace763
-SHA256: 5fc3f194e39b7919ec2cbfd7f46a6fd3f0b9db947de213703df89b9991e8b632
+Size: 548074
+MD5sum: 488417211434e62874b37d91b4bf814e
+SHA1: 44583b017dbfd45ba2ea7566e369880e198c660f
+SHA256: f3994d6341ef5f9abfb17273d47bcf5a05ed25334c0b9fdddc8d91b184e5e380
 Section: System
 Priority: required
 Description: This package contains terminfo data files to support most types of terminals.
@@ -4015,7 +4015,7 @@ Description: tool to make (or reverse) a hex dump
  xxd creates a hex dump of a given file or standard input. It can also convert a hex dump back to its original binary form.
 
 Package: xyz.cypwn.cr4shed
-Version: 4.3.1-2+device1
+Version: 4.3.1-2
 Architecture: iphoneos-arm64
 Maintainer: CyPwn
 Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
@@ -4030,7 +4030,7 @@ Author: Muirey03
 Name: Cr4shed
 
 Package: xyz.cypwn.cr4shed
-Version: 4.3.1-2+rh
+Version: 4.3.1-2
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)
