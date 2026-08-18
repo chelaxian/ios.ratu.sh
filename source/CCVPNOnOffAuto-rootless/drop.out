@@ -1,0 +1,18 @@
+=== utun before (WG up) ===
+5
+=== KILL WG provider (simulate drop) ===
+[sudo] password for mobile: === utun after kill (should drop) ===
+5
+=== anyActive right after kill? ===
+=== wait 25s for watchdog reconnect ===
+=== utun after watchdog (should recover) ===
+5
+=== WG provider respawned? ===
+=== reconnect log ===
+auto tick active=🇩🇪DE (rathole) anyActive=0
+auto: VPN down -> reconnect
+startVPNTunnel ok=1 err=(null)
+conn wait[0] sessStatus=1 anyActive=0
+conn wait[1] sessStatus=1 anyActive=1
+auto tick active=🇩🇪DE (rathole) anyActive=1
+DROP_DONE

@@ -1,0 +1,10 @@
+Package: com.ratush.ccvpnonoffauto
+Name: CCVPN-ON-OFF-AUTO
+Version: 1.0.1+rootless1
+Architecture: iphoneos-arm64
+Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
+Maintainer: ratu.sh
+Author: ratu.sh
+Section: Tweaks (CCSupport)
+Depends: firmware (>=14.0), com.opa334.ccsupport
+Homepage: https://ios.ratu.sh
