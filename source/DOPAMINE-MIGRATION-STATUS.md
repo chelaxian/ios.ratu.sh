@@ -28,6 +28,7 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 
 - `com.ratush.vpnappbridge`: depends on `com.snail.autovpn.global`; only a RootHide arm64e binary is present and no source is available.
 - `com.snail.autovpn.global`, `com.level3tjg.offloader`, `com.choco.tg`, `com.netskao.appdata`, `com.noisyflake.albummanager`, and `xyz.cypwn.cr4shed`: no owned buildable source in this repository.
+- `com.ratush.offloader*fix`: local diagnostic build artifacts only, not the Offloader product; no rootless base for the actual third-party tweak.
 
 ## Remaining owned-source migrations
 
