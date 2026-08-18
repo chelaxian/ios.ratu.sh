@@ -1,0 +1,28 @@
+#!/bin/sh
+# Runs BEFORE the package files are removed (unlike postrm, which runs after the
+# binaries are already gone and so cannot undo the resolver override). This is
+# where we guarantee stock DNS comes back on remove/upgrade: the resolv helper
+# restores each service's ORIGINAL DNS from its on-disk snapshot, then kicks
+# configd and mDNSResponder.
+set -e
+
+for r in /var/jb "" /var/containers/Bundle/Application/.jbroot-*; do
+	if [ -x "$r/usr/libexec/etchosts17resolv" ]; then
+		"$r/usr/libexec/etchosts17resolv" clear 2>/dev/null || true
+		break
+	fi
+done
+
+# Undo the CA-trust patch so we never leave our root trusted for SSL after
+# uninstall. Restores the original TrustStore from the backup taken at install.
+if [ -x /usr/libexec/eh17_untrust_ca.sh ]; then
+	/usr/libexec/eh17_untrust_ca.sh 2>/dev/null || true
+fi
+
+# Belt-and-braces: force configd to recompute and mDNSResponder to reload so a
+# stable Wi-Fi/cellular/VPN service is never left with a dead resolver.
+launchctl kickstart -k user/501/com.apple.configd 2>/dev/null || true
+launchctl kickstart -k system/com.apple.configd 2>/dev/null || true
+killall -HUP mDNSResponder 2>/dev/null || true
+
+exit 0

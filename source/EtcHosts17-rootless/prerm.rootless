@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+[ -x /var/jb/usr/libexec/etchosts17resolv ] && /var/jb/usr/libexec/etchosts17resolv clear 2>/dev/null || true
+/var/jb/usr/bin/launchctl bootout system/com.ratush.etchosts17resolv 2>/dev/null || true
+/var/jb/usr/bin/launchctl bootout system/com.ratush.etchosts17d 2>/dev/null || true
+exit 0

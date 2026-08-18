@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>EtcHosts17Prefs</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.ratush.etchosts17.preferences</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>/etc/hosts (iOS 17.0)</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.3.21</string>
+	<key>CFBundleVersion</key>
+	<string>0.3.21</string>
+	<key>NSPrincipalClass</key>
+	<string>EtcHosts17RootListController</string>
+</dict>
+</plist>

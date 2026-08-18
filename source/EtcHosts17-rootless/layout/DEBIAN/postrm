@@ -1,0 +1,34 @@
+#!/bin/sh
+set -e
+
+# The actual resolver restore happens in prerm (while the binary still exists).
+# Here the binary may already be gone, so try the helper in every possible root
+# and, regardless, force configd/mDNSResponder to recompute as a last-resort net.
+for r in /var/jb "" /var/containers/Bundle/Application/.jbroot-*; do
+	if [ -x "$r/usr/libexec/etchosts17resolv" ]; then
+		"$r/usr/libexec/etchosts17resolv" clear 2>/dev/null || true
+		break
+	fi
+done
+launchctl bootout system /Library/LaunchDaemons/com.ratush.etchosts17resolv.plist 2>/dev/null || true
+
+# Remove our scoped DNS profile (best effort; helper is entitled).
+/usr/libexec/etchosts17dns remove 2>/dev/null || true
+
+# Stop the daemon by PID (pkill/pgrep do not exist on this device).
+for dom in user/501 system; do
+	pid="$(launchctl print "$dom/com.ratush.etchosts17d" 2>/dev/null | sed -n 's/^[[:space:]]*pid = \([0-9]*\)$/\1/p')"
+	if [ -n "$pid" ]; then
+		kill -9 "$pid" 2>/dev/null || true
+	fi
+done
+launchctl bootout user/501/com.ratush.etchosts17d 2>/dev/null || true
+launchctl bootout system /Library/LaunchDaemons/com.ratush.etchosts17d.plist 2>/dev/null || true
+
+# Final safety: recompute the real resolver and reload mDNSResponder so a stable
+# service is never left pointing at our (now-gone) local daemon.
+launchctl kickstart -k user/501/com.apple.configd 2>/dev/null || true
+launchctl kickstart -k system/com.apple.configd 2>/dev/null || true
+killall -HUP mDNSResponder 2>/dev/null || true
+
+exit 0

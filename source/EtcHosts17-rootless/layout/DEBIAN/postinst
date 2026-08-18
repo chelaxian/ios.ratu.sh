@@ -1,0 +1,214 @@
+#!/bin/sh
+set -e
+
+mkdir -p /var/mobile/Library/EtcHosts17
+mkdir -p /rootfs/private/var/mobile/Library/EtcHosts17 2>/dev/null || true
+mkdir -p /var/mobile/Library/Preferences
+mkdir -p /rootfs/private/var/mobile/Library/Preferences 2>/dev/null || true
+chown mobile:mobile /var/mobile/Library/EtcHosts17 2>/dev/null || true
+chown mobile:mobile /rootfs/private/var/mobile/Library/EtcHosts17 2>/dev/null || true
+chmod 0755 /var/mobile/Library/EtcHosts17
+chmod 0755 /rootfs/private/var/mobile/Library/EtcHosts17 2>/dev/null || true
+
+# Per-device DoT certificate: a self-signed CA plus a leaf for the local
+# resolver (CN/SAN etchosts17.local, EKU serverAuth). The CA is bundled into the
+# generated .mobileconfig as a trusted root; the daemon serves DoT with the leaf.
+# Generated once per device so the private key never ships in the package.
+TLS=/var/mobile/Library/EtcHosts17/tls
+OPENSSL="$(command -v openssl || echo /usr/bin/openssl)"
+mkdir -p "$TLS"
+# Detect the current en0 IPv4 so the server cert's SAN can include it (DoH uses
+# an https://<IP> ServerURL, which requires the IP in the cert SAN). This IP is
+# dynamic, but re-running postinst (dpkg-reconfigure / reinstall) refreshes it.
+EN0_IP="$(/sbin/ifconfig en0 2>/dev/null | sed -n 's/^[[:space:]]*inet \([0-9.]*\) .*/\1/p' | head -1)"
+[ -z "$EN0_IP" ] && EN0_IP="127.0.0.1"
+# (Re)generate CA + server cert. Regenerate the server cert whenever the key and
+# cert modulus do not match (a prior interrupted regen can leave them out of
+# sync, which makes the DoT/DoH listener fail to load with KEY_VALUES_MISMATCH).
+SERVER_REGEN=0
+if [ ! -f "$TLS/server.key" ] || [ ! -f "$TLS/server.pem" ] || [ ! -f "$TLS/ca.der" ]; then
+	SERVER_REGEN=1
+else
+	KMOD="$("$OPENSSL" rsa -in "$TLS/server.key" -modulus -noout 2>/dev/null | "$OPENSSL" md5)"
+	CMOD="$("$OPENSSL" x509 -in "$TLS/server.pem" -modulus -noout 2>/dev/null | "$OPENSSL" md5)"
+	[ "$KMOD" != "$CMOD" ] && SERVER_REGEN=1
+fi
+if [ $SERVER_REGEN -eq 1 ] || [ ! -f "$TLS/ca.key" ]; then
+	"$OPENSSL" req -x509 -newkey rsa:2048 -nodes \
+		-keyout "$TLS/ca.key" -out "$TLS/ca.pem" -days 800 \
+		-subj "/CN=EtcHosts17 Local CA" \
+		-addext "basicConstraints=critical,CA:TRUE" \
+		-addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null || true
+	"$OPENSSL" x509 -in "$TLS/ca.pem" -outform DER -out "$TLS/ca.der" 2>/dev/null || true
+fi
+if [ $SERVER_REGEN -eq 1 ]; then
+	"$OPENSSL" req -newkey rsa:2048 -nodes \
+		-keyout "$TLS/server.key" -out "$TLS/server.csr" \
+		-subj "/CN=etchosts17.local" 2>/dev/null || true
+	# SAN includes DNS:etchosts17.local (for DoT ServerName) AND IP:$EN0_IP (for
+	# the DoH https://<IP> ServerURL). extfile uses a [san] section so openssl
+	# honours both DNS and IP entries.
+	printf '[req]\ndistinguished_name=req\n[san]\nsubjectAltName=@alt_names\nextendedKeyUsage=serverAuth\nbasicConstraints=CA:FALSE\n[alt_names]\nDNS.1=etchosts17.local\nIP.1=%s\n' "$EN0_IP" > "$TLS/ext.cnf"
+	"$OPENSSL" x509 -req -in "$TLS/server.csr" \
+		-CA "$TLS/ca.pem" -CAkey "$TLS/ca.key" -CAcreateserial \
+		-out "$TLS/server.pem" -days 800 -sha256 -extfile "$TLS/ext.cnf" -extensions san 2>/dev/null || true
+	rm -f "$TLS/server.csr" "$TLS/ext.cnf" "$TLS/ca.srl"
+fi
+chown -R root:wheel "$TLS" 2>/dev/null || true
+chmod 0711 "$TLS" 2>/dev/null || true
+chmod 0644 "$TLS/ca.der" "$TLS/ca.pem" "$TLS/server.pem" 2>/dev/null || true
+chmod 0600 "$TLS/server.key" "$TLS/ca.key" 2>/dev/null || true
+
+PREF_JB=/var/mobile/Library/Preferences/com.ratush.etchosts17.plist
+PREF_ROOT=/rootfs/private/var/mobile/Library/Preferences/com.ratush.etchosts17.plist
+
+if [ ! -f /var/mobile/Library/EtcHosts17/hosts.extra ] && [ -f /var/mobile/Library/RatuHosts/hosts.extra ]; then
+	cp /var/mobile/Library/RatuHosts/hosts.extra /var/mobile/Library/EtcHosts17/hosts.extra
+fi
+if [ ! -f /var/mobile/Library/EtcHosts17/hosts.extra ] && [ -f /rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra ]; then
+	cp /rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra /var/mobile/Library/EtcHosts17/hosts.extra
+fi
+
+if [ ! -f /var/mobile/Library/EtcHosts17/hosts.extra ]; then
+	cat > /var/mobile/Library/EtcHosts17/hosts.extra <<'EOF'
+# EtcHosts17 supplemental entries
+127.0.0.1 localhost
+# Examples:
+# 0.0.0.0 example.com other.example.com
+# ::1 ipv6.example.com
+EOF
+fi
+
+/usr/bin/python3 - <<'PY' 2>/dev/null || true
+import os, plistlib, time
+paths = [
+    "/rootfs/private/var/mobile/Library/Preferences/com.ratush.etchosts17.plist",
+    "/var/mobile/Library/Preferences/com.ratush.etchosts17.plist",
+    "/var/mobile/Library/EtcHosts17/daemon.hosts",
+    "/rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra",
+    "/var/mobile/Library/EtcHosts17/hosts.extra",
+]
+default = "# EtcHosts17 supplemental entries\n127.0.0.1 localhost\n# Examples:\n# 0.0.0.0 example.com other.example.com\n# ::1 ipv6.example.com\n"
+def read_plist(path):
+    with open(path, "rb") as f:
+        data = plistlib.load(f)
+    return data.get("HostsText") if isinstance(data.get("HostsText"), str) else ""
+def read_text(path):
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        return f.read()
+candidates = []
+for path in paths:
+    if not os.path.exists(path):
+        continue
+    try:
+        text = read_plist(path) if path.endswith(".plist") else read_text(path)
+    except Exception:
+        continue
+    if text.strip():
+        candidates.append((os.stat(path).st_mtime, text))
+text = max(candidates)[1] if candidates else default
+if text and not text.endswith("\n"):
+    text += "\n"
+for path in paths[:2]:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    existing = {}
+    try:
+        with open(path, "rb") as f:
+            existing = plistlib.load(f)
+        if not isinstance(existing, dict):
+            existing = {}
+    except Exception:
+        existing = {}
+    existing.setdefault("Enabled", True)
+    existing.setdefault("GlobalMode", False)
+    existing.setdefault("FallbackSystemDNS", True)
+    existing.setdefault("CreateDNSProfile", False)
+    existing.setdefault("SelectedPreset", "Default")
+    presets = existing.get("Presets")
+    if not isinstance(presets, dict):
+        presets = {"Default": text}
+    presets.setdefault(existing.get("SelectedPreset", "Default"), text)
+    existing["Presets"] = presets
+    existing["HostsText"] = text
+    existing["LastSaved"] = time.time()
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as f:
+        plistlib.dump(existing, f, fmt=plistlib.FMT_BINARY)
+    os.chmod(tmp, 0o644)
+    os.replace(tmp, path)
+for path in paths[2:]:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.chmod(path, 0o644)
+PY
+
+chown mobile:mobile /var/mobile/Library/EtcHosts17/hosts.extra 2>/dev/null || true
+chmod 0644 /var/mobile/Library/EtcHosts17/hosts.extra
+cp /var/mobile/Library/EtcHosts17/hosts.extra /rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra 2>/dev/null || true
+chown mobile:mobile /rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra 2>/dev/null || true
+chmod 0644 /rootfs/private/var/mobile/Library/EtcHosts17/hosts.extra 2>/dev/null || true
+chown mobile:mobile "$PREF_JB" 2>/dev/null || true
+chown mobile:mobile "$PREF_ROOT" 2>/dev/null || true
+chmod 0644 "$PREF_JB" 2>/dev/null || true
+chmod 0644 "$PREF_ROOT" 2>/dev/null || true
+
+chown root:wheel /usr/libexec/etchosts17ctl 2>/dev/null || true
+chmod 4755 /usr/libexec/etchosts17ctl 2>/dev/null || true
+chown root:wheel /usr/libexec/etchosts17.py 2>/dev/null || true
+chmod 0755 /usr/libexec/etchosts17.py 2>/dev/null || true
+chown root:wheel /usr/libexec/etchosts17dns 2>/dev/null || true
+chmod 0755 /usr/libexec/etchosts17dns 2>/dev/null || true
+
+# launchd refuses a LaunchDaemon plist that is group/world-writable. dpkg can
+# ship it 0777 (e.g. when built from a filesystem without POSIX modes), so force
+# secure ownership/permissions before (re)bootstrapping.
+for pl in /Library/LaunchDaemons/com.ratush.etchosts17d.plist /var/jb/Library/LaunchDaemons/com.ratush.etchosts17d.plist \
+          /Library/LaunchDaemons/com.ratush.etchosts17resolv.plist /var/jb/Library/LaunchDaemons/com.ratush.etchosts17resolv.plist; do
+	chown root:wheel "$pl" 2>/dev/null || true
+	chmod 0644 "$pl" 2>/dev/null || true
+done
+chown root:wheel /usr/libexec/etchosts17resolv 2>/dev/null || true
+chmod 0755 /usr/libexec/etchosts17resolv 2>/dev/null || true
+
+/usr/libexec/etchosts17ctl apply 2>/dev/null || /usr/bin/python3 /usr/libexec/etchosts17.py apply 2>/dev/null || true
+
+# Trust our per-device CA for SSL/TLS. Apple ships user-installed roots with
+# sslServer -> deny; without this patch mDNSResponder rejects our DoT/DoH
+# server certificate and the scoped managed-DNS profile never routes. The
+# patch is idempotent (re-running on an already-trusted CA is a no-op) and a
+# backup of the original TrustStore is kept so prerm can fully undo it.
+if [ -x /usr/libexec/eh17_trust_ca.sh ]; then
+	/usr/libexec/eh17_trust_ca.sh 2>/dev/null || true
+fi
+
+# pkill/pgrep do not exist on this device; take the PID from launchd itself
+for dom in user/501 system; do
+	pid="$(launchctl print "$dom/com.ratush.etchosts17d" 2>/dev/null | sed -n 's/^[[:space:]]*pid = \([0-9]*\)$/\1/p')"
+	if [ -n "$pid" ]; then
+		kill -9 "$pid" 2>/dev/null || true
+	fi
+done
+launchctl bootout user/501/com.ratush.etchosts17d 2>/dev/null || true
+launchctl bootout system /Library/LaunchDaemons/com.ratush.etchosts17d.plist 2>/dev/null || true
+pkill -f etchosts17_dns_proxy.py 2>/dev/null || true
+pkill -f "/usr/libexec/etchosts17.py daemon" 2>/dev/null || true
+launchctl bootout system /Library/LaunchDaemons/com.ratush.etchosts17resolv.plist 2>/dev/null || true
+sleep 1
+launchctl bootstrap system /Library/LaunchDaemons/com.ratush.etchosts17d.plist 2>/dev/null || true
+launchctl kickstart -k user/501/com.ratush.etchosts17d 2>/dev/null || true
+launchctl kickstart -k system/com.ratush.etchosts17d 2>/dev/null || true
+# System-resolver redirect (primary mechanism): the watch daemon points
+# State:/Network/Global/DNS + every State:/Network/Service/*/DNS at 127.0.0.1
+# while Enabled + daemon healthy (VPN included), captures the real (VPN) DNS
+# into the upstreams file for forwarding, and clears back to system otherwise.
+launchctl bootstrap system /Library/LaunchDaemons/com.ratush.etchosts17resolv.plist 2>/dev/null || true
+launchctl kickstart -k system/com.ratush.etchosts17resolv 2>/dev/null || true
+
+# Heal directly from the postinst too: a previous build's onTerm/bootout may have
+# just removed the global resolver, and configd will not recompute it on its own
+# under a stable VPN -> DNS would be dead until reboot. Kicking configd here (a
+# context that can reach the per-user domain) repopulates the real resolver.
+launchctl kickstart -k user/501/com.apple.configd 2>/dev/null || true
+
+exit 0

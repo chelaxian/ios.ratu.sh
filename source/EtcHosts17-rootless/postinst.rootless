@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+DATA=/var/mobile/Library/EtcHosts17
+DAEMON=/var/jb/Library/LaunchDaemons/com.ratush.etchosts17d.plist
+RESOLVER=/var/jb/Library/LaunchDaemons/com.ratush.etchosts17resolv.plist
+mkdir -p "$DATA" /var/mobile/Library/Preferences
+chown mobile:mobile "$DATA" 2>/dev/null || true
+for f in /var/jb/usr/libexec/etchosts17.py /var/jb/usr/libexec/etchosts17ctl /var/jb/usr/libexec/etchosts17dns /var/jb/usr/libexec/etchosts17resolv; do
+  [ -e "$f" ] && chmod 0755 "$f"
+done
+for p in "$DAEMON" "$RESOLVER"; do
+  [ -e "$p" ] && { chown root:wheel "$p" 2>/dev/null || true; chmod 0644 "$p"; }
+done
+/var/jb/usr/bin/launchctl bootout system/com.ratush.etchosts17resolv 2>/dev/null || true
+/var/jb/usr/bin/launchctl bootout system/com.ratush.etchosts17d 2>/dev/null || true
+/var/jb/usr/bin/launchctl bootstrap system "$DAEMON" 2>/dev/null || true
+/var/jb/usr/bin/launchctl bootstrap system "$RESOLVER" 2>/dev/null || true
+exit 0
