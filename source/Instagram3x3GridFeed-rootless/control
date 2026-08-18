@@ -1,0 +1,9 @@
+Package: com.ratush.iggridfeed
+Name: Instagram 3x3 Grid Feed
+Version: 0.5.2+rootless2
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Author: chelaxian
+Section: Tweaks
+Depends: firmware (>= 15.0), ellekit
+Description: Turns the Instagram Home/Feed tab into a Profile-style 3x3 thumbnail grid.
