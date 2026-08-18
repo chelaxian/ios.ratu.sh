@@ -23,6 +23,7 @@ Current project families:
 - CatMCP and its RootHide companion
 - JetsamFix (memory manager / OOM protection)
 - RootHide development and recovery toolchain
+- Claude Code iOS — NewTerm 3 `ssh://` launcher (arm64)
 
 The website reads `Packages` directly and merges architecture variants into one
 catalog entry. Adding or removing a package therefore does not require editing the
@@ -63,6 +64,25 @@ grep -E '^(Package|Name|Version|Architecture|Section|Filename|SHA256):' Packages
 
 `Release` advertises both supported architectures and contains checksums for
 `Packages`, `Packages.gz`, and `Packages.bz2`.
+
+
+## Claude Code iOS
+
+`com.ratush.claude-code-ios` packages Claude Code 2.1.112 for rootless iOS with
+the bundled iOS Node runtime and an iOS-patched ripgrep. Its home-screen launcher
+opens **NewTerm 3** through its supported `ssh://` URL scheme and then starts
+Claude Code in the terminal. This replaces the old unregistered `newterm3://`
+URL that caused the original launcher to quit immediately.
+
+**Requirements:** NewTerm 3, OpenSSH, and a rootless jailbreak. The package sets
+up a dedicated, forced-command local SSH key automatically; it preserves existing
+SSH keys and config. After installation, authenticate once in NewTerm:
+
+```sh
+claude-auth
+```
+
+Then tap **Claude Code** on the home screen to open NewTerm directly into Claude.
 
 ## JetsamFix
 
