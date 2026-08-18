@@ -237,7 +237,7 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.muirey03.libmryipc
-Version: 2.0.1+roothide3
+Version: 2.0.1
 Architecture: iphoneos-arm64e
 Maintainer: Muirey03
 Installed-Size: 308
@@ -544,7 +544,7 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1+rootless1
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 372
@@ -722,7 +722,7 @@ Author: ratush
 Name: isdig (dig for iOS)
 
 Package: com.ratush.isdig
-Version: 1.0.0+rootless1
+Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Depends: firmware (>= 15.0), python3
@@ -850,7 +850,7 @@ Author: chelaxian
 Name: Aut0VPN (fix)
 
 Package: com.roothide.patcher
-Version: 2.1.4-1+debug
+Version: 2.1.4-1
 Architecture: iphoneos-arm64e
 Maintainer: roothide
 Installed-Size: 4124
@@ -1045,7 +1045,7 @@ Homepage: http://wiki.debian.org/Teams/Dpkg
 Description: package maintainance tools from Debian
 
 Package: eg.anubistweaks.fridacc
-Version: 1.0.1+ratu29
+Version: 1.0.1
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 524
@@ -1388,7 +1388,7 @@ Author: keystone-engine
 Name: Keystone Assembler
 
 Package: launchctl
-Version: 1:1.1.1-2
+Version: 1
 Architecture: iphoneos-arm64e
 Essential: yes
 Maintainer: roothide <roothideDev@twitter>
@@ -1405,7 +1405,7 @@ Homepage: https://github.com/ProcursusTeam/launchctl
 Description: Tells launchd what to do
 
 Package: ldid
-Version: 2.1.5-procursus7
+Version: 2.1.5
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 220
@@ -1493,7 +1493,7 @@ Homepage: https://www.brotli.org/
 Description: Shared libraries for the Brotli compression format
 
 Package: libcapstone5
-Version: 5.0~git20230223.6e6e602
+Version: 5.0
 Architecture: iphoneos-arm64e
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 6156
@@ -1884,7 +1884,7 @@ Homepage: https://www.gnu.org/software/libidn/#libidn2
 Description: Internationalized domain names (IDNA2008/TR46) library
 
 Package: libimobiledevice-glue1.0-0
-Version: 1.0.0+git20220522.d2ff796
+Version: 1.0.0
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 120
@@ -1899,7 +1899,7 @@ Priority: standard
 Description: A library with common code used by libraries and tools around the libimobiledevice project
 
 Package: libimobiledevice6
-Version: 1.3.0+git20220702.2eec1b9-1
+Version: 1.3.0
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 284
@@ -2032,7 +2032,7 @@ Description: Shared library for the Lua interpreter version 5.3
  explicitly.
 
 Package: libluajit-5.1-2
-Version: 2.1.0~beta3+git377a848
+Version: 2.1.0
 Architecture: iphoneos-arm64e
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 292
@@ -2053,7 +2053,7 @@ Description: Just in time compiler for Lua - library version
  replacement of the standard liblua-5.1 shared library.
 
 Package: libluajit-5.1-common
-Version: 2.1.0~beta3+git377a848
+Version: 2.1.0
 Architecture: all
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 236
@@ -2487,7 +2487,7 @@ Description: New Perl Compatible Regular Expression Library - development files
  static libraries, and documentation.
 
 Package: libplist3
-Version: 2.2.0+git20230130.4b50a5a
+Version: 2.2.0
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 132
@@ -2848,7 +2848,7 @@ Description: userspace USB programming library
  library.
 
 Package: libusbmuxd6
-Version: 2.0.2+git20220504.36ffb7a
+Version: 2.0.2
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 124
@@ -3275,7 +3275,7 @@ Description: Architecture independent files for nmap
  This package contains the nmap files shared by all architectures.
 
 Package: openssh
-Version: 1:0
+Version: 1
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 8
@@ -3290,7 +3290,7 @@ Priority: important
 Description: secure shell client and server (metapackage)
 
 Package: openssh-client
-Version: 9.2p1
+Version: 9.2
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 3508
@@ -3307,7 +3307,7 @@ Priority: important
 Description: secure shell (SSH) client, for secure access to remote machines
 
 Package: openssh-server
-Version: 9.2p1
+Version: 9.2
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 1356
@@ -3324,7 +3324,7 @@ Priority: important
 Description: secure shell (SSH) server, for secure access from remote machines
 
 Package: openssh-sftp-server
-Version: 9.2p1
+Version: 9.2
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 136
@@ -3414,7 +3414,7 @@ Homepage: https://www.freedesktop.org/wiki/Software/pkg-config/
 Description: manage compile and link flags for libraries
 
 Package: plutil
-Version: 0.2.2+2
+Version: 0.2.2
 Architecture: iphoneos-arm64e
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 124
@@ -3431,7 +3431,7 @@ Description: Utility for creating and editing Apple property list files.
 Author: Samuel Bingner
 
 Package: preferenceloader
-Version: 2.2.6-11+debug
+Version: 2.2.6-11
 Architecture: iphoneos-arm64e
 Maintainer: ProcursusTeam <support@procurs.us>
 Installed-Size: 456
@@ -3863,7 +3863,7 @@ Author: Jonas Fonseca <jonas.fonseca@gmail.com>
 Name: tig
 
 Package: tmux
-Version: 3.3a
+Version: 3.3
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 868
@@ -3945,7 +3945,7 @@ Priority: important
 Description: de-compesses files in zip format
 
 Package: usbmuxd
-Version: 1.1.1+git20220619.f50e52f-2
+Version: 1.1.1
 Architecture: iphoneos-arm64e
 Maintainer: RootHide <RootHideDev@twitter>
 Installed-Size: 144
@@ -4072,7 +4072,7 @@ Sileodepiction: https://repo.cypwn.xyz/sileo_depiction/2908
 Sponsor: thebigboss.org <http://thebigboss.org>
 
 Package: xyz.cypwn.libnotifications
-Version: 0.3-6-1
+Version: 0.3-6
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)
