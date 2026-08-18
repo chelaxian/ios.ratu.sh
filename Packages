@@ -549,6 +549,22 @@ Description: Memory-manager daemon for RootHide. Removes SpringBoard's per-proce
 Author: ratush
 Name: JetsamFix
 
+Package: com.ratush.jetsamfix
+Version: 1.0.1+rootless1
+Architecture: iphoneos-arm64
+Maintainer: ratush
+Installed-Size: 312
+Depends: firmware (>= 14.0)
+Filename: debs/com.ratush.jetsamfix_1.0.1+rootless1_iphoneos-arm64.deb
+Size: 26870
+MD5sum: c6e41eeea5d0adc0467d0e98617b5a73
+SHA1: f78486390fb30ab7481646845b53e629b4845330
+SHA256: 0421cf881157d01f430ebee4abc17ff46989079c299fc6d529cfadc2116514a6
+Section: Tweaks
+Description: Memory-manager daemon for Dopamine rootless. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to reduce OOM/safe-mode crashes on iOS 17. Control via `jetsamfix status|apply|lenient on|off`.
+Author: ratush
+Name: JetsamFix
+
 Package: com.ratush.safeguard
 Version: 1.2.1
 Architecture: iphoneos-arm64e
@@ -562,6 +578,22 @@ SHA1: aafbadb9a71a3211785165770e168e6698da3fb8
 SHA256: 83201189a7b69015962dafa367151a3c3c4a378477565e17ca4a0f71c292e1af
 Section: Tweaks
 Description: Proactive memory-pressure watchdog for RootHide. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills only allowlisted hogs once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds kill_min_rss_mb. Release build removes debug entitlement and non-rotating launchd redirect logs; user apps remain advisory-only. Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
+Author: ratush
+Name: Safeguard
+
+Package: com.ratush.safeguard
+Version: 1.2.1+rootless1
+Architecture: iphoneos-arm64
+Maintainer: ratush
+Installed-Size: 312
+Depends: com.ratush.jetsamfix, firmware (>= 14.0)
+Filename: debs/com.ratush.safeguard_1.2.1+rootless1_iphoneos-arm64.deb
+Size: 34104
+MD5sum: de1f176cd79a10397981f9499fe57f3d
+SHA1: f99ff58a7412d70f1f3ab6eb5f27fc02db8dbbff
+SHA256: dd99922c988c9de9bd8c196f01c6b593dafad89c71f3d74d2e35045c0ee85159
+Section: Tweaks
+Description: Proactive memory-pressure watchdog for Dopamine rootless. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills only allowlisted hogs once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds kill_min_rss_mb. Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
 Author: ratush
 Name: Safeguard
 
