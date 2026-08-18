@@ -190,7 +190,7 @@ Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
 Depends: mobilesubstrate, firmware (>=11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+roothide15_iphoneos-arm64e.deb
+Filename: debs/com.level3tjg.offloader_0.0.6+rh_iphoneos-arm64e.deb
 Size: 67942
 MD5sum: 59703407d2792697b757caf7371051af
 SHA1: 73e89a6bf2cf36a7c9d4c706795265a40c953356
@@ -207,7 +207,7 @@ Architecture: iphoneos-arm64
 Maintainer: level3tjg
 Installed-Size: 332
 Depends: ellekit, firmware (>= 11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6+rootless16_iphoneos-arm64.deb
+Filename: debs/com.level3tjg.offloader_0.0.6_iphoneos-arm64.deb
 Size: 38460
 MD5sum: a39a5406564da9087d59c470b7107062
 SHA1: 3415d488e908160265f4b93b7cab7c840fc6fcc1
@@ -225,29 +225,11 @@ Maintainer: Muirey03
 Installed-Size: 308
 Depends: mobilesubstrate
 Conflicts: ws.hbang.stopcrashingpls (=1.0)
-Filename: debs/com.muirey03.libmryipc_2.0.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.muirey03.libmryipc_2.0.1_iphoneos-arm64.deb
 Size: 18606
 MD5sum: e279f94d966892e4aef687d99afc81de
 SHA1: 279770b41cf64c9256a3260a28b749a90f65bccf
 SHA256: a535dfa8d9f66f8bdcfa556551465107deb64f15b41889ab2ab98dec6529279e
-Section: System
-Description: Easy-to-use, RocketBootstrap-less iOS IPC
-Tag: role::developer
-Author: Muirey03
-Name: libMRYIPC
-
-Package: com.muirey03.libmryipc
-Version: 2.0.1
-Architecture: iphoneos-arm64
-Maintainer: Muirey03
-Installed-Size: 308
-Depends: mobilesubstrate
-Conflicts: ws.hbang.stopcrashingpls (=1.0)
-Filename: debs/com.muirey03.libmryipc_2.0.1_iphoneos-arm64.deb
-Size: 31486
-MD5sum: 27b6b2155abd737d960aabc59fe8b8f2
-SHA1: 6b508cd02d1b68febb3942cc8e9e9f3f3a7092e4
-SHA256: 1d2d75fa2d899d5efca751e2fd081756fb9093b5d1f44bab8436085fa82ed2aa
 Section: System
 Description: Easy-to-use, RocketBootstrap-less iOS IPC
 Tag: role::developer
@@ -261,7 +243,7 @@ Maintainer: Muirey03
 Installed-Size: 308
 Depends: mobilesubstrate
 Conflicts: ws.hbang.stopcrashingpls (=1.0)
-Filename: debs/com.muirey03.libmryipc_2.0.1+roothide3_iphoneos-arm64e.deb
+Filename: debs/com.muirey03.libmryipc_2.0.1+rh_iphoneos-arm64e.deb
 Size: 20792
 MD5sum: b94269da2a4d266d76e7a67d22d110fe
 SHA1: 1a3933e810b51fc6ab271ed8cc2da141b5c74f93
@@ -296,7 +278,7 @@ Version: 2.6.9
 Architecture: iphoneos-arm64
 Maintainer: 搬运工
 Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
-Filename: debs/com.netskao.appdata_2.6.9+rootless1_iphoneos-arm64.deb
+Filename: debs/com.netskao.appdata_2.6.9_iphoneos-arm64.deb
 Size: 1711648
 MD5sum: 74c8b166bc4949c4c0f013a12d767f8e
 SHA1: 34496578d41687f5e8f72cc433a553ee3695ec71
@@ -331,7 +313,7 @@ Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: NoisyFlake
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
-Filename: debs/com.noisyflake.albummanager_1.0.2+rootless1_iphoneos-arm64.deb
+Filename: debs/com.noisyflake.albummanager_1.0.2_iphoneos-arm64.deb
 Size: 55320
 MD5sum: b31f529457b8098fb6f568de09752669
 SHA1: 5377d82aec3918115838f7ead1023cdfd786b47a
@@ -363,7 +345,7 @@ Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 460
 Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.appabetical_1.0.16+rootless4_iphoneos-arm64.deb
+Filename: debs/com.ratush.appabetical_1.0.16_iphoneos-arm64.deb
 Size: 39914
 MD5sum: ac2d4ef88993cee81d09aa7f4f5f188f
 SHA1: a908780f8b6680f3c309716265458f402125ff84
@@ -381,7 +363,7 @@ Installed-Size: 704
 Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-fix_1.7.28_rootless_iphoneos-arm64.deb
+Filename: debs/com.ratush.catmcp-fix_1.7.28_iphoneos-arm64.deb
 Size: 35724
 MD5sum: fbeaec67c2d4837b30561f24721af753
 SHA1: 67f06c8afad93d637a18931e01a9c4d68a32059d
@@ -399,7 +381,7 @@ Maintainer: ratu.sh
 Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
-Filename: debs/com.ratush.catmcp-fix_1.7.29_roothide_iphoneos-arm64e.deb
+Filename: debs/com.ratush.catmcp-fix_1.7.29_rh_iphoneos-arm64e.deb
 Size: 38452
 MD5sum: 977cb1056af594635e55602755f52274
 SHA1: 381b99697969eb773884a39493694d11045c1225
@@ -433,7 +415,7 @@ Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 304
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-rootless-fix
-Filename: debs/com.ratush.catmcpcc_1.0.0+ratu10+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.catmcpcc_1.0.0+ratu10_iphoneos-arm64.deb
 Size: 29914
 MD5sum: b7a6e94abe1ad0a519a2aafb0b68f34c
 SHA1: 3a36d32909c48813cf1d59ff6a671c652085f3f1
@@ -466,7 +448,7 @@ Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 360
 Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.ccgapcloser_0.4.7+rootless3_iphoneos-arm64.deb
+Filename: debs/com.ratush.ccgapcloser_0.4.7_iphoneos-arm64.deb
 Size: 20520
 MD5sum: f2aabd3815646ba3af87c244397494b5
 SHA1: 90470d7733915c88dd6b1ec8362494d436fa2d44
@@ -500,7 +482,7 @@ Maintainer: chelaxian
 Installed-Size: 176
 Depends: ellekit, com.ratush.hppe, com.opa334.ccsupport
 Recommends: com.ratush.hppe
-Filename: debs/com.ratush.cchppe_1.0.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.cchppe_1.0.1_iphoneos-arm64.deb
 Size: 9944
 MD5sum: 86e76f1f3983187a8f6f4c012c0d53af
 SHA1: 97529a1359bbf8d9fbdfad7cc245ddcd3a63d48c
@@ -533,7 +515,7 @@ Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 508
 Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.0.10+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.ccopenssh_1.0.10_iphoneos-arm64.deb
 Size: 51302
 MD5sum: 8c493179101e81820fd4d4db65147469
 SHA1: a9fa2342d8ba15db28bdd1643f0d7d6ffaf263ca
@@ -567,7 +549,7 @@ Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 372
 Depends: firmware (>=14.0), com.opa334.ccsupport
-Filename: debs/com.ratush.ccvpnonoffauto_1.0.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
 Size: 23770
 MD5sum: 54ff4d36ec8a18070808c31f3c27edfa
 SHA1: e094568754a92be44cbf5da03774285367599a25
@@ -602,7 +584,7 @@ Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 244
 Depends: preferenceloader, firmware (>= 17.0)
-Filename: debs/com.ratush.crontweak_1.2.0+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.crontweak_1.2.0_iphoneos-arm64.deb
 Size: 43036
 MD5sum: 38d551605fcaccb6a018bda29f815a95
 SHA1: 3942ffeb1359305d2e02a6606910018cfc954e4c
@@ -642,7 +624,7 @@ Installed-Size: 1012
 Depends: firmware (>= 17.0), preferenceloader, python3, sqlite3
 Conflicts: com.ratush.ratuhosts
 Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.8.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.etchosts17_0.8.1_iphoneos-arm64.deb
 Size: 197902
 MD5sum: bb0b115efde5b82e802476a1b8847b0e
 SHA1: 5864eed83d9961ad69e30c1b0e8e90a6a77961c8
@@ -713,7 +695,7 @@ Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 88
 Depends: firmware (>= 15.0), ellekit
-Filename: debs/com.ratush.iggridfeed_0.5.2+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.iggridfeed_0.5.2_iphoneos-arm64.deb
 Size: 7142
 MD5sum: 234f5c1bbf90b8c150423169f4a2329c
 SHA1: 0590c1a0ab3098bfdeb7d7c03f5f7c1085cc0548
@@ -744,7 +726,7 @@ Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Depends: firmware (>= 15.0), python3
-Filename: debs/com.ratush.isdig_1.0.0+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.isdig_1.0.0_iphoneos-arm64.deb
 Size: 5336
 MD5sum: 115f0aafbf7d99473a81ac9f60454edd
 SHA1: 6207dbbadd3304e301beff1771ed713a98d84fb6
@@ -777,7 +759,7 @@ Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 312
 Depends: firmware (>= 14.0)
-Filename: debs/com.ratush.jetsamfix_1.0.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.jetsamfix_1.0.1_iphoneos-arm64.deb
 Size: 26870
 MD5sum: c6e41eeea5d0adc0467d0e98617b5a73
 SHA1: f78486390fb30ab7481646845b53e629b4845330
@@ -809,7 +791,7 @@ Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 312
 Depends: com.ratush.jetsamfix, firmware (>= 14.0)
-Filename: debs/com.ratush.safeguard_1.2.1+rootless1_iphoneos-arm64.deb
+Filename: debs/com.ratush.safeguard_1.2.1_iphoneos-arm64.deb
 Size: 34104
 MD5sum: de1f176cd79a10397981f9499fe57f3d
 SHA1: f99ff58a7412d70f1f3ab6eb5f27fc02db8dbbff
@@ -908,7 +890,7 @@ Architecture: iphoneos-arm64e
 Maintainer: Snail <mu514983786@gmail.com>
 Installed-Size: 1048
 Depends: mobilesubstrate (>= 0.9.5000),preferenceloader,com.opa334.altlist
-Filename: debs/com.snail.autovpn.global_1.0.8+roothidefix2_iphoneos-arm64e.deb
+Filename: debs/com.snail.autovpn.global_1.0.8+rh_iphoneos-arm64e.deb
 Size: 268696
 MD5sum: 8a858f3ee50535de199e3a4178bffe9e
 SHA1: b316941fc39614131739dfd9dc7c797a81cc6fcb
@@ -923,7 +905,7 @@ Version: 1.0.8
 Architecture: iphoneos-arm64
 Maintainer: Snail <mu514983786@gmail.com>
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.altlist
-Filename: debs/com.snail.autovpn.global_1.0.8+rootless1_iphoneos-arm64.deb
+Filename: debs/com.snail.autovpn.global_1.0.8_iphoneos-arm64.deb
 Size: 266296
 MD5sum: f6a7c69d3e61191c53c5476eaea5016d
 SHA1: 6ee6c101dd21d0f12563c08158b7d1dcaf4e2bf0
@@ -4028,7 +4010,7 @@ Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)
 Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
-Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+roothide4_iphoneos-arm64e.deb
+Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+rh_iphoneos-arm64e.deb
 Size: 809278
 MD5sum: 34ba85c67fba2ba07bf458c295eef64e
 SHA1: e141fbeb7189e5f9fd4c300cf7b3c6bae5e67134
