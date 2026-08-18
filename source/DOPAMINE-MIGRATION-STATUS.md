@@ -12,6 +12,10 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 - `com.ratush.crontweak` `1.2.0+rootless1`
 - `com.ratush.catmcpcc` `1.0.0+ratu10+rootless1`
 - `com.ratush.ccopenssh` `1.0.10+rootless1`
+- `com.ratush.ccvpnonoffauto` `1.0.1+rootless1`
+- `com.ratush.cchppe` `1.0.1+rootless1`
+- `com.ratush.etchosts17` `0.8.1+rootless1`
+- `com.ratush.isdig` `1.0.0+rootless1`
 
 ## Existing rootless packages to audit, not replace
 
