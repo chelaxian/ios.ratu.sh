@@ -296,6 +296,21 @@ Depiction: https://chariz.com/buy/albummanager
 Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
+Package: com.noisyflake.albummanager
+Version: 1.0.2+rootless1
+Architecture: iphoneos-arm64
+Maintainer: NoisyFlake
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
+Filename: debs/com.noisyflake.albummanager_1.0.2+rootless1_iphoneos-arm64.deb
+Size: 55320
+MD5sum: b31f529457b8098fb6f568de09752669
+SHA1: 5377d82aec3918115838f7ead1023cdfd786b47a
+SHA256: 9d7bb938248451e183bbdb22f3ecfb91f191715006e5d2bce70e8848e9ee6886
+Section: Tweaks
+Description: Organize and protect photo albums (Dopamine rootless repack from installed device payload).
+Author: NoisyFlake
+Name: AlbumManager
+
 Package: com.ratush.appabetical
 Version: 1.0.16
 Architecture: iphoneos-arm64e
