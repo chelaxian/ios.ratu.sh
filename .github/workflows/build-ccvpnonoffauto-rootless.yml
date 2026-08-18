@@ -1,0 +1,24 @@
+name: Build CCVPNOnOffAuto rootless
+on:
+  push:
+    paths: ['source/CCVPNOnOffAuto-rootless/**', '.github/workflows/build-ccvpnonoffauto-rootless.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - run: |
+          cd source/CCVPNOnOffAuto-rootless
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"; dpkg-deb -x "$deb" "$tmp"
+          for b in "$tmp/var/jb/Library/ControlCenter/Bundles/CCVPNOnOffAuto.bundle/CCVPNOnOffAuto" "$tmp/var/jb/usr/bin/ccvpnd"; do lipo -thin arm64e "$b" -output "$tmp/a"; test "$(xxd -p -s 8 -l 4 "$tmp/a")" = 02000080; done
+          mkdir artifacts && cp "$deb" artifacts/
+      - uses: actions/upload-artifact@v4
+        with: {name: ccvpnonoffauto-rootless-deb, path: source/CCVPNOnOffAuto-rootless/artifacts/*.deb}
