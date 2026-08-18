@@ -36,8 +36,6 @@ static NSDictionary *CCGReadPrefs(void) {
 
     NSArray *paths = @[
         @"/var/mobile/Library/Preferences/com.ratush.ccgapcloser.plist",
-        @"/rootfs/private/var/mobile/Library/Preferences/com.ratush.ccgapcloser.plist",
-        @"/rootfs/var/mobile/Library/Preferences/com.ratush.ccgapcloser.plist",
     ];
     for (NSString *path in paths) {
         NSDictionary *prefs = [NSDictionary dictionaryWithContentsOfFile:path];
