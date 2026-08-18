@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+LABEL="com.ratush.crontweakd"
+
+# Purge every generated per-job LaunchDaemon while the daemon script is still
+# on disk. postrm runs after dpkg has already deleted the package's files, so
+# cleanup that needs the daemon binary must happen here, not in postrm.
+if [ -x /var/jb/usr/bin/python3 ] && [ -f /var/jb/usr/libexec/crontweakd.py ]; then
+	/var/jb/usr/bin/python3 /var/jb/usr/libexec/crontweakd.py --purge 2>/dev/null || true
+fi
+
+launchctl bootout "system/$LABEL" 2>/dev/null || true
+
+exit 0

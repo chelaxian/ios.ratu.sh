@@ -1,0 +1,36 @@
+name: Build CronTweak rootless
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/CronTweak-rootless/**'
+      - '.github/workflows/build-crontweak-rootless.yml'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build and require PTRAUTH arm64e
+        run: |
+          cd source/CronTweak-rootless
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          cp postinst prerm .theos/_/DEBIAN/ && chmod 755 .theos/_/DEBIAN/postinst .theos/_/DEBIAN/prerm
+          dpkg-deb -Zgzip --root-owner-group -b .theos/_ packages/rootless.deb
+          tmp="$(mktemp -d)"; dpkg-deb -x packages/rootless.deb "$tmp"
+          lipo -thin arm64e "$tmp/var/jb/Library/PreferenceBundles/CronTweakPrefs.bundle/CronTweakPrefs" -output "$tmp/check.arm64e"
+          test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = "02000080"
+          mkdir artifacts && cp packages/rootless.deb artifacts/com.ratush.crontweak_1.2.0+rootless1_iphoneos-arm64.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: crontweak-rootless-deb
+          path: source/CronTweak-rootless/artifacts/*.deb
+          if-no-files-found: error

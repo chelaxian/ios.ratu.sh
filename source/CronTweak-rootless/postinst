@@ -1,0 +1,30 @@
+#!/bin/sh
+set -e
+
+DAEMON_PLIST="/var/jb/Library/LaunchDaemons/com.ratush.crontweakd.plist"
+LABEL="com.ratush.crontweakd"
+
+# A Windows-built package can ship 0777 files; launchd refuses to load a
+# group/world-writable LaunchDaemon plist ("Path had bad ownership/permissions").
+chown root:wheel "$DAEMON_PLIST" 2>/dev/null || true
+chmod 0644 "$DAEMON_PLIST" 2>/dev/null || true
+chmod 0755 /var/jb/usr/libexec/crontweakd.py 2>/dev/null || true
+
+mkdir -p /var/mobile/Library/CronTweak
+mkdir -p /var/mobile/Library/Logs/CronTweak
+chown -R mobile:mobile /var/mobile/Library/CronTweak /var/mobile/Library/Logs/CronTweak 2>/dev/null || true
+
+# pkill/pgrep do not exist on this device. Extract a stale daemon's PID
+# (left over from a previous install/upgrade still holding the control
+# socket port) from launchctl print output and kill it before rebootstrap.
+OLD_PID=$(launchctl print "system/$LABEL" 2>/dev/null | sed -n 's/^[[:space:]]*pid = \([0-9]*\)$/\1/p')
+if [ -n "$OLD_PID" ]; then
+	kill "$OLD_PID" 2>/dev/null || true
+	sleep 1
+fi
+launchctl bootout "system/$LABEL" 2>/dev/null || true
+
+launchctl bootstrap system "$DAEMON_PLIST" 2>/dev/null || true
+launchctl enable "system/$LABEL" 2>/dev/null || true
+
+exit 0
