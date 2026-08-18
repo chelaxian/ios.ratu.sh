@@ -1,5 +1,5 @@
 Package: com.ratush.catmcp-rootless-fix
-Name: catmcp_fix_rootless
+Name: CatMCP Fix
 Version: 1.7.28
 Architecture: iphoneos-arm64
 Description: Rootless CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
