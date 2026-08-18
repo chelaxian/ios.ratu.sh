@@ -86,6 +86,21 @@ Description: YACC-compatible parser generator
  grammars ought to work with Bison with no change.  Anyone familiar with
  Yacc should be able to use Bison with little trouble.
 
+Package: byg.iosios.net.appdata-rootless
+Version: 2.6.9
+Architecture: iphoneos-arm64
+Maintainer: 搬运工
+Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
+Filename: debs/byg.iosios.net.appdata-rootless_2.6.9_iphoneos-arm64.deb
+Size: 1713316
+MD5sum: b300ce72aba6168d57fc43ecfea873b1
+SHA1: 18d8721ee1cf896cc8b14cd03e195c0451fbac5c
+SHA256: c20a3f48c24ae98d574b92500c7cf4d50640c7f8b0d2d54d8b461d73d6aa5e1b
+Section: Tweaks
+Description: AppData rootless package repacked from the installed Dopamine payload.
+Author: Fouad Raheb
+Name: AppData软件降级-Rootless
+
 Package: ca-certificates
 Version: 20231210
 Architecture: all
