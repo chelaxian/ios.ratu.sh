@@ -1,6 +1,6 @@
 Package: com.ratush.cchppe
 Name: CCHPM
-Version: 1.0.1+rootless1
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Description: Control Center tile for Hidden Photos Manager. Turns the whole tweak on and off (the same master switch as Settings -> Hidden Photos Manager -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
 Maintainer: chelaxian

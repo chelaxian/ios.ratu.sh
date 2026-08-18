@@ -9,7 +9,7 @@
 | `ru.danpashin.twackup` | **Аудит-only**: внешний бинарный rootless `2.0.27`, принадлежащих исходников нет |
 | `ru.danpashin.twackup-gui` | **Аудит-only**: внешний бинарный rootless `2.0.27`, arm64 зависит от `libroot-dopamine`, исходников нет |
 | `com.ratush.catmcp-rootless-fix` | **Статический PASS с оговоркой**: rootless `1.7.28` чистый; dual-mode исходник собирать только с `THEOS_PACKAGE_SCHEME=rootless` и `control.rootless`, не с Makefile-default `roothide` |
-| `com.ratush.iggridfeed` | Rootless `0.5.2+rootless1` опубликован, но каталог `source/Instagram3x3GridFeed` содержит старую RootHide-сборочную конфигурацию; исходник и опубликованный rootless-артефакт нужно синхронизировать перед следующей правкой |
+| `com.ratush.iggridfeed` | Rootless `0.5.2` опубликован, но каталог `source/Instagram3x3GridFeed` содержит старую RootHide-сборочную конфигурацию; исходник и опубликованный rootless-артефакт нужно синхронизировать перед следующей правкой |
 | `com.ratush.vpnappbridge` | Rootless-папка существует, но пакет жёстко зависит от отсутствующего `com.snail.autovpn.global`; миграция заблокирована внешней зависимостью |
 
 ## Ограничения

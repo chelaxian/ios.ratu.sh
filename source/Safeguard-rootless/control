@@ -1,6 +1,6 @@
 Package: com.ratush.safeguard
 Name: Safeguard
-Version: 1.2.1+rootless1
+Version: 1.2.1
 Architecture: iphoneos-arm64
 Description: Proactive memory-pressure watchdog for Dopamine rootless. Monitors RAM pressure and resident debug-daemon hogs (e.g. a leftover frida-server) and auto-kills only allowlisted hogs once the device is under pressure (AMBER or RED zone) AND the hog's RSS exceeds kill_min_rss_mb. Control via: safeguard status | top [N] | check | probe | kill <name|pid> | arm | disarm.
 Maintainer: ratush

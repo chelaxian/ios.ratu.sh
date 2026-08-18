@@ -1,6 +1,6 @@
 Package: com.ratush.iggridfeed
 Name: Instagram 3x3 Grid Feed
-Version: 0.5.2+rootless2
+Version: 0.5.2
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Author: chelaxian

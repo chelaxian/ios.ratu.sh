@@ -1,6 +1,6 @@
 Package: com.ratush.crontweak
 Name: CronTweak
-Version: 1.2.0+rootless1
+Version: 1.2.0
 Architecture: iphoneos-arm64
 Description: crontab-syntax scheduler. Write cron-style lines (min hour dom mon dow command) in Settings, they auto-convert to native launchd LaunchDaemons.
 Maintainer: chelaxian

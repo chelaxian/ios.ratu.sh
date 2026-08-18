@@ -1,6 +1,6 @@
 Package: com.ratush.etchosts17
 Name: /etc/hosts (iOS 17.0)
-Version: 0.8.1+rootless1
+Version: 0.8.1
 Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Architecture: iphoneos-arm64
 Description: Editable /etc/hosts-style DNS overrides for Dopamine rootless iOS 17.

@@ -6,4 +6,4 @@ Description: RootHide-native foreground app bridge for starting and stopping the
 Maintainer: chelaxian <chelaxian@users.noreply.github.com>
 Author: chelaxian
 Section: Tweaks
-Depends: com.snail.autovpn.global (= 1.0.8+roothidefix2)
+Depends: com.snail.autovpn.global (= 1.0.8+rh

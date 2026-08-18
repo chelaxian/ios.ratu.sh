@@ -4,18 +4,18 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 
 ## Published
 
-- `com.ratush.iggridfeed` `0.5.2+rootless1`
-- `com.ratush.appabetical` `1.0.16+rootless4`
-- `com.ratush.ccgapcloser` `0.4.7+rootless3`
-- `com.ratush.jetsamfix` `1.0.1+rootless1`
-- `com.ratush.safeguard` `1.2.1+rootless1`
-- `com.ratush.crontweak` `1.2.0+rootless1`
-- `com.ratush.catmcpcc` `1.0.0+ratu10+rootless1`
-- `com.ratush.ccopenssh` `1.0.10+rootless1`
-- `com.ratush.ccvpnonoffauto` `1.0.1+rootless1`
-- `com.ratush.cchppe` `1.0.1+rootless1`
-- `com.ratush.etchosts17` `0.8.1+rootless1`
-- `com.ratush.isdig` `1.0.0+rootless1`
+- `com.ratush.iggridfeed` `0.5.2`
+- `com.ratush.appabetical` `1.0.16`
+- `com.ratush.ccgapcloser` `0.4.7`
+- `com.ratush.jetsamfix` `1.0.1`
+- `com.ratush.safeguard` `1.2.1`
+- `com.ratush.crontweak` `1.2.0`
+- `com.ratush.catmcpcc` `1.0.0+ratu10`
+- `com.ratush.ccopenssh` `1.0.10`
+- `com.ratush.ccvpnonoffauto` `1.0.1`
+- `com.ratush.cchppe` `1.0.1`
+- `com.ratush.etchosts17` `0.8.1`
+- `com.ratush.isdig` `1.0.0`
 
 ## Existing rootless packages to audit, not replace
 

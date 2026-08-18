@@ -1,6 +1,6 @@
 Package: com.ratush.appabetical
 Name: Appabetical
-Version: 1.0.16+rootless4
+Version: 1.0.16
 Architecture: iphoneos-arm64
 Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). Dopamine rootless adaptation of Avangelista/Appabetical.
 Maintainer: chelaxian
