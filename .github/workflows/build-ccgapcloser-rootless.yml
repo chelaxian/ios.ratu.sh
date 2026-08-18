@@ -25,7 +25,7 @@ jobs:
       - name: Build and require PTRAUTH arm64e
         run: |
           cd source/CCGapCloser-rootless
-          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
           deb="$(echo packages/*.deb)"
           tmp="$(mktemp -d)"
           dpkg-deb -x "$deb" "$tmp"

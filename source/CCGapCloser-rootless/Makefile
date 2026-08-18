@@ -15,8 +15,7 @@ BUNDLE_NAME = CCGapCloserPrefs
 CCGapCloserPrefs_FILES = CCGapCloserPrefs/CCGRootListController.m
 CCGapCloserPrefs_CFLAGS = -fobjc-arc
 CCGapCloserPrefs_FRAMEWORKS = UIKit
-# Preferences classes are resolved by the iOS runtime; the macOS SDK has no
-# link stub for this private framework.
+CCGapCloserPrefs_PRIVATE_FRAMEWORKS = Preferences
 CCGapCloserPrefs_INSTALL_PATH = /Library/PreferenceBundles
 
 include $(THEOS_MAKE_PATH)/bundle.mk

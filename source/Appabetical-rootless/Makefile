@@ -17,8 +17,7 @@ BUNDLE_NAME = AppabeticalPrefs
 AppabeticalPrefs_FILES = AppabeticalPrefs/ABPRootListController.m
 AppabeticalPrefs_CFLAGS = -fobjc-arc
 AppabeticalPrefs_FRAMEWORKS = UIKit
-# Preferences classes are resolved by the iOS runtime; the macOS SDK has no
-# link stub for this private framework.
+AppabeticalPrefs_PRIVATE_FRAMEWORKS = Preferences
 AppabeticalPrefs_INSTALL_PATH = /Library/PreferenceBundles
 
 include $(THEOS_MAKE_PATH)/bundle.mk
