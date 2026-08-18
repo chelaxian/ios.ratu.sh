@@ -1,4 +1,4 @@
-Package: com.ratush.catmcp-rootless-fix
+Package: com.ratush.catmcp-fix
 Name: CatMCP Fix
 Version: 1.7.28
 Architecture: iphoneos-arm64
@@ -8,5 +8,5 @@ Author: ratu.sh
 Section: Tweaks
 Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
 Replaces: com.ratush.catmcp-touch-bridge
-Conflicts: com.ratush.catmcp-touch-bridge, com.ratush.catmcp-roothide-fix
+Conflicts: com.ratush.catmcp-touch-bridge
 Priority: optional

@@ -5,6 +5,6 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Maintainer: ratu.sh
 Author: ratu.sh
 Section: Tweaks
-Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-rootless-fix
+Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-fix
 Architecture: iphoneos-arm64
 Version: 1.0.0+ratu10+rootless1
