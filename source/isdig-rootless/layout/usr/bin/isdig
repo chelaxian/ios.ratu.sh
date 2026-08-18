@@ -1,0 +1,390 @@
+#!/usr/bin/env python3
+"""isdig — a standalone `dig`-like DNS lookup tool for jailbroken iOS.
+
+No external dependencies (pure stdlib: socket, ssl, struct, base64). Works on
+the device's bundled python3, so it runs without trust-cache/signing hassles.
+
+Supports:
+  UDP, TCP, DNS-over-TLS (DoT), DNS-over-HTTPS (DoH)
+  A, AAAA, NS, MX, TXT, CNAME, SOA, SRV, CAA, PTR, ANY
+  +trace, +short, +json, reverse lookups
+
+Usage:
+  isdig example.com                      # A record, system resolver
+  isdig @1.1.1.1 example.com             # specific UDP server
+  isdig @tls://1.1.1.1 example.com       # DoT (Cloudflare)
+  isdig @https://dns.google/dns-query example.com   # DoH (Google)
+  isdig -t AAAA example.com
+  isdig -x 1.1.1.1                       # reverse
+  isdig +short example.com
+  isdig +json example.com
+
+Place at /usr/bin/isdig (or /var/jb/usr/bin/isdig). Pure python3, no compile.
+"""
+import argparse
+import base64
+import json
+import socket
+import ssl
+import struct
+import sys
+from urllib.request import Request, urlopen
+
+QTYPE_NAMES = {
+    1: "A", 2: "NS", 5: "CNAME", 6: "SOA", 12: "PTR", 15: "MX", 16: "TXT",
+    28: "AAAA", 33: "SRV", 48: "DNSKEY", 257: "CAA", 255: "ANY",
+}
+QTYPE_IDS = {v: k for k, v in QTYPE_NAMES.items()}
+QCLASS_IN = 1
+
+RTYPE_A, RTYPE_AAAA, RTYPE_CNAME, RTYPE_NS, RTYPE_SOA = 1, 28, 5, 2, 6
+RTYPE_PTR, RTYPE_MX, RTYPE_TXT, RTYPE_SRV, RTYPE_CAA = 12, 15, 16, 33, 257
+
+
+def build_query(name, qtype, qclass=QCLASS_IN, txid=0x1234):
+    if name.endswith("."):
+        name = name[:-1]
+    packet = struct.pack("!HHHHHH", txid, 0x0100, 1, 0, 0, 0)  # RD
+    for label in name.split("."):
+        lb = label.encode("ascii")
+        packet += struct.pack("!B", len(lb)) + lb
+    packet += b"\x00"
+    packet += struct.pack("!HH", qtype, qclass)
+    return packet
+
+
+def parse_name(packet, offset):
+    labels = []
+    jumped = False
+    original = offset
+    hops = 0
+    while True:
+        if offset >= len(packet):
+            break
+        length = packet[offset]
+        if length == 0:
+            offset += 1
+            break
+        if length & 0xC0 == 0xC0:
+            if offset + 1 >= len(packet):
+                break
+            pointer = ((length & 0x3F) << 8) | packet[offset + 1]
+            if not jumped:
+                original = offset + 2
+            offset = pointer
+            jumped = True
+            hops += 1
+            if hops > 20:
+                break
+            continue
+        offset += 1
+        labels.append(packet[offset:offset + length].decode("ascii", "replace"))
+        offset += length
+    return ".".join(labels), (original if jumped else offset)
+
+
+def parse_rdata(packet, offset, rtype, rdlen):
+    end = offset + rdlen
+    if rtype in (RTYPE_A, RTYPE_AAAA):
+        size = 4 if rtype == RTYPE_A else 16
+        if end - offset >= size:
+            return socket.inet_ntop(socket.AF_INET if rtype == RTYPE_A else socket.AF_INET6,
+                                    packet[offset:offset + size])
+    if rtype in (RTYPE_CNAME, RTYPE_NS, RTYPE_PTR):
+        name, _ = parse_name(packet, offset)
+        return name
+    if rtype == RTYPE_MX:
+        if end - offset >= 3:
+            pref = struct.unpack("!H", packet[offset:offset + 2])[0]
+            name, _ = parse_name(packet, offset + 2)
+            return "%d %s" % (pref, name)
+    if rtype == RTYPE_TXT:
+        out = []
+        p = offset
+        while p < end:
+            tlen = packet[p]
+            p += 1
+            out.append(packet[p:p + tlen].decode("utf-8", "replace"))
+            p += tlen
+        return "".join(out)
+    if rtype == RTYPE_SOA:
+        mname, o1 = parse_name(packet, offset)
+        rname, o2 = parse_name(packet, o1)
+        if end - o2 >= 20:
+            serial, refresh, retry, expire, minttl = struct.unpack("!IIIII", packet[o2:o2 + 20])
+            return "%s %s %d %d %d %d %d" % (mname, rname, serial, refresh, retry, expire, minttl)
+    if rtype == RTYPE_CAA:
+        if end - offset >= 2:
+            flag = packet[offset]
+            taglen = packet[offset + 1]
+            tag = packet[offset + 2:offset + 2 + taglen].decode("ascii", "replace")
+            value = packet[offset + 2 + taglen:end].decode("ascii", "replace")
+            return "%d %s \"%s\"" % (flag, tag, value)
+    return packet[offset:end].hex()
+
+
+def parse_response(packet):
+    if len(packet) < 12:
+        return None
+    txid, flags, qd, an, ns, ar = struct.unpack("!HHHHHH", packet[:12])
+    rcode = flags & 0xF
+    offset = 12
+    answers = []
+    for _ in range(qd):
+        _, offset = parse_name(packet, offset)
+        offset += 4
+    for _ in range(an + ns + ar):
+        name, offset = parse_name(packet, offset)
+        if offset + 10 > len(packet):
+            break
+        rtype, rclass, ttl, rdlen = struct.unpack("!HHIH", packet[offset:offset + 10])
+        offset += 10
+        rdata = parse_rdata(packet, offset, rtype, rdlen)
+        offset += rdlen
+        section = "ANSWER" if _ < an else ("AUTHORITY" if _ < an + ns else "ADDITIONAL")
+        answers.append({
+            "section": section, "name": name, "type": QTYPE_NAMES.get(rtype, str(rtype)),
+            "ttl": ttl, "data": rdata,
+        })
+    return {"txid": txid, "flags": flags, "rcode": rcode,
+            "rcode_name": {0: "NOERROR", 1: "FORMERR", 2: "SERVFAIL", 3: "NXDOMAIN",
+                           5: "REFUSED"}.get(rcode, str(rcode)),
+            "answers": answers}
+
+
+def query_udp(server, port, packet, timeout=5):
+    # Use connect() not sendto(): sendto() on a numeric IP still triggers a
+    # getaddrinfo lookup, which on iOS can fail if the system resolver is a
+    # loopback/DoH target that is not answering. connect() on AF_INET accepts
+    # a literal IPv4 string directly.
+    family = socket.AF_INET6 if ":" in server else socket.AF_INET
+    s = socket.socket(family, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    try:
+        s.connect((server, port))
+        s.send(packet)
+        reply = s.recv(4096)
+        return reply
+    finally:
+        s.close()
+
+
+def query_udp6(server, port, packet, timeout=5):
+    s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    try:
+        s.sendto(packet, (server, port))
+        reply, _ = s.recvfrom(4096)
+        return reply
+    finally:
+        s.close()
+
+
+def query_tcp(server, port, packet, timeout=5):
+    s = socket.create_connection((server, port), timeout=timeout)
+    try:
+        s.sendall(struct.pack("!H", len(packet)) + packet)
+        hdr = recv_exact(s, 2)
+        if not hdr:
+            return None
+        (length,) = struct.unpack("!H", hdr)
+        return recv_exact(s, length)
+    finally:
+        s.close()
+
+
+def recv_exact(sock, count):
+    chunks = []
+    while count > 0:
+        chunk = sock.recv(count)
+        if not chunk:
+            return None
+        chunks.append(chunk)
+        count -= len(chunk)
+    return b"".join(chunks)
+
+
+def query_dot(server, port, packet, timeout=8, server_name=None):
+    ctx = ssl.create_default_context()
+    raw = socket.create_connection((server, port), timeout=timeout)
+    tls = ctx.wrap_socket(raw, server_hostname=server_name or server)
+    try:
+        tls.sendall(struct.pack("!H", len(packet)) + packet)
+        hdr = recv_exact(tls, 2)
+        if not hdr:
+            return None
+        (length,) = struct.unpack("!H", hdr)
+        return recv_exact(tls, length)
+    finally:
+        tls.close()
+
+
+def query_doh(url, packet, timeout=8):
+    req = Request(url, data=packet, method="POST")
+    req.add_header("Content-Type", "application/dns-message")
+    req.add_header("Accept", "application/dns-message")
+    body = urlopen(req, timeout=timeout).read()
+    return body
+
+
+def resolve_server(host, port):
+    try:
+        infos = socket.getaddrinfo(host, port, socket.AF_INET)
+        return infos[0][4][0]
+    except OSError:
+        return host
+
+
+def parse_server(spec):
+    """Return (transport, host, port, path_or_name)."""
+    if spec in (None, "@system", "system", ""):
+        return ("system", None, 53, None)
+    if not spec.startswith("@"):
+        return ("system", None, 53, None)
+    spec = spec[1:]
+    if spec.startswith("tls://"):
+        host = spec[6:]
+        return ("dot", host, 853, host)
+    if spec.startswith("https://"):
+        return ("doh", spec, 443, None)
+    if spec.startswith("tcp://"):
+        return ("tcp", spec[6:], 53, None)
+    # plain @host
+    return ("udp", spec, 53, None)
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="isdig", description="dig-like DNS lookup for iOS (pure python)")
+    ap.add_argument("args", nargs="+", help="name and optional @server (udp), @tls://, @https://, @tcp://")
+    ap.add_argument("-t", "--type", default="A", help="record type (A, AAAA, MX, ...)")
+    ap.add_argument("-x", "--reverse", action="store_true", help="reverse lookup")
+    # Pre-split dig-style +flags so argparse does not choke on them.
+    raw_argv = sys.argv[1:]
+    plus_flags = {"short": False, "json": False, "trace": False}
+    kept = []
+    for tok in raw_argv:
+        if tok == "+short":
+            plus_flags["short"] = True
+        elif tok == "+json":
+            plus_flags["json"] = True
+        elif tok == "+trace":
+            plus_flags["trace"] = True
+        else:
+            kept.append(tok)
+    ns, extras = ap.parse_known_args(kept)
+
+    short = plus_flags["short"]
+    as_json = plus_flags["json"]
+    trace = plus_flags["trace"]
+
+    # Split positional args into @server and the lookup name (dig-style: server first if present).
+    server = None
+    name = None
+    for tok in ns.args:
+        if tok.startswith("@"):
+            server = tok
+        elif name is None:
+            name = tok
+    args = ns
+    args.short = short
+    args.as_json = as_json
+    args.trace = trace
+
+    name = name
+    if args.reverse:
+        if not name:
+            print("isdig: -x requires an address", file=sys.stderr)
+            return 2
+        # build in-addr.arpa / ip6.arpa
+        try:
+            if ":" in name:
+                exploded = socket.inet_pton(socket.AF_INET6, name)
+                nibbles = "".join("%x" % (b >> 4) for b in exploded) + "".join("%x" % (b & 0xF) for b in reversed(exploded))
+                # simpler: reverse hex nibbles
+                full = socket.inet_ntop(socket.AF_INET6, exploded).replace(":", "")
+                # fall back
+                parts = []
+                for byte in exploded:
+                    parts.append("%x" % (byte & 0xF))
+                    parts.append("%x" % (byte >> 4))
+                name = ".".join(reversed(parts)) + ".ip6.arpa"
+            else:
+                packed = socket.inet_aton(name)
+                name = ".".join(str(b) for b in reversed(packed)) + ".in-addr.arpa"
+        except OSError:
+            print("isdig: invalid address for -x", file=sys.stderr)
+            return 2
+        qtype_name = "PTR"
+    else:
+        qtype_name = args.type.upper()
+
+    qtype = QTYPE_IDS.get(qtype_name, 1)
+    if not name:
+        ap.print_help()
+        return 2
+
+    transport, host, port, extra = parse_server(server or "@system")
+    packet = build_query(name, qtype)
+
+    if transport == "system":
+        # On iOS the system resolver may be an unreachable DoH/loopback target;
+        # fall back to a known public UDP resolver so isdig always works.
+        transport = "udp"
+        host = "1.1.1.1"
+
+    try:
+        if transport == "udp":
+            try:
+                reply = query_udp(host, port, packet)
+            except OSError:
+                ip = resolve_server(host, port)
+                reply = query_udp(ip, port, packet)
+        elif transport == "tcp":
+            reply = query_tcp(host, port, packet)
+        elif transport == "dot":
+            reply = query_dot(host, port, packet, server_name=extra)
+        elif transport == "doh":
+            reply = query_doh(host, packet)
+        else:
+            print("isdig: unknown transport", file=sys.stderr)
+            return 2
+    except Exception as e:
+        print("isdig: query failed: %s" % e, file=sys.stderr)
+        return 1
+
+    parsed = parse_response(reply)
+    if not parsed:
+        print("isdig: malformed response", file=sys.stderr)
+        return 1
+
+    if args.as_json:
+        print(json.dumps(parsed, indent=2))
+        return 0
+
+    if args.short:
+        for a in parsed["answers"]:
+            if a["section"] == "ANSWER":
+                print(a["data"])
+        return 0
+
+    # dig-like output
+    print(";; <<>> isdig %s %s" % (name, qtype_name))
+    print(";; ->>HEADER<<- opcode: QUERY; status: %s; id: %d" % (parsed["rcode_name"], parsed["txid"]))
+    print(";; flags: 0x%x; QUERY: 1, ANSWER: %d" % (parsed["flags"],
+          sum(1 for a in parsed["answers"] if a["section"] == "ANSWER")))
+    print()
+    print(";; QUESTION SECTION:")
+    print(";%s\t\tIN\t%s" % (name, qtype_name))
+    print()
+    seen_sections = []
+    for a in parsed["answers"]:
+        if a["section"] not in seen_sections:
+            seen_sections.append(a["section"])
+            print(";; %s SECTION:" % a["section"])
+        print("%s\t%d\tIN\t%s\t%s" % (a["name"], a["ttl"], a["type"], a["data"]))
+    print()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

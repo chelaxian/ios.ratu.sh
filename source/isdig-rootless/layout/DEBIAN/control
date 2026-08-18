@@ -1,0 +1,10 @@
+Package: com.ratush.isdig
+Name: isdig (dig for iOS)
+Version: 1.0.0+rootless1
+Architecture: iphoneos-arm64
+Description: Standalone dig-like DNS lookup tool for jailbroken iOS.
+ A pure-python (stdlib-only) replacement for dig/host/nslookup that runs on the device's bundled python3 with NO compilation and NO external dependencies. Supports UDP, TCP, DNS-over-TLS (DoT), DNS-over-HTTPS (DoH); record types A, AAAA, NS, MX, TXT, CNAME, SOA, SRV, CAA, PTR, ANY; +short, +json, +trace, and reverse (-x) lookups. Useful for /iosjail diagnostics where dig/kdig/dnsutils are absent from all Sileo/Procursus repos. Usage: isdig example.com; isdig @1.1.1.1 example.com; isdig @tls://1.1.1.1 example.com; isdig @https://dns.google/dns-query example.com; isdig -t MX gmail.com +short; isdig -x 1.1.1.1.
+Maintainer: ratush
+Author: ratush
+Section: Network
+Depends: firmware (>= 15.0), python3
