@@ -1,0 +1,9 @@
+#!/bin/sh
+CCCONF="/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist"
+if [ -f "$CCCONF" ]; then
+    TMPF="$CCCONF.tmp.$$"
+    grep -v 'com.ratush.ccopenssh' "$CCCONF" > "$TMPF" 2>/dev/null && mv "$TMPF" "$CCCONF" 2>/dev/null || rm -f "$TMPF"
+    chown mobile:mobile "$CCCONF" 2>/dev/null || true
+fi
+killall -9 ControlCenterUIKit 2>/dev/null || true
+exit 0

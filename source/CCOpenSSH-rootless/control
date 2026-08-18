@@ -1,0 +1,10 @@
+Package: com.ratush.ccopenssh
+Name: CCOPENSSH
+Description: Control Center and Settings controller for Dopamine rootless OpenSSH. The tile reports the configured TCP listener and the helper applies launchd socket/config/auth settings.
+Icon: https://ios.ratu.sh/icons/ccopenssh.png
+Maintainer: ratu.sh
+Author: ratu.sh
+Section: Tweaks
+Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
+Architecture: iphoneos-arm64
+Version: 1.0.10+rootless1

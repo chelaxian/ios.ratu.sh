@@ -1,0 +1,26 @@
+name: Build CCOpenSSH rootless
+on:
+  push:
+    paths: ['source/CCOpenSSH-rootless/**', '.github/workflows/build-ccopenssh-rootless.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - run: |
+          cd source/CCOpenSSH-rootless
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          cp postinst postrm .theos/_/DEBIAN/ && chmod 755 .theos/_/DEBIAN/postinst .theos/_/DEBIAN/postrm
+          dpkg-deb -Zgzip --root-owner-group -b .theos/_ packages/rootless.deb
+          tmp="$(mktemp -d)"; dpkg-deb -x packages/rootless.deb "$tmp"
+          for b in "$tmp/var/jb/Library/ControlCenter/Bundles/CCOpenSSH.bundle/CCOpenSSH" "$tmp/var/jb/Library/PreferenceBundles/CCOpenSSHPrefs.bundle/CCOpenSSHPrefs" "$tmp/var/jb/usr/bin/ccopenssh"; do lipo -thin arm64e "$b" -output "$tmp/a"; test "$(xxd -p -s 8 -l 4 "$tmp/a")" = 02000080; done
+          mkdir artifacts && cp packages/rootless.deb artifacts/com.ratush.ccopenssh_1.0.10+rootless1_iphoneos-arm64.deb
+      - uses: actions/upload-artifact@v4
+        with: {name: ccopenssh-rootless-deb, path: source/CCOpenSSH-rootless/artifacts/*.deb}

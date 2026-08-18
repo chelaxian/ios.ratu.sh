@@ -1,0 +1,52 @@
+#!/bin/sh
+HELPER="/var/jb/usr/bin/ccopenssh"
+BUNDLE_DIR="/var/jb/Library/ControlCenter/Bundles/CCOpenSSH.bundle"
+[ -f "$HELPER" ] && { chown root:wheel "$HELPER" 2>/dev/null || true; chmod 4755 "$HELPER" 2>/dev/null || true; }
+
+PREF="/var/mobile/Library/Preferences/com.ratush.ccopenssh.plist"
+if [ ! -f "$PREF" ]; then
+    cat > "$PREF" <<'PL'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>enabled</key><true/>
+<key>port</key><integer>2222</integer>
+<key>username</key><string>mobile</string>
+<key>allowPassword</key><true/>
+<key>allowKey</key><true/>
+<key>acl</key><array><string>0.0.0.0/0</string></array>
+</dict></plist>
+PL
+    chown mobile:mobile "$PREF" 2>/dev/null || true
+fi
+
+MOD_ID="com.ratush.ccopenssh"
+CCCONF="/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist"
+if [ -f "$CCCONF" ]; then
+    cp "$CCCONF" "$CCCONF.ccopenssh.$(date +%s).bak" 2>/dev/null || true
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$CCCONF" "$MOD_ID" <<'PY' 2>/dev/null || true
+import plistlib, sys
+p, mod = sys.argv[1], sys.argv[2]
+with open(p, "rb") as f:
+    d = plistlib.load(f)
+a = d.get("module-identifiers")
+if not isinstance(a, list):
+    a = []
+if mod not in a:
+    a.append(mod)
+d["module-identifiers"] = a
+with open(p, "wb") as f:
+    plistlib.dump(d, f, fmt=plistlib.FMT_XML)
+PY
+    elif ! grep -q "$MOD_ID" "$CCCONF" 2>/dev/null; then
+        TMPF="$CCCONF.tmp.$$"
+        awk -v id="$MOD_ID" '/<key>module-identifiers<\/key>/ {f=1; print; next} f && /<array>/ {print; print "\t\t\t<string>" id "</string>"; f=2; next} {print}' "$CCCONF" > "$TMPF" 2>/dev/null && mv "$TMPF" "$CCCONF" 2>/dev/null || rm -f "$TMPF"
+    fi
+    chown mobile:mobile "$CCCONF" 2>/dev/null || true
+fi
+
+"$HELPER" apply >/dev/null 2>&1 || true
+killall -9 ControlCenterUIKit 2>/dev/null || true
+killall -9 Preferences 2>/dev/null || true
+exit 0
