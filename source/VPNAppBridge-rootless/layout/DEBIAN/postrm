@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+PREFIX=
+[ -d /var/jb/Library/MobileSubstrate/DynamicLibraries ] && PREFIX=/var/jb
+PLIST="$PREFIX/Library/LaunchAgents/com.ratush.vpnbridged.plist"
+launchctl bootout user/501 "$PLIST" >/dev/null 2>&1 || true
+killall ratuvpnd >/dev/null 2>&1 || true
+rm -f "$PREFIX/Library/MobileSubstrate/DynamicLibraries/RatuVPNBridge.dylib.roothidepatch"
+
+exit 0

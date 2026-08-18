@@ -1,0 +1,9 @@
+Package: com.ratush.vpnappbridge
+Name: Aut0VPN (fix)
+Version: 1.0.7
+Architecture: iphoneos-arm64e
+Description: RootHide-native foreground app bridge for starting and stopping the active system VPN.
+Maintainer: chelaxian <chelaxian@users.noreply.github.com>
+Author: chelaxian
+Section: Tweaks
+Depends: com.snail.autovpn.global (= 1.0.8+roothidefix2)

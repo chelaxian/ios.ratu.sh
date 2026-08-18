@@ -1,0 +1,114 @@
+#!/bin/sh
+set -e
+
+PREFIX=
+[ -d /var/jb/Library/MobileSubstrate/DynamicLibraries ] && PREFIX=/var/jb
+
+DIR="$PREFIX/Library/MobileSubstrate/DynamicLibraries"
+PATCH="$PREFIX/usr/lib/DynamicPatches/AutoPatches.dylib"
+SHARE="$PREFIX/usr/share/ratuvpnbridge"
+
+mkdir -p "$DIR" "$SHARE"
+
+killall ratuvpnd >/dev/null 2>&1 || true
+
+if [ -e "$PATCH" ]; then
+  ln -sfn "$PATCH" "$DIR/RatuVPNBridge.dylib.roothidepatch"
+fi
+
+chmod 0755 "$PREFIX/usr/bin/ratuvpnctl" 2>/dev/null || true
+chmod 0755 "$PREFIX/usr/bin/ratuvpnd" 2>/dev/null || true
+
+if command -v python3 >/dev/null 2>&1; then
+  python3 <<PY >/dev/null 2>&1 || true
+import os, plistlib, shutil, time
+
+prefix = "$PREFIX"
+dir_path = "$DIR"
+share = "$SHARE"
+prefs_path = "/var/mobile/Library/Preferences/com.snail.autovpnpref.plist"
+config_path = "/var/mobile/Library/RootHide/RootHideConfig.plist"
+bridge_plist_path = os.path.join(dir_path, "RatuVPNBridge.plist")
+launch_plist = os.path.join(prefix, "Library/LaunchAgents/com.ratush.vpnbridged.plist")
+script = "/var/mobile/.ratuvpnbridge-start.sh"
+
+def clean_list(value):
+    out = []
+    seen = set()
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item and item not in seen:
+                seen.add(item)
+                out.append(item)
+    return out
+
+prefs = {}
+if os.path.exists(prefs_path):
+    prefs = plistlib.load(open(prefs_path, "rb"))
+
+need = clean_list(prefs.get("needVPNApps"))
+noneed = clean_list(prefs.get("noNeedVPNApps"))
+bundles = ["com.apple.springboard"]
+
+plistlib.dump({"Filter": {"Bundles": bundles}}, open(bridge_plist_path, "wb"), fmt=plistlib.FMT_XML)
+plistlib.dump({
+    "isEnabled": prefs.get("isEnabled", True),
+    "isEnabledIndicator": prefs.get("isEnabledIndicator", True),
+    "indicatorColor": prefs.get("indicatorColor", "#32C659"),
+    "isHideOriginalVPN": prefs.get("isHideOriginalVPN", False),
+    "isTrunonVPNAfterSpring": prefs.get("isTrunonVPNAfterSpring", False),
+    "isTrunoffVPNOnSpringBoard": prefs.get("isTrunoffVPNOnSpringBoard", False),
+    "isTurnHoldWhenPlaying": prefs.get("isTurnHoldWhenPlaying", True),
+    "isTurnoffVPNWhenLocked": prefs.get("isTurnoffVPNWhenLocked", True),
+    "isTurnoffVPNWhenDeleted": prefs.get("isTurnoffVPNWhenDeleted", True),
+    "bannedWiFis": prefs.get("bannedWiFis", []),
+    "needVPNApps": need,
+    "noNeedVPNApps": noneed,
+}, open(os.path.join(share, "apps.plist"), "wb"), fmt=plistlib.FMT_BINARY)
+
+if os.path.exists(config_path) and bundles != ["com.ratush.vpnbridge.placeholder"]:
+    backup = config_path + ".codex-before-vpnbridge-" + time.strftime("%Y%m%d-%H%M%S")
+    shutil.copyfile(config_path, backup)
+    config = plistlib.load(open(config_path, "rb"))
+    appconfig = config.setdefault("appconfig", {})
+    changed = False
+    for bundle in bundles:
+        if appconfig.get(bundle) is not True:
+            appconfig[bundle] = True
+            changed = True
+    if changed:
+        plistlib.dump(config, open(config_path, "wb"), fmt=plistlib.FMT_BINARY)
+
+helper = os.path.join(prefix, "usr/bin/ratuvpnd")
+args = [helper]
+
+if os.path.exists(launch_plist):
+    lp = plistlib.load(open(launch_plist, "rb"))
+    lp["ProgramArguments"] = args
+    plistlib.dump(lp, open(launch_plist, "wb"), fmt=plistlib.FMT_XML)
+
+with open(script, "w") as f:
+    f.write("#!/bin/sh\n")
+    f.write("killall ratuvpnd >/dev/null 2>&1 || true\n")
+    f.write("nohup '" + helper + "' >/var/mobile/ratuvpnbridge.out 2>/var/mobile/ratuvpnbridge.err &\n")
+os.chmod(script, 0o755)
+PY
+fi
+
+chown root:wheel "$DIR/RatuVPNBridge.plist" 2>/dev/null || true
+chmod 0644 "$DIR/RatuVPNBridge.plist" 2>/dev/null || true
+chown -R root:wheel "$SHARE" 2>/dev/null || true
+chmod 0755 "$SHARE" 2>/dev/null || true
+chmod 0644 "$SHARE/apps.plist" 2>/dev/null || true
+
+PLIST="$PREFIX/Library/LaunchAgents/com.ratush.vpnbridged.plist"
+if [ -f "$PLIST" ]; then
+  chown root:wheel "$PLIST" 2>/dev/null || true
+  chmod 0644 "$PLIST" 2>/dev/null || true
+fi
+
+if [ -x /var/mobile/.ratuvpnbridge-start.sh ]; then
+  /bin/sh /var/mobile/.ratuvpnbridge-start.sh >/dev/null 2>&1 || true
+fi
+
+exit 0
