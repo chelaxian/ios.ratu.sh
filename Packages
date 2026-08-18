@@ -185,7 +185,7 @@ Author: choco
 Name: TGExtra
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+roothide15
+Version: 0.0.6+rh
 Architecture: iphoneos-arm64e
 Maintainer: level3tjg
 Installed-Size: 660
@@ -202,7 +202,7 @@ Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
 Package: com.level3tjg.offloader
-Version: 0.0.6+rootless16
+Version: 0.0.6
 Architecture: iphoneos-arm64
 Maintainer: level3tjg
 Installed-Size: 332
@@ -255,7 +255,7 @@ Author: Muirey03
 Name: libMRYIPC
 
 Package: com.muirey03.libmryipc
-Version: 2.0.1+roothide3
+Version: 2.0.1+rh
 Architecture: iphoneos-arm64e
 Maintainer: Muirey03
 Installed-Size: 308
@@ -292,7 +292,7 @@ Name: AppData
 Sileodepiction: https://jailrepo.initnil.com/api?Package=com.netskao.appdata
 
 Package: com.netskao.appdata
-Version: 2.6.9+rootless1
+Version: 2.6.9
 Architecture: iphoneos-arm64
 Maintainer: 搬运工
 Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
@@ -327,7 +327,7 @@ Icon: https://img.chariz.cloud/icon/albummanager/icon@3x.png
 Name: AlbumManager
 
 Package: com.noisyflake.albummanager
-Version: 1.0.2+rootless1
+Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: NoisyFlake
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
@@ -358,7 +358,7 @@ Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by che
 Name: Appabetical
 
 Package: com.ratush.appabetical
-Version: 1.0.16+rootless4
+Version: 1.0.16
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 460
@@ -428,7 +428,7 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.0.0+ratu10+rootless1
+Version: 1.0.0+ratu10
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 304
@@ -461,7 +461,7 @@ Author: chelaxian
 Name: CCGapCloser
 
 Package: com.ratush.ccgapcloser
-Version: 0.4.7+rootless3
+Version: 0.4.7
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 360
@@ -494,7 +494,7 @@ Author: chelaxian
 Name: CCHPM
 
 Package: com.ratush.cchppe
-Version: 1.0.1+rootless1
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 176
@@ -528,7 +528,7 @@ Icon: https://ios.ratu.sh/icons/ccopenssh.png
 Name: CCOPENSSH
 
 Package: com.ratush.ccopenssh
-Version: 1.0.10+rootless1
+Version: 1.0.10
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 508
@@ -562,7 +562,7 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1+rootless1
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 372
@@ -597,7 +597,7 @@ Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
 Name: CronTweak
 
 Package: com.ratush.crontweak
-Version: 1.2.0+rootless1
+Version: 1.2.0
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 244
@@ -635,7 +635,7 @@ Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
 
 Package: com.ratush.etchosts17
-Version: 0.8.1+rootless1
+Version: 0.8.1
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 1012
@@ -708,7 +708,7 @@ Author: chelaxian
 Name: Instagram 3x3 Grid Feed
 
 Package: com.ratush.iggridfeed
-Version: 0.5.2+rootless1
+Version: 0.5.2
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 88
@@ -740,7 +740,7 @@ Author: ratush
 Name: isdig (dig for iOS)
 
 Package: com.ratush.isdig
-Version: 1.0.0+rootless1
+Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Depends: firmware (>= 15.0), python3
@@ -772,7 +772,7 @@ Author: ratush
 Name: JetsamFix
 
 Package: com.ratush.jetsamfix
-Version: 1.0.1+rootless1
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 312
@@ -804,7 +804,7 @@ Author: ratush
 Name: Safeguard
 
 Package: com.ratush.safeguard
-Version: 1.2.1+rootless1
+Version: 1.2.1
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 312
@@ -903,7 +903,7 @@ Author: roothide
 Name: PatchLoader
 
 Package: com.snail.autovpn.global
-Version: 1.0.8+roothidefix2
+Version: 1.0.8+rh
 Architecture: iphoneos-arm64e
 Maintainer: Snail <mu514983786@gmail.com>
 Installed-Size: 1048
@@ -919,7 +919,7 @@ Author: Snail <mu514983786@gmail.com>
 Name: AutoVPN
 
 Package: com.snail.autovpn.global
-Version: 1.0.8+rootless1
+Version: 1.0.8
 Architecture: iphoneos-arm64
 Maintainer: Snail <mu514983786@gmail.com>
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.altlist
@@ -4023,7 +4023,7 @@ Author: Muirey03
 Name: Cr4shed
 
 Package: xyz.cypwn.cr4shed
-Version: 4.3.1-2+roothide4
+Version: 4.3.1-2+rh
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)

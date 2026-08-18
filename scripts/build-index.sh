@@ -17,8 +17,8 @@ from pathlib import Path
 import re
 p = Path('Packages')
 s = p.read_text(encoding='utf-8')
-s = re.sub(r'(?m)^Version: ([^\\r\\n]*?)\\+rootless[0-9]*$', r'Version: \\1', s)
-s = re.sub(r'(?m)^Version: ([^\\r\\n]*?)\\+roothide[^\\r\\n]*$', r'Version: \\1+rh', s)
+s = re.sub(r'(?m)^Version: ([^\r\n]*?)\+rootless[0-9]*$', r'Version: \1', s)
+s = re.sub(r'(?m)^Version: ([^\r\n]*?)\+roothide[^\r\n]*$', r'Version: \1+rh', s)
 p.write_text(s, encoding='utf-8')
 PY
 
