@@ -1,6 +1,6 @@
 # ios.ratu.sh
 
-Personal APT repository for RootHide Bootstrap and modern rootless jailbreaks.
+Personal APT repository for RootHide Bootstrap, Dopamine, and modern rootless jailbreaks.
 
 Repository URL: `https://ios.ratu.sh/`
 
@@ -68,7 +68,7 @@ grep -E '^(Package|Name|Version|Architecture|Section|Filename|SHA256):' Packages
 
 ## Claude Code iOS
 
-`com.ratush.claude-code-ios` packages Claude Code 2.1.112 for rootless iOS with
+`com.ratush.claude-code-ios` is a **Dopamine/rootless tweak** that packages Claude Code 2.1.112 with
 the bundled iOS Node runtime and an iOS-patched ripgrep. Its home-screen launcher
 opens **NewTerm 3** through its supported `ssh://` URL scheme and then starts
 Claude Code in the terminal. This replaces the old unregistered `newterm3://`
