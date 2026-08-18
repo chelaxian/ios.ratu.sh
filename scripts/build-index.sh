@@ -23,8 +23,8 @@ for stanza in stanzas:
     if re.search(r'(?m)^Section: Tweaks$', stanza):
         def clean(m):
             value = m.group(1)
-            base = value.split('+', 1)[0]
-            return 'Version: ' + (base + '+rh' if '+rh' in value else base)
+            numeric = re.match(r'([0-9]+(?:\.[0-9]+)*(?:-[0-9]+)?)', value)
+            return 'Version: ' + (numeric.group(1) if numeric else value)
         stanza = re.sub(r'(?m)^Version: ([^\r\n]+)$', clean, stanza)
     out.append(stanza)
 p.write_text(''.join(out), encoding='utf-8')
