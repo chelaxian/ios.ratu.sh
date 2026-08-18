@@ -448,6 +448,24 @@ Author: chelaxian
 Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
 Name: CronTweak
 
+Package: com.ratush.crontweak
+Version: 1.2.0+rootless1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 244
+Depends: preferenceloader, firmware (>= 17.0)
+Filename: debs/com.ratush.crontweak_1.2.0+rootless1_iphoneos-arm64.deb
+Size: 43036
+MD5sum: 38d551605fcaccb6a018bda29f815a95
+SHA1: 3942ffeb1359305d2e02a6606910018cfc954e4c
+SHA256: f272cce7847adf63934e22861d65d8e3065f43f7bef553d7506a4a5da3149790
+Section: Tweaks
+Homepage: https://ios.ratu.sh/
+Description: crontab-syntax scheduler. Write cron-style lines (min hour dom mon dow command) in Settings, they auto-convert to native launchd LaunchDaemons.
+Author: chelaxian
+Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
+Name: CronTweak
+
 Package: com.ratush.etchosts17
 Version: 0.8.1
 Architecture: iphoneos-arm64e
