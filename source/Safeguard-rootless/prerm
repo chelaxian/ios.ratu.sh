@@ -1,0 +1,9 @@
+#!/bin/bash
+# com.ratush.safeguard prerm
+LABEL="com.ratush.safeguardd"
+PLIST="/var/jb/Library/LaunchDaemons/com.ratush.safeguardd.plist"
+
+launchctl bootout "system/$LABEL" 2>/dev/null || \
+launchctl unload "$PLIST" 2>/dev/null || true
+
+exit 0

@@ -1,0 +1,9 @@
+#!/bin/bash
+# com.ratush.jetsamfix prerm
+LABEL="com.ratush.jetsamfixd"
+PLIST="/var/jb/Library/LaunchDaemons/com.ratush.jetsamfixd.plist"
+
+launchctl bootout "system/$LABEL" 2>/dev/null || \
+launchctl unload "$PLIST" 2>/dev/null || true
+
+exit 0

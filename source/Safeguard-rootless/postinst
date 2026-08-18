@@ -1,0 +1,27 @@
+#!/bin/bash
+# com.ratush.safeguard postinst
+set -e
+
+PREFS="/var/mobile/Library/Preferences"
+CFG="$PREFS/com.ratush.safeguard.plist"
+TPL="/var/jb/usr/share/safeguard/default-config.plist"
+PLIST="/var/jb/Library/LaunchDaemons/com.ratush.safeguardd.plist"
+LABEL="com.ratush.safeguardd"
+
+# Seed the reference config only if none exists (documentation/override only;
+# the daemon uses built-in policy). Best-effort; do not fail install if the
+# daemon namespace cannot see this later.
+if [ ! -f "$CFG" ] && [ -f "$TPL" ]; then
+	cp "$TPL" "$CFG" 2>/dev/null || true
+fi
+chown mobile:mobile "$CFG" 2>/dev/null || true
+
+# Load + start the daemon. Modern bootstrap, fall back to legacy load.
+if [ -f "$PLIST" ]; then
+	launchctl bootstrap system "$PLIST" 2>/dev/null || \
+	launchctl load -w "$PLIST" 2>/dev/null || true
+	launchctl enable "system/$LABEL" 2>/dev/null || true
+	launchctl kickstart -k "system/$LABEL" 2>/dev/null || true
+fi
+
+exit 0

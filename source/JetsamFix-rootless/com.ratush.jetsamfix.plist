@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LenientMode</key>
+	<true/>
+	<key>Interval</key>
+	<integer>30</integer>
+	<key>Targets</key>
+	<array>
+		<!-- SpringBoard: remove the fatal per-process cap, keep Home band -->
+		<dict>
+			<key>Name</key>
+			<string>SpringBoard</string>
+			<key>Priority</key>
+			<integer>160</integer>
+			<key>LimitMB</key>
+			<integer>0</integer>
+		</dict>
+		<!-- VPN packet tunnels: default 15MB hard cap raised to 256MB -->
+		<dict>
+			<key>Name</key>
+			<string>NEPacketTunnelProvider</string>
+			<key>LimitMB</key>
+			<integer>256</integer>
+		</dict>
+		<dict>
+			<key>Name</key>
+			<string>backboardd</string>
+			<key>Priority</key>
+			<integer>150</integer>
+		</dict>
+	</array>
+</dict>
+</plist>

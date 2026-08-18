@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Documentation / reference defaults. The safeguard daemon uses the
+	     built-in policy baked into the binary because a RootHide launchd
+	     daemon cannot reliably open() files under /var/mobile from its
+	     data-container namespace. These keys mirror those built-ins. -->
+	<key>Armed</key>
+	<true/>
+	<key>DryRun</key>
+	<false/>
+	<key>Interval</key>
+	<integer>20</integer>
+	<key>RedMB</key>
+	<integer>60</integer>
+	<key>AmberMB</key>
+	<integer>120</integer>
+	<key>HogCeilingMB</key>
+	<integer>200</integer>
+	<!-- Only these process names may ever be auto-killed (case-exact match
+	     against the kernel p_comm, truncated to ~16 chars). -->
+	<key>KillAllow</key>
+	<array>
+		<string>frida-server</string>
+		<string>frida-helper</string>
+	</array>
+	<!-- Never touched even if somehow allowlisted. -->
+	<key>NeverKill</key>
+	<array>
+		<string>SpringBoard</string>
+		<string>backboardd</string>
+		<string>launchd</string>
+		<string>kernel_task</string>
+		<string>debugserver</string>
+		<string>cfprefsd</string>
+		<string>runningboardd</string>
+		<string>amfid</string>
+	</array>
+</dict>
+</plist>

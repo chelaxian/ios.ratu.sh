@@ -1,0 +1,9 @@
+Package: com.ratush.jetsamfix
+Name: JetsamFix
+Version: 1.0.1+rootless1
+Architecture: iphoneos-arm64
+Description: Memory-manager daemon for Dopamine rootless. Removes SpringBoard's per-process jetsam fatal cap, raises backboardd/VPN priority, and enables global aggressive-lenient mode to reduce OOM/safe-mode crashes on iOS 17. Control via `jetsamfix status|apply|lenient on|off`.
+Maintainer: ratush
+Author: ratush
+Section: Tweaks
+Depends: firmware (>= 14.0)

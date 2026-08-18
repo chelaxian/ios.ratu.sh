@@ -1,0 +1,27 @@
+#!/bin/bash
+# com.ratush.jetsamfix postinst
+set -e
+
+PREFS="/var/mobile/Library/Preferences"
+CFG="$PREFS/com.ratush.jetsamfix.plist"
+TPL="/var/jb/usr/share/jetsamfix/default-config.plist"
+PLIST="/var/jb/Library/LaunchDaemons/com.ratush.jetsamfixd.plist"
+LABEL="com.ratush.jetsamfixd"
+
+# Seed the default config only if the user has none yet (don't clobber edits)
+if [ ! -f "$CFG" ] && [ -f "$TPL" ]; then
+	cp "$TPL" "$CFG" 2>/dev/null || true
+fi
+chown mobile:mobile "$CFG" 2>/dev/null || true
+touch "$PREFS/com.ratush.jetsamfix.log" 2>/dev/null || true
+chown mobile:mobile "$PREFS/com.ratush.jetsamfix.log" 2>/dev/null || true
+
+# Load + start the daemon. Try the modern bootstrap, fall back to legacy load.
+if [ -f "$PLIST" ]; then
+	launchctl bootstrap system "$PLIST" 2>/dev/null || \
+	launchctl load -w "$PLIST" 2>/dev/null || true
+	launchctl enable "system/$LABEL" 2>/dev/null || true
+	launchctl kickstart -k "system/$LABEL" 2>/dev/null || true
+fi
+
+exit 0

@@ -1,0 +1,36 @@
+name: Build JetsamFix rootless
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/JetsamFix-rootless/**'
+      - '.github/workflows/build-jetsamfix-rootless.yml'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+      - name: Build and require PTRAUTH arm64e
+        run: |
+          cd source/JetsamFix-rootless
+          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          cp postinst prerm .theos/_/DEBIAN/
+          chmod 755 .theos/_/DEBIAN/postinst .theos/_/DEBIAN/prerm
+          dpkg-deb -Zgzip --root-owner-group -b .theos/_ packages/rootless.deb
+          tmp="$(mktemp -d)"; dpkg-deb -x packages/rootless.deb "$tmp"
+          for binary in "$tmp/var/jb/usr/bin/jetsamfixd" "$tmp/var/jb/usr/bin/jetsamfix"; do
+            lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
+            test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = "02000080"
+          done
+          mkdir artifacts; cp packages/rootless.deb artifacts/com.ratush.jetsamfix_1.0.1+rootless1_iphoneos-arm64.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jetsamfix-rootless-deb
+          path: source/JetsamFix-rootless/artifacts/*.deb
+          if-no-files-found: error

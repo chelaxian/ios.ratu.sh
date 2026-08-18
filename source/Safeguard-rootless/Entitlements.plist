@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>platform-application</key>
+	<true/>
+	<key>com.apple.private.security.no-sandbox</key>
+	<true/>
+	<key>com.apple.private.security.no-container</key>
+	<true/>
+	<!-- Used ONLY so the daemon can lift its own 6 MB launchd jetsam cap and
+	     survive memory pressure (self-protection). It does not set policy on
+	     other processes — cross-process policy stays in JetsamFix. -->
+	<key>com.apple.private.memorystatus</key>
+	<true/>
+</dict>
+</plist>
