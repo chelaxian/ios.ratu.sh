@@ -30,7 +30,9 @@ jobs:
           sudo apt-get install --yes dpkg-dev bzip2
 
       - name: Build repository metadata
-        run: ./scripts/build-index.sh
+        # The repository is edited from Windows too, where Git may not retain
+        # an executable bit. Invoke Bash explicitly rather than relying on it.
+        run: bash ./scripts/build-index.sh
 
       - name: Commit updated metadata
         run: |
