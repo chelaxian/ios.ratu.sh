@@ -10,6 +10,18 @@ if ! command -v dpkg-scanpackages >/dev/null 2>&1; then
 fi
 
 dpkg-scanpackages -m debs /dev/null > Packages
+
+# Normalize flavour suffixes in repository display versions.
+python3 - <<'PY'
+from pathlib import Path
+import re
+p = Path('Packages')
+s = p.read_text(encoding='utf-8')
+s = re.sub(r'(?m)^Version: ([^\\r\\n]*?)\\+rootless[0-9]*$', r'Version: \\1', s)
+s = re.sub(r'(?m)^Version: ([^\\r\\n]*?)\\+roothide', r'Version: \\1+rh', s)
+p.write_text(s, encoding='utf-8')
+PY
+
 bzip2 -c9 Packages > Packages.bz2
 gzip -c9n Packages > Packages.gz
 
