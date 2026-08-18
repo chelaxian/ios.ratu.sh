@@ -382,15 +382,15 @@ Depends: com.catmcp.daemon (>= 1.0.3), ellekit, firmware (>= 15.0)
 Conflicts: com.ratush.catmcp-touch-bridge
 Replaces: com.ratush.catmcp-touch-bridge
 Filename: debs/com.ratush.catmcp-fix_1.7.28_rootless_iphoneos-arm64.deb
-Size: 35704
-MD5sum: 19a88d5b0fc0360c5e8a537a56e779b5
-SHA1: dc03250cb27dcea392d9476a17d147fa34ee80e2
-SHA256: b3a0cb63611ba6ae740b95bc06dbac55d030144b4ef98779c4e77d42682abe08
+Size: 35724
+MD5sum: fbeaec67c2d4837b30561f24721af753
+SHA1: 67f06c8afad93d637a18931e01a9c4d68a32059d
+SHA256: e50644d675f0aed3aec9af012539c51eabc154f05f278d8f8ec1401c116491b1
 Section: Tweaks
 Priority: optional
 Description: Rootless CatMCP companion: supervises the server, autoloads the touch bridge, and provides SpringBoard HID dispatch.
 Author: ratu.sh
-Name: catmcp_fix_rootless
+Name: catmcp_fix
 
 Package: com.ratush.catmcp-fix
 Version: 1.7.29
@@ -924,14 +924,14 @@ Architecture: iphoneos-arm64
 Maintainer: Snail <mu514983786@gmail.com>
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.altlist
 Filename: debs/com.snail.autovpn.global_1.0.8+rootless1_iphoneos-arm64.deb
-Size: 265932
-MD5sum: 487878ddd748b247418efa8c66a53ac3
-SHA1: 924e8a7f91a42d818885590866a682a530e5fb92
-SHA256: d523e7a8bb9030a49590097dbebeea86e74699e4c5f7e16fa92d70e7fdd2863e
+Size: 266296
+MD5sum: f6a7c69d3e61191c53c5476eaea5016d
+SHA1: 6ee6c101dd21d0f12563c08158b7d1dcaf4e2bf0
+SHA256: afcfebfdd74cd60543992e70ab78f60f6c6c8ce3bfb62a7e4124d45f6616766f
 Section: Tweaks
 Description: Automatically enable or disable the VPN according to the situation (Dopamine rootless repack from installed device payload).
 Author: Snail <mu514983786@gmail.com>
-Name: AutoVPN 自动VPN
+Name: AutoVPN
 
 Package: coreutils
 Version: 9.3-1
