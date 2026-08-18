@@ -16,10 +16,13 @@ jobs:
         run: |
           brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
           git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
       - name: Build and require PTRAUTH arm64e
         run: |
           cd source/CatMCPCC-rootless
-          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
           cp postinst .theos/_/DEBIAN/ && chmod 755 .theos/_/DEBIAN/postinst
           dpkg-deb -Zgzip --root-owner-group -b .theos/_ packages/rootless.deb
           tmp="$(mktemp -d)"; dpkg-deb -x packages/rootless.deb "$tmp"
