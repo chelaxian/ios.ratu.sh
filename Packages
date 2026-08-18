@@ -347,6 +347,22 @@ Description: Move iOS Control Center modules upward and tune portrait/landscape 
 Author: chelaxian
 Name: CCGapCloser
 
+Package: com.ratush.ccgapcloser
+Version: 0.4.7+rootless3
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 360
+Depends: ellekit, preferenceloader (>= 2.2)
+Filename: debs/com.ratush.ccgapcloser_0.4.7+rootless3_iphoneos-arm64.deb
+Size: 20520
+MD5sum: f2aabd3815646ba3af87c244397494b5
+SHA1: 90470d7733915c88dd6b1ec8362494d436fa2d44
+SHA256: ee791b11b72b3e31856f7e68288976dcc7f2f09c155485675b41856b005185a1
+Section: Tweaks
+Description: Move iOS Control Center modules upward and tune portrait/landscape top offsets.
+Author: chelaxian
+Name: CCGapCloser
+
 Package: com.ratush.cchppe
 Version: 1.0.1
 Architecture: iphoneos-arm64e
