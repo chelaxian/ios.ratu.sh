@@ -903,6 +903,21 @@ Description: Automatically enable or disable the vpn according to the situation,
 Author: Snail <mu514983786@gmail.com>
 Name: AutoVPN (roothide)
 
+Package: com.snail.autovpn.global
+Version: 1.0.8+rootless1
+Architecture: iphoneos-arm64
+Maintainer: Snail <mu514983786@gmail.com>
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.altlist
+Filename: debs/com.snail.autovpn.global_1.0.8+rootless1_iphoneos-arm64.deb
+Size: 265932
+MD5sum: 487878ddd748b247418efa8c66a53ac3
+SHA1: 924e8a7f91a42d818885590866a682a530e5fb92
+SHA256: d523e7a8bb9030a49590097dbebeea86e74699e4c5f7e16fa92d70e7fdd2863e
+Section: Tweaks
+Description: Automatically enable or disable the VPN according to the situation (Dopamine rootless repack from installed device payload).
+Author: Snail <mu514983786@gmail.com>
+Name: AutoVPN 自动VPN
+
 Package: coreutils
 Version: 9.3-1
 Architecture: iphoneos-arm64e
