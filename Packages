@@ -413,6 +413,23 @@ Description: Control Center tile for HPPE. Turns the whole Hidden Photos Picker 
 Author: chelaxian
 Name: CCHPM
 
+Package: com.ratush.cchppe
+Version: 1.0.1+rootless1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 176
+Depends: ellekit, com.ratush.hppe, com.opa334.ccsupport
+Recommends: com.ratush.hppe
+Filename: debs/com.ratush.cchppe_1.0.1+rootless1_iphoneos-arm64.deb
+Size: 9944
+MD5sum: 86e76f1f3983187a8f6f4c012c0d53af
+SHA1: 97529a1359bbf8d9fbdfad7cc245ddcd3a63d48c
+SHA256: 8f7980e3a90f1382ada83a520962b1c6f959f25275d7d267bf4b3b559654945b
+Section: Tweaks
+Description: Control Center tile for Hidden Photos Manager. Turns the whole tweak on and off (the same master switch as Settings -> Hidden Photos Manager -> Enable), so you can disable or re-enable it without opening Settings. Add the tile in Settings -> Control Center.
+Author: chelaxian
+Name: CCHPM
+
 Package: com.ratush.ccopenssh
 Version: 1.0.10
 Architecture: iphoneos-arm64e
