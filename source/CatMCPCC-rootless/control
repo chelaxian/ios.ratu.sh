@@ -8,4 +8,3 @@ Section: Tweaks
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-rootless-fix
 Architecture: iphoneos-arm64
 Version: 1.0.0+ratu10+rootless1
-Installed-Size: 320
