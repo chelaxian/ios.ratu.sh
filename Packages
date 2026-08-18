@@ -528,6 +528,23 @@ Name: CCOPENSSH
 
 Package: com.ratush.ccvpnonoffauto
 Version: 1.0.1
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Installed-Size: 372
+Depends: firmware (>=14.0), com.opa334.ccsupport
+Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
+Size: 23824
+MD5sum: 9f932ed96f211b1930e05ca34d090676
+SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
+SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
+Section: Tweaks (CCSupport)
+Homepage: https://ios.ratu.sh
+Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
+Author: ratu.sh
+Name: CCVPN-ON-OFF-AUTO
+
+Package: com.ratush.ccvpnonoffauto
+Version: 1.0.1
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 420
@@ -538,23 +555,6 @@ MD5sum: 46ae362deadee5695c053a55fe322434
 SHA1: 88f33dc932e291d91776444ac9634553495fc0d2
 SHA256: 60b2c117acf7a7d99a3a5f3cca269977d24da9ea82ebe116ec586b9ccf819d4c
 Section: Tweaks
-Homepage: https://ios.ratu.sh
-Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
-Author: ratu.sh
-Name: CCVPN-ON-OFF-AUTO
-
-Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Installed-Size: 372
-Depends: firmware (>=14.0), com.opa334.ccsupport
-Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
-Size: 23770
-MD5sum: 54ff4d36ec8a18070808c31f3c27edfa
-SHA1: e094568754a92be44cbf5da03774285367599a25
-SHA256: ceb2891e3b85df5c7076cf11352923a050dc052bed74f37fef829bf92465b06b
-Section: Tweaks (CCSupport)
 Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
