@@ -86,21 +86,6 @@ Description: YACC-compatible parser generator
  grammars ought to work with Bison with no change.  Anyone familiar with
  Yacc should be able to use Bison with little trouble.
 
-Package: byg.iosios.net.appdata-rootless
-Version: 2.6.9
-Architecture: iphoneos-arm64
-Maintainer: 搬运工
-Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
-Filename: debs/byg.iosios.net.appdata-rootless_2.6.9_iphoneos-arm64.deb
-Size: 1713316
-MD5sum: b300ce72aba6168d57fc43ecfea873b1
-SHA1: 18d8721ee1cf896cc8b14cd03e195c0451fbac5c
-SHA256: c20a3f48c24ae98d574b92500c7cf4d50640c7f8b0d2d54d8b461d73d6aa5e1b
-Section: Tweaks
-Description: AppData rootless package repacked from the installed Dopamine payload.
-Author: Fouad Raheb
-Name: AppData软件降级-Rootless
-
 Package: ca-certificates
 Version: 20231210
 Architecture: all
@@ -168,6 +153,21 @@ Section: Tweaks
 Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
 Name: catmcp
+
+Package: com.choco.tg
+Version: 1.2.1
+Architecture: iphoneos-arm64
+Maintainer: waruhachi
+Installed-Size: 28292
+Filename: debs/com.choco.tg_1.2.1_iphoneos-arm64.deb
+Size: 3385682
+MD5sum: 129c2fe6985679a6b5645c6c1148e0a0
+SHA1: 814a16d1db1dc1c1f6ed27f93284fd30eaa553cd
+SHA256: 4b3890a6d79fa4fd945783c064a620dbc70705d998e3119ee6742c1629931c93
+Section: Tweaks
+Description: A simple Tweak For Telegram iOS
+Author: choco
+Name: TGExtra
 
 Package: com.choco.tg
 Version: 1.2.1
@@ -290,6 +290,21 @@ Author: Fouad Raheb
 Markdowndescription: View & Manage Applications Data from your Home Screen<br><br>• v1.4.7: Fix app failed to downgrade<br><br>• v1.4.6: Fix iOS15 crash issues<br><br>• v1.4.5: Modify the API interface for obtaining the downgraded version number of an application
 Name: AppData
 Sileodepiction: https://jailrepo.initnil.com/api?Package=com.netskao.appdata
+
+Package: com.netskao.appdata
+Version: 2.6.9+rootless1
+Architecture: iphoneos-arm64
+Maintainer: 搬运工
+Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
+Filename: debs/com.netskao.appdata_2.6.9+rootless1_iphoneos-arm64.deb
+Size: 1711648
+MD5sum: 74c8b166bc4949c4c0f013a12d767f8e
+SHA1: 34496578d41687f5e8f72cc433a553ee3695ec71
+SHA256: 8e7632dae31bffaca60f29602b7f205f62fa353db0babfb3f1c413303950394b
+Section: Tweaks
+Description: AppData rootless package repacked from the installed Dopamine payload.
+Author: Fouad Raheb
+Name: AppData
 
 Package: com.noisyflake.albummanager
 Version: 1.0.2
@@ -3991,6 +4006,21 @@ Section: Text_Editors
 Priority: standard
 Description: tool to make (or reverse) a hex dump
  xxd creates a hex dump of a given file or standard input. It can also convert a hex dump back to its original binary form.
+
+Package: xyz.cypwn.cr4shed
+Version: 4.3.1-2+device1
+Architecture: iphoneos-arm64
+Maintainer: CyPwn
+Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
+Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+device1_iphoneos-arm64.deb
+Size: 203528
+MD5sum: 1782de2b4d46719fc6c56094a2966815
+SHA1: a44ef0e22619ef5724bb0e3b479203c0a8fe8836
+SHA256: 43f62bb3d5dbc70724f902ca6da0b0846df993b3864bfd1b82b0f31a7305aa74
+Section: Tweaks
+Description: A modern crash reporter for iOS (Dopamine rootless repack from installed device payload).
+Author: Muirey03
+Name: Cr4shed
 
 Package: xyz.cypwn.cr4shed
 Version: 4.3.1-2+roothide4
