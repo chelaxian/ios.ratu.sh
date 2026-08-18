@@ -32,6 +32,4 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 
 ## Remaining owned-source migrations
 
-- `com.ratush.etchosts17`
-- `com.ratush.cchppe`
-- remaining Control Center and network integrations after their runtime dependencies are audited.
+EtcHosts17 and CCHPPE are already published as Dopamine rootless builds. Remaining work is audit/follow-up for the packages listed in [`DOPAMINE-ROOTLESS-AUDIT.md`](DOPAMINE-ROOTLESS-AUDIT.md), plus any future owned-source integrations whose runtime dependencies are verified.
