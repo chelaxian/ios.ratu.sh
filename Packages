@@ -186,6 +186,41 @@ Author: level3tjg
 Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
+Package: com.level3tjg.offloader
+Version: 0.0.6+rootless16
+Architecture: iphoneos-arm64
+Maintainer: level3tjg
+Installed-Size: 332
+Depends: ellekit, firmware (>= 11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
+Filename: debs/com.level3tjg.offloader_0.0.6+rootless16_iphoneos-arm64.deb
+Size: 38460
+MD5sum: a39a5406564da9087d59c470b7107062
+SHA1: 3415d488e908160265f4b93b7cab7c840fc6fcc1
+SHA256: 13411e6223d8a576f2480d776d405f0dc390e37d1ceba7e304bbfaa6d1af8602
+Section: Tweaks
+Description: Offload apps from the 3D touch menu and more (rootless)
+Author: level3tjg
+Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
+Name: Offloader
+
+Package: com.muirey03.libmryipc
+Version: 2.0.1
+Architecture: iphoneos-arm64
+Maintainer: Muirey03
+Installed-Size: 308
+Depends: mobilesubstrate
+Conflicts: ws.hbang.stopcrashingpls (=1.0)
+Filename: debs/com.muirey03.libmryipc_2.0.1+rootless1_iphoneos-arm64.deb
+Size: 18606
+MD5sum: e279f94d966892e4aef687d99afc81de
+SHA1: 279770b41cf64c9256a3260a28b749a90f65bccf
+SHA256: a535dfa8d9f66f8bdcfa556551465107deb64f15b41889ab2ab98dec6529279e
+Section: System
+Description: Easy-to-use, RocketBootstrap-less iOS IPC
+Tag: role::developer
+Author: Muirey03
+Name: libMRYIPC
+
 Package: com.muirey03.libmryipc
 Version: 2.0.1
 Architecture: iphoneos-arm64
