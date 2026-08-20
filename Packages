@@ -4035,6 +4035,52 @@ Description: retrieves files from the web
  .
  Wget supports proxy servers; this can lighten the network load, speed up retrieval, and provide access behind firewalls.
 
+Package: wiki.qaq.ighostty
+Version: 0.2.4
+Architecture: iphoneos-arm64e
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Installed-Size: 18760
+Depends: firmware (>= 15.0), uikittools
+Filename: debs/wiki.qaq.ighostty_0.2.4_iphoneos-arm64e.deb
+Size: 8197876
+MD5sum: 1eb76b61dc5f1fe2a70f8773f13fda5b
+SHA1: 5c1a2454ace6d240e535a3062ef472f60e2d1a59
+SHA256: a716556c63c0e11892eccd14a200622e2c10e60b4a8f37e5645cc48236f1ae16
+Section: Utilities
+Priority: optional
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Name: iGhostty
+
+Package: wiki.qaq.ighostty
+Version: 0.2.4
+Architecture: iphoneos-arm64
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Installed-Size: 18760
+Depends: firmware (>= 15.0), uikittools
+Filename: debs/wiki.qaq.ighostty_0.2.4_iphoneos-arm64.deb
+Size: 8199442
+MD5sum: 9b80bce78123dce37f145414074ff931
+SHA1: b9aa6cfeaaa783bb32be0603cb1a84922046bba0
+SHA256: 5c94a7962dd91ceece5847c76718b8855fce69235b4a0420593a9addaf8564b4
+Section: Utilities
+Priority: optional
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Name: iGhostty
+
 Package: xxd
 Version: 9.0.1000
 Architecture: iphoneos-arm64e

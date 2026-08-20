@@ -6,16 +6,16 @@ Codename: ios
 Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
 Description: Rootless and RootHide jailbreak packages
-Date: Tue, 18 Aug 2026 15:48:48 +0000
+Date: Thu, 20 Aug 2026 13:24:43 +0000
 MD5Sum:
- 2867015f96252a7c9f298b3ffd34f297           177029 Packages
- 5e96e63d686dee9bfb13f5baa235fe19            46748 Packages.bz2
- 475fd53b50979321f620130bfbeccf1c            55195 Packages.gz
+ 6779ab9775df87e96c7a94ad6092dd9d           178871 Packages
+ 1086840ad640b678f183b195a0e18ccf            47186 Packages.bz2
+ 074f7fca17431bcb2629d6dbab53e42a            55723 Packages.gz
 SHA1:
- 2391256be5e8d4abc905e9ade4946ac95142599c           177029 Packages
- fa7f5cfdb7a6ff946a41a2becda53b7372cb0279            46748 Packages.bz2
- f6695bb4a4374ba262ae8183810380026ef1fc24            55195 Packages.gz
+ 5b98600ffb3c6544e94c80a16a7049002ecc079e           178871 Packages
+ fb9da464c8815d78c930f8a999044fdf88e8859b            47186 Packages.bz2
+ 572bcfd816a2ecfdb1f68a2ab6f6044db86c933c            55723 Packages.gz
 SHA256:
- 3810d50ce53cdd6af5854ef55b7334a4a2d5d33a9d675446104f5b3283a39a37           177029 Packages
- 2ad218ea8427a5616af2b598dae9334524808d2d3fed9cf598d70468850ce8ab            46748 Packages.bz2
- 79ebb1b5c8a0b288fa17ca369fde032984e6c7e818a914948d4d04ba25162f2c            55195 Packages.gz
+ b0e4eb996481fd21c2a722a5067cb9136372c8290c0b8fa56a78bf996664c147           178871 Packages
+ 562323800371091bbdb0c817639f764fb75ed6db233ff02afc25cfac2620cd94            47186 Packages.bz2
+ 81c7a93623e5286288ea8cfc3db71a711fc586ed6120e8cf7eef28165a01ab84            55723 Packages.gz
