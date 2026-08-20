@@ -636,6 +636,44 @@ Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Cla
 Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
 Name: Claude Code iOS (iGhostty launcher)
 
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-7
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64.deb
+Size: 46106390
+MD5sum: b1034220f6f6f9bc6293b34407b45910
+SHA1: 44c20dbf004b6530c5fdd7ecf344a58b6c87ccd3
+SHA256: de742eefd7591cafe0bb4b41aade96e74402e65854f4b0eb014f9939ad7c193a
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-7
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64e.deb
+Size: 46106986
+MD5sum: 74acb09fbf099dc177f996a1e88f85e3
+SHA1: 2f0fa3120d321ca1c5f6f2eabcd4bc729ca64d68
+SHA256: f34f1712f56e7106ba8e6a6fb9418d83c29c40adb2e633032ec8393f8b418601
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
 Package: com.ratush.crontweak
 Version: 1.2.0
 Architecture: iphoneos-arm64e
