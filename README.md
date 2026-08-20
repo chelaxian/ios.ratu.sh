@@ -23,7 +23,7 @@ Current project families:
 - CatMCP and its RootHide companion
 - JetsamFix (memory manager / OOM protection)
 - RootHide development and recovery toolchain
-- Claude Code iOS — NewTerm 3 `ssh://` launcher (arm64)
+- Claude Code iOS — iGhostty launcher (arm64 and arm64e)
 
 The website reads `Packages` directly and merges architecture variants into one
 catalog entry. Adding or removing a package therefore does not require editing the
@@ -68,21 +68,22 @@ grep -E '^(Package|Name|Version|Architecture|Section|Filename|SHA256):' Packages
 
 ## Claude Code iOS
 
-`com.ratush.claude-code-ios` is a **Dopamine/rootless tweak** that packages Claude Code 2.1.112 with
-the bundled iOS Node runtime and an iOS-patched ripgrep. Its home-screen launcher
-opens **NewTerm 3** through its supported `ssh://` URL scheme and then starts
-Claude Code in the terminal. This replaces the old unregistered `newterm3://`
-URL that caused the original launcher to quit immediately.
+`com.ratush.claude-code-ios` packages Claude Code 2.1.112 with the bundled iOS
+Node runtime and an iOS-patched ripgrep for Dopamine (`iphoneos-arm64`) and
+RootHide (`iphoneos-arm64e`). Its home-screen launcher passes only the fixed
+`ighostty://claude` intent to **iGhostty**. iGhostty owns the authenticated daemon
+connection and starts the package-owned, signed Claude adapter — the URL contains
+no command, arguments, or filesystem path.
 
-**Requirements:** NewTerm 3, OpenSSH, and a rootless jailbreak. The package sets
-up a dedicated, forced-command local SSH key automatically; it preserves existing
-SSH keys and config. After installation, authenticate once in NewTerm:
+**Requirements:** iGhostty 0.2.6 or later, zsh, ldid, and a supported rootless
+jailbreak. The iGhostty integration creates one Claude tab on first launch and
+focuses that existing tab on later taps. After installation, authenticate once:
 
 ```sh
 claude-auth
 ```
 
-Then tap **Claude Code** on the home screen to open NewTerm directly into Claude.
+Then tap **Claude Code** on the home screen to open or focus Claude in iGhostty.
 
 ## JetsamFix
 
