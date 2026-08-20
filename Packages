@@ -4081,6 +4081,60 @@ Description: Ghostty-powered terminal for jailbroken iOS
 Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Name: iGhostty
 
+Package: wiki.qaq.ighostty
+Version: 0.2.5
+Architecture: iphoneos-arm64
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Installed-Size: 18808
+Depends: firmware (>= 15.0), uikittools
+Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64.deb
+Size: 8222964
+MD5sum: d9511d511eb1cb11799513add9847c8f
+SHA1: a38d8d310014342eef7835cf79bfb557bf468156
+SHA256: fd9859fc1f4d7c036b5c792108ce14397550ebbfb42ad10204a192ee147c0d4b
+Section: Utilities
+Priority: optional
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+ .
+ Supports the fixed ighostty://claude handoff used by Claude Code iOS.
+ The handoff starts only its predefined Claude shell and accepts no
+ arbitrary command or arguments.
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Name: iGhostty
+
+Package: wiki.qaq.ighostty
+Version: 0.2.5
+Architecture: iphoneos-arm64e
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Installed-Size: 18808
+Depends: firmware (>= 15.0), uikittools
+Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64e.deb
+Size: 8220806
+MD5sum: b3f1c3e9cd350754d252de75891b4d36
+SHA1: 49dbe6dd1a13ecc6470ef8ec7b66763b4db7118d
+SHA256: c4a9cdbab8a11697e252f9d44ccb16b09e39bbea39ac9bc7810807e7f9b43e7f
+Section: Utilities
+Priority: optional
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+ .
+ Supports the fixed ighostty://claude handoff used by Claude Code iOS.
+ The handoff starts only its predefined Claude shell and accepts no
+ arbitrary command or arguments.
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Name: iGhostty
+
 Package: xxd
 Version: 9.0.1000
 Architecture: iphoneos-arm64e
