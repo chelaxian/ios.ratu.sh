@@ -528,23 +528,6 @@ Name: CCOPENSSH
 
 Package: com.ratush.ccvpnonoffauto
 Version: 1.0.1
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Installed-Size: 372
-Depends: firmware (>=14.0), com.opa334.ccsupport
-Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
-Size: 23824
-MD5sum: 9f932ed96f211b1930e05ca34d090676
-SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
-SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
-Section: Tweaks (CCSupport)
-Homepage: https://ios.ratu.sh
-Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
-Author: ratu.sh
-Name: CCVPN-ON-OFF-AUTO
-
-Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 420
@@ -555,6 +538,23 @@ MD5sum: 46ae362deadee5695c053a55fe322434
 SHA1: 88f33dc932e291d91776444ac9634553495fc0d2
 SHA256: 60b2c117acf7a7d99a3a5f3cca269977d24da9ea82ebe116ec586b9ccf819d4c
 Section: Tweaks
+Homepage: https://ios.ratu.sh
+Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
+Author: ratu.sh
+Name: CCVPN-ON-OFF-AUTO
+
+Package: com.ratush.ccvpnonoffauto
+Version: 1.0.1
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Installed-Size: 372
+Depends: firmware (>=14.0), com.opa334.ccsupport
+Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
+Size: 23824
+MD5sum: 9f932ed96f211b1930e05ca34d090676
+SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
+SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
+Section: Tweaks (CCSupport)
 Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
@@ -600,25 +600,6 @@ Name: Claude Code iOS (NewTerm launcher)
 
 Package: com.ratush.claude-code-ios
 Version: 2.1.112-6
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-6_iphoneos-arm64.deb
-Size: 46105112
-MD5sum: 92ae262c3c589a18bc1ea326fe8136ee
-SHA1: 3fc3641da7e692d7ccf8a615a5d185055ee40e62
-SHA256: 520db3531db7f2f247faae50a8e9323dcc5c7a3bc3ccd9745513f667d6a5920a
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-6
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
@@ -633,6 +614,25 @@ SHA256: 287570806b692f07fc1a022cb7241ba874fecc2b048a3e9d8d9cde20f264f9d1
 Section: Tweaks
 Homepage: https://github.com/chelaxian/claude-code-ios
 Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-6
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-6_iphoneos-arm64.deb
+Size: 46105112
+MD5sum: 92ae262c3c589a18bc1ea326fe8136ee
+SHA1: 3fc3641da7e692d7ccf8a615a5d185055ee40e62
+SHA256: 520db3531db7f2f247faae50a8e9323dcc5c7a3bc3ccd9745513f667d6a5920a
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
 Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
 Name: Claude Code iOS (iGhostty launcher)
 
@@ -955,22 +955,6 @@ Name: Safeguard
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.2
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64.deb
-Size: 50824
-MD5sum: 1ef5ba517cc1a36e86fe42cbc18fc5bd
-SHA1: 3cc5adf3fc60bbc1dae5044e69d791dfc22ee8a1
-SHA256: 5e92167d15baf6f53b31cb8f2ffeb257b18feaa5d94d20071316a15eb629c6e4
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.2
 Architecture: iphoneos-arm64e
 Maintainer: chelaxian
 Installed-Size: 164
@@ -980,6 +964,22 @@ Size: 50738
 MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
 SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
 SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.2
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64.deb
+Size: 50824
+MD5sum: 1ef5ba517cc1a36e86fe42cbc18fc5bd
+SHA1: 3cc5adf3fc60bbc1dae5044e69d791dfc22ee8a1
+SHA256: 5e92167d15baf6f53b31cb8f2ffeb257b18feaa5d94d20071316a15eb629c6e4
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -3298,11 +3298,11 @@ Architecture: iphoneos-arm64e
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 29832
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8, lua-luv, libuv1, libmsgpackc2, libvterm0, libtermkey1, libunibilium4, libluajit-5.1-2, libtree-sitter0
-Filename: debs/neovim_0.9.0_iphoneos-arm64e.deb
-Size: 7881500
-MD5sum: 491a65b889a1380625aadd294c006b3c
-SHA1: 2b90703db4a57b0ecdaa35b72d176fbf357445cb
-SHA256: ed8d4a4cfe52e4f9ffcb22b851c2ab8716e09817c92cf61a791e1a80408766db
+Filename: debs/neovim_0.9.0_iphoneos-arm64e.deb.norm.deb
+Size: 41064
+MD5sum: 82c06622055af6b6d5cd017a21753c56
+SHA1: c1d4f40945d4c79c83f48d0b81273e49cf057da0
+SHA256: 7850df840b22424be4a8afb0ae7608e233986b926dbf8a3478fd08182c9aa6a7
 Section: Text_Editors
 Priority: optional
 Homepage: https://neovim.io/
@@ -3323,11 +3323,11 @@ Architecture: iphoneos-arm64e
 Maintainer: roothide <roothideDev@twitter>
 Installed-Size: 29832
 Depends: roothide (>= 0.0.6), libiosexec1 (>= 1.3.1), libintl8, lua-luv, libuv1, libmsgpackc2, libvterm0, libtermkey1, libunibilium4, libluajit-5.1-2, libtree-sitter0
-Filename: debs/neovim_0.9.0_iphoneos-arm64e.deb.norm.deb
-Size: 41064
-MD5sum: 82c06622055af6b6d5cd017a21753c56
-SHA1: c1d4f40945d4c79c83f48d0b81273e49cf057da0
-SHA256: 7850df840b22424be4a8afb0ae7608e233986b926dbf8a3478fd08182c9aa6a7
+Filename: debs/neovim_0.9.0_iphoneos-arm64e.deb
+Size: 7881500
+MD5sum: 491a65b889a1380625aadd294c006b3c
+SHA1: 2b90703db4a57b0ecdaa35b72d176fbf357445cb
+SHA256: ed8d4a4cfe52e4f9ffcb22b851c2ab8716e09817c92cf61a791e1a80408766db
 Section: Text_Editors
 Priority: optional
 Homepage: https://neovim.io/
@@ -3801,24 +3801,6 @@ Description: fast, versatile, remote (and local) file-copying tool
 
 Package: ru.danpashin.twackup
 Version: 2.0.27
-Architecture: iphoneos-arm64
-Maintainer: DanP
-Installed-Size: 4608
-Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64.deb
-Size: 2261690
-MD5sum: 86bc539873da8290b69cc67c2ca5029d
-SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
-SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
-Section: Tweaks
-Priority: optional
-Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
-License: GPL-3.0-only
-Name: Twackup (CLI)
-
-Package: ru.danpashin.twackup
-Version: 2.0.27
 Architecture: iphoneos-arm64e
 Maintainer: DanP
 Installed-Size: 4608
@@ -3835,23 +3817,23 @@ Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up pa
 License: GPL-3.0-only
 Name: Twackup (CLI)
 
-Package: ru.danpashin.twackup-gui
+Package: ru.danpashin.twackup
 Version: 2.0.27
 Architecture: iphoneos-arm64
 Maintainer: DanP
-Installed-Size: 12100
-Depends: firmware (>= 14.0), libroot-dopamine
-Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64.deb
-Size: 4535812
-MD5sum: 1f4e8c3270a0ee0ae2fcaec8a3563fe5
-SHA1: 5ba5035e0ff22ea6e347775bc3589d8c966a9194
-SHA256: bd3718577b38ef96b2ba31c23541a0b157f9c8a283c4ea57310e366c60947a60
+Installed-Size: 4608
+Depends: firmware (>= 3.0)
+Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64.deb
+Size: 2261690
+MD5sum: 86bc539873da8290b69cc67c2ca5029d
+SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
+SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
+Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
 License: GPL-3.0-only
-Name: Twackup (GUI)
+Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup-gui
 Version: 2.0.27
@@ -3864,6 +3846,24 @@ Size: 4535744
 MD5sum: 158e6c5b6ff2eec5dbfa1ca4c24f75d0
 SHA1: f54e8ca2e824d127404e5ce97690b4a1d92139c0
 SHA256: 37095f1bfeecc9e00229e9abebbd3ef998dddf670c9d9217498e9344081955bd
+Section: Tweaks
+Priority: optional
+Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
+Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
+License: GPL-3.0-only
+Name: Twackup (GUI)
+
+Package: ru.danpashin.twackup-gui
+Version: 2.0.27
+Architecture: iphoneos-arm64
+Maintainer: DanP
+Installed-Size: 12100
+Depends: firmware (>= 14.0), libroot-dopamine
+Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64.deb
+Size: 4535812
+MD5sum: 1f4e8c3270a0ee0ae2fcaec8a3563fe5
+SHA1: 5ba5035e0ff22ea6e347775bc3589d8c966a9194
+SHA256: bd3718577b38ef96b2ba31c23541a0b157f9c8a283c4ea57310e366c60947a60
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
