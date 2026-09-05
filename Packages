@@ -124,22 +124,6 @@ Description: GnuPG keys for the Chariz repository
 
 Package: com.catmcp.daemon
 Version: 1.0.3
-Architecture: iphoneos-arm64
-Maintainer: 0x530c<0x530c@gmail.com>
-Installed-Size: 5256
-Depends: mobilesubstrate, preferenceloader
-Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
-Size: 1733498
-MD5sum: e94d766d1b363753b65e57794468f93b
-SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
-SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
-Section: Tweaks
-Description: iOS MCP Server
-Author: 0x530c<0x530c@gmail.com>
-Name: catmcp
-
-Package: com.catmcp.daemon
-Version: 1.0.3
 Architecture: iphoneos-arm64e
 Maintainer: 0x530c<0x530c@gmail.com>
 Installed-Size: 5256
@@ -154,20 +138,21 @@ Description: iOS MCP Server
 Author: 0x530c<0x530c@gmail.com>
 Name: catmcp
 
-Package: com.choco.tg
-Version: 1.2.1
+Package: com.catmcp.daemon
+Version: 1.0.3
 Architecture: iphoneos-arm64
-Maintainer: waruhachi
-Installed-Size: 28292
-Filename: debs/com.choco.tg_1.2.1_iphoneos-arm64.deb
-Size: 3385682
-MD5sum: 129c2fe6985679a6b5645c6c1148e0a0
-SHA1: 814a16d1db1dc1c1f6ed27f93284fd30eaa553cd
-SHA256: 4b3890a6d79fa4fd945783c064a620dbc70705d998e3119ee6742c1629931c93
+Maintainer: 0x530c<0x530c@gmail.com>
+Installed-Size: 5256
+Depends: mobilesubstrate, preferenceloader
+Filename: debs/com.catmcp.daemon_1.0.3_iphoneos-arm64.deb
+Size: 1733498
+MD5sum: e94d766d1b363753b65e57794468f93b
+SHA1: 7627f551beb69c5c144e9554f12f642b224894ab
+SHA256: 85f4cee671d3ae8df27ddb97d6d8eda2adff29e53b1a5ab8baf2b4bfe1ddfaea
 Section: Tweaks
-Description: A simple Tweak For Telegram iOS
-Author: choco
-Name: TGExtra
+Description: iOS MCP Server
+Author: 0x530c<0x530c@gmail.com>
+Name: catmcp
 
 Package: com.choco.tg
 Version: 1.2.1
@@ -181,6 +166,21 @@ SHA1: f388ca3d438c54696e334165d5f32c57e681d0a8
 SHA256: 34435edee94a90751fbf3f31ea83530aba9de9b3ce49507e7d8133806141fdbc
 Section: Tweaks
 Description: A simple Telegram iOS tweak that adds extra features. Targets the official Telegram (ph.telegra.Telegraph), Swiftgram (app.swiftgram.ios) and Turrit / Nicegram-family client (com.seastar.turrit). Open the tweak menu with a 3-finger long press (or 4 fingers if Flex is injected).
+Author: choco
+Name: TGExtra
+
+Package: com.choco.tg
+Version: 1.2.1
+Architecture: iphoneos-arm64
+Maintainer: waruhachi
+Installed-Size: 28292
+Filename: debs/com.choco.tg_1.2.1_iphoneos-arm64.deb
+Size: 3385682
+MD5sum: 129c2fe6985679a6b5645c6c1148e0a0
+SHA1: 814a16d1db1dc1c1f6ed27f93284fd30eaa553cd
+SHA256: 4b3890a6d79fa4fd945783c064a620dbc70705d998e3119ee6742c1629931c93
+Section: Tweaks
+Description: A simple Tweak For Telegram iOS
 Author: choco
 Name: TGExtra
 
@@ -528,23 +528,6 @@ Name: CCOPENSSH
 
 Package: com.ratush.ccvpnonoffauto
 Version: 1.0.1
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Installed-Size: 372
-Depends: firmware (>=14.0), com.opa334.ccsupport
-Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
-Size: 23824
-MD5sum: 9f932ed96f211b1930e05ca34d090676
-SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
-SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
-Section: Tweaks (CCSupport)
-Homepage: https://ios.ratu.sh
-Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
-Author: ratu.sh
-Name: CCVPN-ON-OFF-AUTO
-
-Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Installed-Size: 420
@@ -555,6 +538,23 @@ MD5sum: 46ae362deadee5695c053a55fe322434
 SHA1: 88f33dc932e291d91776444ac9634553495fc0d2
 SHA256: 60b2c117acf7a7d99a3a5f3cca269977d24da9ea82ebe116ec586b9ccf819d4c
 Section: Tweaks
+Homepage: https://ios.ratu.sh
+Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
+Author: ratu.sh
+Name: CCVPN-ON-OFF-AUTO
+
+Package: com.ratush.ccvpnonoffauto
+Version: 1.0.1
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Installed-Size: 372
+Depends: firmware (>=14.0), com.opa334.ccsupport
+Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
+Size: 23824
+MD5sum: 9f932ed96f211b1930e05ca34d090676
+SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
+SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
+Section: Tweaks (CCSupport)
 Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
@@ -638,25 +638,6 @@ Name: Claude Code iOS (iGhostty launcher)
 
 Package: com.ratush.claude-code-ios
 Version: 2.1.112-7
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64.deb
-Size: 46106390
-MD5sum: b1034220f6f6f9bc6293b34407b45910
-SHA1: 44c20dbf004b6530c5fdd7ecf344a58b6c87ccd3
-SHA256: de742eefd7591cafe0bb4b41aade96e74402e65854f4b0eb014f9939ad7c193a
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-7
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
@@ -671,6 +652,25 @@ SHA256: f34f1712f56e7106ba8e6a6fb9418d83c29c40adb2e633032ec8393f8b418601
 Section: Tweaks
 Homepage: https://github.com/chelaxian/claude-code-ios
 Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-7
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64.deb
+Size: 46106390
+MD5sum: b1034220f6f6f9bc6293b34407b45910
+SHA1: 44c20dbf004b6530c5fdd7ecf344a58b6c87ccd3
+SHA256: de742eefd7591cafe0bb4b41aade96e74402e65854f4b0eb014f9939ad7c193a
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
 Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
 Name: Claude Code iOS (iGhostty launcher)
 
@@ -806,20 +806,40 @@ Author: chelaxian
 Name: Hidden Photos Manager
 
 Package: com.ratush.hppe
-Version: 1.6.37
+Version: 1.6.49
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
-Installed-Size: 1460
+Installed-Size: 1492
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
 Recommends: com.noisyflake.albummanager
 Conflicts: com.ratush.cchppe
 Replaces: com.ratush.cchppe
 Provides: com.ratush.cchppe
-Filename: debs/com.ratush.hppe_1.6.37_iphoneos-arm64.deb
-Size: 268224
-MD5sum: 6aaab18d59bb34c035d2da3b5893d045
-SHA1: 3ddce624390dfa5815e03a1ba2769cc96b3eadf0
-SHA256: 190fcde73d46a694e337c0f80e3f7830d9075569805657b7b93b1328e62f0011
+Filename: debs/com.ratush.hppe_1.6.49_iphoneos-arm64.deb
+Size: 278094
+MD5sum: 8dbc6322501bfa9d7572d84d86d25cb4
+SHA1: 7424df289ae4a48edf0b380669c16a8f46667c54
+SHA256: 01eecfc53a835f9828860e523df40f0375782d0a46d247fae00e78a9875ab970
+Section: Tweaks
+Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
+Author: chelaxian
+Name: Hidden Photos Manager
+
+Package: com.ratush.hppe
+Version: 1.6.51
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 1492
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
+Recommends: com.noisyflake.albummanager
+Conflicts: com.ratush.cchppe
+Replaces: com.ratush.cchppe
+Provides: com.ratush.cchppe
+Filename: debs/com.ratush.hppe_1.6.51_iphoneos-arm64.deb
+Size: 279716
+MD5sum: c0a889ea4a17fc4836d6a233c979447a
+SHA1: c6b79f19703b08e2a174ab29d367ba431d96533e
+SHA256: 433c669b4c82ec8cd9e87359f1f7837cc0103afe21b7e6b35a9fe60a532bc99f
 Section: Tweaks
 Description: Manage your hidden and locked photos everywhere iOS normally keeps them out of sight. Reveal hidden/locked albums - with all their photos - inside any app's photo picker (Telegram, Instagram and others) and inside the Photos app; surface hidden-only face groups in People (with a configurable limit) and rename them; declutter Recents/Hidden after you move a photo into an album; and let hidden photos join the automatic collections (Media Types, People, counts). Settings -> Hidden Photos Manager: "Enable" is the master switch (also on the Control Center tile); "Show hidden assets in pickers" toggles the reveal; "Require Authentication" asks for Face ID first; "Hide Moved Items" declutters Recents/Hidden; "Allow hidden profiling"; "Max hidden people" caps the surfaced face groups. Works with or without AlbumManager.
 Author: chelaxian
@@ -4197,33 +4217,6 @@ Name: iGhostty
 
 Package: wiki.qaq.ighostty
 Version: 0.2.5
-Architecture: iphoneos-arm64
-Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Installed-Size: 18808
-Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64.deb
-Size: 8222964
-MD5sum: d9511d511eb1cb11799513add9847c8f
-SHA1: a38d8d310014342eef7835cf79bfb557bf468156
-SHA256: fd9859fc1f4d7c036b5c792108ce14397550ebbfb42ad10204a192ee147c0d4b
-Section: Utilities
-Priority: optional
-Description: Ghostty-powered terminal for jailbroken iOS
- Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
- .
- Shells are spawned by the bundled ighosttyd daemon and survive app
- relaunches; SSH transport is planned on the same transport interface.
- .
- Supports the fixed ighostty://claude handoff used by Claude Code iOS.
- The handoff starts only its predefined Claude shell and accepts no
- arbitrary command or arguments.
-Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Name: iGhostty
-
-Package: wiki.qaq.ighostty
-Version: 0.2.5
 Architecture: iphoneos-arm64e
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Installed-Size: 18808
@@ -4250,16 +4243,16 @@ Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Name: iGhostty
 
 Package: wiki.qaq.ighostty
-Version: 0.2.6
+Version: 0.2.5
 Architecture: iphoneos-arm64
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Installed-Size: 18808
 Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.6_iphoneos-arm64.deb
-Size: 8222628
-MD5sum: 4e2300ca4dabdf0315c033640fac097c
-SHA1: ddc7b62594ea16f87a3d603a509aa0a82dbffc16
-SHA256: 1d627054be9a986fc09d878ceba659d615120360748c68002edb844e794535c6
+Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64.deb
+Size: 8222964
+MD5sum: d9511d511eb1cb11799513add9847c8f
+SHA1: a38d8d310014342eef7835cf79bfb557bf468156
+SHA256: fd9859fc1f4d7c036b5c792108ce14397550ebbfb42ad10204a192ee147c0d4b
 Section: Utilities
 Priority: optional
 Description: Ghostty-powered terminal for jailbroken iOS
@@ -4287,6 +4280,33 @@ Size: 8224580
 MD5sum: 33dcdba1ff11fcf4dedb94f3f6766599
 SHA1: e2b3011bb55bc4c72e6ef1b3f86c75ee1b2f3e91
 SHA256: 2756acaeffc92743b5ef36ed080686463b9b16d2c7e0f831a84339dd76c443d8
+Section: Utilities
+Priority: optional
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+ .
+ Supports the fixed ighostty://claude handoff used by Claude Code iOS.
+ The handoff starts only its predefined Claude shell and accepts no
+ arbitrary command or arguments.
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Name: iGhostty
+
+Package: wiki.qaq.ighostty
+Version: 0.2.6
+Architecture: iphoneos-arm64
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Installed-Size: 18808
+Depends: firmware (>= 15.0), uikittools
+Filename: debs/wiki.qaq.ighostty_0.2.6_iphoneos-arm64.deb
+Size: 8222628
+MD5sum: 4e2300ca4dabdf0315c033640fac097c
+SHA1: ddc7b62594ea16f87a3d603a509aa0a82dbffc16
+SHA256: 1d627054be9a986fc09d878ceba659d615120360748c68002edb844e794535c6
 Section: Utilities
 Priority: optional
 Description: Ghostty-powered terminal for jailbroken iOS
