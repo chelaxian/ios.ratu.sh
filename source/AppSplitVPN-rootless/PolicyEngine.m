@@ -34,12 +34,20 @@
         if (!resolved.count && bundleURL) {
             NSString *path=[NSBundle bundleWithURL:bundleURL].executablePath;
             if (path.length) resolved=[NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path];
-            if (!resolved.count) {
-                if (error) *error=@"Could not resolve an installed application's identity";
-                return NO; // Never turn a requested VPN app into DIRECT after lookup failure.
-            }
         }
-        if (!resolved.count) [unresolved addObject:identifier];
+        if (!resolved.count) {
+            [unresolved addObject:identifier];
+            // An offloaded app can have an LSApplicationProxy but no executable.
+            // In BYPASS, leave it on the VPN and still apply the other DIRECT apps.
+            // In TUNNEL ONLY, continuing would silently send a requested VPN app
+            // directly, so fail closed instead.
+            if ([mode isEqualToString:@"tunnelOnly"]) {
+                _unresolved = [unresolved copy];
+                if (error) *error=@"Could not resolve a selected VPN application's identity";
+                return NO;
+            }
+            continue;
+        }
         for (id uuid in resolved) if ([uuid isKindOfClass:NSUUID.class]) [uuids addObject:uuid];
         // Include extensions even if a later iOS implementation stops including
         // them in copyUUIDsForBundleID. WebKit's effective identity remains the host.

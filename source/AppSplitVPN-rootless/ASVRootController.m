@@ -13,9 +13,22 @@
 static NSString *L(NSString *en,NSString *ru) {
     return [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"] ? ru : en;
 }
-@interface ASVRootController : PSListController
+@interface ASVRootController : PSListController {
+    NSTimer *_statusTimer;
+    NSString *_statusFingerprint;
+}
 @end
 @implementation ASVRootController
+- (NSString *)statusFingerprint {
+    NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
+    BOOL stale=[NSDate date].timeIntervalSince1970-[state[@"updated"] doubleValue]>90;
+    return [NSString stringWithFormat:@"%@|%@|%@|%@|%d",state[@"status"] ?: @"",state[@"error"] ?: @"",
+        state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],stale];
+}
+- (void)updateStatusIfChanged {
+    NSString *current=[self statusFingerprint];
+    if (![_statusFingerprint isEqualToString:current]) [self refreshStatus];
+}
 - (id)readPreferenceValue:(PSSpecifier *)specifier {
     return [NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][[specifier propertyForKey:@"key"]] ?: [specifier propertyForKey:@"default"];
 }
@@ -62,22 +75,31 @@ static NSString *L(NSString *en,NSString *ru) {
         [s setProperty:@(picker!=Nil) forKey:@"enabled"];[items addObject:s];
     }
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
+    _statusFingerprint=[self statusFingerprint];
     NSString *code=state[@"status"] ?: @"unavailable";
     if ([NSDate date].timeIntervalSince1970-[state[@"updated"] doubleValue]>90) code=@"unavailable";
     NSDictionary *labels=@{
         @"disabled":L(@"Disabled",@"Выключен"),@"waitingVPN":L(@"Waiting for VPN",@"Ожидание VPN"),
-        @"active":L(@"Rules applied",@"Правила применены"),@"error":L(@"Rules could not be updated",@"Не удалось обновить правила"),
+        @"active":L(@"Rules applied",@"Правила применены"),
+        @"partial":L(@"Available apps routed",@"Доступные приложения направлены"),
+        @"error":L(@"Rules could not be updated",@"Не удалось обновить правила"),
         @"unsupported":L(@"System API unavailable",@"Системный API недоступен"),
         @"stopped":L(@"Service stopped",@"Служба остановлена"),@"unavailable":L(@"Service has not started",@"Служба ещё не запущена")};
     group=[PSSpecifier groupSpecifierWithName:L(@"Status",@"Статус")];
     NSString *description=labels[code] ?: code;
     NSArray *missing=state[@"unresolved"];
-    if (missing.count) description=[description stringByAppendingFormat:L(@". Unavailable apps: %lu",@". Недоступных приложений: %lu"),(unsigned long)missing.count];
+    if (missing.count) description=[description stringByAppendingFormat:L(@". Offloaded or unavailable: %lu",@". Выгружено или недоступно: %lu"),(unsigned long)missing.count];
     [group setProperty:description forKey:@"footerText"];[items addObject:group];
     PSSpecifier *refresh=[PSSpecifier preferenceSpecifierNamed:L(@"Refresh status",@"Обновить статус") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [refresh setButtonAction:@selector(refreshStatus)];[items addObject:refresh];
     _specifiers=[items copy];return _specifiers;
 }
 - (void)refreshStatus { _specifiers=nil;[self reloadSpecifiers]; }
-- (void)viewWillAppear:(BOOL)animated { [super viewWillAppear:animated];[self refreshStatus]; }
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];[self refreshStatus];
+    [_statusTimer invalidate];
+    _statusTimer=[NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(updateStatusIfChanged) userInfo:nil repeats:YES];
+}
+- (void)viewWillDisappear:(BOOL)animated { [_statusTimer invalidate];_statusTimer=nil;[super viewWillDisappear:animated]; }
+- (void)dealloc { [_statusTimer invalidate]; }
 @end

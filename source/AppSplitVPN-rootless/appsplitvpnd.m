@@ -38,7 +38,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.1.0"};
+        @"unresolved": engine.unresolved, @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.1.1"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     if (changed) fprintf(stderr,"AppSplitVPN status=%s rules=%lu error=%s\n", status.UTF8String,(unsigned long)engine.count,(error ?: @"").UTF8String);
@@ -57,7 +57,7 @@ static void Reconcile(BOOL force) {
         NSString *mode = prefs[@"mode"];
         NSString *error = nil;
         BOOL ok = [engine replaceMode:mode applications:prefs[[mode isEqual:@"tunnelOnly"]?ASV_VPN:ASV_DIRECT] error:&error];
-        State(ok ? @"active" : @"error",error);
+        State(ok ? (engine.unresolved.count ? @"partial" : @"active") : @"error",error);
         if (!ok) lastRefresh = now-55; // bounded retry after five seconds, not a busy loop
     } @catch (NSException *exception) {
         [engine clear]; State(@"error",exception.name); initialized=NO;
