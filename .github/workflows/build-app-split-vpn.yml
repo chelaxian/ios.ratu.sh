@@ -1,8 +1,5 @@
 name: Build App Split VPN
 on:
-  push:
-    branches: [feature/app-split-vpn]
-    paths: ['research/**', 'source/AppSplitVPN-rootless/**', '.github/workflows/build-app-split-vpn.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,12 +8,36 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - run: brew install ldid
-      - name: Build diagnostic tool
+      - name: Install toolchain
         run: |
-          xcrun --sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.0 -fobjc-arc -framework Foundation research/ne-probe.m -o research/ne-probe-macos
-          ldid -Sresearch/probe.entitlements.plist research/ne-probe-macos
+          brew install ldid dpkg
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks
+          git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+          git checkout --quiet
+          mkdir -p "$HOME/theos/sdks"
+          cp -a iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build rootless package
+        run: |
+          cd source/AppSplitVPN-rootless
+          swift generate-icons.swift
+          chmod 755 layout/DEBIAN/postinst layout/DEBIAN/prerm
+          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          tmp="$(mktemp -d)"
+          dpkg-deb -x "$deb" "$tmp"
+          bundle="$tmp/var/jb/Library/PreferenceBundles/AppSplitVPNPrefs.bundle/AppSplitVPNPrefs"
+          lipo -thin arm64e "$bundle" -output "$tmp/arm64e"
+          test "$(xxd -p -s 8 -l 4 "$tmp/arm64e")" = 02000080
+          ldid -h "$tmp/var/jb/usr/libexec/appsplitvpnd"
+          ldid -e "$tmp/var/jb/usr/libexec/appsplitvpnd"
+          mkdir artifacts
+          cp "$deb" artifacts/
+          cp package-icon.png artifacts/com.ratush.appsplitvpn.png
+          shasum -a 256 artifacts/* > artifacts/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: app-split-vpn-probe
-          path: research/ne-probe-macos
+          name: app-split-vpn-rootless
+          path: source/AppSplitVPN-rootless/artifacts/*

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Removing the process closes its NECP session and withdraws only this package's rules.
+/var/jb/bin/launchctl bootout system/com.ratush.appsplitvpn 2>/dev/null || true
+exit 0

@@ -1,0 +1,6 @@
+.theos/
+packages/
+*.deb
+Resources/icon*.png
+package-icon.png
+artifacts/

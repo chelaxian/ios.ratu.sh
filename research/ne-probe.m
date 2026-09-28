@@ -11,6 +11,7 @@
 @end
 @interface NEPolicyCondition:NSObject
 + (id)effectiveApplication:(id)uuid;
++ (id)allInterfaces;
 @end
 @interface NEPolicy:NSObject
 - (id)initWithOrder:(unsigned)o result:(id)r conditions:(NSArray *)c;
@@ -29,7 +30,7 @@ int main(int argc,char **argv) { @autoreleasepool {
  for(id uuid in uuids) {
  id c=[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid];
  id r=[NSClassFromString(@"NEPolicyResult") scopeToDirectInterface];
- id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:100 result:r conditions:@[c]];
+ id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:100 result:r conditions:@[c,[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
  NSLog(@"add=%lu policy=%@",(unsigned long)[s addPolicy:p],p);
  }
  NSLog(@"apply=%d session=%@",[s apply],s);
