@@ -6,7 +6,7 @@ Codename: ios
 Architectures: iphoneos-arm64 iphoneos-arm64e
 Components: main
 Description: Rootless and RootHide jailbreak packages
-Date: Mon, 28 Sep 2026 18:38:34 +0000
+Date: Mon, 28 Sep 2026 18:40:47 +0000
 MD5Sum:
  a977fe551072a01a2ac4bb1b7b53ded7           191954 Packages
  84e36c11894bfc71f19fd53b77ccc3b8            48815 Packages.bz2
