@@ -1,0 +1,22 @@
+name: Build App Split VPN
+on:
+  push:
+    branches: [feature/app-split-vpn]
+    paths: ['research/**', 'source/AppSplitVPN-rootless/**', '.github/workflows/build-app-split-vpn.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install ldid
+      - name: Build diagnostic tool
+        run: |
+          xcrun --sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.0 -fobjc-arc -framework Foundation research/ne-probe.m -o research/ne-probe-macos
+          ldid -Sresearch/probe.entitlements.plist research/ne-probe-macos
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-split-vpn-probe
+          path: research/ne-probe-macos
