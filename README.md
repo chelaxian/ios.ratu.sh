@@ -17,6 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
+- App Split VPN — экспериментальное разделение приложений на VPN и DIRECT для iOS 17 с Dopamine
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
