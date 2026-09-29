@@ -199,7 +199,8 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     PSSpecifier *direct=[self button:@"DIRECT" action:@selector(openDirectList)];
     [direct setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_DIRECT],(unsigned long)total] forKey:@"asvCount"];
     [direct setProperty:@"red" forKey:@"asvColor"];[items addObject:direct];
-    PSSpecifier *transfer=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    // A static-text Preferences cell does not reliably forward touches to child controls.
+    PSSpecifier *transfer=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [transfer setProperty:@YES forKey:@"asvTransfer"];[items addObject:transfer];
 
     NSString *code=nil;
@@ -279,6 +280,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
         [box addSubview:count];[box addSubview:chevron];cell.accessoryView=box;
     } else if ([specifier propertyForKey:@"asvTransfer"]) {
         cell.textLabel.text=nil;cell.selectionStyle=UITableViewCellSelectionStyleNone;
+        cell.userInteractionEnabled=YES;cell.contentView.userInteractionEnabled=YES;
         UIStackView *row=[UIStackView new];row.tag=0x5A5;row.axis=UILayoutConstraintAxisHorizontal;row.distribution=UIStackViewDistributionFillEqually;
         for (NSArray *item in @[@[L(@"Export",@"Экспорт"),@"square.and.arrow.up",NSStringFromSelector(@selector(exportLists))],@[L(@"Import",@"Импорт"),@"square.and.arrow.down",NSStringFromSelector(@selector(importLists))]]) {
             UIButton *button=[UIButton buttonWithType:UIButtonTypeSystem];
@@ -336,9 +338,14 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 - (void)exportLists {
     NSDictionary *prefs=[self prefs];
     NSDictionary *payload=@{@"format":@"appsplitvpn-lists-v1",ASV_VPN:prefs[ASV_VPN] ?: @[],ASV_DIRECT:prefs[ASV_DIRECT] ?: @[]};
-    NSData *data=[NSJSONSerialization dataWithJSONObject:payload options:NSJSONWritingPrettyPrinted error:nil];
+    NSError *error=nil;
+    NSData *data=[NSJSONSerialization dataWithJSONObject:payload options:NSJSONWritingPrettyPrinted error:&error];
     NSURL *url=[[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"AppSplitVPN-lists.json"];
-    if (![data writeToURL:url atomically:YES]) return;
+    if (!data || ![data writeToURL:url options:NSDataWritingAtomic error:&error]) {
+        UIAlertController *alert=[UIAlertController alertControllerWithTitle:L(@"Export failed",@"Не удалось экспортировать") message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];return;
+    }
     UIActivityViewController *share=[[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
     share.popoverPresentationController.sourceView=self.view;
     [self presentViewController:share animated:YES completion:nil];
