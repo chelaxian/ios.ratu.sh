@@ -5,6 +5,7 @@
 <key>CFBundleIdentifier</key><string>com.ratush.appsplitvpn.ccmodule</string>
 <key>CFBundleName</key><string>App Split VPN</string>
 <key>CFBundleDisplayName</key><string>App Split VPN</string>
+<key>CFBundleShortVersionString</key><string>0.2.0</string>
 <key>CFBundlePackageType</key><string>BNDL</string>
 <key>CFBundleSupportedPlatforms</key><array><string>iPhoneOS</string></array>
 <key>MinimumOSVersion</key><string>15.0</string>
