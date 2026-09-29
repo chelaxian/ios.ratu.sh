@@ -25,11 +25,17 @@ static NSString *ASVBadge(UILabel *label, NSString *text) {
 }
 
 %hook STUIStatusBarStringView
-- (void)setText:(NSString *)text { %orig(ASVBadge((UILabel *)self, text)); }
+- (void)setText:(NSString *)text {
+    NSString *badge = ASVBadge((UILabel *)self, text);
+    %orig(badge);
+}
 %end
 
 %hook _UIStatusBarStringView
-- (void)setText:(NSString *)text { %orig(ASVBadge((UILabel *)self, text)); }
+- (void)setText:(NSString *)text {
+    NSString *badge = ASVBadge((UILabel *)self, text);
+    %orig(badge);
+}
 %end
 
 %ctor {
