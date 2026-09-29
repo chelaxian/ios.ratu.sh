@@ -82,7 +82,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.5"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.6"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -121,6 +121,16 @@ static void Reconcile(BOOL force) {
         [engine clear]; State(@"error",exception.name); initialized=NO;
     } }
 }
+static void SetEnabled(BOOL enabled) {
+    NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
+    if ([prefs[@"enabled"] boolValue]==enabled) { Reconcile(YES); return; }
+    prefs[@"enabled"]=@(enabled);
+    if ([prefs writeToFile:ASV_PREFS atomically:YES]) {
+        chown(ASV_PREFS.fileSystemRepresentation,501,501);
+        chmod(ASV_PREFS.fileSystemRepresentation,0644);
+    }
+    Reconcile(YES);
+}
 int main(int argc,char **argv) { @autoreleasepool {
     (void)argc; (void)argv;
     dlopen("/System/Library/Frameworks/NetworkExtension.framework/NetworkExtension",RTLD_NOW);
@@ -134,13 +144,13 @@ int main(int argc,char **argv) { @autoreleasepool {
     unlink(ASV_LOG.fileSystemRepresentation); // change log removed in 0.2.3
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){
         (void)t;
-        NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
-        prefs[@"enabled"]=@(![prefs[@"enabled"] boolValue]);
-        if ([prefs writeToFile:ASV_PREFS atomically:YES]) {
-            chown(ASV_PREFS.fileSystemRepresentation,501,501);
-            chmod(ASV_PREFS.fileSystemRepresentation,0644);
-            Reconcile(YES);
-        }
+        SetEnabled(![[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"enabled"] boolValue]);
+    });
+    int setToken;
+    notify_register_dispatch(ASV_CMD_SET,&setToken,dispatch_get_main_queue(),^(int t){
+        uint64_t wanted=0;
+        notify_get_state(t,&wanted);
+        if (wanted==1 || wanted==2) SetEnabled(wanted==1);
     });
     dispatch_source_t timer=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_main_queue());
     dispatch_source_set_timer(timer,DISPATCH_TIME_NOW,NSEC_PER_SEC,100*NSEC_PER_MSEC);

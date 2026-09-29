@@ -114,8 +114,11 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 - (NSString *)statusFingerprint {
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
     BOOL stale=[NSDate date].timeIntervalSince1970-[state[@"updated"] doubleValue]>90;
-    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%d",state[@"status"] ?: @"",state[@"error"] ?: @"",
-        state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],state[@"vpnName"] ?: @"",stale];
+    NSDictionary *prefs=[self prefs];
+    // Include the switch and mode so a change made from Control Center shows up here too.
+    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@",state[@"status"] ?: @"",state[@"error"] ?: @"",
+        state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],state[@"vpnName"] ?: @"",state[@"mode"] ?: @"",stale,
+        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @""];
 }
 - (void)updateStatusIfChanged {
     if (![_statusFingerprint isEqualToString:[self statusFingerprint]]) [self refreshStatus];

@@ -6,6 +6,9 @@
 #define ASV_ROUTE_LOG @"/var/mobile/Library/Preferences/com.ratush.appsplitvpn.routes.plist"
 #define ASV_NOTIFY "com.ratush.appsplitvpn.changed"
 #define ASV_CMD_TOGGLE "com.ratush.appsplitvpn.toggle"
+// Explicit enable/disable from Control Center: notify state 1 = on, 2 = off.
+// Unlike a toggle, repeated or coalesced posts cannot flip the switch twice.
+#define ASV_CMD_SET "com.ratush.appsplitvpn.set"
 #define ASV_STATE_NOTIFY "com.ratush.appsplitvpn.state.changed"
 // The two selection arrays persist independently. Only the current mode is evaluated.
 #define ASV_VPN @"vpnApps"

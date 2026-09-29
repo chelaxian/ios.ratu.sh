@@ -13,6 +13,19 @@ static NSHashTable<UIView *> *statusBars;
 static NSString *const ASVBadgeText = @"VPN½";
 static const void *ASVOriginalColorKey=&ASVOriginalColorKey;
 static const NSInteger ASVTunnelBadgeTag=0x41535650;
+static BOOL ASVApplyingColor;
+
+static BOOL ASVIsVPNText(NSString *text) {
+    return [text isEqualToString:@"VPN"] || [text isEqualToString:ASVBadgeText];
+}
+
+// Color the badge should have now; nil keeps whatever the system asked for.
+static UIColor *ASVWantedColor(UILabel *label) {
+    if (!ASVIsVPNText(label.text)) return nil;
+    if (splitMode==1) return UIColor.systemRedColor;
+    if (splitMode==2) return UIColor.systemGreenColor;
+    return nil;
+}
 
 static uint64_t ASVReadState(void) {
     static int token = -1;
@@ -29,9 +42,12 @@ static void ASVStyleNativeBadge(UILabel *label) {
         original=label.textColor;
         if (original) objc_setAssociatedObject(label,ASVOriginalColorKey,original,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    BOOL vpnText=[label.text isEqualToString:@"VPN"] || [label.text isEqualToString:ASVBadgeText];
-    UIColor *color=!vpnText?original:(splitMode==1?UIColor.systemRedColor:(splitMode==2?UIColor.systemGreenColor:original));
-    if (color && ![label.textColor isEqual:color]) label.textColor=color;
+    UIColor *color=ASVWantedColor(label) ?: original;
+    if (color && ![label.textColor isEqual:color]) {
+        ASVApplyingColor=YES;
+        label.textColor=color;
+        ASVApplyingColor=NO;
+    }
 }
 
 static NSString *ASVBadge(UILabel *label, NSString *text) {
@@ -85,6 +101,19 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     %orig(badge);
     if ([badges containsObject:(UILabel *)self] || objc_getAssociatedObject((UILabel *)self,ASVOriginalColorKey)) ASVStyleNativeBadge((UILabel *)self);
 }
+// The status bar re-applies its style (Control Center, appearance changes)
+// after the text is set; remember its color and keep the split color on top.
+- (void)setTextColor:(UIColor *)color {
+    if (!ASVApplyingColor && color) {
+        objc_setAssociatedObject((UILabel *)self,ASVOriginalColorKey,color,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        color=ASVWantedColor((UILabel *)self) ?: color;
+    }
+    %orig(color);
+}
+- (void)didMoveToWindow {
+    %orig;
+    if ([badges containsObject:(UILabel *)self]) ASVStyleNativeBadge((UILabel *)self);
+}
 %end
 
 %hook _UIStatusBarStringView
@@ -92,6 +121,17 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     NSString *badge = ASVBadge((UILabel *)self, text);
     %orig(badge);
     if ([badges containsObject:(UILabel *)self] || objc_getAssociatedObject((UILabel *)self,ASVOriginalColorKey)) ASVStyleNativeBadge((UILabel *)self);
+}
+- (void)setTextColor:(UIColor *)color {
+    if (!ASVApplyingColor && color) {
+        objc_setAssociatedObject((UILabel *)self,ASVOriginalColorKey,color,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        color=ASVWantedColor((UILabel *)self) ?: color;
+    }
+    %orig(color);
+}
+- (void)didMoveToWindow {
+    %orig;
+    if ([badges containsObject:(UILabel *)self]) ASVStyleNativeBadge((UILabel *)self);
 }
 %end
 

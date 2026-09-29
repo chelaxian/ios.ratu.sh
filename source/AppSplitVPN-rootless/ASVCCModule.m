@@ -36,10 +36,11 @@ static UIImage *ASVGlyph(void) {
             outline.lineWidth=5;[outline stroke];
             UIBezierPath *arrows=[UIBezierPath bezierPath];
             arrows.lineWidth=5;arrows.lineCapStyle=kCGLineCapRound;arrows.lineJoinStyle=kCGLineJoinRound;
-            [arrows moveToPoint:CGPointMake(22,49)];[arrows addLineToPoint:CGPointMake(38,33)];
-            [arrows moveToPoint:CGPointMake(29,33)];[arrows addLineToPoint:CGPointMake(38,33)];[arrows addLineToPoint:CGPointMake(38,42)];
-            [arrows moveToPoint:CGPointMake(58,31)];[arrows addLineToPoint:CGPointMake(42,47)];
-            [arrows moveToPoint:CGPointMake(42,38)];[arrows addLineToPoint:CGPointMake(42,47)];[arrows addLineToPoint:CGPointMake(51,47)];
+            // Two arrows centred on (40,40) with a clear gap between the heads.
+            [arrows moveToPoint:CGPointMake(21,54)];[arrows addLineToPoint:CGPointMake(35,40)];
+            [arrows moveToPoint:CGPointMake(27,40)];[arrows addLineToPoint:CGPointMake(35,40)];[arrows addLineToPoint:CGPointMake(35,48)];
+            [arrows moveToPoint:CGPointMake(59,26)];[arrows addLineToPoint:CGPointMake(45,40)];
+            [arrows moveToPoint:CGPointMake(45,32)];[arrows addLineToPoint:CGPointMake(45,40)];[arrows addLineToPoint:CGPointMake(53,40)];
             [arrows stroke];
         }] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     });
@@ -58,8 +59,12 @@ static UIImage *ASVGlyph(void) {
     return [prefs[@"enabled"] boolValue];
 }
 - (void)setSelected:(BOOL)selected {
-    (void)selected;
-    notify_post(ASV_CMD_TOGGLE);
+    if (selected==[self isSelected]) return;
+    int token=-1;
+    if (notify_register_check(ASV_CMD_SET,&token)==NOTIFY_STATUS_OK &&
+        notify_set_state(token,selected?1:2)==NOTIFY_STATUS_OK) notify_post(ASV_CMD_SET);
+    else notify_post(ASV_CMD_TOGGLE);
+    if (token>=0) notify_cancel(token);
 }
 - (UIImage *)iconGlyph { return ASVGlyph(); }
 - (UIImage *)selectedIconGlyph { return ASVGlyph(); }
