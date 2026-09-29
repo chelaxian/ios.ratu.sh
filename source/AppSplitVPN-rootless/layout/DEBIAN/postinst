@@ -5,3 +5,5 @@ chown root:wheel /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
 chmod 644 /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
 /var/jb/bin/launchctl bootout system/com.ratush.appsplitvpn 2>/dev/null || true
 /var/jb/bin/launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
+/var/jb/usr/libexec/appsplitvpn-register || true
+/usr/bin/killall ControlCenterUIKit 2>/dev/null || true

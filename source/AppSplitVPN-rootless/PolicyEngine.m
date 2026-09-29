@@ -37,11 +37,12 @@
         }
         if (!resolved.count) {
             [unresolved addObject:identifier];
-            // An offloaded app can have an LSApplicationProxy but no executable.
-            // In BYPASS, leave it on the VPN and still apply the other DIRECT apps.
-            // In TUNNEL ONLY, continuing would silently send a requested VPN app
-            // directly, so fail closed instead.
-            if ([mode isEqualToString:@"tunnelOnly"]) {
+            // A deleted/offloaded app cannot launch traffic. Keep its selection
+            // for a later reinstall, but do not let it block unrelated rules.
+            // An installed app whose identity cannot be resolved is different:
+            // TUNNEL ONLY must fail closed rather than leak that app directly.
+            BOOL installedExecutable = [NSBundle bundleWithURL:bundleURL].executablePath.length > 0;
+            if (installedExecutable && [mode isEqualToString:@"tunnelOnly"]) {
                 _unresolved = [unresolved copy];
                 if (error) *error=@"Could not resolve a selected VPN application's identity";
                 return NO;

@@ -31,6 +31,10 @@ jobs:
           bundle="$tmp/var/jb/Library/PreferenceBundles/AppSplitVPNPrefs.bundle/AppSplitVPNPrefs"
           lipo -thin arm64e "$bundle" -output "$tmp/arm64e"
           test "$(xxd -p -s 8 -l 4 "$tmp/arm64e")" = 02000080
+          cc="$tmp/var/jb/Library/ControlCenter/Bundles/AppSplitVPNCC.bundle/AppSplitVPNCC"
+          lipo -thin arm64e "$cc" -output "$tmp/cc-arm64e"
+          test "$(xxd -p -s 8 -l 4 "$tmp/cc-arm64e")" = 02000080
+          test -x "$tmp/var/jb/usr/libexec/appsplitvpn-register"
           ldid -h "$tmp/var/jb/usr/libexec/appsplitvpnd"
           ldid -e "$tmp/var/jb/usr/libexec/appsplitvpnd"
           mkdir artifacts
