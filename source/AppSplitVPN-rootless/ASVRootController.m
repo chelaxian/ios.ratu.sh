@@ -10,6 +10,9 @@
 @interface PSSpecifier (ASVListValues)
 - (void)setValues:(NSArray *)values titles:(NSArray *)titles;
 @end
+@interface PSListController (ASVIndexPath)
+- (PSSpecifier *)specifierAtIndexPath:(NSIndexPath *)indexPath;
+@end
 static NSString *L(NSString *en,NSString *ru) {
     NSString *chosen=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"language"];
     BOOL russian=[chosen isEqual:@"ru"] || (![chosen isEqual:@"en"] && [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"]);
@@ -77,11 +80,13 @@ static NSString *L(NSString *en,NSString *ru) {
     [group setProperty:L(@"TUNNEL ONLY: only VPN apps use the tunnel. BYPASS: DIRECT apps bypass it. Reopen apps after changing rules.",@"TUNNEL ONLY: туннель только для списка VPN. BYPASS: список DIRECT идёт напрямую. После изменения правил переоткройте приложения.") forKey:@"footerText"];
     [items addObject:group];
     NSUInteger total=[ASVAppListController installedApplicationCount];
-    PSSpecifier *vpn=[PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"VPN  %lu/%lu",(unsigned long)[self countFor:ASV_VPN],(unsigned long)total]
-        target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
+    PSSpecifier *vpn=[PSSpecifier preferenceSpecifierNamed:@"VPN" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
+    [vpn setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_VPN],(unsigned long)total] forKey:@"asvCount"];
+    [vpn setProperty:@"green" forKey:@"asvColor"];
     [vpn setButtonAction:@selector(openVPNList)];[items addObject:vpn];
-    PSSpecifier *direct=[PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"DIRECT  %lu/%lu",(unsigned long)[self countFor:ASV_DIRECT],(unsigned long)total]
-        target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
+    PSSpecifier *direct=[PSSpecifier preferenceSpecifierNamed:@"DIRECT" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
+    [direct setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_DIRECT],(unsigned long)total] forKey:@"asvCount"];
+    [direct setProperty:@"red" forKey:@"asvColor"];
     [direct setButtonAction:@selector(openDirectList)];[items addObject:direct];
     PSSpecifier *export=[PSSpecifier preferenceSpecifierNamed:L(@"Export lists",@"Экспорт списков") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [export setButtonAction:@selector(exportLists)];[items addObject:export];
@@ -100,19 +105,50 @@ static NSString *L(NSString *en,NSString *ru) {
         @"stopped":L(@"Service stopped",@"Служба остановлена"),@"unavailable":L(@"Service has not started",@"Служба ещё не запущена")};
     BOOL healthy=[@[@"active",@"partial"] containsObject:code];
     group=[PSSpecifier groupSpecifierWithName:[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")]];
-    NSString *description=labels[code] ?: code;
+    NSMutableArray *lines=[NSMutableArray arrayWithObject:labels[code] ?: code];
+    if ([@[@"active",@"partial"] containsObject:code] && [state[@"rules"] integerValue]>0)
+        [lines addObject:[NSString stringWithFormat:L(@"Rules: %@",@"Правил: %@"),state[@"rules"]]];
     NSArray *missing=state[@"unresolved"];
-    if (missing.count) description=[description stringByAppendingFormat:L(@". Offloaded or unavailable: %lu",@". Выгружено или недоступно: %lu"),(unsigned long)missing.count];
-    NSString *vpnName=state[@"vpnName"];
-    if (vpnName.length) description=[description stringByAppendingFormat:@"\nVPN: %@",vpnName];
+    if (missing.count) [lines addObject:[NSString stringWithFormat:L(@"Offloaded or unavailable: %lu",@"Выгружено или недоступно: %lu"),(unsigned long)missing.count]];
     NSString *detail=state[@"error"];
-    if (detail.length) description=[description stringByAppendingFormat:@"\n%@",detail];
-    [group setProperty:description forKey:@"footerText"];[items addObject:group];
+    if (detail.length) [lines addObject:detail];
+    [group setProperty:[lines componentsJoinedByString:@"\n"] forKey:@"footerText"];[items addObject:group];
     PSSpecifier *refresh=[PSSpecifier preferenceSpecifierNamed:L(@"Refresh status",@"Обновить статус") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [refresh setButtonAction:@selector(refreshStatus)];[items addObject:refresh];
     PSSpecifier *logs=[PSSpecifier preferenceSpecifierNamed:L(@"Routing log",@"Журнал маршрутизации") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [logs setButtonAction:@selector(openLogs)];[items addObject:logs];
+    NSString *vpnName=state[@"vpnName"];
+    BOOL vpnUp=vpnName.length && ![code isEqual:@"waitingVPN"] && ![code isEqual:@"unavailable"];
+    group=[PSSpecifier groupSpecifierWithName:L(@"Active VPN",@"Активный VPN")];[items addObject:group];
+    PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:vpnUp?vpnName:L(@"Not connected",@"Не подключён") target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];
+    [items addObject:active];
     _specifiers=[items copy];return _specifiers;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell=[super tableView:tableView cellForRowAtIndexPath:indexPath];
+    PSSpecifier *specifier=[self specifierAtIndexPath:indexPath];
+    NSString *color=[specifier propertyForKey:@"asvColor"];
+    if (color) {
+        UIColor *tint=[color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor;
+        cell.textLabel.textColor=tint;
+        UILabel *count=[UILabel new];count.text=[specifier propertyForKey:@"asvCount"];count.textColor=tint;
+        count.font=[UIFont monospacedDigitSystemFontOfSize:17 weight:UIFontWeightRegular];[count sizeToFit];
+        UIImageView *chevron=[[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"chevron.right" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:14 weight:UIImageSymbolWeightSemibold]]];
+        chevron.tintColor=UIColor.tertiaryLabelColor;[chevron sizeToFit];
+        CGFloat height=MAX(count.bounds.size.height,chevron.bounds.size.height);
+        UIView *box=[[UIView alloc] initWithFrame:CGRectMake(0,0,count.bounds.size.width+10+chevron.bounds.size.width,height)];
+        count.frame=CGRectMake(0,(height-count.bounds.size.height)/2,count.bounds.size.width,count.bounds.size.height);
+        chevron.frame=CGRectMake(count.bounds.size.width+10,(height-chevron.bounds.size.height)/2,chevron.bounds.size.width,chevron.bounds.size.height);
+        [box addSubview:count];[box addSubview:chevron];cell.accessoryView=box;
+    } else if ([specifier propertyForKey:@"asvDot"]) {
+        BOOL up=[[specifier propertyForKey:@"asvDot"] isEqual:@"green"];
+        cell.imageView.image=[UIImage systemImageNamed:up?@"lock.shield.fill":@"shield.slash"];
+        cell.imageView.tintColor=up?UIColor.systemGreenColor:UIColor.secondaryLabelColor;
+        cell.textLabel.textColor=up?UIColor.labelColor:UIColor.secondaryLabelColor;
+        cell.accessoryView=nil;
+    }
+    return cell;
 }
 - (void)refreshStatus { _specifiers=nil;[self reloadSpecifiers]; }
 - (void)openList:(NSString *)key {

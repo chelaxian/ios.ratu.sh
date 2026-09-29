@@ -14,6 +14,25 @@
 @property(readonly) NSString *applicationType;
 @property(readonly) NSURL *bundleURL;
 @end
+@interface UIImage (ASVPrivateIcons)
++ (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)identifier format:(int)format scale:(CGFloat)scale;
+@end
+
+static UIImage *ASVIcon(NSString *identifier) {
+    static NSCache *icons;
+    static dispatch_once_t once;
+    dispatch_once(&once,^{ icons=[NSCache new]; });
+    UIImage *icon=[icons objectForKey:identifier];
+    if (icon) return icon;
+    if ([UIImage respondsToSelector:@selector(_applicationIconImageForBundleIdentifier:format:scale:)])
+        icon=[UIImage _applicationIconImageForBundleIdentifier:identifier format:0 scale:UIScreen.mainScreen.scale];
+    if (!icon) icon=[UIImage systemImageNamed:@"app.dashed"];
+    UIImage *source=icon;
+    UIGraphicsImageRenderer *renderer=[[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(29,29)];
+    icon=[renderer imageWithActions:^(__unused UIGraphicsImageRendererContext *context){ [source drawInRect:CGRectMake(0,0,29,29)]; }];
+    [icons setObject:icon forKey:identifier];
+    return icon;
+}
 
 static NSArray<NSDictionary *> *ASVCatalog(void) {
     static NSArray *cache;
@@ -132,11 +151,16 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
         else if ([_groupMode isEqual:@"category"]) group=record[@"category"];
         else if ([_groupMode isEqual:@"state"]) group=[self stateLabel:record[@"state"]];
         else if ([_groupMode isEqual:@"type"]) group=record[@"type"];
+        else if ([_groupMode isEqual:@"none"]) group=@"";
         else group=selected?[self t:@"Selected" ru:@"Выбрано"]:[self t:@"Not selected" ru:@"Не выбрано"];
         if (!groups[group]) groups[group]=[NSMutableArray array];
         [groups[group] addObject:record];
     }
-    _sectionNames=[[groups allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    _sectionNames=[[groups allKeys] sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){
+        BOOL aa=!a.length || [a isEqual:@"—"] || [a isEqual:@"#"], bb=!b.length || [b isEqual:@"—"] || [b isEqual:@"#"];
+        if (aa!=bb) return aa?NSOrderedDescending:NSOrderedAscending;
+        return [a localizedCaseInsensitiveCompare:b];
+    }];
     NSMutableArray *sections=[NSMutableArray array];
     for (NSString *name in _sectionNames) {
         NSArray *sorted=[groups[name] sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *a,NSDictionary *b){
@@ -149,7 +173,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
         [sections addObject:sorted];
     }
     _sections=[sections copy];
-    self.title=[NSString stringWithFormat:@"%@ %lu/%lu",_listKey,(unsigned long)_selected.count,(unsigned long)ASVCatalog().count];
+    self.title=[NSString stringWithFormat:@"%@ %lu/%lu",[_listKey isEqual:ASV_VPN]?@"VPN":@"DIRECT",(unsigned long)_selected.count,(unsigned long)ASVCatalog().count];
     [self.tableView reloadData];
 }
 - (NSString *)stateLabel:(NSString *)state {
@@ -160,7 +184,12 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView { return _sections.count; }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section { return _sections[section].count; }
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section { return _sectionNames[section]; }
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    NSString *name=_sectionNames[section];
+    if ([_groupMode isEqual:@"none"]) return nil;
+    if ([name isEqual:@"—"]) return [_groupMode isEqual:@"vendor"]?[self t:@"Unknown developer" ru:@"Разработчик не указан"]:[self t:@"No category" ru:@"Без категории"];
+    return name;
+}
 - (NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView {
     return [_groupMode isEqual:@"name"] ? _sectionNames:nil;
 }
@@ -171,13 +200,25 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
     NSDictionary *r=_sections[path.section][path.row];
     cell.textLabel.text=r[@"name"];
     cell.detailTextLabel.text=[NSString stringWithFormat:@"%@ · %@ · %@",r[@"id"],r[@"vendor"],[self stateLabel:r[@"state"]]];
-    if ([r[@"state"] isEqual:@"offloaded"]) cell.imageView.image=[UIImage systemImageNamed:@"icloud.and.arrow.down"];
-    else if ([r[@"state"] isEqual:@"deleted"]) cell.imageView.image=[UIImage systemImageNamed:@"trash"];
-    else if ([r[@"state"] isEqual:@"profileExpired"]) cell.imageView.image=[UIImage systemImageNamed:@"exclamationmark.shield"];
-    else cell.imageView.image=[UIImage systemImageNamed:@"app"];
+    cell.imageView.image=ASVIcon(r[@"id"]);
+    cell.imageView.layer.cornerRadius=6.5;cell.imageView.clipsToBounds=YES;
+    NSString *symbol=nil;UIColor *tint=UIColor.secondaryLabelColor;
+    if ([r[@"state"] isEqual:@"offloaded"]) { symbol=@"icloud.and.arrow.down";tint=UIColor.systemBlueColor; }
+    else if ([r[@"state"] isEqual:@"deleted"]) { symbol=@"trash";tint=UIColor.systemRedColor; }
+    else if ([r[@"state"] isEqual:@"profileExpired"]) { symbol=@"exclamationmark.shield";tint=UIColor.systemOrangeColor; }
     UISwitch *sw=[[UISwitch alloc] init];sw.accessibilityIdentifier=r[@"id"];
     sw.on=[_selected containsObject:r[@"id"]];[sw addTarget:self action:@selector(changed:) forControlEvents:UIControlEventValueChanged];
-    cell.accessoryView=sw;return cell;
+    [sw sizeToFit];
+    if (symbol) {
+        CGSize size=sw.bounds.size;
+        UIImageView *badge=[[UIImageView alloc] initWithImage:[UIImage systemImageNamed:symbol]];
+        badge.tintColor=tint;badge.contentMode=UIViewContentModeScaleAspectFit;
+        badge.frame=CGRectMake(0,(size.height-20)/2,22,20);
+        UIView *box=[[UIView alloc] initWithFrame:CGRectMake(0,0,30+size.width,size.height)];
+        sw.frame=CGRectMake(30,0,size.width,size.height);
+        [box addSubview:badge];[box addSubview:sw];cell.accessoryView=box;
+    } else cell.accessoryView=sw;
+    return cell;
 }
 - (void)choice:(NSString *)title options:(NSArray<NSArray<NSString *> *> *)choices field:(NSString *)field {
     UIAlertController *sheet=[UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleActionSheet];
@@ -191,7 +232,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 - (void)showOptions {
     UIAlertController *sheet=[UIAlertController alertControllerWithTitle:[self t:@"List options" ru:@"Параметры списка"] message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     [sheet addAction:[UIAlertAction actionWithTitle:[self t:@"Group" ru:@"Группировка"] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){
-        [self choice:[self t:@"Group by" ru:@"Группировать по"] options:@[@[@"name",[self t:@"Alphabet" ru:@"Алфавит"]],@[@"vendor",[self t:@"Developer" ru:@"Разработчик"]],@[@"category",[self t:@"Category" ru:@"Категория"]],@[@"type",[self t:@"User / system" ru:@"Пользовательское / системное"]],@[@"state",[self t:@"Installation state" ru:@"Состояние установки"]],@[@"selected",[self t:@"Selected / unselected" ru:@"Выбрано / не выбрано"]]] field:@"groupMode"];
+        [self choice:[self t:@"Group by" ru:@"Группировать по"] options:@[@[@"none",[self t:@"Don't group" ru:@"Не группировать"]],@[@"name",[self t:@"Alphabet" ru:@"Алфавит"]],@[@"vendor",[self t:@"Developer" ru:@"Разработчик"]],@[@"category",[self t:@"Category" ru:@"Категория"]],@[@"type",[self t:@"User / system" ru:@"Пользовательское / системное"]],@[@"state",[self t:@"Installation state" ru:@"Состояние установки"]],@[@"selected",[self t:@"Selected / unselected" ru:@"Выбрано / не выбрано"]]] field:@"groupMode"];
     }]];
     [sheet addAction:[UIAlertAction actionWithTitle:[self t:@"Sort" ru:@"Сортировка"] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){
         [self choice:[self t:@"Sort by" ru:@"Сортировать по"] options:@[@[@"asc",[self t:@"Name A–Z" ru:@"Имя А–Я"]],@[@"desc",[self t:@"Name Z–A" ru:@"Имя Я–А"]],@[@"selectedFirst",[self t:@"Selected first" ru:@"Выбранные сначала"]],@[@"selectedLast",[self t:@"Selected last" ru:@"Выбранные в конце"]]] field:@"sortMode"];

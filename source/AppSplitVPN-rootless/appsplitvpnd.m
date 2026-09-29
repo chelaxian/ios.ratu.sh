@@ -77,9 +77,12 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.0"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.1"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
+    static int splitToken = -1;
+    if (splitToken < 0) notify_register_check(ASV_STATE_NOTIFY, &splitToken);
+    if (splitToken >= 0) notify_set_state(splitToken, ([status isEqual:@"active"] || [status isEqual:@"partial"]) ? 1 : 0);
     if (changed) {
         NSString *event=[NSString stringWithFormat:@"status=%@ rules=%lu unavailable=%lu vpn=%@ %@",status,(unsigned long)engine.count,(unsigned long)engine.unresolved.count,vpnName ?: @"?",error ?: @""];
         if (![event isEqual:lastLoggedState]) { Journal(event);lastLoggedState=event; }

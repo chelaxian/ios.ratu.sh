@@ -35,5 +35,11 @@ AppSplitVPNCC_CODESIGN_FLAGS = -Cadhoc -S
 AppSplitVPNCC_INSTALL_PATH = /Library/ControlCenter/Bundles
 AppSplitVPNCC_RESOURCE_DIRS = CCResources
 
+TWEAK_NAME = AppSplitVPNStatusBar
+AppSplitVPNStatusBar_FILES = StatusBar.x
+AppSplitVPNStatusBar_CFLAGS = -fobjc-arc
+AppSplitVPNStatusBar_FRAMEWORKS = UIKit
+
 include $(THEOS_MAKE_PATH)/tool.mk
 include $(THEOS_MAKE_PATH)/bundle.mk
+include $(THEOS_MAKE_PATH)/tweak.mk
