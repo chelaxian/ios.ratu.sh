@@ -356,16 +356,16 @@ Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine rootless ad
 Name: Appabetical
 
 Package: com.ratush.appsplitvpn
-Version: 0.2.2
+Version: 0.2.3
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 852
 Depends: firmware (>= 15.0), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.2_iphoneos-arm64.deb
-Size: 75848
-MD5sum: 084ae69323c2a5f44da9a39200e9c7ac
-SHA1: 3b656867951c940220e127fb7c3fa6afa292989b
-SHA256: daa0d4a39338f96719a4b876e44d796c69f4c1017008a3b8510efcd0379b186d
+Filename: debs/com.ratush.appsplitvpn_0.2.3_iphoneos-arm64.deb
+Size: 74940
+MD5sum: 8d90a4551c3110bee76f9586634776fb
+SHA1: c4afc38115ff3dfd68d24753e94cf09e29969cbc
+SHA256: c5f458065bf291779064c383f32194f802bd8aaa2d48d61b4f1807d8c07ffcac
 Section: Tweaks
 Description: Per-application routing through the active system VPN or directly.
 Author: ratush
