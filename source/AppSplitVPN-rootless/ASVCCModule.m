@@ -48,9 +48,9 @@ static UIImage *ASVGlyph(void) {
 - (instancetype)init { if ((self=[super init])) currentModule=self;return self; }
 - (BOOL)isSelected {
     NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
-    NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
-    NSString *status=state[@"status"];
-    return [prefs[@"enabled"] boolValue] && [@[@"active",@"partial"] containsObject:status];
+    // This is the tweak's enable switch, not the VPN's connection indicator.
+    // Keep it visibly on while waiting for a VPN so the next tap turns it off.
+    return [prefs[@"enabled"] boolValue];
 }
 - (void)setSelected:(BOOL)selected {
     (void)selected;
