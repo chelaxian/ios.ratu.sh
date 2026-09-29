@@ -1,10 +1,10 @@
 Package: com.ratush.appsplitvpn
 Name: App Split VPN
-Version: 0.2.4
+Version: 0.2.5
 Architecture: iphoneos-arm64
-Description: Per-application routing through the active system VPN or directly.
+Description: Per-app VPN/DIRECT routing. Target: iOS 15.0-17.3.1 with Dopamine; verified on iOS 17.0. Status badge shows red BYPASS or green TUNNEL ONLY.
 Maintainer: ratush
 Author: ratush
 Section: Tweaks
-Depends: firmware (>= 15.0), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
+Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
 Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png

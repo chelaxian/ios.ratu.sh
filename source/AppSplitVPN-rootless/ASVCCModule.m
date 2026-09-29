@@ -34,8 +34,13 @@ static UIImage *ASVGlyph(void) {
             [[UIColor whiteColor] setStroke];
             UIBezierPath *outline=[UIBezierPath bezierPathWithRoundedRect:CGRectMake(8,10,64,60) cornerRadius:12];
             outline.lineWidth=5;[outline stroke];
-            NSString *symbol=@"↗↙";
-            [symbol drawInRect:CGRectMake(12,23,56,35) withAttributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:24],NSForegroundColorAttributeName:UIColor.whiteColor}];
+            UIBezierPath *arrows=[UIBezierPath bezierPath];
+            arrows.lineWidth=5;arrows.lineCapStyle=kCGLineCapRound;arrows.lineJoinStyle=kCGLineJoinRound;
+            [arrows moveToPoint:CGPointMake(22,49)];[arrows addLineToPoint:CGPointMake(38,33)];
+            [arrows moveToPoint:CGPointMake(29,33)];[arrows addLineToPoint:CGPointMake(38,33)];[arrows addLineToPoint:CGPointMake(38,42)];
+            [arrows moveToPoint:CGPointMake(58,31)];[arrows addLineToPoint:CGPointMake(42,47)];
+            [arrows moveToPoint:CGPointMake(42,38)];[arrows addLineToPoint:CGPointMake(42,47)];[arrows addLineToPoint:CGPointMake(51,47)];
+            [arrows stroke];
         }] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     });
     return image;

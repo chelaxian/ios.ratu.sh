@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- App Split VPN — экспериментальное разделение приложений на VPN и DIRECT для iOS 17 с Dopamine
+- App Split VPN — разделение приложений на VPN и DIRECT. Целевой диапазон: iOS 15.0–17.3.1 с Dopamine rootless; фактически проверено на iOS 17.0. iOS 15/16 и остальные минорные версии требуют проверки на устройстве: используемые NEPolicy API закрыты Apple.
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
