@@ -15,30 +15,19 @@ static int (*anyVPNActive)(void);
 static NSString *lastState;
 static NSTimeInterval lastStateWrite;
 static NSString *vpnName;
-static NSDictionary *lastLoggedPrefs;
-static NSString *lastLoggedState;
 static NSTimeInterval lastVPNLookup;
 static NSString *lastRouteFingerprint;
 
-static void Journal(NSString *line) {
-    NSMutableArray *entries=[[NSArray arrayWithContentsOfFile:ASV_LOG] mutableCopy] ?: [NSMutableArray array];
-    [entries addObject:[NSString stringWithFormat:@"%@  %@",[NSDate date],line]];
-    if (entries.count>250) [entries removeObjectsInRange:NSMakeRange(0,entries.count-250)];
-    [entries writeToFile:ASV_LOG atomically:YES];
-    chmod(ASV_LOG.fileSystemRepresentation,0644);
-}
-// Routing journal: one block per applied rule set, listing every selected app and its outcome.
+// Current routing table: a single block (no history) listing every selected app and its outcome.
+// Rewritten only when the effective rules change.
 static void RouteJournal(NSString *headline, NSString *route, NSArray<NSString *> *apps, NSArray<NSString *> *skipped) {
     NSString *fingerprint=[NSString stringWithFormat:@"%@|%@|%@|%@",headline,route ?: @"",apps ?: @[],skipped ?: @[]];
     if ([fingerprint isEqualToString:lastRouteFingerprint]) return;
     lastRouteFingerprint=fingerprint;
-    NSMutableArray *entries=[[NSArray arrayWithContentsOfFile:ASV_ROUTE_LOG] mutableCopy] ?: [NSMutableArray array];
     NSMutableArray *block=[NSMutableArray arrayWithObject:[NSString stringWithFormat:@"%@  %@",[NSDate date],headline]];
     NSSet *skip=[NSSet setWithArray:skipped ?: @[]];
     for (NSString *app in apps) [block addObject:[NSString stringWithFormat:@"%@ %@",[skip containsObject:app]?@"SKIP":route,app]];
-    [entries addObject:block];
-    while (entries.count>20) [entries removeObjectAtIndex:0];
-    [entries writeToFile:ASV_ROUTE_LOG atomically:YES];
+    [@[block] writeToFile:ASV_ROUTE_LOG atomically:YES];
     chmod(ASV_ROUTE_LOG.fileSystemRepresentation,0644);
 }
 static id CallObject(id object,NSString *name) {
@@ -92,15 +81,13 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.2"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.3"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
     if (splitToken < 0) notify_register_check(ASV_STATE_NOTIFY, &splitToken);
     if (splitToken >= 0) notify_set_state(splitToken, ([status isEqual:@"active"] || [status isEqual:@"partial"]) ? 1 : 0);
     if (changed) {
-        NSString *event=[NSString stringWithFormat:@"status=%@ rules=%lu unavailable=%lu vpn=%@ %@",status,(unsigned long)engine.count,(unsigned long)engine.unresolved.count,vpnName ?: @"?",error ?: @""];
-        if (![event isEqual:lastLoggedState]) { Journal(event);lastLoggedState=event; }
         notify_post(ASV_STATE_NOTIFY);
         fprintf(stderr,"AppSplitVPN status=%s rules=%lu error=%s\n", status.UTF8String,(unsigned long)engine.count,(error ?: @"").UTF8String);
     }
@@ -115,12 +102,6 @@ static void Reconcile(BOOL force) {
         // Periodic UUID refresh covers application upgrades and newly installed extensions.
         if (!force && initialized && active == lastActive && [prefs isEqual:lastPrefs] && now-lastRefresh < 60) return;
         initialized = YES; lastActive = active; lastPrefs = prefs; lastRefresh = now;
-        if (![prefs isEqual:lastLoggedPrefs]) {
-            NSString *mode=prefs[@"mode"];
-            NSString *key=[mode isEqual:@"tunnelOnly"]?ASV_VPN:ASV_DIRECT;
-            Journal([NSString stringWithFormat:@"settings enabled=%@ mode=%@ selected=%lu",[prefs[@"enabled"] boolValue]?@"yes":@"no",mode,(unsigned long)[prefs[key] count]]);
-            lastLoggedPrefs=[prefs copy];
-        }
         if (![prefs[@"enabled"] boolValue]) { [engine clear]; State(@"disabled",nil); RouteJournal(@"disabled: all apps use the system VPN",nil,nil,nil); return; }
         if (!anyVPNActive) { [engine clear]; State(@"unsupported",@"System VPN status API unavailable"); return; }
         if (!active) { [engine clear]; State(@"waitingVPN",nil); RouteJournal(@"no active VPN: rules removed",nil,nil,nil); return; }
@@ -148,16 +129,7 @@ int main(int argc,char **argv) { @autoreleasepool {
     int token;
     notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);});
     int toggleToken;
-    int clearToken;
-    notify_register_dispatch(ASV_CMD_CLEAR_LOGS,&clearToken,dispatch_get_main_queue(),^(int t){
-        (void)t;
-        [@[] writeToFile:ASV_LOG atomically:YES];
-        [@[] writeToFile:ASV_ROUTE_LOG atomically:YES];
-        chmod(ASV_LOG.fileSystemRepresentation,0644);chmod(ASV_ROUTE_LOG.fileSystemRepresentation,0644);
-        lastRouteFingerprint=nil;lastLoggedState=nil;lastLoggedPrefs=nil;
-        Reconcile(YES);
-        notify_post(ASV_STATE_NOTIFY);
-    });
+    unlink(ASV_LOG.fileSystemRepresentation); // change log removed in 0.2.3
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){
         (void)t;
         NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];

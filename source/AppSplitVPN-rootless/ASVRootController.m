@@ -23,21 +23,32 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 #pragma mark - Log pages
 
 @interface ASVLogController : UIViewController
-@property(nonatomic) BOOL routes;
 @property(nonatomic,strong) UITextView *textView;
+@property(nonatomic,strong) NSTimer *timer;
+@property(nonatomic,strong) NSDate *loaded;
 @end
 @implementation ASVLogController
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor=UIColor.blackColor;
-    self.title=_routes?L(@"Routing log",@"Журнал маршрутизации"):L(@"Change log",@"Журнал изменений");
+    self.title=L(@"Routing log",@"Журнал маршрутизации");
     _textView=[[UITextView alloc] initWithFrame:CGRectZero];_textView.editable=NO;
     _textView.backgroundColor=UIColor.blackColor;_textView.textColor=UIColor.systemGreenColor;
     _textView.textContainerInset=UIEdgeInsetsMake(12,10,12,10);
     _textView.translatesAutoresizingMaskIntoConstraints=NO;[self.view addSubview:_textView];
     [NSLayoutConstraint activateConstraints:@[[_textView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],[_textView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],[_textView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],[_textView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor]]];
-    self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:L(@"Clear",@"Очистить") style:UIBarButtonItemStylePlain target:self action:@selector(confirmClear)];
     [self reload];
+}
+// The service rewrites the file whenever the effective rules change; follow it live.
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [_timer invalidate];
+    _timer=[NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(reloadIfChanged) userInfo:nil repeats:YES];
+}
+- (void)viewWillDisappear:(BOOL)animated { [_timer invalidate];_timer=nil;[super viewWillDisappear:animated]; }
+- (void)reloadIfChanged {
+    NSDate *modified=[[NSFileManager defaultManager] attributesOfItemAtPath:ASV_ROUTE_LOG error:nil].fileModificationDate;
+    if (modified && ![modified isEqualToDate:_loaded]) [self reload];
 }
 - (NSString *)reasonFor:(NSString *)identifier {
     NSDictionary *record=[ASVAppListController recordForIdentifier:identifier];
@@ -51,6 +62,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     return name.length && ![name isEqual:identifier]?[NSString stringWithFormat:@"%@ (%@)",name,identifier]:identifier;
 }
 - (void)reload {
+    _loaded=[[NSFileManager defaultManager] attributesOfItemAtPath:ASV_ROUTE_LOG error:nil].fileModificationDate;
     NSMutableAttributedString *body=[NSMutableAttributedString new];
     NSDictionary *normal=@{NSFontAttributeName:ASVMono(12),NSForegroundColorAttributeName:UIColor.systemGreenColor};
     NSDictionary *header=@{NSFontAttributeName:ASVMonoBold(12),NSForegroundColorAttributeName:UIColor.whiteColor};
@@ -59,9 +71,9 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     void (^add)(NSString *,NSDictionary *)=^(NSString *text,NSDictionary *attributes){
         [body appendAttributedString:[[NSAttributedString alloc] initWithString:[text stringByAppendingString:@"\n"] attributes:attributes]];
     };
-    if (_routes) {
+    {
         NSArray *blocks=[NSArray arrayWithContentsOfFile:ASV_ROUTE_LOG] ?: @[];
-        for (NSArray *block in [blocks reverseObjectEnumerator]) {
+        for (NSArray *block in [blocks.lastObject isKindOfClass:NSArray.class]?@[blocks.lastObject]:@[]) {
             if (![block isKindOfClass:NSArray.class] || !block.count) continue;
             add(block.firstObject,header);
             for (NSString *line in [block subarrayWithRange:NSMakeRange(1,block.count-1)]) {
@@ -74,21 +86,13 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
             }
             add(@"",normal);
         }
-    } else {
-        for (NSString *line in [([NSArray arrayWithContentsOfFile:ASV_LOG] ?: @[]) reverseObjectEnumerator]) add(line,normal);
     }
-    if (!body.length) add(L(@"Log is empty",@"Журнал пуст"),skip);
+    if (!body.length) add(L(@"No rules are applied yet",@"Правила ещё не применены"),skip);
+    CGPoint offset=_textView.contentOffset;
     _textView.attributedText=body;
+    [_textView setContentOffset:offset animated:NO];
 }
-- (void)confirmClear {
-    UIAlertController *alert=[UIAlertController alertControllerWithTitle:L(@"Clear both logs?",@"Очистить оба журнала?") message:nil preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:L(@"Cancel",@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
-    [alert addAction:[UIAlertAction actionWithTitle:L(@"Clear",@"Очистить") style:UIAlertActionStyleDestructive handler:^(__unused UIAlertAction *a){
-        notify_post(ASV_CMD_CLEAR_LOGS);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.2*NSEC_PER_SEC)),dispatch_get_main_queue(),^{ [self reload]; });
-    }]];
-    [self presentViewController:alert animated:YES completion:nil];
-}
+- (void)dealloc { [_timer invalidate]; }
 @end
 
 #pragma mark - Root
@@ -150,21 +154,13 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     if (codeOut) *codeOut=code;
     BOOL enabled=[prefs[@"enabled"] boolValue];
     BOOL tunnel=[prefs[@"mode"] isEqual:@"tunnelOnly"];
-    NSString *listName=tunnel?@"VPN":@"DIRECT";
-    NSArray *apps=prefs[tunnel?ASV_VPN:ASV_DIRECT];
-    NSUInteger total=[apps isKindOfClass:NSArray.class]?apps.count:0;
     BOOL applied=[@[@"active",@"partial"] containsObject:code];
-    NSArray *missing=applied?(state[@"unresolved"] ?: @[]):@[];
-    NSUInteger offloaded=0,deleted=0,unknown=0;
-    for (NSString *identifier in missing) {
-        NSDictionary *record=[ASVAppListController recordForIdentifier:identifier];
-        if (!record) deleted++; else if ([record[@"state"] isEqual:@"offloaded"]) offloaded++; else unknown++;
-    }
+    NSUInteger vpnApps=[self countFor:ASV_VPN], directApps=[self countFor:ASV_DIRECT];
     NSMutableAttributedString *text=[NSMutableAttributedString new];
     UIColor *green=UIColor.systemGreenColor, *red=UIColor.systemRedColor, *gray=UIColor.systemGrayColor;
     void (^line)(NSString *,NSString *,UIColor *)=^(NSString *label,NSString *value,UIColor *color){
         if (text.length) [text appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        [text appendAttributedString:[[NSAttributedString alloc] initWithString:[label stringByPaddingToLength:13 withString:@" " startingAtIndex:0] attributes:@{NSFontAttributeName:ASVMono(14),NSForegroundColorAttributeName:gray}]];
+        [text appendAttributedString:[[NSAttributedString alloc] initWithString:[label stringByPaddingToLength:15 withString:@" " startingAtIndex:0] attributes:@{NSFontAttributeName:ASVMono(14),NSForegroundColorAttributeName:gray}]];
         [text appendAttributedString:[[NSAttributedString alloc] initWithString:value attributes:@{NSFontAttributeName:ASVMonoBold(14),NSForegroundColorAttributeName:color}]];
     };
     line(L(@"Tweak:",@"Твик:"),enabled?L(@"enabled",@"включён"):L(@"disabled",@"выключен"),enabled?green:red);
@@ -173,15 +169,9 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     if ([code isEqual:@"unavailable"] || [code isEqual:@"stopped"]) vpnState=L(@"service stopped",@"служба не запущена");
     line(@"VPN:",vpnState,down?red:green);
     line(L(@"Mode:",@"Режим:"),tunnel?@"TUNNEL ONLY":@"BYPASS",UIColor.whiteColor);
-    line([listName stringByAppendingString:@":"],[NSString stringWithFormat:L(@"%lu apps",@"%lu прил."),(unsigned long)total],tunnel?green:red);
-    if (applied) {
-        line(tunnel?L(@"Via VPN:",@"Через VPN:"):L(@"Direct:",@"Напрямую:"),[NSString stringWithFormat:@"%lu",(unsigned long)(total-MIN(total,missing.count))],green);
-        line(L(@"Skipped:",@"Пропущено:"),[NSString stringWithFormat:@"%lu",(unsigned long)missing.count],missing.count?UIColor.systemOrangeColor:green);
-        if (offloaded) line(L(@" offloaded",@" выгружено"),[NSString stringWithFormat:@"%lu",(unsigned long)offloaded],gray);
-        if (deleted) line(L(@" deleted",@" удалено"),[NSString stringWithFormat:@"%lu",(unsigned long)deleted],gray);
-        if (unknown) line(L(@" unresolved",@" не опред."),[NSString stringWithFormat:@"%lu",(unsigned long)unknown],gray);
-        line(L(@"NECP rules:",@"Правил NECP:"),[state[@"rules"] description] ?: @"0",gray);
-    }
+    line(L(@"NECP rules:",@"Правил NECP:"),applied?([state[@"rules"] description] ?: @"0"):@"0",UIColor.whiteColor);
+    line(L(@"VPN list:",@"Список VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)vpnApps],green);
+    line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
     return text;
 }
@@ -197,7 +187,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     else [mode setProperty:@NO forKey:@"enabled"];
     [items addObject:mode];
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
-    if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System",@"Системный"),@"Русский",@"English"]];
+    if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
@@ -216,13 +206,6 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     _statusText=[self buildStatus:&code];
     _statusFingerprint=[self statusFingerprint];
     BOOL healthy=[@[@"active",@"partial"] containsObject:code];
-    [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"Skipped: selected apps that cannot get a rule now. Offloaded and deleted apps have no executable; they are routed again after reinstall.\n\nNECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps.",@"Пропущено: выбранные приложения, для которых сейчас нельзя создать правило. У выгруженных и удалённых нет исполняемого файла; после установки правило появится снова.\n\nПравил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений.")]];
-    PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
-    [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
-    [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(refreshStatus)]];
-    [items addObject:[self button:L(@"Routing log",@"Журнал маршрутизации") action:@selector(openRouteLog)]];
-    [items addObject:[self button:L(@"Change log",@"Журнал изменений") action:@selector(openChangeLog)]];
 
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
     NSString *vpnName=state[@"vpnName"];
@@ -232,6 +215,13 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     NSString *activeName=vpnUp?(vpnName.length?vpnName:L(@"Connected",@"Подключён")):L(@"Not connected",@"Не подключён");
     PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:activeName target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];[items addObject:active];
+
+    [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
+    [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"NECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps. Offloaded and deleted apps get no rule until they are installed again.\n\nThe routing log shows the current route of every app in the active list and updates automatically.",@"Правил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений. Выгруженные и удалённые приложения не получают правил до повторной установки.\n\nЖурнал маршрутизации показывает текущий маршрут каждого приложения из активного списка и обновляется автоматически.")]];
+    PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+    [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
+    [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(refreshStatus)]];
+    [items addObject:[self button:L(@"Routing log",@"Журнал маршрутизации") action:@selector(openRouteLog)]];
     _headers=[headers copy];
     _specifiers=[items copy];return _specifiers;
 }
@@ -263,7 +253,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 - (CGFloat)terminalHeight {
     CGFloat width=MAX(200,self.view.bounds.size.width-40-24);
     CGRect box=[_statusText boundingRectWithSize:CGSizeMake(width,CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil];
-    return ceil(box.size.height)+24;
+    return ceil(box.size.height)+40;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     PSSpecifier *specifier=[self specifierAtIndexPath:indexPath];
@@ -301,10 +291,13 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
         [NSLayoutConstraint activateConstraints:@[[row.topAnchor constraintEqualToAnchor:cell.contentView.topAnchor],[row.bottomAnchor constraintEqualToAnchor:cell.contentView.bottomAnchor],[row.leadingAnchor constraintEqualToAnchor:cell.contentView.leadingAnchor],[row.trailingAnchor constraintEqualToAnchor:cell.contentView.trailingAnchor]]];
     } else if ([specifier propertyForKey:@"asvTerminal"]) {
         cell.textLabel.text=nil;cell.selectionStyle=UITableViewCellSelectionStyleNone;
-        cell.backgroundColor=UIColor.blackColor;
+        UIView *frame=[UIView new];frame.tag=0x5A5;frame.backgroundColor=UIColor.blackColor;
+        frame.layer.cornerRadius=10;frame.layer.borderWidth=1.5;frame.layer.borderColor=UIColor.systemGray2Color.CGColor;
+        frame.translatesAutoresizingMaskIntoConstraints=NO;[cell.contentView addSubview:frame];
+        [NSLayoutConstraint activateConstraints:@[[frame.topAnchor constraintEqualToAnchor:cell.contentView.topAnchor constant:8],[frame.bottomAnchor constraintEqualToAnchor:cell.contentView.bottomAnchor constant:-8],[frame.leadingAnchor constraintEqualToAnchor:cell.contentView.leadingAnchor constant:8],[frame.trailingAnchor constraintEqualToAnchor:cell.contentView.trailingAnchor constant:-8]]];
         UILabel *label=[UILabel new];label.tag=0x5A5;label.numberOfLines=0;label.attributedText=_statusText;
-        label.translatesAutoresizingMaskIntoConstraints=NO;[cell.contentView addSubview:label];
-        [NSLayoutConstraint activateConstraints:@[[label.topAnchor constraintEqualToAnchor:cell.contentView.topAnchor constant:12],[label.leadingAnchor constraintEqualToAnchor:cell.contentView.leadingAnchor constant:12],[label.trailingAnchor constraintEqualToAnchor:cell.contentView.trailingAnchor constant:-12]]];
+        label.translatesAutoresizingMaskIntoConstraints=NO;[frame addSubview:label];
+        [NSLayoutConstraint activateConstraints:@[[label.topAnchor constraintEqualToAnchor:frame.topAnchor constant:12],[label.leadingAnchor constraintEqualToAnchor:frame.leadingAnchor constant:12],[label.trailingAnchor constraintEqualToAnchor:frame.trailingAnchor constant:-12]]];
     } else if ([specifier propertyForKey:@"asvDot"]) {
         BOOL up=[[specifier propertyForKey:@"asvDot"] isEqual:@"green"];
         cell.imageView.image=[UIImage systemImageNamed:up?@"lock.shield.fill":@"shield.slash"];
@@ -339,9 +332,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 }
 - (void)openVPNList { [self openList:ASV_VPN]; }
 - (void)openDirectList { [self openList:ASV_DIRECT]; }
-- (void)openLog:(BOOL)routes { ASVLogController *page=[ASVLogController new];page.routes=routes;[self.navigationController pushViewController:page animated:YES]; }
-- (void)openRouteLog { [self openLog:YES]; }
-- (void)openChangeLog { [self openLog:NO]; }
+- (void)openRouteLog { [self.navigationController pushViewController:[ASVLogController new] animated:YES]; }
 - (void)exportLists {
     NSDictionary *prefs=[self prefs];
     NSDictionary *payload=@{@"format":@"appsplitvpn-lists-v1",ASV_VPN:prefs[ASV_VPN] ?: @[],ASV_DIRECT:prefs[ASV_DIRECT] ?: @[]};
