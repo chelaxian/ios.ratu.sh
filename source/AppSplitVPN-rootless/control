@@ -1,6 +1,6 @@
 Package: com.ratush.appsplitvpn
 Name: App Split VPN
-Version: 0.2.1
+Version: 0.2.2
 Architecture: iphoneos-arm64
 Description: Per-application routing through the active system VPN or directly.
 Maintainer: ratush

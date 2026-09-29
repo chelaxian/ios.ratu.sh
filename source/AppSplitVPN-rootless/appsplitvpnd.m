@@ -18,6 +18,7 @@ static NSString *vpnName;
 static NSDictionary *lastLoggedPrefs;
 static NSString *lastLoggedState;
 static NSTimeInterval lastVPNLookup;
+static NSString *lastRouteFingerprint;
 
 static void Journal(NSString *line) {
     NSMutableArray *entries=[[NSArray arrayWithContentsOfFile:ASV_LOG] mutableCopy] ?: [NSMutableArray array];
@@ -25,6 +26,20 @@ static void Journal(NSString *line) {
     if (entries.count>250) [entries removeObjectsInRange:NSMakeRange(0,entries.count-250)];
     [entries writeToFile:ASV_LOG atomically:YES];
     chmod(ASV_LOG.fileSystemRepresentation,0644);
+}
+// Routing journal: one block per applied rule set, listing every selected app and its outcome.
+static void RouteJournal(NSString *headline, NSString *route, NSArray<NSString *> *apps, NSArray<NSString *> *skipped) {
+    NSString *fingerprint=[NSString stringWithFormat:@"%@|%@|%@|%@",headline,route ?: @"",apps ?: @[],skipped ?: @[]];
+    if ([fingerprint isEqualToString:lastRouteFingerprint]) return;
+    lastRouteFingerprint=fingerprint;
+    NSMutableArray *entries=[[NSArray arrayWithContentsOfFile:ASV_ROUTE_LOG] mutableCopy] ?: [NSMutableArray array];
+    NSMutableArray *block=[NSMutableArray arrayWithObject:[NSString stringWithFormat:@"%@  %@",[NSDate date],headline]];
+    NSSet *skip=[NSSet setWithArray:skipped ?: @[]];
+    for (NSString *app in apps) [block addObject:[NSString stringWithFormat:@"%@ %@",[skip containsObject:app]?@"SKIP":route,app]];
+    [entries addObject:block];
+    while (entries.count>20) [entries removeObjectAtIndex:0];
+    [entries writeToFile:ASV_ROUTE_LOG atomically:YES];
+    chmod(ASV_ROUTE_LOG.fileSystemRepresentation,0644);
 }
 static id CallObject(id object,NSString *name) {
     SEL selector=NSSelectorFromString(name);
@@ -77,7 +92,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.1"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.2"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -106,13 +121,18 @@ static void Reconcile(BOOL force) {
             Journal([NSString stringWithFormat:@"settings enabled=%@ mode=%@ selected=%lu",[prefs[@"enabled"] boolValue]?@"yes":@"no",mode,(unsigned long)[prefs[key] count]]);
             lastLoggedPrefs=[prefs copy];
         }
-        if (![prefs[@"enabled"] boolValue]) { [engine clear]; State(@"disabled",nil); return; }
+        if (![prefs[@"enabled"] boolValue]) { [engine clear]; State(@"disabled",nil); RouteJournal(@"disabled: all apps use the system VPN",nil,nil,nil); return; }
         if (!anyVPNActive) { [engine clear]; State(@"unsupported",@"System VPN status API unavailable"); return; }
-        if (!active) { [engine clear]; State(@"waitingVPN",nil); return; }
+        if (!active) { [engine clear]; State(@"waitingVPN",nil); RouteJournal(@"no active VPN: rules removed",nil,nil,nil); return; }
         NSString *mode = prefs[@"mode"];
         NSString *error = nil;
-        BOOL ok = [engine replaceMode:mode applications:prefs[[mode isEqual:@"tunnelOnly"]?ASV_VPN:ASV_DIRECT] error:&error];
+        NSArray *apps = prefs[[mode isEqual:@"tunnelOnly"]?ASV_VPN:ASV_DIRECT];
+        BOOL ok = [engine replaceMode:mode applications:apps error:&error];
         State(ok ? (engine.unresolved.count ? @"partial" : @"active") : @"error",error);
+        if (ok) {
+            BOOL tunnel=[mode isEqual:@"tunnelOnly"];
+            RouteJournal([NSString stringWithFormat:@"%@: other apps -> %@",tunnel?@"TUNNEL ONLY":@"BYPASS",tunnel?@"DIRECT":@"VPN"],tunnel?@"VPN   ":@"DIRECT",apps,engine.unresolved);
+        }
         if (!ok) lastRefresh = now-55; // bounded retry after five seconds, not a busy loop
     } @catch (NSException *exception) {
         [engine clear]; State(@"error",exception.name); initialized=NO;
@@ -128,6 +148,16 @@ int main(int argc,char **argv) { @autoreleasepool {
     int token;
     notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);});
     int toggleToken;
+    int clearToken;
+    notify_register_dispatch(ASV_CMD_CLEAR_LOGS,&clearToken,dispatch_get_main_queue(),^(int t){
+        (void)t;
+        [@[] writeToFile:ASV_LOG atomically:YES];
+        [@[] writeToFile:ASV_ROUTE_LOG atomically:YES];
+        chmod(ASV_LOG.fileSystemRepresentation,0644);chmod(ASV_ROUTE_LOG.fileSystemRepresentation,0644);
+        lastRouteFingerprint=nil;lastLoggedState=nil;lastLoggedPrefs=nil;
+        Reconcile(YES);
+        notify_post(ASV_STATE_NOTIFY);
+    });
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){
         (void)t;
         NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
