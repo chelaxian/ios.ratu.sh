@@ -18,6 +18,7 @@ static NSString *vpnName;
 static NSTimeInterval lastVPNLookup;
 static NSString *lastRouteFingerprint;
 static NSString *currentMode;
+static BOOL badgeColor=YES;
 
 // Current routing table: a single block (no history) listing every selected app and its outcome.
 // Rewritten only when the effective rules change.
@@ -72,22 +73,26 @@ static NSDictionary *ReadPreferences(void) {
         }
         validated[key] = apps.array;
     }
+    validated[@"badgeColor"] = @(raw[@"badgeColor"] == nil || [raw[@"badgeColor"] boolValue]);
     return validated;
 }
 static void State(NSString *status, NSString *error) {
-    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @""];
+    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@|%d",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @"",badgeColor];
     NSTimeInterval now=[NSDate date].timeIntervalSince1970;
     BOOL changed=![lastState isEqual:fingerprint];
     if (!changed && now-lastStateWrite<30) return;
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.6"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.7"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
     if (splitToken < 0) notify_register_check(ASV_STATE_NOTIFY, &splitToken);
-    if (splitToken >= 0) notify_set_state(splitToken, ([status isEqual:@"active"] || [status isEqual:@"partial"]) ? ([currentMode isEqual:@"tunnelOnly"] ? 2 : 1) : 0);
+    // Bits 0-1: 0 inactive, 1 BYPASS, 2 TUNNEL ONLY. Bit 2: badge coloring switched off.
+    uint64_t split=([status isEqual:@"active"] || [status isEqual:@"partial"]) ? ([currentMode isEqual:@"tunnelOnly"] ? 2 : 1) : 0;
+    if (split && !badgeColor) split|=4;
+    if (splitToken >= 0) notify_set_state(splitToken, split);
     if (changed) {
         notify_post(ASV_STATE_NOTIFY);
         fprintf(stderr,"AppSplitVPN status=%s rules=%lu error=%s\n", status.UTF8String,(unsigned long)engine.count,(error ?: @"").UTF8String);
@@ -97,6 +102,7 @@ static void Reconcile(BOOL force) {
     @autoreleasepool { @try {
         NSDictionary *prefs = ReadPreferences();
         currentMode=prefs[@"mode"];
+        badgeColor=[prefs[@"badgeColor"] boolValue];
         BOOL active = anyVPNActive && anyVPNActive() != 0;
         NSTimeInterval now = [NSDate date].timeIntervalSince1970;
         if (active && now-lastVPNLookup>25) { lastVPNLookup=now;RefreshVPNName(); }

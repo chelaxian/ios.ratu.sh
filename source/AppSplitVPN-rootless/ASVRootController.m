@@ -12,6 +12,8 @@
 @interface PSListController (ASVIndexPath)
 - (PSSpecifier *)specifierAtIndexPath:(NSIndexPath *)indexPath;
 @end
+@interface PSListItemsController : PSListController
+@end
 static NSString *L(NSString *en,NSString *ru) {
     NSString *chosen=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"language"];
     BOOL russian=[chosen isEqual:@"ru"] || (![chosen isEqual:@"en"] && [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"]);
@@ -19,6 +21,25 @@ static NSString *L(NSString *en,NSString *ru) {
 }
 static UIFont *ASVMono(CGFloat size) { return [UIFont fontWithName:@"CourierNewPSMT" size:size] ?: [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightRegular]; }
 static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"CourierNewPS-BoldMT" size:size] ?: [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightBold]; }
+// TUNNEL ONLY is green and BYPASS is red everywhere the mode is shown.
+static UIColor *ASVModeColor(NSString *text) {
+    if ([text isEqual:@"TUNNEL ONLY"] || [text isEqual:@"tunnelOnly"]) return UIColor.systemGreenColor;
+    if ([text isEqual:@"BYPASS"] || [text isEqual:@"bypass"]) return UIColor.systemRedColor;
+    return nil;
+}
+
+#pragma mark - Mode picker
+
+@interface ASVModeListController : PSListItemsController
+@end
+@implementation ASVModeListController
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell=[super tableView:tableView cellForRowAtIndexPath:indexPath];
+    UIColor *color=ASVModeColor(cell.textLabel.text);
+    if (color) { cell.textLabel.textColor=color;cell.tintColor=color; }
+    return cell;
+}
+@end
 
 #pragma mark - Log pages
 
@@ -128,7 +149,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
 }
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier {
     NSString *key=[specifier propertyForKey:@"key"];
-    if (![@[@"enabled",@"mode",@"language",ASV_VPN,ASV_DIRECT] containsObject:key]) return;
+    if (![@[@"enabled",@"mode",@"language",@"badgeColor",ASV_VPN,ASV_DIRECT] containsObject:key]) return;
     NSMutableDictionary *prefs=[[self prefs] mutableCopy];
     prefs[key]=value;
     if (![prefs writeToFile:ASV_PREFS atomically:YES]) {
@@ -171,7 +192,7 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):([code isEqual:@"disabled"]?L(@"not used",@"не используется"):L(@"connected",@"подключён"));
     if ([code isEqual:@"unavailable"] || [code isEqual:@"stopped"]) vpnState=L(@"service stopped",@"служба не запущена");
     line(@"VPN:",vpnState,down?red:green);
-    line(L(@"Mode:",@"Режим:"),tunnel?@"TUNNEL ONLY":@"BYPASS",UIColor.whiteColor);
+    line(L(@"Mode:",@"Режим:"),tunnel?@"TUNNEL ONLY":@"BYPASS",tunnel?green:red);
     line(L(@"NECP rules:",@"Правил NECP:"),applied?([state[@"rules"] description] ?: @"0"):@"0",UIColor.whiteColor);
     line(L(@"VPN list:",@"Список VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)vpnApps],green);
     line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
@@ -185,10 +206,12 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.")]];
     [items addObject:[self setting:L(@"Enable",@"Включить") key:@"enabled" type:PSSwitchCell fallback:@NO detail:nil]];
-    PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:NSClassFromString(@"PSListItemsController")];
+    PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:ASVModeListController.class];
     if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass"] titles:@[@"TUNNEL ONLY",@"BYPASS"]];
     else [mode setProperty:@NO forKey:@"enabled"];
+    [mode setProperty:@YES forKey:@"asvMode"];
     [items addObject:mode];
+    [items addObject:[self setting:L(@"Colored VPN½ badge",@"Цветной значок VPN½") key:@"badgeColor" type:PSSwitchCell fallback:@YES detail:nil]];
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
@@ -269,7 +292,10 @@ static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"Courier
     PSSpecifier *specifier=[self specifierAtIndexPath:indexPath];
     for (UIView *view in [cell.contentView.subviews copy]) if (view.tag==0x5A5) [view removeFromSuperview];
     NSString *color=[specifier propertyForKey:@"asvColor"];
-    if (color) {
+    if ([specifier propertyForKey:@"asvMode"]) {
+        UIColor *tint=ASVModeColor([self prefs][@"mode"] ?: @"bypass");
+        if (tint) cell.detailTextLabel.textColor=tint;
+    } else if (color) {
         UIColor *tint=[color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor;
         cell.textLabel.textColor=tint;
         UILabel *count=[UILabel new];count.text=[specifier propertyForKey:@"asvCount"];count.textColor=tint;

@@ -25,6 +25,8 @@ static void StateChanged(__unused CFNotificationCenterRef center,__unused void *
         if ([currentModule respondsToSelector:@selector(reconfigureView)]) [currentModule reconfigureView];
     });
 }
+// Same fork as the tweak icon: one stem going up that splits into two arcs,
+// each ending in an arrow head, left and right.
 static UIImage *ASVGlyph(void) {
     static UIImage *image;
     static dispatch_once_t once;
@@ -32,16 +34,16 @@ static UIImage *ASVGlyph(void) {
         UIGraphicsImageRenderer *renderer=[[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(80,80)];
         image=[[renderer imageWithActions:^(__unused UIGraphicsImageRendererContext *context){
             [[UIColor whiteColor] setStroke];
-            UIBezierPath *outline=[UIBezierPath bezierPathWithRoundedRect:CGRectMake(8,10,64,60) cornerRadius:12];
-            outline.lineWidth=5;[outline stroke];
-            UIBezierPath *arrows=[UIBezierPath bezierPath];
-            arrows.lineWidth=5;arrows.lineCapStyle=kCGLineCapRound;arrows.lineJoinStyle=kCGLineJoinRound;
-            // Two arrows centred on (40,40) with a clear gap between the heads.
-            [arrows moveToPoint:CGPointMake(21,54)];[arrows addLineToPoint:CGPointMake(35,40)];
-            [arrows moveToPoint:CGPointMake(27,40)];[arrows addLineToPoint:CGPointMake(35,40)];[arrows addLineToPoint:CGPointMake(35,48)];
-            [arrows moveToPoint:CGPointMake(59,26)];[arrows addLineToPoint:CGPointMake(45,40)];
-            [arrows moveToPoint:CGPointMake(45,32)];[arrows addLineToPoint:CGPointMake(45,40)];[arrows addLineToPoint:CGPointMake(53,40)];
-            [arrows stroke];
+            UIBezierPath *fork=[UIBezierPath bezierPath];
+            fork.lineWidth=6.5;fork.lineCapStyle=kCGLineCapRound;fork.lineJoinStyle=kCGLineJoinRound;
+            [fork moveToPoint:CGPointMake(40,70)];[fork addLineToPoint:CGPointMake(40,50)];
+            [fork addQuadCurveToPoint:CGPointMake(17,17) controlPoint:CGPointMake(40,40)];
+            [fork moveToPoint:CGPointMake(40,50)];
+            [fork addQuadCurveToPoint:CGPointMake(63,17) controlPoint:CGPointMake(40,40)];
+            // Arrow heads aligned with the end direction of each arc.
+            [fork moveToPoint:CGPointMake(17,31)];[fork addLineToPoint:CGPointMake(17,17)];[fork addLineToPoint:CGPointMake(31,17)];
+            [fork moveToPoint:CGPointMake(49,17)];[fork addLineToPoint:CGPointMake(63,17)];[fork addLineToPoint:CGPointMake(63,31)];
+            [fork stroke];
         }] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     });
     return image;
@@ -68,5 +70,9 @@ static UIImage *ASVGlyph(void) {
 }
 - (UIImage *)iconGlyph { return ASVGlyph(); }
 - (UIImage *)selectedIconGlyph { return ASVGlyph(); }
-- (UIColor *)selectedColor { return [UIColor colorWithRed:0.10 green:0.55 blue:0.75 alpha:1]; }
+// Green for TUNNEL ONLY, red for BYPASS, matching the status bar badge.
+- (UIColor *)selectedColor {
+    NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
+    return [prefs[@"mode"] isEqual:@"tunnelOnly"]?UIColor.systemGreenColor:UIColor.systemRedColor;
+}
 @end
