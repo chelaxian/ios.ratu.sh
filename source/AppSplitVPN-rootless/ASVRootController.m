@@ -12,8 +12,7 @@
 @interface PSListController (ASVIndexPath)
 - (PSSpecifier *)specifierAtIndexPath:(NSIndexPath *)indexPath;
 @end
-@interface PSListItemsController : PSListController
-@end
+#import <Preferences/PSListItemsController.h>
 static NSString *L(NSString *en,NSString *ru) {
     NSString *chosen=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"language"];
     BOOL russian=[chosen isEqual:@"ru"] || (![chosen isEqual:@"en"] && [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"]);
