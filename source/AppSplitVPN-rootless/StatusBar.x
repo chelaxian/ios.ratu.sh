@@ -162,6 +162,10 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
 %end
 
 %ctor {
+    // App extensions and UIKit-using daemons have no status bar of their own.
+    // Keep the badge in every full app (including SpringBoard), but avoid
+    // installing its hooks in widgets, notifications, and other extensions.
+    if (![[[NSBundle mainBundle] bundlePath] hasSuffix:@".app"]) return;
     badges = [NSHashTable weakObjectsHashTable];
     statusBars = [NSHashTable weakObjectsHashTable];
     splitMode = ASVReadState(&colorOff);
