@@ -423,6 +423,23 @@ Author: ratush
 Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
 Name: App Split VPN
 
+Package: com.ratush.appsplitvpn
+Version: 0.2.8
+Architecture: iphoneos-arm64
+Maintainer: ratush
+Installed-Size: 852
+Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
+Filename: debs/com.ratush.appsplitvpn_0.2.8_iphoneos-arm64.deb
+Size: 79036
+MD5sum: b76a7ca01c369bd01a69958740afe29f
+SHA1: 485c3a454d2421987e12b52722f2748e1ec8edac
+SHA256: 4e17a6a78970dde1a14c58a4b055396358024bb05db57c819a08b3b559f2a081
+Section: Tweaks
+Description: Per-app VPN/DIRECT routing through the active system VPN. Supported iOS: 15.0 - 17.3.1 (Dopamine rootless). Tested on iOS 17.0. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
+Author: ratush
+Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
+Name: App Split VPN
+
 Package: com.ratush.catmcp-fix
 Version: 1.7.28
 Architecture: iphoneos-arm64
