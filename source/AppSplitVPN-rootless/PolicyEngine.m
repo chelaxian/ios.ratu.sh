@@ -86,6 +86,13 @@
         count++;
     }
     if (tunnelOnly) {
+        for (id uuid in self.selfUUIDs) {
+            if (![uuid isKindOfClass:NSUUID.class]) continue;
+            id own = [[NSClassFromString(@"NEPolicy") alloc] initWithOrder:100
+                result:[NSClassFromString(@"NEPolicyResult") skipWithOrder:0]
+                conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+            [candidate addPolicy:own];
+        }
         id policy = [[NSClassFromString(@"NEPolicy") alloc] initWithOrder:1000
             result:[NSClassFromString(@"NEPolicyResult") scopeToDirectInterface]
             conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];

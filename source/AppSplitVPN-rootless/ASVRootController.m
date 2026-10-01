@@ -3,8 +3,10 @@
 #import <Preferences/PSSpecifier.h>
 #import <notify.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
-#import "Shared.h"
+#import <arpa/inet.h>
+#import "ASVUI.h"
 #import "ASVAppListController.h"
+#import "ASVExtraController.h"
 // Theos' deliberately minimal header omits these runtime APIs.
 @interface PSSpecifier (ASVListValues)
 - (void)setValues:(NSArray *)values titles:(NSArray *)titles;
@@ -13,18 +15,44 @@
 - (PSSpecifier *)specifierAtIndexPath:(NSIndexPath *)indexPath;
 @end
 #import <Preferences/PSListItemsController.h>
-static NSString *L(NSString *en,NSString *ru) {
-    NSString *chosen=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"language"];
-    BOOL russian=[chosen isEqual:@"ru"] || (![chosen isEqual:@"en"] && [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"]);
-    return russian ? ru : en;
-}
-static UIFont *ASVMono(CGFloat size) { return [UIFont fontWithName:@"CourierNewPSMT" size:size] ?: [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightRegular]; }
-static UIFont *ASVMonoBold(CGFloat size) { return [UIFont fontWithName:@"CourierNewPS-BoldMT" size:size] ?: [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightBold]; }
 // TUNNEL ONLY is green and BYPASS is red everywhere the mode is shown.
 static UIColor *ASVModeColor(NSString *text) {
     if ([text isEqual:@"TUNNEL ONLY"] || [text isEqual:@"tunnelOnly"]) return UIColor.systemGreenColor;
     if ([text isEqual:@"BYPASS"] || [text isEqual:@"bypass"]) return UIColor.systemRedColor;
     return nil;
+}
+
+// Public IP and country from a Cloudflare trace, a JSON object or plain text.
+static NSArray<NSString *> *ASVParseIP(NSData *data) {
+    NSString *body=[[NSString alloc] initWithData:data ?: [NSData data] encoding:NSUTF8StringEncoding];
+    if (!body.length) return nil;
+    NSString *ip=nil,*country=nil;
+    if ([body containsString:@"ip="]) {
+        for (NSString *line in [body componentsSeparatedByCharactersInSet:NSCharacterSet.newlineCharacterSet]) {
+            if ([line hasPrefix:@"ip="]) ip=[line substringFromIndex:3];
+            else if ([line hasPrefix:@"loc="]) country=[line substringFromIndex:4];
+        }
+    } else {
+        id json=[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingFragmentsAllowed error:nil];
+        if ([json isKindOfClass:NSString.class]) ip=json;
+        else if ([json isKindOfClass:NSDictionary.class]) {
+            for (NSString *key in @[@"ip",@"query",@"ip_addr",@"address"]) if ([json[key] isKindOfClass:NSString.class]) { ip=json[key];break; }
+            for (NSString *key in @[@"country_code",@"countryCode",@"country",@"cc",@"loc"]) if ([json[key] isKindOfClass:NSString.class] && [json[key] length]==2) { country=json[key];break; }
+        } else ip=body;
+    }
+    ip=[ip stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" \t\r\n\""]];
+    unsigned char buffer[16];
+    if (!ip.length || (inet_pton(AF_INET,ip.UTF8String,buffer)!=1 && inet_pton(AF_INET6,ip.UTF8String,buffer)!=1)) return nil;
+    country=country.uppercaseString;
+    BOOL letters=country.length==2;
+    for (NSUInteger i=0;letters && i<2;i++) letters=[country characterAtIndex:i]>='A' && [country characterAtIndex:i]<='Z';
+    return letters ? @[ip,country] : @[ip];
+}
+static NSString *ASVFlag(NSString *country) {
+    if (country.length!=2) return @"";
+    uint32_t a=0x1F1E6+[country characterAtIndex:0]-'A', b=0x1F1E6+[country characterAtIndex:1]-'A';
+    uint32_t scalars[2]={NSSwapHostIntToLittle(a),NSSwapHostIntToLittle(b)};
+    return [[NSString alloc] initWithBytes:scalars length:sizeof scalars encoding:NSUTF32LittleEndianStringEncoding] ?: @"";
 }
 
 #pragma mark - Mode picker
@@ -122,6 +150,10 @@ static UIColor *ASVModeColor(NSString *text) {
     NSString *_statusFingerprint;
     NSArray<NSArray<NSString *> *> *_headers; // @[title, info]
     NSAttributedString *_statusText;
+    NSArray<NSString *> *_ip;     // @[address, optional country]
+    BOOL _ipLoading;
+    NSUInteger _ipToken;
+    NSString *_ipRoute;           // VPN/mode state the IP was measured for
 }
 @end
 @implementation ASVRootController
@@ -142,6 +174,45 @@ static UIColor *ASVModeColor(NSString *text) {
 }
 - (void)updateStatusIfChanged {
     if (![_statusFingerprint isEqualToString:[self statusFingerprint]]) [self refreshStatus];
+    if (_ipRoute && ![_ipRoute isEqualToString:[self ipRoute]]) [self fetchIP];
+}
+// The public IP changes with the VPN state, its name and the routing mode.
+- (NSString *)ipRoute {
+    NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
+    NSDictionary *prefs=[self prefs];
+    return [NSString stringWithFormat:@"%@|%@|%@|%d",state[@"status"] ?: @"",state[@"vpnName"] ?: @"",prefs[@"mode"] ?: @"",[prefs[@"enabled"] boolValue]];
+}
+- (void)fetchIP {
+    _ipRoute=[self ipRoute];
+    _ipLoading=YES;
+    NSUInteger token=++_ipToken;
+    NSString *service=ASVIPService([self prefs]);
+    [self refreshStatus];
+    // Routes settle a moment after a VPN change.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{
+        [self fetchIPFrom:service token:token fallback:[service isEqual:ASV_DEFAULT_IP_SERVICE]?ASV_FALLBACK_IP_SERVICE:nil];
+    });
+}
+- (void)fetchIPFrom:(NSString *)service token:(NSUInteger)token fallback:(NSString *)fallback {
+    if (token!=_ipToken) return;
+    NSURLSessionConfiguration *configuration=[NSURLSessionConfiguration ephemeralSessionConfiguration];
+    configuration.timeoutIntervalForRequest=8;configuration.timeoutIntervalForResource=10;
+    configuration.requestCachePolicy=NSURLRequestReloadIgnoringLocalCacheData;
+    NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];
+    __weak ASVRootController *weakSelf=self;
+    [[session dataTaskWithURL:[NSURL URLWithString:service] completionHandler:^(NSData *data,NSURLResponse *response,NSError *error){
+        NSInteger code=[response isKindOfClass:NSHTTPURLResponse.class]?((NSHTTPURLResponse *)response).statusCode:0;
+        NSArray *parsed=(!error && code<400)?ASVParseIP(data):nil;
+        dispatch_async(dispatch_get_main_queue(),^{
+            ASVRootController *controller=weakSelf;
+            if (!controller || token!=controller->_ipToken) return;
+            if (!parsed && fallback) { [controller fetchIPFrom:fallback token:token fallback:nil];return; }
+            controller->_ipLoading=NO;
+            controller->_ip=parsed;
+            [controller refreshStatus];
+        });
+    }] resume];
+    [session finishTasksAndInvalidate];
 }
 - (id)readPreferenceValue:(PSSpecifier *)specifier {
     return [self prefs][[specifier propertyForKey:@"key"]] ?: [specifier propertyForKey:@"default"];
@@ -181,11 +252,7 @@ static UIColor *ASVModeColor(NSString *text) {
     NSUInteger vpnApps=[self countFor:ASV_VPN], directApps=[self countFor:ASV_DIRECT];
     NSMutableAttributedString *text=[NSMutableAttributedString new];
     UIColor *green=UIColor.systemGreenColor, *red=UIColor.systemRedColor, *gray=UIColor.systemGrayColor;
-    void (^line)(NSString *,NSString *,UIColor *)=^(NSString *label,NSString *value,UIColor *color){
-        if (text.length) [text appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        [text appendAttributedString:[[NSAttributedString alloc] initWithString:[label stringByPaddingToLength:15 withString:@" " startingAtIndex:0] attributes:@{NSFontAttributeName:ASVMono(14),NSForegroundColorAttributeName:gray}]];
-        [text appendAttributedString:[[NSAttributedString alloc] initWithString:value attributes:@{NSFontAttributeName:ASVMonoBold(14),NSForegroundColorAttributeName:color}]];
-    };
+    void (^line)(NSString *,NSString *,UIColor *)=^(NSString *label,NSString *value,UIColor *color){ ASVTerminalLine(text,label,value,color,15); };
     line(L(@"Tweak:",@"Твик:"),enabled?L(@"enabled",@"включён"):L(@"disabled",@"выключен"),enabled?green:red);
     BOOL down=[@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
     NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):([code isEqual:@"disabled"]?L(@"not used",@"не используется"):L(@"connected",@"подключён"));
@@ -195,6 +262,8 @@ static UIColor *ASVModeColor(NSString *text) {
     line(L(@"NECP rules:",@"Правил NECP:"),applied?([state[@"rules"] description] ?: @"0"):@"0",UIColor.whiteColor);
     line(L(@"VPN list:",@"Список VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)vpnApps],green);
     line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
+    NSString *ip=_ipLoading?@"…":(_ip.count?[NSString stringWithFormat:@"%@ %@",_ip[0],_ip.count>1?ASVFlag(_ip[1]):@""]:@"—");
+    line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
     return text;
 }
@@ -203,7 +272,7 @@ static UIColor *ASVModeColor(NSString *text) {
     NSMutableArray *items=[NSMutableArray array];
     NSMutableArray *headers=[NSMutableArray array];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.")]];
+    [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check Disconnect with their tuning. They work with any VPN and independently of the Enable switch.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, Always ON VPN и Health Check Disconnect с настройкой параметров. Работают с любым VPN и независимо от переключателя «Включить».")]];
     [items addObject:[self setting:L(@"Enable",@"Включить") key:@"enabled" type:PSSwitchCell fallback:@NO detail:nil]];
     PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:ASVModeListController.class];
     if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass"] titles:@[@"TUNNEL ONLY",@"BYPASS"]];
@@ -214,6 +283,9 @@ static UIColor *ASVModeColor(NSString *text) {
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
+    PSSpecifier *extra=[self button:L(@"Extra",@"Дополнительно") action:@selector(openExtra)];
+    [extra setProperty:[NSString stringWithFormat:@"%lu/3",(unsigned long)[ASVExtraController enabledCount]] forKey:@"asvCount"];
+    [extra setProperty:@"plain" forKey:@"asvColor"];[items addObject:extra];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"App lists",@"Списки приложений"),L(@"The two lists are independent; only the list of the current mode is applied.\n\nAfter changing the rules, reopen the affected apps: already open connections keep their old route.\n\nImport skips apps that are not installed and keeps them in the list for a later reinstall.",@"Списки независимы: применяется только список текущего режима.\n\nПосле изменения правил переоткройте нужные приложения — уже открытые соединения сохраняют прежний маршрут.\n\nПри импорте отсутствующие приложения пропускаются и остаются в списке до установки.")]];
@@ -243,29 +315,16 @@ static UIColor *ASVModeColor(NSString *text) {
     [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];[items addObject:active];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"NECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps. Offloaded and deleted apps get no rule until they are installed again.\n\nThe routing log shows the current route of every app in the active list and updates automatically.",@"Правил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений. Выгруженные и удалённые приложения не получают правил до повторной установки.\n\nЖурнал маршрутизации показывает текущий маршрут каждого приложения из активного списка и обновляется автоматически.")]];
+    [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"NECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps. Offloaded and deleted apps get no rule until they are installed again.\n\nPublic IP: the address and country with which the Settings app reaches the Internet, so with BYPASS it is usually the VPN address and with TUNNEL ONLY the direct one. It is checked when this page opens and when the VPN or mode changes; the service is set in Extra → Tuning.\n\nThe routing log shows the current route of every app in the active list and updates automatically.",@"Правил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений. Выгруженные и удалённые приложения не получают правил до повторной установки.\n\nБелый IP — адрес и страна, с которыми выходит в интернет приложение «Настройки»: при BYPASS это обычно адрес VPN, при TUNNEL ONLY — прямой. Проверяется при открытии страницы и при смене VPN или режима; сервис задаётся в «Дополнительно → Тюнинг».\n\nЖурнал маршрутизации показывает текущий маршрут каждого приложения из активного списка и обновляется автоматически.")]];
     PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
-    [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(refreshStatus)]];
+    [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(fetchIP)]];
     [items addObject:[self button:L(@"Routing log",@"Журнал маршрутизации") action:@selector(openRouteLog)]];
     _headers=[headers copy];
     _specifiers=[items copy];return _specifiers;
 }
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    if (section>=(NSInteger)_headers.count) return nil;
-    UIView *view=[UIView new];
-    UILabel *label=[UILabel new];label.text=_headers[section][0];
-    label.font=[UIFont systemFontOfSize:20 weight:UIFontWeightBold];label.textColor=UIColor.labelColor;
-    UIButton *info=[UIButton buttonWithType:UIButtonTypeInfoLight];info.tag=section;
-    [info addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
-    label.translatesAutoresizingMaskIntoConstraints=NO;info.translatesAutoresizingMaskIntoConstraints=NO;
-    [view addSubview:label];[view addSubview:info];
-    [NSLayoutConstraint activateConstraints:@[
-        [label.leadingAnchor constraintEqualToAnchor:view.layoutMarginsGuide.leadingAnchor],
-        [label.bottomAnchor constraintEqualToAnchor:view.bottomAnchor constant:-6],
-        [info.leadingAnchor constraintEqualToAnchor:label.trailingAnchor constant:8],
-        [info.centerYAnchor constraintEqualToAnchor:label.centerYAnchor]]];
-    return view;
+    return section<(NSInteger)_headers.count ? ASVHeaderView(_headers[section][0],section,self,@selector(showInfo:)) : nil;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section { return section==0?34:40; }
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section { return 4; }
@@ -276,11 +335,7 @@ static UIColor *ASVModeColor(NSString *text) {
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
-- (CGFloat)terminalHeight {
-    CGFloat width=MAX(200,self.view.bounds.size.width-40-24);
-    CGRect box=[_statusText boundingRectWithSize:CGSizeMake(width,CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil];
-    return ceil(box.size.height)+40;
-}
+- (CGFloat)terminalHeight { return ASVTerminalHeight(_statusText,self.view.bounds.size.width); }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     PSSpecifier *specifier=[self specifierAtIndexPath:indexPath];
     if ([specifier propertyForKey:@"asvTerminal"]) return [self terminalHeight];
@@ -295,9 +350,10 @@ static UIColor *ASVModeColor(NSString *text) {
         UIColor *tint=ASVModeColor([self prefs][@"mode"] ?: @"bypass");
         if (tint) cell.detailTextLabel.textColor=tint;
     } else if (color) {
-        UIColor *tint=[color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor;
+        BOOL plain=[color isEqual:@"plain"];
+        UIColor *tint=plain?UIColor.labelColor:([color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor);
         cell.textLabel.textColor=tint;
-        UILabel *count=[UILabel new];count.text=[specifier propertyForKey:@"asvCount"];count.textColor=tint;
+        UILabel *count=[UILabel new];count.text=[specifier propertyForKey:@"asvCount"];count.textColor=plain?UIColor.secondaryLabelColor:tint;
         count.font=[UIFont monospacedDigitSystemFontOfSize:17 weight:UIFontWeightRegular];[count sizeToFit];
         UIImageView *chevron=[[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"chevron.right" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:14 weight:UIImageSymbolWeightSemibold]]];
         chevron.tintColor=UIColor.tertiaryLabelColor;[chevron sizeToFit];
@@ -320,14 +376,7 @@ static UIColor *ASVModeColor(NSString *text) {
         row.translatesAutoresizingMaskIntoConstraints=NO;[cell.contentView addSubview:row];
         [NSLayoutConstraint activateConstraints:@[[row.topAnchor constraintEqualToAnchor:cell.contentView.topAnchor],[row.bottomAnchor constraintEqualToAnchor:cell.contentView.bottomAnchor],[row.leadingAnchor constraintEqualToAnchor:cell.contentView.leadingAnchor],[row.trailingAnchor constraintEqualToAnchor:cell.contentView.trailingAnchor]]];
     } else if ([specifier propertyForKey:@"asvTerminal"]) {
-        cell.textLabel.text=nil;cell.selectionStyle=UITableViewCellSelectionStyleNone;
-        UIView *frame=[UIView new];frame.tag=0x5A5;frame.backgroundColor=UIColor.blackColor;
-        frame.layer.cornerRadius=10;frame.layer.borderWidth=1.5;frame.layer.borderColor=UIColor.systemGray2Color.CGColor;
-        frame.translatesAutoresizingMaskIntoConstraints=NO;[cell.contentView addSubview:frame];
-        [NSLayoutConstraint activateConstraints:@[[frame.topAnchor constraintEqualToAnchor:cell.contentView.topAnchor constant:8],[frame.bottomAnchor constraintEqualToAnchor:cell.contentView.bottomAnchor constant:-8],[frame.leadingAnchor constraintEqualToAnchor:cell.contentView.leadingAnchor constant:8],[frame.trailingAnchor constraintEqualToAnchor:cell.contentView.trailingAnchor constant:-8]]];
-        UILabel *label=[UILabel new];label.tag=0x5A5;label.numberOfLines=0;label.attributedText=_statusText;
-        label.translatesAutoresizingMaskIntoConstraints=NO;[frame addSubview:label];
-        [NSLayoutConstraint activateConstraints:@[[label.topAnchor constraintEqualToAnchor:frame.topAnchor constant:12],[label.leadingAnchor constraintEqualToAnchor:frame.leadingAnchor constant:12],[label.trailingAnchor constraintEqualToAnchor:frame.trailingAnchor constant:-12]]];
+        ASVFillTerminal(cell,_statusText,0x5A5);
     } else if ([specifier propertyForKey:@"asvDot"]) {
         BOOL up=[[specifier propertyForKey:@"asvDot"] isEqual:@"green"];
         cell.imageView.image=[UIImage systemImageNamed:up?@"lock.shield.fill":@"shield.slash"];
@@ -362,6 +411,7 @@ static UIColor *ASVModeColor(NSString *text) {
 }
 - (void)openVPNList { [self openList:ASV_VPN]; }
 - (void)openDirectList { [self openList:ASV_DIRECT]; }
+- (void)openExtra { [self.navigationController pushViewController:[ASVExtraController new] animated:YES]; }
 - (void)openRouteLog { [self.navigationController pushViewController:[ASVLogController new] animated:YES]; }
 - (void)exportLists {
     NSDictionary *prefs=[self prefs];
@@ -404,7 +454,7 @@ static UIColor *ASVModeColor(NSString *text) {
     [self presentViewController:alert animated:YES completion:nil];
 }
 - (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];[self refreshStatus];
+    [super viewWillAppear:animated];[self fetchIP];
     [_statusTimer invalidate];
     _statusTimer=[NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(updateStatusIfChanged) userInfo:nil repeats:YES];
 }

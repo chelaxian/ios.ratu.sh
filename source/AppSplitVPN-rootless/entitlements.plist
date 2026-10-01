@@ -6,4 +6,5 @@
 <key>com.apple.private.necp.policies</key><true/>
 <key>com.apple.private.necp.match</key><true/>
 <key>com.apple.networkextension</key><true/>
+<key>com.apple.private.networkextension.configuration</key><true/>
 </dict></plist>
