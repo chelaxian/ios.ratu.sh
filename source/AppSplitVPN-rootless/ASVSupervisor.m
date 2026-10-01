@@ -231,7 +231,8 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel) {
     setsockopt(fd,v4?IPPROTO_IP:IPPROTO_IPV6,v4?IP_BOUND_IF:IPV6_BOUND_IF,&index,sizeof index);
     uint16_t ident=(uint16_t)arc4random();
     NSString *reason=@"timeout";
-    for (uint16_t seq=1;seq<=3;seq++) {
+    // Tunnels often answer ICMP slowly and drop some echoes: four tries, 2.5 s each.
+    for (uint16_t seq=1;seq<=4;seq++) {
         uint8_t packet[24]={0};
         packet[0]=v4?ICMP_ECHO:ICMP6_ECHO_REQUEST;
         memcpy(packet+4,&ident,2);
@@ -239,7 +240,7 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel) {
         memcpy(packet+6,&netSeq,2);
         if (v4) { uint16_t sum=Checksum(packet,sizeof packet);memcpy(packet+2,&sum,2); }
         if (sendto(fd,packet,sizeof packet,0,result->ai_addr,result->ai_addrlen)<0) { reason=@"send";continue; }
-        NSTimeInterval deadline=Now()+1.5;
+        NSTimeInterval deadline=Now()+2.5;
         while (Now()<deadline) {
             struct pollfd poller={fd,POLLIN,0};
             if (poll(&poller,1,(int)MAX(1,(deadline-Now())*1000))<=0) break;
