@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- App Split VPN — разделение приложений на VPN и DIRECT. Пакет 0.2.9 разрешает установку на iOS 15.0–26.0.1 с Dopamine rootless; работа полностью проверена на iOS 17.0. Верхняя граница — разрешение установки, а не подтверждение совместимости: закрытые API и поведение маршрутизации на других версиях пока не проверены; [подробная матрица](source/AppSplitVPN-rootless/README.md#совместимость).
+- App Split VPN — разделение приложений на VPN и DIRECT; в 0.3.0 добавлены отключение VPN на экране блокировки, «Всегда включать VPN», Health Check и белый IP в статусе. Пакет 0.3.0 разрешает установку на iOS 15.0–26.0.1 с Dopamine rootless; работа полностью проверена на iOS 17.0. Верхняя граница — разрешение установки, а не подтверждение совместимости: закрытые API и поведение маршрутизации на других версиях пока не проверены; [подробная матрица](source/AppSplitVPN-rootless/README.md#совместимость).
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
