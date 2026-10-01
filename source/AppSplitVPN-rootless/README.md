@@ -1,12 +1,20 @@
 # App Split VPN
 
-Раздельная маршрутизация приложений через активный системный VPN на iOS с Dopamine.
+Раздельная маршрутизация приложений через активный системный VPN на iOS с rootless jailbreak.
 
-**Совместимость: целевой диапазон iOS 15.0–17.3.1 с Dopamine rootless; полностью проверена пока только iOS 17.0.** На активном CT проверены оба режима на Safari и отдельном CLI-процессе: в BYPASS Safari шёл напрямую, в TUNNEL ONLY Safari шёл через VPN, а другой процесс напрямую. После SIGKILL служба восстановила правила, после отключения сняла их.
+## Совместимость
 
-Минимум 15.0 задают пакет, сборка и используемый UIKit `UIButtonConfiguration` (появился в iOS 15). Ядро NECP присутствует в опубликованных Apple исходниках XNU для поколений iOS 15, 16 и 17; однако `NEPolicySession`, `NEPolicyResult`, `NEProcessInfo` и классы статус-бара — закрытые API без обещания совместимости. Верхняя граница 17.3.1 выбрана по заявленной поддержке Dopamine для arm64e (A14+); это граница целевого диапазона, а не результат проверки каждой версии. На A12/A13 Dopamine поддерживает и более новые iOS, но этот твик на них пока не проверялся.
+| Уровень | Установлено проверкой |
+| --- | --- |
+| Работа всего твика | iOS 17.0 на iPhone 14 Pro Max с Dopamine rootless. Оба режима проверены на активном CT: Safari шёл через выбранный путь, отдельный CLI-процесс — через противоположный. После SIGKILL служба восстановила правила, после отключения сняла их. |
+| Диапазон установки пакета 0.2.8 | iOS 15.0–17.3.1: так записано в `firmware`-зависимостях. Кроме того, пакет требует `libroot-dopamine`, PreferenceLoader, CCSupport и инжектор твиков. Это ограничение конкретного `.deb`, а не подтверждение работы на каждой версии в диапазоне. |
+| Нижняя граница текущего исходника | iOS 15.0: цель сборки, `MinimumOSVersion` модуля Пункта управления, `UIButtonConfiguration` и используемый интерфейс выбора файлов. Для iOS 11–14 нужен отдельный порт интерфейса, сборки и зависимостей. |
+| Сетевой механизм Apple | Условия по эффективному приложению и результат `SKIP` есть уже в XNU поколения iOS 11; необходимый `SCOPED_DIRECT` отсутствует в просмотренном XNU iOS 11, присутствует с поколения iOS 12 и сохраняется в опубликованных XNU поколений iOS 18 и 26. Это подтверждает наличие примитивов ядра, но не совместимость всего твика. |
+| iOS новее 17.3.1 и другие rootless jailbreak | Не проверены. Актуальный Dopamine поддерживает больше версий на части устройств; palera1n также работает на ряде устройств с iOS 15+. Для них потребуются отдельные проверки закрытых API, подписи и ABI, PreferenceLoader, CCSupport, значка статус-бара и применённых маршрутов. Текущий `.deb` дополнительно ограничен зависимостью от `libroot-dopamine`. |
 
-Источники: [Apple XNU для iOS 15](https://github.com/apple-oss-distributions/xnu/blob/xnu-8019.41.5/bsd/net/necp.h), [iOS 16](https://github.com/apple-oss-distributions/xnu/blob/xnu-8792.41.9/bsd/net/necp.h), [iOS 17](https://github.com/apple-oss-distributions/xnu/blob/xnu-10002.1.13/bsd/net/necp.h), [UIKit `UIButtonConfiguration`](https://developer.apple.com/documentation/uikit/uibuttonconfiguration), [официальный диапазон Dopamine](https://github.com/opa334/Dopamine#readme).
+Классы `NEPolicySession`, `NEPolicyResult`, `NEProcessInfo`, функция определения активного VPN и классы статус-бара — закрытые API Apple. Их наличие и поведение за пределами проверенной iOS 17.0 нельзя вывести только из заголовка XNU. Поэтому максимальную версию iOS, на которой работает весь твик, сейчас определить достоверно нельзя. Диапазон Dopamine также зависит от чипа устройства и не равен диапазону совместимости твика.
+
+Источники: [Apple XNU iOS 11](https://github.com/apple-oss-distributions/xnu/blob/xnu-4570.1.46/bsd/net/necp.h), [iOS 12](https://github.com/apple-oss-distributions/xnu/blob/xnu-4903.221.2/bsd/net/necp.h), [iOS 18](https://github.com/apple-oss-distributions/xnu/blob/xnu-11215.1.10/bsd/net/necp.h), [iOS 26](https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/net/necp.h), [UIKit `UIButtonConfiguration`](https://developer.apple.com/documentation/uikit/uikit-catalog-creating-and-customizing-views-and-controls), [официальный диапазон Dopamine](https://github.com/opa334/Dopamine#readme), [palera1n](https://github.com/palera1n/palera1n).
 
 - TUNNEL ONLY: только приложения из списка VPN сохраняют маршрут через системный VPN; остальные идут напрямую.
 - BYPASS: приложения из DIRECT идут напрямую; остальные сохраняют системную VPN-маршрутизацию.

@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- App Split VPN — разделение приложений на VPN и DIRECT. Целевой диапазон: iOS 15.0–17.3.1 с Dopamine rootless; фактически проверено на iOS 17.0. iOS 15/16 и остальные минорные версии требуют проверки на устройстве: используемые NEPolicy API закрыты Apple.
+- App Split VPN — разделение приложений на VPN и DIRECT. Пакет 0.2.8 разрешает установку на iOS 15.0–17.3.1 с Dopamine rootless; работа полностью проверена на iOS 17.0. Граница 17.3.1 задана метаданными пакета, а не исчезновением NECP из iOS: его необходимые примитивы видны в исходниках Apple вплоть до поколения iOS 26. Другие версии и jailbreak пока не проверены; [подробная матрица](source/AppSplitVPN-rootless/README.md#совместимость).
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
