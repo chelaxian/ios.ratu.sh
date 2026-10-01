@@ -286,7 +286,7 @@ static void Probe(NSString *method,NSString *host,NSInteger port,ASVTunnel tunne
             });
         }
     });
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,10*NSEC_PER_SEC),queue,^{ finish(@"timeout"); });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,15*NSEC_PER_SEC),queue,^{ finish(@"timeout"); });
     nw_connection_start(current);
 }
 
@@ -335,7 +335,7 @@ void ASVSupervisorTick(void) {
     BOOL lsOption=[prefs[ASV_LS_DISCONNECT] boolValue], always=[prefs[ASV_ALWAYS_ON] boolValue], health=[prefs[ASV_HEALTH] boolValue];
     if ((lsOption || always || health || lsStoppedUUID) && now-lastConfigLoad>(configUUID?30:5)) LoadConfiguration();
     BOOL active=VPNActive();
-    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+20;dirty=YES; }
+    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+30;dirty=YES; }
     if (!active && (wasActive || downSince==0)) { downSince=now;healthText=nil;dirty=YES; }
     wasActive=active;
     if (lsOption && locked && active && !lsStoppedUUID && configUUID &&
@@ -361,7 +361,7 @@ void ASVSupervisorTick(void) {
             });
         }
     }
-    if (health && active && !Suspended(prefs) && !probing && now>=nextHealth && now-activeSince>=20) RunHealth(prefs);
+    if (health && active && !Suspended(prefs) && !probing && now>=nextHealth && now-activeSince>=30) RunHealth(prefs);
     if (!health && (healthText || healthFails)) { healthText=nil;healthFails=0;dirty=YES; }
     WriteState();
 }
@@ -390,4 +390,3 @@ void ASVSupervisorStart(void) {
     if (locked) lockedAt=Now();
     else if (lsStoppedUUID) { locked=YES;LockChanged(NO); }
 }
-
