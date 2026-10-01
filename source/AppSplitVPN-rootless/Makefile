@@ -4,10 +4,10 @@ ARCHS = arm64 arm64e
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = appsplitvpnd appsplitvpn-register
-appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m
+appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m ASVSupervisor.m
 appsplitvpnd_ARCHS = arm64
 appsplitvpnd_CFLAGS = -fobjc-arc -Wall -Wextra
-appsplitvpnd_FRAMEWORKS = Foundation
+appsplitvpnd_FRAMEWORKS = Foundation Network
 appsplitvpnd_CODESIGN_FLAGS = -Cadhoc -Sentitlements.plist
 appsplitvpnd_INSTALL_PATH = /usr/libexec
 appsplitvpn-register_FILES = ASVRegister.m
@@ -18,7 +18,7 @@ appsplitvpn-register_CODESIGN_FLAGS = -Cadhoc -S
 appsplitvpn-register_INSTALL_PATH = /usr/libexec
 
 BUNDLE_NAME = AppSplitVPNPrefs
-AppSplitVPNPrefs_FILES = ASVRootController.m ASVAppListController.m
+AppSplitVPNPrefs_FILES = ASVRootController.m ASVAppListController.m ASVExtraController.m
 AppSplitVPNPrefs_CFLAGS = -fobjc-arc -Wall -Wextra
 AppSplitVPNPrefs_FRAMEWORKS = UIKit Foundation UniformTypeIdentifiers
 AppSplitVPNPrefs_PRIVATE_FRAMEWORKS = Preferences

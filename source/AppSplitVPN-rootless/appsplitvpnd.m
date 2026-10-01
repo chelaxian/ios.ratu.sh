@@ -1,6 +1,8 @@
 #import "PolicyEngine.h"
+#import "ASVSupervisor.h"
 #import "Shared.h"
 #import <dlfcn.h>
+#import <mach-o/dyld.h>
 #import <notify.h>
 #import <signal.h>
 #import <sys/stat.h>
@@ -84,7 +86,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.2.9"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.3.0"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -144,8 +146,17 @@ int main(int argc,char **argv) { @autoreleasepool {
     void *library=dlopen("/usr/lib/system/libsystem_networkextension.dylib",RTLD_NOW);
     anyVPNActive=dlsym(library ?: RTLD_DEFAULT,"ne_session_manager_has_active_sessions");
     engine=[ASVPolicyEngine new];
+    // TUNNEL ONLY sends unlisted processes direct; the health check of this
+    // service must still reach the tunnel it binds to.
+    char executable[PATH_MAX]={0};
+    uint32_t size=sizeof executable;
+    if (_NSGetExecutablePath(executable,&size)==0) {
+        NSArray *uuids=[NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:@(executable)];
+        engine.selfUUIDs=[uuids isKindOfClass:NSArray.class] ? uuids : @[];
+    }
+    ASVSupervisorStart();
     int token;
-    notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);});
+    notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);ASVSupervisorTick();});
     int toggleToken;
     unlink(ASV_LOG.fileSystemRepresentation); // change log removed in 0.2.3
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){
@@ -160,7 +171,7 @@ int main(int argc,char **argv) { @autoreleasepool {
     });
     dispatch_source_t timer=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_main_queue());
     dispatch_source_set_timer(timer,DISPATCH_TIME_NOW,NSEC_PER_SEC,100*NSEC_PER_MSEC);
-    dispatch_source_set_event_handler(timer,^{Reconcile(NO);}); dispatch_resume(timer);
+    dispatch_source_set_event_handler(timer,^{Reconcile(NO);ASVSupervisorTick();}); dispatch_resume(timer);
     signal(SIGTERM,SIG_IGN); signal(SIGINT,SIG_IGN);
     dispatch_source_t term=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGTERM,0,dispatch_get_main_queue());
     dispatch_source_set_event_handler(term,^{[engine clear];State(@"stopped",nil);exit(0);}); dispatch_resume(term);
