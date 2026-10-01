@@ -18,6 +18,10 @@
 // work independently of the split-routing switch.
 #define ASV_EXTRA_STATE @"/var/mobile/Library/Preferences/com.ratush.appsplitvpn.extra.plist"
 #define ASV_EXTRA_NOTIFY "com.ratush.appsplitvpn.extra.changed"
+// Event journal of the extra options (newest last) and the request to clear it.
+#define ASV_EXTRA_LOG @"/var/mobile/Library/Preferences/com.ratush.appsplitvpn.events.plist"
+#define ASV_EXTRA_CLEAR "com.ratush.appsplitvpn.events.clear"
+#define ASV_EXTRA_LOG_LIMIT 300
 #define ASV_LS_DISCONNECT @"lsDisconnect"
 #define ASV_ALWAYS_ON @"alwaysOn"
 #define ASV_HEALTH @"healthCheck"

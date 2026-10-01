@@ -29,6 +29,7 @@ static NSUUID *sessionUUID;
 static ASVNESession session;
 static NSUUID *configUUID;
 static NSString *configName;
+static NSString *configApp;
 static NSTimeInterval lastConfigLoad;
 static BOOL configLoading;
 static int lockToken=-1;
@@ -38,9 +39,13 @@ static NSUUID *lsStoppedUUID;
 static BOOL wasActive;
 static NSTimeInterval activeSince, downSince, nextStartAllowed, nextHealth, statusRequestedAt;
 static NSInteger startFailures, healthFails;
-static BOOL probing, statusPending, dirty=YES;
+static BOOL probing, statusPending, dirty=YES, logDirty;
 static NSString *healthText;
 static NSMutableArray<NSDictionary *> *events;
+static int vpnStatus;
+static NSTimeInterval lastStatusPoll;
+static BOOL statusPolling;
+static int clearToken=-1;
 static NSDictionary *prefsCache;
 static struct timespec prefsStamp;
 
@@ -68,16 +73,21 @@ static BOOL Suspended(NSDictionary *prefs) { return locked && [prefs[ASV_LS_DISC
 
 static void Event(NSString *code,NSString *detail) {
     [events addObject:@{@"time":@(Now()),@"code":code,@"detail":detail ?: @""}];
-    while (events.count>6) [events removeObjectAtIndex:0];
-    dirty=YES;
+    if (events.count>ASV_EXTRA_LOG_LIMIT) [events removeObjectsInRange:NSMakeRange(0,events.count-ASV_EXTRA_LOG_LIMIT)];
+    logDirty=YES;
     fprintf(stderr,"AppSplitVPN extra %s %s\n",code.UTF8String,(detail ?: @"").UTF8String);
 }
 static void WriteState(void) {
+    if (logDirty) {
+        logDirty=NO;
+        [events writeToFile:ASV_EXTRA_LOG atomically:YES];
+        chmod(ASV_EXTRA_LOG.fileSystemRepresentation,0644);
+    }
     if (!dirty) return;
     dirty=NO;
-    NSDictionary *state=@{@"events":events ?: @[],@"health":healthText ?: @"",@"healthFails":@(healthFails),
+    NSDictionary *state=@{@"health":healthText ?: @"",@"healthFails":@(healthFails),
         @"locked":@(locked),@"lsStopped":lsStoppedUUID.UUIDString ?: @"",@"vpnName":configName ?: @"",
-        @"vpnActive":@(wasActive),@"updated":@(Now())};
+        @"vpnApp":configApp ?: @"",@"vpnStatus":@(vpnStatus),@"vpnActive":@(wasActive),@"updated":@(Now())};
     [state writeToFile:ASV_EXTRA_STATE atomically:YES];
     chmod(ASV_EXTRA_STATE.fileSystemRepresentation,0644);
     notify_post(ASV_EXTRA_NOTIFY);
@@ -122,14 +132,18 @@ static void LoadConfiguration(void) {
             if (![uuid isKindOfClass:NSUUID.class]) continue;
             NSString *lower=[name isKindOfClass:NSString.class] ? name.lowercaseString : @"";
             if ([lower containsString:@"com.apple"] || [lower containsString:@"privaterelay"] || [lower containsString:@"networkprivacy"]) continue;
-            [found addObject:@[uuid,[name isKindOfClass:NSString.class] ? name : @""]];
+            // Owning app: the configuration's application, else the tunnel provider extension.
+            NSString *app=Send(cfg,@"application");
+            if (![app isKindOfClass:NSString.class] || !app.length) app=Send(Send(Send(cfg,@"VPN"),@"protocol"),@"providerBundleIdentifier");
+            [found addObject:@[uuid,[name isKindOfClass:NSString.class] ? name : @"",[app isKindOfClass:NSString.class] ? app : @""]];
         }
         NSArray *chosen=found.firstObject;
         for (NSArray *item in found) if ([item[0] isEqual:configUUID]) chosen=item;
         NSUUID *uuid=chosen[0];
-        if (![uuid isEqual:configUUID] || ![chosen[1] isEqual:configName]) dirty=YES;
+        if (![uuid isEqual:configUUID] || ![chosen[1] isEqual:configName] || ![chosen[2] isEqual:configApp]) dirty=YES;
         configUUID=uuid;
         configName=chosen[1];
+        configApp=chosen[2];
     });
 }
 
@@ -305,9 +319,14 @@ static void RunHealth(NSDictionary *prefs) {
         probing=NO;
         if (!VPNActive() || session!=activeSince) return;
         dirty=YES;
-        if (ok) { healthFails=0;healthText=[NSString stringWithFormat:@"ok:%ld",(long)ms];nextHealth=Now()+interval;return; }
+        if (ok) {
+            healthFails=0;healthText=[NSString stringWithFormat:@"ok:%ld",(long)ms];nextHealth=Now()+interval;
+            Event(@"hcOK",[NSString stringWithFormat:@"%ld",(long)ms]);
+            return;
+        }
         healthFails++;
         healthText=[@"fail:" stringByAppendingString:reason ?: @""];
+        Event(@"hcFail",[NSString stringWithFormat:@"%ld/%ld %@",(long)healthFails,(long)threshold,reason ?: @""]);
         if (healthFails>=threshold && target && !Suspended(Prefs()) && Control(target,NO)) {
             Event(@"healthStop",reason);
             healthFails=0;
@@ -320,6 +339,7 @@ static void LockChanged(BOOL nowLocked) {
     if (nowLocked==locked) return;
     locked=nowLocked;
     dirty=YES;
+    Event(locked?@"lock":@"unlock",nil);
     if (locked) { lockedAt=Now();return; }
     if (lsStoppedUUID) {
         NSUUID *uuid=lsStoppedUUID;
@@ -329,15 +349,31 @@ static void LockChanged(BOOL nowLocked) {
     }
     ASVSupervisorTick();
 }
+// Fine-grained session state (connecting, reasserting, disconnecting) for the State read-out.
+static void PollStatus(NSTimeInterval now) {
+    if (statusPolling || now-lastStatusPoll<3) return;
+    ASVNESession target=configUUID ? SessionFor(configUUID) : NULL;
+    if (!target || !neGetStatus) { if (vpnStatus) { vpnStatus=0;dirty=YES; } return; }
+    lastStatusPoll=now;
+    statusPolling=YES;
+    neGetStatus(target,dispatch_get_main_queue(),^(int status){
+        statusPolling=NO;
+        if (status!=vpnStatus) { vpnStatus=status;dirty=YES; }
+    });
+}
 void ASVSupervisorTick(void) {
     NSTimeInterval now=Now();
     NSDictionary *prefs=Prefs();
     BOOL lsOption=[prefs[ASV_LS_DISCONNECT] boolValue], always=[prefs[ASV_ALWAYS_ON] boolValue], health=[prefs[ASV_HEALTH] boolValue];
-    if ((lsOption || always || health || lsStoppedUUID) && now-lastConfigLoad>(configUUID?30:5)) LoadConfiguration();
     BOOL active=VPNActive();
-    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+30;dirty=YES; }
-    if (!active && (wasActive || downSince==0)) { downSince=now;healthText=nil;dirty=YES; }
+    if (now-lastConfigLoad>(configUUID?30:5) || (active && !wasActive)) LoadConfiguration();
+    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+30;dirty=YES;Event(@"vpnUp",configName); }
+    if (!active && (wasActive || downSince==0)) {
+        if (wasActive) Event(@"vpnDown",configName);
+        downSince=now;healthText=nil;dirty=YES;
+    }
     wasActive=active;
+    PollStatus(now);
     if (lsOption && locked && active && !lsStoppedUUID && configUUID &&
         now-lockedAt>=ASVIntSetting(prefs,ASV_LS_DELAY,ASV_DEFAULT_LS_DELAY,0,600) && Control(configUUID,NO)) {
         lsStoppedUUID=configUUID;
@@ -376,7 +412,17 @@ void ASVSupervisorStart(void) {
     neAnyActive=dlsym(library ?: RTLD_DEFAULT,"ne_session_manager_has_active_sessions");
     NSDictionary *saved=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
     events=[NSMutableArray array];
-    if ([saved[@"events"] isKindOfClass:NSArray.class]) for (id item in saved[@"events"]) if ([item isKindOfClass:NSDictionary.class]) [events addObject:item];
+    NSArray *journal=[NSArray arrayWithContentsOfFile:ASV_EXTRA_LOG];
+    if (![journal isKindOfClass:NSArray.class]) journal=[saved[@"events"] isKindOfClass:NSArray.class] ? saved[@"events"] : @[];
+    for (id item in journal) if ([item isKindOfClass:NSDictionary.class]) [events addObject:item];
+    if (events.count>ASV_EXTRA_LOG_LIMIT) [events removeObjectsInRange:NSMakeRange(0,events.count-ASV_EXTRA_LOG_LIMIT)];
+    logDirty=YES;
+    // The settings page cannot rewrite the service's journal; it asks the service to clear it.
+    notify_register_dispatch(ASV_EXTRA_CLEAR,&clearToken,dispatch_get_main_queue(),^(__unused int token){
+        [events removeAllObjects];
+        logDirty=YES;
+        WriteState();
+    });
     // A VPN switched off for the lock screen must come back even if the service restarted meanwhile.
     if ([saved[@"lsStopped"] length]) lsStoppedUUID=[[NSUUID alloc] initWithUUIDString:saved[@"lsStopped"]];
     notify_register_dispatch("com.apple.springboard.lockstate",&lockToken,dispatch_get_main_queue(),^(int token){

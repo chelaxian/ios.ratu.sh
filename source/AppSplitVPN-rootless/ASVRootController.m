@@ -4,6 +4,7 @@
 #import <notify.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <arpa/inet.h>
+#import <objc/message.h>
 #import "ASVUI.h"
 #import "ASVAppListController.h"
 #import "ASVExtraController.h"
@@ -53,6 +54,63 @@ static NSString *ASVFlag(NSString *country) {
     uint32_t a=0x1F1E6+[country characterAtIndex:0]-'A', b=0x1F1E6+[country characterAtIndex:1]-'A';
     uint32_t scalars[2]={NSSwapHostIntToLittle(a),NSSwapHostIntToLittle(b)};
     return [[NSString alloc] initWithBytes:scalars length:sizeof scalars encoding:NSUTF32LittleEndianStringEncoding] ?: @"";
+}
+
+// Icon of the app that owns the VPN profile. The service reports the configuration's
+// application or its tunnel-provider extension; an extension resolves to its containing app.
+@interface UIImage (ASVRootIcons)
++ (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)identifier format:(int)format scale:(CGFloat)scale;
+@end
+static id ASVCall(id object,NSString *name) {
+    SEL selector=NSSelectorFromString(name);
+    return object && [object respondsToSelector:selector] ? ((id(*)(id,SEL))objc_msgSend)(object,selector) : nil;
+}
+static BOOL ASVInstalledApp(NSString *identifier) {
+    Class cls=NSClassFromString(@"LSApplicationProxy");
+    SEL make=NSSelectorFromString(@"applicationProxyForIdentifier:");
+    if (!identifier.length || ![cls respondsToSelector:make]) return NO;
+    id proxy=((id(*)(id,SEL,id))objc_msgSend)(cls,make,identifier);
+    id appState=ASVCall(proxy,@"appState");
+    SEL installed=NSSelectorFromString(@"isInstalled");
+    if (appState && [appState respondsToSelector:installed]) return ((BOOL(*)(id,SEL))objc_msgSend)(appState,installed);
+    return ASVCall(proxy,@"bundleURL")!=nil;
+}
+static NSString *ASVOwnerApp(NSString *identifier) {
+    if (!identifier.length) return nil;
+    Class plugin=NSClassFromString(@"LSPlugInKitProxy");
+    SEL make=NSSelectorFromString(@"pluginKitProxyForIdentifier:");
+    if ([plugin respondsToSelector:make]) {
+        id proxy=((id(*)(id,SEL,id))objc_msgSend)(plugin,make,identifier);
+        NSString *owner=ASVCall(ASVCall(proxy,@"containingBundle"),@"bundleIdentifier");
+        if ([owner isKindOfClass:NSString.class] && ASVInstalledApp(owner)) return owner;
+    }
+    NSMutableArray *parts=[[identifier componentsSeparatedByString:@"."] mutableCopy];
+    while (parts.count>=2) {
+        NSString *candidate=[parts componentsJoinedByString:@"."];
+        if (ASVInstalledApp(candidate)) return candidate;
+        [parts removeLastObject];
+    }
+    return nil;
+}
+static UIImage *ASVVPNIcon(NSString *identifier) {
+    static NSMutableDictionary *cache;
+    if (!cache) cache=[NSMutableDictionary dictionary];
+    if (!identifier.length) return nil;
+    id cached=cache[identifier];
+    if (cached) return [cached isKindOfClass:UIImage.class] ? cached : nil;
+    NSString *app=ASVOwnerApp(identifier);
+    UIImage *icon=nil;
+    if (app && [UIImage respondsToSelector:@selector(_applicationIconImageForBundleIdentifier:format:scale:)])
+        icon=[UIImage _applicationIconImageForBundleIdentifier:app format:0 scale:UIScreen.mainScreen.scale];
+    if (icon) {
+        UIGraphicsImageRenderer *renderer=[[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(29,29)];
+        icon=[renderer imageWithActions:^(__unused UIGraphicsImageRendererContext *context){
+            [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(0,0,29,29) cornerRadius:6.5] addClip];
+            [icon drawInRect:CGRectMake(0,0,29,29)];
+        }];
+    }
+    cache[identifier]=icon ?: (id)NSNull.null;
+    return icon;
 }
 
 #pragma mark - Mode picker
@@ -168,9 +226,10 @@ static NSString *ASVFlag(NSString *country) {
     BOOL stale=[NSDate date].timeIntervalSince1970-[state[@"updated"] doubleValue]>90;
     NSDictionary *prefs=[self prefs];
     // Include the switch and mode so a change made from Control Center shows up here too.
-    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@",state[@"status"] ?: @"",state[@"error"] ?: @"",
+    NSDictionary *extra=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
+    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@|%@|%@|%d",state[@"status"] ?: @"",state[@"error"] ?: @"",
         state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],state[@"vpnName"] ?: @"",state[@"mode"] ?: @"",stale,
-        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @""];
+        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @"",extra[@"vpnName"] ?: @"",extra[@"vpnApp"] ?: @"",[extra[@"vpnActive"] boolValue]];
 }
 - (void)updateStatusIfChanged {
     if (![_statusFingerprint isEqualToString:[self statusFingerprint]]) [self refreshStatus];
@@ -272,7 +331,7 @@ static NSString *ASVFlag(NSString *country) {
     NSMutableArray *items=[NSMutableArray array];
     NSMutableArray *headers=[NSMutableArray array];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check Disconnect with their tuning. They work with any VPN and independently of the Enable switch.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, Always ON VPN и Health Check Disconnect с настройкой параметров. Работают с любым VPN и независимо от переключателя «Включить».")]];
+    [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check VPN Disconnect with their tuning, and the event log. They work with any VPN and independently of the Enable switch.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, «Всегда включать VPN» и «Отключать VPN по Health Check» с настройкой параметров, журнал событий. Работают с любым VPN и независимо от переключателя «Включить».")]];
     [items addObject:[self setting:L(@"Enable",@"Включить") key:@"enabled" type:PSSwitchCell fallback:@NO detail:nil]];
     PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:ASVModeListController.class];
     if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass"] titles:@[@"TUNNEL ONLY",@"BYPASS"]];
@@ -306,13 +365,18 @@ static NSString *ASVFlag(NSString *country) {
     BOOL healthy=[@[@"active",@"partial"] containsObject:code];
 
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
-    NSString *vpnName=state[@"vpnName"];
-    BOOL vpnUp=![@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
+    NSDictionary *extraState=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
+    // The supervisor tracks the profile selected in iOS; fall back to the split service's view.
+    BOOL extraFresh=extraState && [NSDate date].timeIntervalSince1970-[extraState[@"updated"] doubleValue]<3600;
+    NSString *vpnName=[extraState[@"vpnName"] length]?extraState[@"vpnName"]:state[@"vpnName"];
+    BOOL vpnUp=extraFresh?[extraState[@"vpnActive"] boolValue]:![@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[L(@"Active VPN",@"Активный VPN"),L(@"The name is shown when exactly one VPN configuration is enabled in the system; otherwise the active one cannot be identified reliably.",@"Название показывается, если в системе включена ровно одна конфигурация VPN; иначе активную нельзя надёжно определить.")]];
+    [headers addObject:@[L(@"Active VPN",@"Активный VPN"),L(@"The VPN profile selected in iOS Settings and the icon of the app it belongs to. Built-in iOS VPN profiles (IKEv2, IPsec) have no app and show a shield.",@"Профиль VPN, выбранный в настройках iOS, и иконка приложения, которому он принадлежит. У встроенных профилей iOS (IKEv2, IPsec) приложения нет — для них показывается щит.")]];
     NSString *activeName=vpnUp?(vpnName.length?vpnName:L(@"Connected",@"Подключён")):L(@"Not connected",@"Не подключён");
     PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:activeName target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
-    [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];[items addObject:active];
+    [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];
+    if ([extraState[@"vpnApp"] length]) [active setProperty:extraState[@"vpnApp"] forKey:@"asvApp"];
+    [items addObject:active];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"NECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps. Offloaded and deleted apps get no rule until they are installed again.\n\nPublic IP: the address and country with which the Settings app reaches the Internet, so with BYPASS it is usually the VPN address and with TUNNEL ONLY the direct one. It is checked when this page opens and when the VPN or mode changes; the service is set in Extra → Tuning.\n\nThe routing log shows the current route of every app in the active list and updates automatically.",@"Правил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений. Выгруженные и удалённые приложения не получают правил до повторной установки.\n\nБелый IP — адрес и страна, с которыми выходит в интернет приложение «Настройки»: при BYPASS это обычно адрес VPN, при TUNNEL ONLY — прямой. Проверяется при открытии страницы и при смене VPN или режима; сервис задаётся в «Дополнительно → Тюнинг».\n\nЖурнал маршрутизации показывает текущий маршрут каждого приложения из активного списка и обновляется автоматически.")]];
@@ -379,8 +443,10 @@ static NSString *ASVFlag(NSString *country) {
         ASVFillTerminal(cell,_statusText,0x5A5);
     } else if ([specifier propertyForKey:@"asvDot"]) {
         BOOL up=[[specifier propertyForKey:@"asvDot"] isEqual:@"green"];
-        cell.imageView.image=[UIImage systemImageNamed:up?@"lock.shield.fill":@"shield.slash"];
+        UIImage *icon=ASVVPNIcon([specifier propertyForKey:@"asvApp"]);
+        cell.imageView.image=icon ?: [UIImage systemImageNamed:up?@"lock.shield.fill":@"shield.slash"];
         cell.imageView.tintColor=up?UIColor.systemGreenColor:UIColor.secondaryLabelColor;
+        cell.imageView.alpha=(icon && !up)?0.45:1;
         cell.textLabel.textColor=up?UIColor.labelColor:UIColor.secondaryLabelColor;
     }
     return cell;
