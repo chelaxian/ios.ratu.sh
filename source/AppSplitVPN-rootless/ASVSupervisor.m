@@ -434,6 +434,9 @@ void ASVSupervisorStart(void) {
     uint64_t value=0;
     if (lockToken>=0) notify_get_state(lockToken,&value);
     locked=value!=0;
+    // A service restart is not a VPN connection: start from the current state without logging it.
+    wasActive=VPNActive();
+    if (wasActive) { activeSince=Now();nextHealth=activeSince+30; } else downSince=Now();
     if (locked) lockedAt=Now();
     else if (lsStoppedUUID) { locked=YES;LockChanged(NO); }
 }
