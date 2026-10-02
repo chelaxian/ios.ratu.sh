@@ -62,6 +62,9 @@ static NSString *pendingReserve,*pinnedProfile;
 static BOOL profileStarting, circuitLatched;
 static NSTimeInterval connectDeadline;
 static BOOL lastAutomation;
+static BOOL lastRedundancy;
+static NSString *lastPrimary,*reserveCycleProfile;
+static unsigned reserveCycles;
 static struct timespec prefsStamp;
 static BOOL transactionPaused;
 static BOOL masterEnabled, masterKnown;
@@ -79,6 +82,7 @@ void ASVSupervisorSetEnabled(BOOL enabled){
     probing=NO;statusPending=NO;profileStarting=NO;pendingReserve=nil;pinnedProfile=nil;
     connectDeadline=0;lsStoppedUUID=nil;mediaHeld=NO;mediaKnown=NO;mediaPending=NO;++mediaGeneration;lastConfigLoad=0;
     recovery=(ASVRecovery){0};[failedReserves removeAllObjects];lastAutomation=NO;
+    lastRedundancy=NO;reserveCycles=0;reserveCycleProfile=nil;
     healthFails=0;startFailures=0;healthText=nil;nextHealth=Now()+30;nextStartAllowed=Now()+3;
     dirty=YES;
 }
@@ -137,7 +141,7 @@ static void WriteState(void) {
     NSDictionary *state=@{@"health":healthText ?: @"",@"healthFails":@(healthFails),
         @"locked":@(locked),@"mediaHeld":@(mediaHeld),@"lsStopped":lsStoppedUUID.UUIDString ?: @"",@"vpnName":configName ?: @"",
         @"vpnApp":configApp ?: @"",@"vpnStatus":@(vpnStatus),@"vpnActive":@(wasActive),@"updated":@(Now()),
-        @"failedCycles":@(recovery.cycles),@"cycleHealthy":@(recovery.healthy),@"failedReserves":failedReserves.allObjects ?: @[],@"pinnedProfile":pinnedProfile ?: @"",@"circuitLatched":@(circuitLatched)};
+        @"failedCycles":@(recovery.cycles),@"cycleHealthy":@(recovery.healthy),@"reserveCycles":@(reserveCycles),@"reserveCycleProfile":reserveCycleProfile ?: @"",@"failedReserves":failedReserves.allObjects ?: @[],@"pinnedProfile":pinnedProfile ?: @"",@"circuitLatched":@(circuitLatched)};
     [state writeToFile:ASV_EXTRA_STATE atomically:YES];
     chmod(ASV_EXTRA_STATE.fileSystemRepresentation,0644);
     notify_post(ASV_EXTRA_NOTIFY);
@@ -382,6 +386,12 @@ static void FailedCycle(NSString *reason) {
     BOOL exhausted=ASVRecoveryCycleFailed(&recovery,limit);
     Event(@"badCycle",[NSString stringWithFormat:@"%u/%u",recovery.cycles,limit]);dirty=YES;
     if(ASVExtraOptionActive(prefs,ASV_REDUNDANCY)) {
+        if(![reserveCycleProfile isEqual:configUUID.UUIDString]){reserveCycleProfile=configUUID.UUIDString;reserveCycles=0;}
+        unsigned switchLimit=(unsigned)ASVIntSetting(prefs,ASV_RED_CYCLES,1,1,10);
+        BOOL rotate=ASVReserveCycleFailed(&reserveCycles,switchLimit);
+        Event(@"reserveCycle",[NSString stringWithFormat:@"%u/%u %@",reserveCycles,switchLimit,configName ?: @""]);
+        if(!rotate){nextStartAllowed=Now()+5;connectDeadline=0;return;}
+        reserveCycles=0;reserveCycleProfile=nil;
         if(!failedReserves)failedReserves=[NSMutableSet set];if(configUUID)[failedReserves addObject:configUUID.UUIDString];
         NSArray *raw=[prefs[ASV_RESERVES] isKindOfClass:NSArray.class]?prefs[ASV_RESERVES]:@[];
         NSMutableOrderedSet *unique=[NSMutableOrderedSet orderedSet];for(id v in raw)if([v isKindOfClass:NSString.class] && [[NSUUID alloc] initWithUUIDString:v])[unique addObject:v];
@@ -399,11 +409,13 @@ static void StartReservedProfile(void) {
     NSDictionary *snapshot=Prefs();
     NSString *mode=[snapshot[@"mode"] copy];
     NSArray *reserves=[snapshot[ASV_RESERVES] copy];
+    NSString *primary=[snapshot[ASV_PRIMARY] copy];
     BOOL (^valid)(void)=^BOOL{
         NSDictionary *current=Prefs();
         return generation==automationGeneration && masterEnabled && !transactionPaused && !circuitLatched && !ASVIsMultiMode(current) &&
             [current[@"mode"] isEqual:mode] &&
             [current[ASV_RESERVES] isEqual:reserves] &&
+            ((current[ASV_PRIMARY]==nil && primary==nil) || [current[ASV_PRIMARY] isEqual:primary]) &&
             ASVExtraOptionActive(current,ASV_REDUNDANCY) &&
             ASVExtraOptionActive(current,ASV_ALWAYS_ON) &&
             ASVExtraOptionActive(current,ASV_HEALTH) && !Suspended(current);
@@ -436,6 +448,7 @@ static void RunHealth(NSDictionary *prefs) {
         if (ok) {
             healthFails=0;healthText=[NSString stringWithFormat:@"ok:%ld",(long)ms];nextHealth=Now()+interval;
             ASVRecoverySuccess(&recovery);[failedReserves removeAllObjects];connectDeadline=0;
+            reserveCycles=0;reserveCycleProfile=nil;
             Event(@"hcOK",[NSString stringWithFormat:@"%ld",(long)ms]);
             return;
         }
@@ -516,6 +529,18 @@ void ASVSupervisorTick(void) {
     BOOL automation=always || ASVExtraOptionActive(prefs,ASV_REDUNDANCY);
     if(automation && !lastAutomation){circuitLatched=NO;recovery=(ASVRecovery){0};[failedReserves removeAllObjects];dirty=YES;}
     lastAutomation=automation;
+    BOOL redundancy=ASVExtraOptionActive(prefs,ASV_REDUNDANCY);
+    NSString *primary=[prefs[ASV_PRIMARY] isKindOfClass:NSString.class]?prefs[ASV_PRIMARY]:@"";
+    if(redundancy && primary.length && (!lastRedundancy || ![primary isEqual:lastPrimary])){
+        if(Suspended(prefs) || (VPNActive() && !configUUID)){LoadConfiguration();WriteState();return;}
+        if(ASVProfileRecord(primary) && ![configUUID.UUIDString isEqual:primary]){
+            if(VPNActive() && configUUID)Control(configUUID,NO);
+            pendingReserve=primary;nextStartAllowed=now+3;connectDeadline=0;
+            reserveCycles=0;reserveCycleProfile=nil;[failedReserves removeAllObjects];
+            Event(@"primaryStart",ASVProfileRecord(primary)[@"name"] ?: primary);
+        }
+    }
+    lastRedundancy=redundancy;lastPrimary=[primary copy];
     BOOL active=pinnedProfile.length?(vpnStatus==3||vpnStatus==4):VPNActive();
     static NSTimeInterval pausedAt;
     BOOL paused=Suspended(prefs) || !HasPhysicalNetwork();
@@ -581,6 +606,8 @@ void ASVSupervisorStart(void) {
     failedReserves=[NSMutableSet setWithArray:[saved[@"failedReserves"] isKindOfClass:NSArray.class]?saved[@"failedReserves"]:@[]];
     pinnedProfile=[saved[@"pinnedProfile"] length]?saved[@"pinnedProfile"]:nil;circuitLatched=[saved[@"circuitLatched"] boolValue];
     lastAutomation=ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON);
+    lastRedundancy=ASVExtraOptionActive(Prefs(),ASV_REDUNDANCY) && VPNActive();lastPrimary=[Prefs()[ASV_PRIMARY] copy] ?: @"";
+    reserveCycles=MIN(10,[saved[@"reserveCycles"] unsignedIntValue]);reserveCycleProfile=[saved[@"reserveCycleProfile"] copy];
     ASVProfilesRefresh();
     events=[NSMutableArray array];
     NSArray *journal=[NSArray arrayWithContentsOfFile:ASV_EXTRA_LOG];

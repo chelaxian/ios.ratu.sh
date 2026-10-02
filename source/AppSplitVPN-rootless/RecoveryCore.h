@@ -5,6 +5,9 @@
 // A cycle ends only when an established tunnel fails health or a start times out.
 // An individual failed probe is not a failed recovery cycle.
 typedef struct { unsigned probes, cycles; bool healthy; } ASVRecovery;
+static inline bool ASVReserveCycleFailed(unsigned *cycles,unsigned limit) {
+ if(!limit)limit=1;return ++*cycles>=limit;
+}
 static inline void ASVRecoverySuccess(ASVRecovery *s) { s->probes=0;s->cycles=0;s->healthy=true; }
 static inline bool ASVRecoveryProbeFailed(ASVRecovery *s,unsigned limit) { return ++s->probes>=limit; }
 static inline bool ASVRecoveryCycleFailed(ASVRecovery *s,unsigned limit) {

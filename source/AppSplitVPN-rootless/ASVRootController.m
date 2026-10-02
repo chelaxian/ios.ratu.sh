@@ -8,6 +8,10 @@
 #import "ASVUI.h"
 #import "ASVAppListController.h"
 #import "ASVExtraController.h"
+#import "ASVSettingsTransfer.h"
+@interface ASVExtraController (ASVImportValidation)
+- (NSString *)problemWith:(NSString *)text key:(NSString *)key;
+@end
 // Theos' deliberately minimal header omits these runtime APIs.
 @interface PSSpecifier (ASVListValues)
 - (void)setValues:(NSArray *)values titles:(NSArray *)titles;
@@ -375,7 +379,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if(!ASVIsMultiMode([self prefs]))[items addObject:extra];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[L(@"App lists",@"Списки приложений"),L(@"The two lists are independent; only the list of the current mode is applied.\n\nAfter changing the rules, reopen the affected apps: already open connections keep their old route.\n\nImport skips apps that are not installed and keeps them in the list for a later reinstall.",@"Списки независимы: применяется только список текущего режима.\n\nПосле изменения правил переоткройте нужные приложения — уже открытые соединения сохраняют прежний маршрут.\n\nПри импорте отсутствующие приложения пропускаются и остаются в списке до установки.")]];
+    [headers addObject:@[L(@"App lists",@"Списки приложений"),L(@"The two lists are independent; only the list of the current mode is applied.\n\nAfter changing the rules, reopen the affected apps: already open connections keep their old route.\n\nImport skips missing apps and VPN profiles and applies the remaining settings.",@"Списки независимы: применяется только список текущего режима.\n\nПосле изменения правил переоткройте нужные приложения — уже открытые соединения сохраняют прежний маршрут.\n\nПри импорте отсутствующие приложения и VPN-профили пропускаются, остальные настройки применяются.")]];
     NSUInteger total=[ASVAppListController installedApplicationCount];
     PSSpecifier *vpn=[self button:@"VPN" action:@selector(openVPNList)];
     [vpn setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_VPN],(unsigned long)total] forKey:@"asvCount"];
@@ -389,7 +393,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     }
     // A static-text Preferences cell does not reliably forward touches to child controls.
     PSSpecifier *transfer=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
-    [transfer setProperty:@YES forKey:@"asvTransfer"];[items addObject:transfer];
+    [transfer setProperty:@YES forKey:@"asvTransfer"];
 
     NSString *code=nil;
     _statusText=[self buildStatus:&code];
@@ -427,6 +431,9 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if(ASVIsMultiMode([self prefs]))headers[headers.count-1]=@[headers.lastObject[0],L(@"NECP rules count executable identities, including app extensions.\n\nMULTI public IP is checked separately through each connected profile using an assigned app's native routing policy. The connection's local address must match that profile's tunnel; otherwise it is shown as unavailable. Checks run on connection, page opening and Refresh status, not continuously. The default service has a numeric Cloudflare fallback if DNS is unavailable.",@"Правила NECP считают исполняемые файлы, включая расширения приложений.\n\nВ MULTI белый IP проверяется отдельно через каждый подключённый профиль по штатным правилам назначенного приложения. Локальный адрес соединения должен соответствовать туннелю профиля; иначе показывается «недоступен». Проверки выполняются при подключении, открытии страницы и нажатии «Обновить статус», не постоянно. Для стандартного сервиса есть резервный числовой адрес Cloudflare, если DNS недоступен.")];
     [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(fetchIP)]];
     [items addObject:[self button:L(@"Routing log",@"Журнал маршрутизации") action:@selector(openRouteLog)]];
+    [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
+    [headers addObject:@[L(@"Settings backup",@"Перенос настроек"),L(@"Export/import includes all tweak settings, app lists, VPN MATRIX, primary VPN and ordered reserves. Missing apps and profiles are skipped. Only profile identifiers and display metadata are included; VPN keys and credentials stay in their VPN apps.",@"Экспорт/импорт включает все настройки твика, списки приложений, VPN MATRIX, основной VPN и порядок резервов. Отсутствующие приложения и профили пропускаются. Сохраняются только идентификаторы и названия профилей; ключи и конфигурации остаются в VPN-приложениях.")]];
+    [items addObject:transfer];
     _headers=[headers copy];
     _specifiers=[items copy];return _specifiers;
 }
@@ -525,10 +532,10 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 - (void)openRouteLog { [self.navigationController pushViewController:[ASVLogController new] animated:YES]; }
 - (void)exportLists {
     NSDictionary *prefs=[self prefs];
-    NSDictionary *payload=@{@"format":@"appsplitvpn-lists-v2",ASV_VPN:prefs[ASV_VPN] ?: @[],ASV_DIRECT:prefs[ASV_DIRECT] ?: @[],ASV_MATRIX:prefs[ASV_MATRIX] ?: @{}};
+    NSDictionary *payload=ASVExportSettings(prefs,[NSArray arrayWithContentsOfFile:ASV_PROFILE_CATALOG] ?: @[]);
     NSError *error=nil;
     NSData *data=[NSJSONSerialization dataWithJSONObject:payload options:NSJSONWritingPrettyPrinted error:&error];
-    NSURL *url=[[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"AppSplitVPN-lists.json"];
+    NSURL *url=[[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"AppSplitVPN-settings.json"];
     if (!data || ![data writeToURL:url options:NSDataWritingAtomic error:&error]) {
         UIAlertController *alert=[UIAlertController alertControllerWithTitle:L(@"Export failed",@"Не удалось экспортировать") message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
@@ -543,40 +550,28 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     picker.delegate=self;[self presentViewController:picker animated:YES completion:nil];
 }
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
-    NSData *data=[NSData dataWithContentsOfURL:urls.firstObject options:0 error:nil];
-    NSDictionary *payload=data?[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
-    BOOL v2=[payload isKindOfClass:NSDictionary.class] && [payload[@"format"] isEqual:@"appsplitvpn-lists-v2"];
-    BOOL valid=[payload isKindOfClass:NSDictionary.class] && (v2 || [payload[@"format"] isEqual:@"appsplitvpn-lists-v1"]);
-    NSCharacterSet *bad=[NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"].invertedSet;
-    for (NSString *key in @[ASV_VPN,ASV_DIRECT]) {
-        NSArray *items=valid?payload[key]:nil;
-        if (![items isKindOfClass:NSArray.class] || items.count>2048) valid=NO;
-        for (id item in items) if (![item isKindOfClass:NSString.class] || [item length]<1 || [item length]>255 || [item rangeOfCharacterFromSet:bad].location!=NSNotFound) valid=NO;
+    NSURL *url=urls.firstObject;
+    NSNumber *size=[[[NSFileManager defaultManager] attributesOfItemAtPath:url.path error:nil] objectForKey:NSFileSize];
+    NSData *data=size && size.unsignedLongLongValue<=2*1024*1024?[NSData dataWithContentsOfURL:url options:0 error:nil]:nil;
+    id payload=data?[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
+    NSMutableSet *apps=[NSMutableSet set];
+    id workspace=((id(*)(id,SEL))objc_msgSend)(NSClassFromString(@"LSApplicationWorkspace"),@selector(defaultWorkspace));
+    NSArray *proxies=((id(*)(id,SEL))objc_msgSend)(workspace,@selector(allInstalledApplications));
+    for(id proxy in proxies) {
+        if(![proxy respondsToSelector:@selector(applicationIdentifier)] || ![proxy respondsToSelector:@selector(bundleURL)])continue;
+        NSString *app=((id(*)(id,SEL))objc_msgSend)(proxy,@selector(applicationIdentifier));
+        NSURL *bundle=((id(*)(id,SEL))objc_msgSend)(proxy,@selector(bundleURL));
+        if(![bundle isKindOfClass:NSURL.class])continue;
+        NSString *executable=[NSBundle bundleWithURL:bundle].executablePath;
+        if(app.length && executable.length && [[NSFileManager defaultManager] fileExistsAtPath:executable])[apps addObject:app];
     }
-    NSMutableDictionary *matrix=[NSMutableDictionary dictionary];NSUInteger skippedProfiles=0;
-    if(valid && v2) {
-        id assignments=payload[ASV_MATRIX];
-        if(![assignments isKindOfClass:NSDictionary.class] || [assignments count]>2048)valid=NO;
-        NSMutableSet *known=[NSMutableSet set];
-        for(NSDictionary *record in [NSArray arrayWithContentsOfFile:ASV_PROFILE_CATALOG])if([record[@"id"] isKindOfClass:NSString.class])[known addObject:record[@"id"]];
-        if(valid)for(id app in assignments) {
-            id profile=assignments[app];
-            if(![app isKindOfClass:NSString.class] || [app length]<1 || [app length]>255 || [app rangeOfCharacterFromSet:bad].location!=NSNotFound || ![profile isKindOfClass:NSString.class] || ![[NSUUID alloc] initWithUUIDString:profile]){valid=NO;break;}
-            matrix[app]=profile;
-            if(![known containsObject:profile])skippedProfiles++;
-        }
-    }
-    if (valid) {
-        NSMutableDictionary *prefs=[[self prefs] mutableCopy];
-        prefs[ASV_VPN]=[[NSOrderedSet orderedSetWithArray:payload[ASV_VPN]] array];
-        prefs[ASV_DIRECT]=[[NSOrderedSet orderedSetWithArray:payload[ASV_DIRECT]] array];
-        if(v2)prefs[ASV_MATRIX]=matrix;
-        valid=[prefs writeToFile:ASV_PREFS atomically:YES];
-        if (valid) { notify_post(ASV_NOTIFY);[self refreshStatus]; }
-    }
-    NSString *message=valid?L(@"Missing apps are kept in the lists and skipped until installed.",@"Отсутствующие приложения сохраняются в списках и пропускаются до установки."):nil;
-    if(valid && skippedProfiles)message=[message stringByAppendingFormat:L(@"\nUnavailable VPN profile assignments kept: %lu. Select a local profile in VPN MATRIX; these apps must not fall back to DIRECT.",@"\nСохранено назначений недоступных VPN-профилей: %lu. Выберите местный профиль в VPN MATRIX; эти приложения не должны переходить в DIRECT."),(unsigned long)skippedProfiles];
-    UIAlertController *alert=[UIAlertController alertControllerWithTitle:valid?L(@"Lists imported",@"Списки импортированы"):L(@"Invalid list file",@"Неверный файл списков") message:message preferredStyle:UIAlertControllerStyleAlert];
+    NSArray *catalog=[NSArray arrayWithContentsOfFile:ASV_PROFILE_CATALOG] ?: @[];
+    ASVExtraController *validator=[ASVExtraController new];NSUInteger skipped=0;
+    NSMutableDictionary *prefs=ASVImportSettings(payload,[self prefs],apps,catalog,^BOOL(NSString *key,NSString *value){return [validator problemWith:value key:key]==nil;},&skipped);
+    BOOL valid=prefs && [prefs writeToFile:ASV_PREFS atomically:YES];
+    if(valid){notify_post(ASV_NOTIFY);[self fetchIP];[self refreshStatus];}
+    NSString *message=valid?[NSString stringWithFormat:L(@"Settings applied. Unavailable or invalid items skipped: %lu. VPN profiles are matched by UUID or a unique app + profile name. VPN credentials are not imported.",@"Настройки применены. Пропущено недоступных или некорректных пунктов: %lu. VPN сопоставляются по UUID либо уникальному сочетанию приложения и имени профиля. Конфигурации и ключи VPN не импортируются."),(unsigned long)skipped]:nil;
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:valid?L(@"Settings imported",@"Настройки импортированы"):L(@"Invalid settings file",@"Неверный файл настроек") message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }

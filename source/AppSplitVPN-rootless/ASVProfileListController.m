@@ -2,7 +2,7 @@
 #import "ASVUI.h"
 #import <notify.h>
 @implementation ASVProfileListController {
- BOOL _ordered,_descending,_groupDescending;NSString *_selection,*_group,*_filterField,*_filterValue;void(^_pick)(NSString*);
+ BOOL _ordered,_descending,_groupDescending;NSString *_selection,*_group,*_filterField,*_filterValue,*_primary;void(^_pick)(NSString*);
  NSMutableArray *_selected;NSArray *_keys,*_sections;UISearchController *_search;NSTimer *_timer;NSDate *_stamp;
 }
 - (instancetype)initForReserves { if((self=[super initWithStyle:UITableViewStyleInsetGrouped])){_ordered=YES;_group=@"owner";NSArray *old=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][ASV_RESERVES];_selected=[NSMutableArray arrayWithArray:[old isKindOfClass:NSArray.class]?old:@[]];}return self; }
@@ -21,8 +21,10 @@
  NSString *name=record[@"name"];return name.length?[[name substringToIndex:1] uppercaseString]:@"#";
 }
 - (void)rebuild {
+ if(_ordered)_primary=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][ASV_PRIMARY];
  NSMutableDictionary *groups=[NSMutableDictionary dictionary];NSString *query=_search.searchBar.text.lowercaseString ?: @"";
  for(NSDictionary *r in [self records]) {
+   if(_ordered && [r[@"id"] isEqual:_primary])continue;
    NSString *owner=[self owner:r],*name=r[@"name"];
    if(query.length && ![name.lowercaseString containsString:query] && ![owner.lowercaseString containsString:query])continue;
    if(_filterValue && ![[self valueFor:r field:_filterField] isEqual:_filterValue])continue;
@@ -32,20 +34,38 @@
  _keys=[groups.allKeys sortedArrayUsingComparator:^NSComparisonResult(id a,id b){NSComparisonResult result=[a localizedCaseInsensitiveCompare:b];return self->_groupDescending?-result:result;}];
  NSMutableArray *sections=[NSMutableArray array];for(NSString *key in _keys)[sections addObject:[groups[key] sortedArrayUsingComparator:^NSComparisonResult(id a,id b){NSComparisonResult result=[a[@"name"] localizedCaseInsensitiveCompare:b[@"name"]];return self->_descending?-result:result;}]];_sections=sections;[self.tableView reloadData];
 }
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)table { return _sections.count; }
-- (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)s { return [_sections[s] count]; }
-- (NSString *)tableView:(UITableView *)table titleForHeaderInSection:(NSInteger)s { return [_group isEqual:@"none"]?nil:_keys[s]; }
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)table { return _sections.count+(_ordered?1:0); }
+- (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)s { return _ordered && s==0?1:[_sections[s-(_ordered?1:0)] count]; }
+- (NSString *)tableView:(UITableView *)table titleForHeaderInSection:(NSInteger)s { if(_ordered && s==0)return L(@"Starting profile",@"Исходный профиль");return [_group isEqual:@"none"]?nil:_keys[s-(_ordered?1:0)]; }
+- (NSInteger)tableView:(UITableView *)table sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index { return index+(_ordered?1:0); }
 - (NSArray *)sectionIndexTitlesForTableView:(UITableView *)table { return [_group isEqual:@"name"]?_keys:nil; }
 - (UITableViewCell *)tableView:(UITableView *)table cellForRowAtIndexPath:(NSIndexPath *)p {
+ if(_ordered && p.section==0){
+   UITableViewCell *cell=[table dequeueReusableCellWithIdentifier:@"primary"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"primary"];
+   cell.textLabel.text=L(@"Primary VPN",@"Основной VPN");NSString *name=nil;for(NSDictionary *r in [self records])if([r[@"id"] isEqual:_primary])name=r[@"name"];
+   cell.detailTextLabel.text=name ?: L(@"System selection (auto)",@"Системный (авто)");cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;return cell;
+ }
  UITableViewCell *cell=[table dequeueReusableCellWithIdentifier:@"vpn"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"vpn"];
- NSDictionary *r=_sections[p.section][p.row];NSUInteger position=[_selected indexOfObject:r[@"id"]];
+ NSDictionary *r=_sections[p.section-(_ordered?1:0)][p.row];NSUInteger position=[_selected indexOfObject:r[@"id"]];
  cell.textLabel.text=_ordered && position!=NSNotFound?[NSString stringWithFormat:@"%lu. %@",(unsigned long)position+1,r[@"name"]]:r[@"name"];
  cell.detailTextLabel.text=[self owner:r];cell.detailTextLabel.textColor=UIColor.secondaryLabelColor;
  cell.accessoryType=(_ordered?position!=NSNotFound:[r[@"id"] isEqual:_selection])?UITableViewCellAccessoryCheckmark:UITableViewCellAccessoryNone;
  cell.tintColor=UIColor.systemBlueColor;return cell;
 }
 - (void)tableView:(UITableView *)table didSelectRowAtIndexPath:(NSIndexPath *)p {
- NSString *uuid=_sections[p.section][p.row][@"id"];
+ if(_ordered && p.section==0){
+   __weak ASVProfileListController *weakSelf=self;
+   ASVProfileListController *picker=[[ASVProfileListController alloc] initWithSelection:_primary completion:^(NSString *uuid){
+      ASVProfileListController *controller=weakSelf;if(!controller)return;
+      NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
+      if(uuid.length)prefs[ASV_PRIMARY]=uuid;else [prefs removeObjectForKey:ASV_PRIMARY];
+      [controller->_selected removeObject:uuid ?: @""];prefs[ASV_RESERVES]=controller->_selected;
+      if([prefs writeToFile:ASV_PREFS atomically:YES]){notify_post(ASV_NOTIFY);[controller rebuild];}
+   }];
+   picker.navigationItem.leftBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:L(@"Auto",@"Авто") style:UIBarButtonItemStylePlain target:picker action:@selector(selectAutomaticPrimary)];
+   [self.navigationController pushViewController:picker animated:YES];return;
+ }
+ NSString *uuid=_sections[p.section-(_ordered?1:0)][p.row][@"id"];
  if(!_ordered){if(_pick)_pick(uuid);[self.navigationController popViewControllerAnimated:YES];return;}
  if([_selected containsObject:uuid])[_selected removeObject:uuid];else {
    if(_selected.count>=64){UIAlertController *a=[UIAlertController alertControllerWithTitle:L(@"Up to 64 reserve profiles",@"Не более 64 резервных профилей") message:nil preferredStyle:UIAlertControllerStyleAlert];[a addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];[self presentViewController:a animated:YES completion:nil];return;}
@@ -54,6 +74,7 @@
  NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];prefs[ASV_RESERVES]=_selected;
  if([prefs writeToFile:ASV_PREFS atomically:YES])notify_post(ASV_NOTIFY);[self rebuild];
 }
+- (void)selectAutomaticPrimary { if(_pick)_pick(nil);[self.navigationController popViewControllerAnimated:YES]; }
 - (void)sheet:(NSString *)title choices:(NSArray *)choices action:(void(^)(NSString*))action {
  UIAlertController *sheet=[UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleActionSheet];
  for(NSArray *choice in choices)[sheet addAction:[UIAlertAction actionWithTitle:choice[1] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){action(choice[0]);}]];

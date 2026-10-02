@@ -8,6 +8,12 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      - name: Check recovery and settings import
+        run: |
+          clang research/recovery-test.c -o /tmp/asv-recovery-test
+          /tmp/asv-recovery-test
+          clang -fobjc-arc -framework Foundation research/settings-transfer-test.m -o /tmp/asv-settings-transfer-test
+          /tmp/asv-settings-transfer-test
       - name: Install toolchain
         run: |
           brew install ldid dpkg

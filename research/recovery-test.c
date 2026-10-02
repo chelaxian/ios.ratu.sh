@@ -3,6 +3,9 @@
 #include "../source/AppSplitVPN-rootless/RecoveryCore.h"
 #include "../source/AppSplitVPN-rootless/MediaCore.h"
 int main(void) {
+ unsigned reserveCycles=0;assert(!ASVReserveCycleFailed(&reserveCycles,3));assert(!ASVReserveCycleFailed(&reserveCycles,3));assert(ASVReserveCycleFailed(&reserveCycles,3));
+ reserveCycles=0;assert(ASVReserveCycleFailed(&reserveCycles,1));
+ reserveCycles=0;assert(!ASVReserveCycleFailed(&reserveCycles,3));reserveCycles=0;assert(!ASVReserveCycleFailed(&reserveCycles,3));
  assert(!ASVMediaShouldHold(false,true,true,true,true,0));
  assert(!ASVMediaShouldHold(true,false,true,true,true,0));
  assert(!ASVMediaShouldHold(true,true,false,true,true,0));

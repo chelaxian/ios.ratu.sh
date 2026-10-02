@@ -20,6 +20,8 @@
 #define ASV_REDUNDANCY @"redundancy"
 #define ASV_RESERVES @"reserveProfiles"
 #define ASV_RED_ALGORITHM @"redundancyAlgorithm"
+#define ASV_RED_CYCLES @"redundancyCycles"
+#define ASV_PRIMARY @"primaryVPN"
 #define ASV_HC_TIMEOUT @"hcTimeout"
 #define ASV_DEFAULT_HC_TIMEOUT 15
 
@@ -30,6 +32,9 @@ static inline BOOL ASVIsMultiMode(NSDictionary *prefs) {
 }
 static inline BOOL ASVExtraOptionActive(NSDictionary *prefs, NSString *key) {
     return [prefs[@"enabled"] boolValue] && !ASVIsMultiMode(prefs) && [prefs[key] boolValue];
+}
+static inline BOOL ASVExtraOptionConfigured(NSDictionary *prefs, NSString *key) {
+    return !ASVIsMultiMode(prefs) && [prefs[key] boolValue];
 }
 
 // Extra options (0.3.0). They act on the system VPN selected in iOS Settings and
