@@ -45,6 +45,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     BOOL _busy,_ownsProfiles,_wanted,_restoring,_startupDone;
     NSString *_status,*_error,*_names;
     NSDictionary *_matrix,*_requested;
+    NSDictionary *_publishedInterfaces;
     NSArray *_originals,*_activeBefore,*_providers;
     NSMutableDictionary *_connections,*_statuses;
     double _lastPoll,_started,_retry;
@@ -96,7 +97,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
         [self save:c reply:^(BOOL ok){if(!ok){_busy=NO;_restoring=NO;[self fail:@"MULTI profile restoration failed; backup retained"];completion(NO);return;}[self restoreIndex:index+1 completion:completion];}];return;
     }
     if(!Manifest(@[]) || !Remove(ArchiveName)){_busy=NO;_restoring=NO;[self fail:@"MULTI recovery cleanup failed"];completion(NO);return;}
-    [_engine clear];_ownsProfiles=NO;_startupDone=YES;_matrix=nil;_originals=nil;_providers=nil;_names=nil;_busy=NO;_restoring=NO;_status=@"disabled";_error=nil;
+    [_engine clear];_publishedInterfaces=nil;_ownsProfiles=NO;_startupDone=YES;_matrix=nil;_originals=nil;_providers=nil;_names=nil;_busy=NO;_restoring=NO;_status=@"disabled";_error=nil;
     // Restore only sessions that were actually active before this transaction.
     void(*start)(void *)=dlsym(RTLD_DEFAULT,"ne_session_start");for(NSString *uuid in _activeBefore){void *s=Session(uuid,1);if(s && start)start(s);Release(s);}_activeBefore=nil;ASVProfilesRefresh();completion(YES);
 }
@@ -114,8 +115,10 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
             id c=all[uuid],vpn=Get(c,@"VPN"),protocol=Get(vpn,@"protocol");NSString *provider=Get(protocol,@"providerBundleIdentifier"),*owner=Get(c,@"application");
             if(!vpn || Get(c,@"appVPN") || Get(c,@"payloadInfo") || !provider.length || ![vpn respondsToSelector:NSSelectorFromString(@"tunnelType")] || ((NSInteger(*)(id,SEL))objc_msgSend)(vpn,NSSelectorFromString(@"tunnelType"))!=1){self->_busy=NO;[self fail:@"MULTI requires ordinary unmanaged PacketTunnel profiles"];return;}
             if([extensions containsObject:provider]){self->_busy=NO;[self fail:@"Two profiles of the same provider are not validated yet"];return;}[extensions addObject:provider];[providers addObject:provider];if(owner.length)[providers addObject:owner];[selected addObject:[c copy]];
+            if(matrix[provider] || (owner.length && matrix[owner])){self->_busy=NO;[self fail:@"VPN provider apps cannot themselves be assigned in this experiment"];return;}
         }
         NSString *policyError=nil;if(![self->_engine replaceMatrix:matrix interfaces:@{} providerIDs:providers error:&policyError]){self->_busy=NO;[self fail:policyError];return;}
+        self->_publishedInterfaces=@{};
         self->_originals=selected;self->_providers=providers;self->_matrix=[matrix copy];
         NSMutableArray *active=[NSMutableArray array];dispatch_group_t group=dispatch_group_create();
         for(id c in configs)if(Get(c,@"VPN")){NSString *uuid=[Get(c,@"identifier") UUIDString];if(!uuid)continue;dispatch_group_enter(group);Status(uuid,1,^(NSInteger s){if(s>=2 && s<=4)[active addObject:uuid];dispatch_group_leave(group);});}
@@ -174,7 +177,10 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     if(Clock()-_lastPoll<3)return;_lastPoll=Clock();NSUInteger generation=_generation;NSMutableDictionary *interfaces=[NSMutableDictionary dictionary];NSMutableArray *names=[NSMutableArray array];dispatch_group_t group=dispatch_group_create();
     for(id c in _originals){NSString *uuid=[Get(c,@"identifier") UUIDString];dispatch_group_enter(group);Status(uuid,2,^(NSInteger status){if(generation==self->_generation){self->_statuses[uuid]=@(status);NSString *interface=ASVProfileInterface(uuid);if(status==3 && interface.length){interfaces[uuid]=interface;[names addObject:Get(c,@"name") ?: uuid];}}dispatch_group_leave(group);});}
     dispatch_group_notify(group,dispatch_get_main_queue(),^{if(generation!=self->_generation || !self->_wanted)return;NSString *error=nil;
-        if(![self->_engine replaceMatrix:self->_matrix interfaces:interfaces providerIDs:self->_providers error:&error]){[self fail:error];return;}
+        if(![self->_publishedInterfaces isEqual:interfaces]){
+            if(![self->_engine replaceMatrix:self->_matrix interfaces:interfaces providerIDs:self->_providers error:&error]){[self fail:error];return;}
+            self->_publishedInterfaces=[interfaces copy];
+        }
         self->_names=[names componentsJoinedByString:@" + "];self->_status=interfaces.count==self->_originals.count?@"active":(interfaces.count?@"partial":@"connecting");
         self->_error=interfaces.count==self->_originals.count?nil:@"Assigned VPN unavailable: its applications are blocked";
         if(Clock()-self->_started>60 && !interfaces.count){[self fail:@"No assigned VPN connected; restoring originals"];}

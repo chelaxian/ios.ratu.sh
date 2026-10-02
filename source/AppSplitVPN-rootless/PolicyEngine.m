@@ -24,17 +24,12 @@
     NEPolicySession *candidate=[NSClassFromString(@"NEPolicySession") new];candidate.priority=1;
     NSMutableArray *unresolved=[NSMutableArray array];NSUInteger count=0;
     [NSClassFromString(@"NEProcessInfo") clearUUIDCache];
-    // Provider transports must reach their servers directly, never another assigned tunnel.
-    NSMutableSet *providerUUIDs=[NSMutableSet set];
-    for(NSString *provider in providers)for(NSUUID *uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:provider uid:501]) {
-        if(![uuid isKindOfClass:NSUUID.class] || [providerUUIDs containsObject:uuid])continue;
-        [providerUUIDs addObject:uuid];
-        // iOS 17 exposes realApplication: but rejects it in this policy session.
-        // Never infer support from selector presence. Use the accepted effective
-        // executable identity plus Apple's native provider transport exclusions.
-        id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:10 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
-        if(![candidate addPolicy:p]){if(error)*error=@"Provider transport exception rejected";return NO;}count++;
-    }
+    // Do not override Apple's native provider transport attribution with an
+    // effectiveApplication DIRECT rule: it changes native flow attribution. The
+    // ordinary DIRECT fallback below covers nonassigned transport processes;
+    // assigned flows SKIP into Apple's per-app socket/DNS policies. The working
+    // research prototype had no accepted provider-specific policies either.
+    (void)providers;
     for(NSUUID *uuid in self.selfUUIDs) {
         id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:20 result:[result skipWithOrder:0] conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
         if(![candidate addPolicy:p]){if(error)*error=@"Supervisor exception rejected";return NO;}count++;
