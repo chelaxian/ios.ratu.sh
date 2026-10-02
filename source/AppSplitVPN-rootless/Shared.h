@@ -29,11 +29,11 @@ static inline BOOL ASVIsMultiMode(NSDictionary *prefs) {
     return [prefs[@"mode"] isEqual:@"multiVPN"];
 }
 static inline BOOL ASVExtraOptionActive(NSDictionary *prefs, NSString *key) {
-    return !ASVIsMultiMode(prefs) && [prefs[key] boolValue];
+    return [prefs[@"enabled"] boolValue] && !ASVIsMultiMode(prefs) && [prefs[key] boolValue];
 }
 
 // Extra options (0.3.0). They act on the system VPN selected in iOS Settings and
-// work independently of the split-routing switch.
+// are all gated by the global Enable switch; their preferences remain saved.
 #define ASV_EXTRA_STATE @"/var/mobile/Library/Preferences/com.ratush.appsplitvpn.extra.plist"
 #define ASV_EXTRA_NOTIFY "com.ratush.appsplitvpn.extra.changed"
 // Event journal of the extra options (newest last) and the request to clear it.

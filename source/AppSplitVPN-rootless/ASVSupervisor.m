@@ -18,6 +18,7 @@
 #import <sys/stat.h>
 #import <unistd.h>
 #import <uuid/uuid.h>
+#import <stdatomic.h>
 
 typedef void *ASVNESession;
 static ASVNESession (*neCreate)(const unsigned char *,int);
@@ -63,7 +64,24 @@ static NSTimeInterval connectDeadline;
 static BOOL lastAutomation;
 static struct timespec prefsStamp;
 static BOOL transactionPaused;
+static BOOL masterEnabled, masterKnown;
+static NSTimeInterval Now(void);
+static NSUInteger automationGeneration;
+static _Atomic unsigned long probeGeneration;
+static dispatch_block_t cancelProbe;
 void ASVSupervisorSetTransactionPaused(BOOL paused){transactionPaused=paused;}
+void ASVSupervisorSetEnabled(BOOL enabled){
+    if(masterKnown && masterEnabled==enabled)return;
+    masterEnabled=enabled;masterKnown=YES;
+    if(enabled){lockedAt=[NSDate date].timeIntervalSince1970;dirty=YES;return;}
+    ++automationGeneration;atomic_fetch_add(&probeGeneration,1);
+    if(cancelProbe){cancelProbe();cancelProbe=nil;}
+    probing=NO;statusPending=NO;profileStarting=NO;pendingReserve=nil;pinnedProfile=nil;
+    connectDeadline=0;lsStoppedUUID=nil;mediaHeld=NO;mediaKnown=NO;mediaPending=NO;++mediaGeneration;lastConfigLoad=0;
+    recovery=(ASVRecovery){0};[failedReserves removeAllObjects];lastAutomation=NO;
+    healthFails=0;startFailures=0;healthText=nil;nextHealth=Now()+30;nextStartAllowed=Now()+3;
+    dirty=YES;
+}
 
 static NSTimeInterval Now(void) { return [NSDate date].timeIntervalSince1970; }
 static id Send(id object,NSString *name) {
@@ -138,6 +156,8 @@ static ASVNESession SessionFor(NSUUID *uuid) {
     return session;
 }
 static BOOL Control(NSUUID *uuid,BOOL start) {
+    NSDictionary *prefs=Prefs();
+    if(!masterEnabled || transactionPaused || ![prefs[@"enabled"] boolValue] || ASVIsMultiMode(prefs))return NO;
     ASVNESession target=SessionFor(uuid);
     void (*action)(ASVNESession)=start ? neStart : neStop;
     if (!target || !action) return NO;
@@ -256,10 +276,11 @@ static uint16_t Checksum(const void *data,size_t length) {
     while (sum>>16) sum=(sum&0xFFFF)+(sum>>16);
     return (uint16_t)~sum;
 }
-static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout) {
+static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout,unsigned long generation) {
     struct addrinfo hints={0},*result=NULL;
     hints.ai_family=tunnel.family;hints.ai_socktype=SOCK_DGRAM;
     if (getaddrinfo(host.UTF8String,NULL,&hints,&result)!=0 || !result) return @"dns";
+    if(generation!=atomic_load(&probeGeneration)){freeaddrinfo(result);return @"Cancelled";}
     BOOL v4=tunnel.family==AF_INET;
     int fd=socket(tunnel.family,SOCK_DGRAM,v4?IPPROTO_ICMP:IPPROTO_ICMPV6);
     if (fd<0) { freeaddrinfo(result);return @"socket"; }
@@ -269,7 +290,7 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout) {
     NSString *reason=@"timeout";
     // Tunnels often answer ICMP slowly and drop some echoes: four tries, 2.5 s each.
     NSTimeInterval totalDeadline=Now()+timeout;
-    for (uint16_t seq=1;seq<=4 && Now()<totalDeadline;seq++) {
+    for (uint16_t seq=1;seq<=4 && Now()<totalDeadline && generation==atomic_load(&probeGeneration);seq++) {
         uint8_t packet[24]={0};
         packet[0]=v4?ICMP_ECHO:ICMP6_ECHO_REQUEST;
         memcpy(packet+4,&ident,2);
@@ -278,9 +299,10 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout) {
         if (v4) { uint16_t sum=Checksum(packet,sizeof packet);memcpy(packet+2,&sum,2); }
         if (sendto(fd,packet,sizeof packet,0,result->ai_addr,result->ai_addrlen)<0) { reason=@"send";continue; }
         NSTimeInterval deadline=MIN(totalDeadline,Now()+MAX(0.25,timeout/4.0));
-        while (Now()<deadline) {
+        while (Now()<deadline && generation==atomic_load(&probeGeneration)) {
             struct pollfd poller={fd,POLLIN,0};
-            if (poll(&poller,1,(int)MAX(1,(deadline-Now())*1000))<=0) break;
+            int ready=poll(&poller,1,(int)MIN(100,MAX(1,(deadline-Now())*1000)));
+            if(ready<0)break;if(ready==0)continue;
             uint8_t reply[512];
             ssize_t length=recv(fd,reply,sizeof reply,0);
             if (length<8) continue;
@@ -294,6 +316,7 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout) {
     return reason;
 }
 static void Probe(NSString *method,NSString *host,NSInteger port,NSInteger timeout,ASVTunnel tunnel,ASVProbeDone done) {
+    unsigned long generation=atomic_load(&probeGeneration);
     dispatch_queue_t queue=ProbeQueue();
     CFAbsoluteTime start=CFAbsoluteTimeGetCurrent();
     __block BOOL finished=NO;
@@ -307,7 +330,7 @@ static void Probe(NSString *method,NSString *host,NSInteger port,NSInteger timeo
         dispatch_async(dispatch_get_main_queue(),^{ done(reason==nil,ms,reason); });
     };
     if ([method isEqual:@"ping"]) {
-        dispatch_async(queue,^{ finish(Ping(host,tunnel,timeout)); });
+        dispatch_async(queue,^{ finish(Ping(host,tunnel,timeout,generation)); });
         return;
     }
     BOOL tls=[method isEqual:@"https"], http=tls || [method isEqual:@"http"];
@@ -319,8 +342,10 @@ static void Probe(NSString *method,NSString *host,NSInteger port,NSInteger timeo
     if (ip) nw_ip_options_set_version(ip,tunnel.family==AF_INET6?nw_ip_version_6:nw_ip_version_4);
     connection=nw_connection_create(nw_endpoint_create_host(host.UTF8String,[NSString stringWithFormat:@"%ld",(long)port].UTF8String),parameters);
     nw_connection_t current=connection;
+    cancelProbe=^{dispatch_async(queue,^{finish(@"Cancelled");});};
     nw_connection_set_queue(current,queue);
     nw_connection_set_state_changed_handler(current,^(nw_connection_state_t state,nw_error_t error){
+        if(generation!=atomic_load(&probeGeneration)){finish(@"Cancelled");return;}
         if (state==nw_connection_state_failed) finish(error?[NSString stringWithFormat:@"error %d",nw_error_get_error_code(error)]:@"failed");
         else if (state==nw_connection_state_waiting) finish(@"no route");
         else if (state==nw_connection_state_ready) {
@@ -345,6 +370,7 @@ static void Probe(NSString *method,NSString *host,NSInteger port,NSInteger timeo
 #pragma mark - Supervisor
 
 static void CircuitOpen(BOOL reserves,NSString *reason) {
+    if(!masterEnabled || ![Prefs()[@"enabled"] boolValue])return;
     NSMutableDictionary *prefs=[Prefs() mutableCopy];prefs[ASV_ALWAYS_ON]=@NO;prefs[ASV_REDUNDANCY]=@NO;
     if(!reserves)prefs[ASV_HEALTH]=@NO;
     if([prefs writeToFile:ASV_PREFS atomically:YES]) { chown(ASV_PREFS.UTF8String,501,501);chmod(ASV_PREFS.UTF8String,0644);prefsCache=nil;notify_post(ASV_NOTIFY); }
@@ -368,13 +394,14 @@ static void FailedCycle(NSString *reason) {
     } else if(exhausted && [prefs[ASV_ALWAYS_ON] boolValue]) CircuitOpen(NO,reason ?: @"No successful health check in consecutive recovery cycles");
 }
 static void StartReservedProfile(void) {
+    NSUInteger generation=automationGeneration;
     NSString *uuid=pendingReserve;pendingReserve=nil;profileStarting=YES;pinnedProfile=uuid;
     NSDictionary *snapshot=Prefs();
     NSString *mode=[snapshot[@"mode"] copy];
     NSArray *reserves=[snapshot[ASV_RESERVES] copy];
     BOOL (^valid)(void)=^BOOL{
         NSDictionary *current=Prefs();
-        return !transactionPaused && !circuitLatched && !ASVIsMultiMode(current) &&
+        return generation==automationGeneration && masterEnabled && !transactionPaused && !circuitLatched && !ASVIsMultiMode(current) &&
             [current[@"mode"] isEqual:mode] &&
             [current[ASV_RESERVES] isEqual:reserves] &&
             ASVExtraOptionActive(current,ASV_REDUNDANCY) &&
@@ -382,6 +409,7 @@ static void StartReservedProfile(void) {
             ASVExtraOptionActive(current,ASV_HEALTH) && !Suspended(current);
     };
     ASVProfileConnect(uuid,valid,^(BOOL ok,NSString *error){
+        if(generation!=automationGeneration)return;
         if(!valid() || [error isEqual:@"Cancelled"]){profileStarting=NO;pinnedProfile=nil;dirty=YES;return;}
         profileStarting=NO;configUUID=[[NSUUID alloc] initWithUUIDString:uuid];configName=ASVProfileRecord(uuid)[@"name"];configApp=ASVProfileRecord(uuid)[@"owner"];
         vpnStatus=ok?2:1;wasActive=NO;activeSince=0;downSince=Now();healthText=nil;lastStatusPoll=0;dirty=YES;
@@ -391,6 +419,7 @@ static void StartReservedProfile(void) {
 }
 
 static void RunHealth(NSDictionary *prefs) {
+    NSUInteger generation=automationGeneration;
     NSInteger interval=ASVIntSetting(prefs,ASV_HC_INTERVAL,ASV_DEFAULT_HC_INTERVAL,10,3600);
     if (!HasPhysicalNetwork()) { healthText=@"nonet";nextHealth=Now()+interval;dirty=YES;return; }
     ASVTunnel tunnel=FindTunnel();
@@ -400,7 +429,8 @@ static void RunHealth(NSDictionary *prefs) {
     NSTimeInterval session=activeSince;
     NSUUID *target=configUUID;
     Probe(ASVHealthMethod(prefs),ASVHealthTarget(prefs),ASVHealthPort(prefs),ASVIntSetting(prefs,ASV_HC_TIMEOUT,15,1,120),tunnel,^(BOOL ok,NSInteger ms,NSString *reason){
-        probing=NO;
+        if(generation!=automationGeneration)return;
+        probing=NO;cancelProbe=nil;
         if (transactionPaused || !VPNActive() || session!=activeSince || ![target isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_HEALTH)) return;
         dirty=YES;
         if (ok) {
@@ -426,13 +456,15 @@ static void LockChanged(BOOL nowLocked) {
     locked=nowLocked;
     mediaKnown=NO;mediaPending=NO;mediaPollAt=0;++mediaGeneration;
     dirty=YES;
+    NSDictionary *prefs=Prefs();
+    ASVSupervisorSetEnabled([prefs[@"enabled"] boolValue]);
+    if(!masterEnabled || transactionPaused || ASVIsMultiMode(prefs))return;
     Event(locked?@"lock":@"unlock",nil);
-    if(transactionPaused || ASVIsMultiMode(Prefs()))return;
     if (locked) { lockedAt=Now();return; }
     if (lsStoppedUUID) {
         NSUUID *uuid=lsStoppedUUID;
         lsStoppedUUID=nil;
-        if (!VPNActive() && Control(uuid,YES)) Event(@"lsStart",nil);
+        if (ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT) && !VPNActive() && Control(uuid,YES)) Event(@"lsStart",nil);
         nextStartAllowed=Now()+15;
     }
     ASVSupervisorTick();
@@ -453,9 +485,16 @@ static void PollStatus(NSTimeInterval now) {
     });
 }
 void ASVSupervisorTick(void) {
-    if(transactionPaused)return;
     NSTimeInterval now=Now();
     NSDictionary *prefs=Prefs();
+    ASVSupervisorSetEnabled([prefs[@"enabled"] boolValue]);
+    if(!masterEnabled){
+        // Read-only status for Settings; no VPN control, probes or event monitoring.
+        if(now-lastConfigLoad>30 || !configUUID)LoadConfiguration();
+        BOOL active=VPNActive();if(wasActive!=active){wasActive=active;dirty=YES;}
+        PollStatus(now);WriteState();return;
+    }
+    if(transactionPaused)return;
     uint64_t uiLock=0;
     if(uiLockToken>=0 && notify_get_state(uiLockToken,&uiLock)==NOTIFY_STATUS_OK && (uiLock&2) && locked!=((uiLock&1)!=0)){
         LockChanged((uiLock&1)!=0);return;
@@ -506,9 +545,11 @@ void ASVSupervisorTick(void) {
         ASVNESession target=SessionFor(configUUID);
         if (target && neGetStatus) {
             NSUUID *uuid=configUUID;
+            NSUInteger generation=automationGeneration;
             statusPending=YES;
             statusRequestedAt=now;
             neGetStatus(target,dispatch_get_main_queue(),^(int status){
+                if(generation!=automationGeneration)return;
                 statusPending=NO;
                 if (transactionPaused || VPNActive() || circuitLatched || ![uuid isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON)) return;
                 if (status==ASVStatusConnecting || status==ASVStatusReasserting || status==ASVStatusDisconnecting) { nextStartAllowed=Now()+3;return; }
@@ -539,7 +580,7 @@ void ASVSupervisorStart(void) {
     recovery.cycles=[saved[@"failedCycles"] unsignedIntValue];recovery.healthy=[saved[@"cycleHealthy"] boolValue];
     failedReserves=[NSMutableSet setWithArray:[saved[@"failedReserves"] isKindOfClass:NSArray.class]?saved[@"failedReserves"]:@[]];
     pinnedProfile=[saved[@"pinnedProfile"] length]?saved[@"pinnedProfile"]:nil;circuitLatched=[saved[@"circuitLatched"] boolValue];
-    lastAutomation=[Prefs()[ASV_ALWAYS_ON] boolValue];
+    lastAutomation=ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON);
     ASVProfilesRefresh();
     events=[NSMutableArray array];
     NSArray *journal=[NSArray arrayWithContentsOfFile:ASV_EXTRA_LOG];
@@ -573,4 +614,5 @@ void ASVSupervisorStart(void) {
     if (wasActive) { activeSince=Now();nextHealth=activeSince+30; } else downSince=Now();
     if (locked) lockedAt=Now();
     else if (lsStoppedUUID) { locked=YES;LockChanged(NO); }
+    ASVSupervisorSetEnabled([Prefs()[@"enabled"] boolValue]);
 }

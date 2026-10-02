@@ -99,7 +99,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0"};
+@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.1"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -121,6 +121,7 @@ static void Reconcile(BOOL force) {
         NSDictionary *prefs = ReadPreferences();
         currentMode=prefs[@"mode"];
         badgeColor=[prefs[@"badgeColor"] boolValue];
+        ASVSupervisorSetEnabled([prefs[@"enabled"] boolValue]);
         BOOL multiMode=ASVIsMultiMode(prefs);
         [multi tickMatrix:prefs[ASV_MATRIX] enabled:multiMode && [prefs[@"enabled"] boolValue]];
         ASVSupervisorSetTransactionPaused(multiMode || multi.ownsProfiles || multi.busy);
@@ -187,7 +188,7 @@ int main(int argc,char **argv) { @autoreleasepool {
     int token;
     notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);ASVSupervisorTick();});
     int ipToken;
-    notify_register_dispatch(ASV_IP_REFRESH_NOTIFY,&ipToken,dispatch_get_main_queue(),^(__unused int t){if(!shuttingDown && ASVIsMultiMode(ReadPreferences()))[multi refreshPublicIPs];});
+    notify_register_dispatch(ASV_IP_REFRESH_NOTIFY,&ipToken,dispatch_get_main_queue(),^(__unused int t){NSDictionary *prefs=ReadPreferences();if(!shuttingDown && [prefs[@"enabled"] boolValue] && ASVIsMultiMode(prefs))[multi refreshPublicIPs];});
     int toggleToken;
     unlink(ASV_LOG.fileSystemRepresentation); // change log removed in 0.2.3
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){

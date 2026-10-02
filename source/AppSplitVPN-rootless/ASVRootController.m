@@ -212,6 +212,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSArray<NSString *> *_ip;     // @[address, optional country]
     BOOL _ipLoading;
     NSUInteger _ipToken;
+    NSURLSession *_ipSession;
     NSString *_ipRoute;           // VPN/mode state the IP was measured for
 }
 @end
@@ -244,6 +245,8 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 }
 - (void)fetchIP {
     _ipRoute=[self ipRoute];
+    [_ipSession invalidateAndCancel];_ipSession=nil;
+    if(![[self prefs][@"enabled"] boolValue]){++_ipToken;_ipLoading=NO;_ip=nil;[self refreshStatus];return;}
     if(ASVIsMultiMode([self prefs])){++_ipToken;_ipLoading=NO;_ip=nil;notify_post(ASV_IP_REFRESH_NOTIFY);[self refreshStatus];return;}
     _ipLoading=YES;
     NSUInteger token=++_ipToken;
@@ -255,18 +258,19 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     });
 }
 - (void)fetchIPFrom:(NSString *)service token:(NSUInteger)token fallback:(NSString *)fallback {
-    if (token!=_ipToken) return;
+    if (token!=_ipToken || ![[self prefs][@"enabled"] boolValue]) return;
     NSURLSessionConfiguration *configuration=[NSURLSessionConfiguration ephemeralSessionConfiguration];
     configuration.timeoutIntervalForRequest=8;configuration.timeoutIntervalForResource=10;
     configuration.requestCachePolicy=NSURLRequestReloadIgnoringLocalCacheData;
     NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];
+    _ipSession=session;
     __weak ASVRootController *weakSelf=self;
     [[session dataTaskWithURL:[NSURL URLWithString:service] completionHandler:^(NSData *data,NSURLResponse *response,NSError *error){
         NSInteger code=[response isKindOfClass:NSHTTPURLResponse.class]?((NSHTTPURLResponse *)response).statusCode:0;
         NSArray *parsed=(!error && code<400)?ASVParseIP(data):nil;
         dispatch_async(dispatch_get_main_queue(),^{
             ASVRootController *controller=weakSelf;
-            if (!controller || token!=controller->_ipToken) return;
+            if (!controller || token!=controller->_ipToken || ![[controller prefs][@"enabled"] boolValue]) return;
             if (!parsed && fallback) { [controller fetchIPFrom:fallback token:token fallback:nil];return; }
             controller->_ipLoading=NO;
             controller->_ip=parsed;
@@ -317,7 +321,8 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     void (^line)(NSString *,NSString *,UIColor *)=^(NSString *label,NSString *value,UIColor *color){ ASVTerminalLine(text,label,value,color,15); };
     line(L(@"Tweak:",@"Твик:"),enabled?L(@"enabled",@"включён"):L(@"disabled",@"выключен"),enabled?green:red);
     BOOL down=[@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
-    NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):([code isEqual:@"disabled"]?L(@"not used",@"не используется"):L(@"connected",@"подключён"));
+    NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):L(@"connected",@"подключён");
+    if(!enabled){BOOL active=[[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE][@"vpnActive"] boolValue];down=!active;vpnState=active?L(@"connected",@"подключён"):L(@"not connected",@"не подключён");}
     if ([code isEqual:@"unavailable"] || [code isEqual:@"stopped"]) vpnState=L(@"service stopped",@"служба не запущена");
     if ([code isEqual:@"connecting"]) {vpnState=L(@"connecting",@"подключается");down=YES;}
     if ([code isEqual:@"recovering"]) {vpnState=L(@"restoring profiles",@"восстановление профилей");down=YES;}
@@ -348,7 +353,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSMutableArray *items=[NSMutableArray array];
     NSMutableArray *headers=[NSMutableArray array];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
-    [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check VPN Disconnect with their tuning, and the event log. They work with any VPN and independently of the Enable switch.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, «Всегда включать VPN» и «Отключать VPN по Health Check» с настройкой параметров, журнал событий. Работают с любым VPN и независимо от переключателя «Включить».")]];
+[headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check VPN Disconnect with their tuning, and the event log. Enable and the CC toggle globally stop all routing, VPN automation and checks. Saved options remain for the next activation.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, «Всегда включать VPN» и «Отключать VPN по Health Check» с настройкой параметров, журнал событий. «Включить» и кнопка CC глобально останавливают маршрутизацию, всю автоматику VPN и проверки. Настройки сохраняются до следующего включения.")]];
     [items addObject:[self setting:L(@"Enable",@"Включить") key:@"enabled" type:PSSwitchCell fallback:@NO detail:nil]];
     PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:ASVModeListController.class];
     if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass",@"multiVPN"] titles:@[@"TUNNEL ONLY",@"BYPASS",@"MULTI VPN"]];
@@ -581,6 +586,6 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     _statusTimer=[NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(updateStatusIfChanged) userInfo:nil repeats:YES];
 }
 - (void)viewWillDisappear:(BOOL)animated { [_statusTimer invalidate];_statusTimer=nil;[super viewWillDisappear:animated]; }
-- (void)dealloc { [_statusTimer invalidate]; }
+- (void)dealloc { [_statusTimer invalidate];[_ipSession invalidateAndCancel]; }
 @end
 

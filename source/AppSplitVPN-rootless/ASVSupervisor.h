@@ -4,6 +4,7 @@
 // session API as the system VPN switch, so it is independent of the VPN client.
 void ASVSupervisorStart(void);
 void ASVSupervisorTick(void);
+void ASVSupervisorSetEnabled(BOOL enabled);
 void ASVSupervisorSetTransactionPaused(BOOL paused);
 NSString *ASVSupervisorVPNName(void);
 
