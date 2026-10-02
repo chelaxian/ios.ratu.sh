@@ -1,8 +1,8 @@
 Package: com.ratush.appsplitvpn
 Name: App Split VPN
-Version: 0.4.0~beta8
+Version: 0.4.0
 Architecture: iphoneos-arm64
-Description: Per-app VPN/DIRECT routing through the active system VPN. Extra: disconnect VPN on lock screen, Always ON VPN, VPN health check, public IP with country flag. Package install range: iOS 15.0 - 26.0.1 (Dopamine rootless); runtime verified on iOS 17.0 only. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
+Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
 Maintainer: ratush
 Author: ratush
 Section: Tweaks

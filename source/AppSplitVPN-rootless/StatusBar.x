@@ -137,10 +137,9 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     }
     CGRect position=CGRectMake(CGRectGetMaxX(anchorFrame)+3,anchorFrame.origin.y-1,43,18);
     if(CGRectGetMaxX(position)>nextLeft-3){
-        // Dynamic Island leaves too little horizontal room. Keep the fallback
-        // inside the 54pt bar, below the signal row, without moving native items.
-        position=CGRectMake(MAX(3,MIN(CGRectGetMaxX(anchorFrame)-43,foreground.bounds.size.width-46)),
-            MAX(0,MIN(CGRectGetMaxY(anchorFrame)+2,foreground.bounds.size.height-16)),43,16);
+        // Follow native Dynamic Island/notch behavior: no separate second row.
+        // Expanded Control Center has room; compact bars may hide the badge.
+        [badge removeFromSuperview];return;
     }
     if (!badge) {
         badge=[[UILabel alloc] initWithFrame:position];badge.tag=ASVTunnelBadgeTag;

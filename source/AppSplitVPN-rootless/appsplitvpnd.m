@@ -99,7 +99,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta8"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
