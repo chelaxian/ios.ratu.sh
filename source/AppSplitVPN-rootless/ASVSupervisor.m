@@ -62,6 +62,8 @@ static BOOL profileStarting, circuitLatched;
 static NSTimeInterval connectDeadline;
 static BOOL lastAutomation;
 static struct timespec prefsStamp;
+static BOOL transactionPaused;
+void ASVSupervisorSetTransactionPaused(BOOL paused){transactionPaused=paused;}
 
 static NSTimeInterval Now(void) { return [NSDate date].timeIntervalSince1970; }
 static id Send(id object,NSString *name) {
@@ -372,7 +374,7 @@ static void StartReservedProfile(void) {
     NSArray *reserves=[snapshot[ASV_RESERVES] copy];
     BOOL (^valid)(void)=^BOOL{
         NSDictionary *current=Prefs();
-        return !circuitLatched && !ASVIsMultiMode(current) &&
+        return !transactionPaused && !circuitLatched && !ASVIsMultiMode(current) &&
             [current[@"mode"] isEqual:mode] &&
             [current[ASV_RESERVES] isEqual:reserves] &&
             ASVExtraOptionActive(current,ASV_REDUNDANCY) &&
@@ -399,7 +401,7 @@ static void RunHealth(NSDictionary *prefs) {
     NSUUID *target=configUUID;
     Probe(ASVHealthMethod(prefs),ASVHealthTarget(prefs),ASVHealthPort(prefs),ASVIntSetting(prefs,ASV_HC_TIMEOUT,15,1,120),tunnel,^(BOOL ok,NSInteger ms,NSString *reason){
         probing=NO;
-        if (!VPNActive() || session!=activeSince || ![target isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_HEALTH)) return;
+        if (transactionPaused || !VPNActive() || session!=activeSince || ![target isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_HEALTH)) return;
         dirty=YES;
         if (ok) {
             healthFails=0;healthText=[NSString stringWithFormat:@"ok:%ld",(long)ms];nextHealth=Now()+interval;
@@ -425,7 +427,7 @@ static void LockChanged(BOOL nowLocked) {
     mediaKnown=NO;mediaPending=NO;mediaPollAt=0;++mediaGeneration;
     dirty=YES;
     Event(locked?@"lock":@"unlock",nil);
-    if(ASVIsMultiMode(Prefs()))return;
+    if(transactionPaused || ASVIsMultiMode(Prefs()))return;
     if (locked) { lockedAt=Now();return; }
     if (lsStoppedUUID) {
         NSUUID *uuid=lsStoppedUUID;
@@ -451,6 +453,7 @@ static void PollStatus(NSTimeInterval now) {
     });
 }
 void ASVSupervisorTick(void) {
+    if(transactionPaused)return;
     NSTimeInterval now=Now();
     NSDictionary *prefs=Prefs();
     uint64_t uiLock=0;
@@ -507,7 +510,7 @@ void ASVSupervisorTick(void) {
             statusRequestedAt=now;
             neGetStatus(target,dispatch_get_main_queue(),^(int status){
                 statusPending=NO;
-                if (VPNActive() || circuitLatched || ![uuid isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON)) return;
+                if (transactionPaused || VPNActive() || circuitLatched || ![uuid isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON)) return;
                 if (status==ASVStatusConnecting || status==ASVStatusReasserting || status==ASVStatusDisconnecting) { nextStartAllowed=Now()+3;return; }
                 if (!Control(uuid,YES)) return;
                 startFailures++;

@@ -118,6 +118,7 @@ static void Reconcile(BOOL force) {
         badgeColor=[prefs[@"badgeColor"] boolValue];
         BOOL multiMode=ASVIsMultiMode(prefs);
         [multi tickMatrix:prefs[ASV_MATRIX] enabled:multiMode && [prefs[@"enabled"] boolValue]];
+        ASVSupervisorSetTransactionPaused(multiMode || multi.ownsProfiles || multi.busy);
         if(multiMode || multi.ownsProfiles || multi.busy){
             vpnName=multi.names;
             State(multiMode?multi.status:@"recovering",multi.error);
@@ -196,8 +197,8 @@ int main(int argc,char **argv) { @autoreleasepool {
     dispatch_source_set_event_handler(timer,^{if(!shuttingDown){Reconcile(NO);ASVSupervisorTick();}}); dispatch_resume(timer);
     signal(SIGTERM,SIG_IGN); signal(SIGINT,SIG_IGN);
     dispatch_source_t term=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGTERM,0,dispatch_get_main_queue());
-    dispatch_source_set_event_handler(term,^{if(shuttingDown)return;shuttingDown=YES;[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(term);
+    dispatch_source_set_event_handler(term,^{if(shuttingDown)return;shuttingDown=YES;ASVSupervisorSetTransactionPaused(YES);[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(term);
     dispatch_source_t interrupt=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGINT,0,dispatch_get_main_queue());
-    dispatch_source_set_event_handler(interrupt,^{if(shuttingDown)return;shuttingDown=YES;[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(interrupt);
+    dispatch_source_set_event_handler(interrupt,^{if(shuttingDown)return;shuttingDown=YES;ASVSupervisorSetTransactionPaused(YES);[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(interrupt);
     [[NSRunLoop mainRunLoop] run];
 } return 0; }
