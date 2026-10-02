@@ -21,13 +21,18 @@
 - (void)dealloc { [self clear]; }
 - (BOOL)replaceMatrix:(NSDictionary<NSString *,NSString *> *)matrix interfaces:(NSDictionary<NSString *,NSString *> *)interfaces providerIDs:(NSArray<NSString *> *)providers error:(NSString **)error {
     Class result=NSClassFromString(@"NEPolicyResult");
-    if(![NSClassFromString(@"NEPolicyCondition") respondsToSelector:@selector(realApplication:)]){if(error)*error=@"Provider identity API unavailable";return NO;}
     NEPolicySession *candidate=[NSClassFromString(@"NEPolicySession") new];candidate.priority=1;
     NSMutableArray *unresolved=[NSMutableArray array];NSUInteger count=0;
     [NSClassFromString(@"NEProcessInfo") clearUUIDCache];
     // Provider transports must reach their servers directly, never another assigned tunnel.
+    NSMutableSet *providerUUIDs=[NSMutableSet set];
     for(NSString *provider in providers)for(NSUUID *uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:provider uid:501]) {
-        id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:10 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") realApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+        if(![uuid isKindOfClass:NSUUID.class] || [providerUUIDs containsObject:uuid])continue;
+        [providerUUIDs addObject:uuid];
+        // iOS 17 exposes realApplication: but rejects it in this policy session.
+        // Never infer support from selector presence. Use the accepted effective
+        // executable identity plus Apple's native provider transport exclusions.
+        id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:10 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
         if(![candidate addPolicy:p]){if(error)*error=@"Provider transport exception rejected";return NO;}count++;
     }
     for(NSUUID *uuid in self.selfUUIDs) {
