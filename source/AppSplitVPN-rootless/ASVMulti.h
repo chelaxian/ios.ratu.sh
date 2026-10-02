@@ -5,6 +5,8 @@
 @property(readonly) NSString *status;
 @property(readonly) NSString *error;
 @property(readonly) NSString *names;
+@property(readonly) NSArray<NSDictionary *> *activeProfiles;
+- (void)refreshPublicIPs;
 - (instancetype)initWithEngine:(ASVPolicyEngine *)engine;
 - (void)tickMatrix:(NSDictionary *)matrix enabled:(BOOL)enabled;
 - (void)restoreWithCompletion:(void (^)(BOOL))completion;

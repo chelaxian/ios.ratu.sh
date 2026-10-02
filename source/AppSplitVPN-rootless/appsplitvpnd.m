@@ -91,21 +91,24 @@ static NSDictionary *ReadPreferences(void) {
     return validated;
 }
 static void State(NSString *status, NSString *error) {
-    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@|%d",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @"",badgeColor];
+    NSArray *profiles=ASVIsMultiMode(@{@"mode":currentMode ?: @""})?multi.activeProfiles:@[];
+    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@|%d|%@",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @"",badgeColor,profiles];
     NSTimeInterval now=[NSDate date].timeIntervalSince1970;
     BOOL changed=![lastState isEqual:fingerprint];
     if (!changed && now-lastStateWrite<30) return;
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta5"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta6"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
     if (splitToken < 0) notify_register_check(ASV_STATE_NOTIFY, &splitToken);
     // Bits 0-1: 0 inactive, 1 BYPASS, 2 TUNNEL ONLY. Bit 2: badge coloring switched off.
     uint64_t split=([status isEqual:@"active"] || [status isEqual:@"partial"]) ? (ASVIsMultiMode(@{@"mode":currentMode ?: @""}) ? 3 : ([currentMode isEqual:@"tunnelOnly"] ? 2 : 1)) : 0;
+    if(split==3 && !profiles.count)split=0;
     if (split && !badgeColor) split|=4;
+    if((split&3)==3)split|=((uint64_t)MIN(profiles.count,(NSUInteger)64)<<8);
     if (splitToken >= 0) notify_set_state(splitToken, split);
     if (changed) {
         notify_post(ASV_STATE_NOTIFY);
@@ -183,6 +186,8 @@ int main(int argc,char **argv) { @autoreleasepool {
     ASVSupervisorStart();
     int token;
     notify_register_dispatch(ASV_NOTIFY,&token,dispatch_get_main_queue(),^(int t){(void)t;Reconcile(YES);ASVSupervisorTick();});
+    int ipToken;
+    notify_register_dispatch(ASV_IP_REFRESH_NOTIFY,&ipToken,dispatch_get_main_queue(),^(__unused int t){if(!shuttingDown && ASVIsMultiMode(ReadPreferences()))[multi refreshPublicIPs];});
     int toggleToken;
     unlink(ASV_LOG.fileSystemRepresentation); // change log removed in 0.2.3
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){

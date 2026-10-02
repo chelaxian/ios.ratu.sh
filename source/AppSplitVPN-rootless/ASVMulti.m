@@ -1,6 +1,8 @@
 #import "ASVMulti.h"
 #import "Shared.h"
 #import "ASVProfiles.h"
+#import "ASVIPProbe.h"
+#import <net/if.h>
 #import <objc/message.h>
 #import <dlfcn.h>
 #import <notify.h>
@@ -50,13 +52,55 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     NSMutableDictionary *_connections,*_statuses;
     double _lastPoll,_started,_retry;
     NSUInteger _generation;
+    NSMutableDictionary *_publicIPs;
+    NSString *_ipService;
+    BOOL _ipBusy;
+    double _lastIPRefresh;
+    NSUInteger _ipEpoch;
 }
 - (BOOL)busy{return _busy;}
 - (BOOL)ownsProfiles{return _ownsProfiles || !_startupDone;}
 - (NSString *)status{return _status ?: @"waitingVPN";}
 - (NSString *)error{return _error;}
 - (NSString *)names{return _names ?: @"";}
-- (instancetype)initWithEngine:(ASVPolicyEngine *)engine{if((self=[super init])){_engine=engine;_status=@"recovering";_connections=[NSMutableDictionary dictionary];_statuses=[NSMutableDictionary dictionary];}return self;}
+- (NSArray<NSDictionary *> *)activeProfiles {
+    NSMutableArray *records=[NSMutableArray new];
+    if(_restoring || !_wanted)return records;
+    for(id c in _originals){NSString *uuid=[Get(c,@"identifier") UUIDString],*interface=_publishedInterfaces[uuid];if(!interface.length)continue;
+        NSString *owner=Get(c,@"application") ?: Get(Get(Get(c,@"VPN"),@"protocol"),@"providerBundleIdentifier");
+        NSDictionary *cached=_publicIPs[uuid];
+        BOOL valid=[cached[@"interface"] isEqual:interface] && [cached[@"index"] unsignedIntValue]==if_nametoindex(interface.UTF8String) && [cached[@"service"] isEqual:_ipService];
+        [records addObject:@{@"id":uuid,@"name":Get(c,@"name") ?: uuid,@"owner":owner ?: @"",@"interface":interface,
+            @"publicIP":valid?(cached[@"result"] ?: @[]):@[],@"ipError":valid?(cached[@"error"] ?: @""):@"",@"ipPending":@(!valid)}];
+    }return records;
+}
+- (void)refreshPublicIPs {
+    if(Clock()-_lastIPRefresh<5)return;_lastIPRefresh=Clock();++_ipEpoch;[_publicIPs removeAllObjects];[self probeNextIP];
+}
+- (void)probeNextIP {
+    if(_ipBusy || !_wanted || _busy || _restoring)return;
+    NSString *service=ASVIPService([NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] ?: @{});
+    if(![_ipService isEqual:service]){_ipService=service;++_ipEpoch;[_publicIPs removeAllObjects];}
+    NSDictionary *target=nil;for(NSDictionary *record in self.activeProfiles)if([record[@"ipPending"] boolValue]){target=record;break;}
+    if(!target)return;
+    _ipBusy=YES;NSUInteger generation=_generation,epoch=_ipEpoch;NSString *uuid=target[@"id"],*interface=target[@"interface"];unsigned index=if_nametoindex(interface.UTF8String);
+    NSString *application=nil;for(NSString *bundle in [_matrix.allKeys sortedArrayUsingSelector:@selector(compare:)])if([_matrix[bundle] isEqual:uuid]){application=bundle;break;}
+    void(^finish)(NSArray *,NSString *)=^(NSArray *result,NSString *error){
+        self->_ipBusy=NO;
+        if(generation==self->_generation && epoch==self->_ipEpoch && self->_wanted && !self->_restoring &&
+           [self->_publishedInterfaces[uuid] isEqual:interface] && if_nametoindex(interface.UTF8String)==index){
+            self->_publicIPs[uuid]=@{@"interface":interface,@"index":@(index),@"service":service,@"result":result ?: @[],@"error":error ?: @""};
+        }
+        [self probeNextIP];
+    };
+    ASVIPProbe(interface,application,service,^(NSArray *result,NSString *error){
+        if(!result && [service isEqual:ASV_DEFAULT_IP_SERVICE] && generation==self->_generation && epoch==self->_ipEpoch && self->_wanted && !self->_restoring){
+            // Numeric Cloudflare endpoint avoids a DNS dependency, keeping the same attribution and route verification.
+            ASVIPProbe(interface,application,@"https://1.1.1.1/cdn-cgi/trace",finish);
+        }else finish(result,error);
+    });
+}
+- (instancetype)initWithEngine:(ASVPolicyEngine *)engine{if((self=[super init])){_engine=engine;_status=@"recovering";_connections=[NSMutableDictionary dictionary];_statuses=[NSMutableDictionary dictionary];_publicIPs=[NSMutableDictionary dictionary];}return self;}
 - (void)load:(void(^)(NSArray *,NSError *))reply{
     id manager=Get(NSClassFromString(@"NEConfigurationManager"),@"sharedManager");SEL s=NSSelectorFromString(@"loadConfigurationsWithCompletionQueue:handler:");
     if(![manager respondsToSelector:s]){reply(nil,[NSError errorWithDomain:@"ASVMulti" code:1 userInfo:nil]);return;}
@@ -97,7 +141,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
         [self save:c reply:^(BOOL ok){if(!ok){_busy=NO;_restoring=NO;[self fail:@"MULTI profile restoration failed; backup retained"];completion(NO);return;}[self restoreIndex:index+1 completion:completion];}];return;
     }
     if(!Manifest(@[]) || !Remove(ArchiveName)){_busy=NO;_restoring=NO;[self fail:@"MULTI recovery cleanup failed"];completion(NO);return;}
-    [_engine clear];_publishedInterfaces=nil;_ownsProfiles=NO;_startupDone=YES;_matrix=nil;_originals=nil;_providers=nil;_names=nil;_busy=NO;_restoring=NO;_status=@"disabled";_error=nil;
+    [_engine clear];_publishedInterfaces=nil;++_ipEpoch;[_publicIPs removeAllObjects];_ownsProfiles=NO;_startupDone=YES;_matrix=nil;_originals=nil;_providers=nil;_names=nil;_busy=NO;_restoring=NO;_status=@"disabled";_error=nil;
     // Restore only sessions that were actually active before this transaction.
     void(*start)(void *)=dlsym(RTLD_DEFAULT,"ne_session_start");for(NSString *uuid in _activeBefore){void *s=Session(uuid,1);if(s && start)start(s);Release(s);}_activeBefore=nil;ASVProfilesRefresh();completion(YES);
 }
@@ -179,10 +223,13 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     dispatch_group_notify(group,dispatch_get_main_queue(),^{if(generation!=self->_generation || !self->_wanted)return;NSString *error=nil;
         if(![self->_publishedInterfaces isEqual:interfaces]){
             if(![self->_engine replaceMatrix:self->_matrix interfaces:interfaces providerIDs:self->_providers error:&error]){[self fail:error];return;}
+            ++self->_ipEpoch;
+            for(NSString *uuid in [self->_publicIPs.allKeys copy])if(![self->_publicIPs[uuid][@"interface"] isEqual:interfaces[uuid]])[self->_publicIPs removeObjectForKey:uuid];
             self->_publishedInterfaces=[interfaces copy];
         }
         self->_names=[names componentsJoinedByString:@" + "];self->_status=interfaces.count==self->_originals.count?@"active":(interfaces.count?@"partial":@"connecting");
         self->_error=interfaces.count==self->_originals.count?nil:@"Assigned VPN unavailable: its applications are blocked";
+        [self probeNextIP];
         if(Clock()-self->_started>60 && !interfaces.count){[self fail:@"No assigned VPN connected; restoring originals"];}
     });
 }

@@ -228,9 +228,9 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSDictionary *prefs=[self prefs];
     // Include the switch and mode so a change made from Control Center shows up here too.
     NSDictionary *extra=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
-    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@|%@|%@|%d|%lu",state[@"status"] ?: @"",state[@"error"] ?: @"",
+    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@|%@|%@|%d|%lu|%@",state[@"status"] ?: @"",state[@"error"] ?: @"",
         state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],state[@"vpnName"] ?: @"",state[@"mode"] ?: @"",stale,
-        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @"",extra[@"vpnName"] ?: @"",extra[@"vpnApp"] ?: @"",[extra[@"vpnActive"] boolValue],(unsigned long)[ASVExtraController enabledCount]];
+        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @"",extra[@"vpnName"] ?: @"",extra[@"vpnApp"] ?: @"",[extra[@"vpnActive"] boolValue],(unsigned long)[ASVExtraController enabledCount],state[@"activeProfiles"] ?: @[]];
 }
 - (void)updateStatusIfChanged {
     if (![_statusFingerprint isEqualToString:[self statusFingerprint]]) [self refreshStatus];
@@ -244,6 +244,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 }
 - (void)fetchIP {
     _ipRoute=[self ipRoute];
+    if(ASVIsMultiMode([self prefs])){++_ipToken;_ipLoading=NO;_ip=nil;notify_post(ASV_IP_REFRESH_NOTIFY);[self refreshStatus];return;}
     _ipLoading=YES;
     NSUInteger token=++_ipToken;
     NSString *service=ASVIPService([self prefs]);
@@ -328,7 +329,17 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if(!tunnel && !multi)line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
     if(multi)line(@"VPN MATRIX:",[NSString stringWithFormat:@"%lu",(unsigned long)[self countFor:ASV_MATRIX]],UIColor.systemBlueColor);
     NSString *ip=_ipLoading?@"…":(_ip.count?[NSString stringWithFormat:@"%@ %@",_ip[0],_ip.count>1?ASVFlag(_ip[1]):@""]:@"—");
-    line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
+    if(multi){
+        NSArray *profiles=[state[@"activeProfiles"] isKindOfClass:NSArray.class]?state[@"activeProfiles"]:@[];
+        line(L(@"Active VPNs:",@"Активных VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)profiles.count],UIColor.systemBlueColor);
+        for(NSDictionary *profile in profiles){
+            NSArray *address=[profile[@"publicIP"] isKindOfClass:NSArray.class]?profile[@"publicIP"]:@[];
+            NSString *value=address.count?[NSString stringWithFormat:@"%@ %@",address[0],address.count>1?ASVFlag(address[1]):@""]:([profile[@"ipPending"] boolValue]?@"…":L(@"unavailable",@"недоступен"));
+            // Profile names may be long: put the address on its own line, never truncate it.
+            ASVTerminalLine(text,@"",profile[@"name"] ?: @"VPN",UIColor.systemBlueColor,0);
+            line(L(@"Public IP:",@"Белый IP:"),value,address.count?UIColor.whiteColor:gray);
+        }
+    }else line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
     return text;
 }
@@ -344,7 +355,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     else [mode setProperty:@NO forKey:@"enabled"];
     [mode setProperty:@YES forKey:@"asvMode"];
     [items addObject:mode];
-    [items addObject:[self setting:L(@"Colored VPN½ badge",@"Цветной значок VPN½") key:@"badgeColor" type:PSSwitchCell fallback:@YES detail:nil]];
+    [items addObject:[self setting:L(@"Colored VPN badge",@"Цветной значок VPN") key:@"badgeColor" type:PSSwitchCell fallback:@YES detail:nil]];
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
@@ -384,20 +395,31 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSDictionary *extraState=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
     // The supervisor tracks the profile selected in iOS; fall back to the split service's view.
     BOOL extraFresh=!ASVIsMultiMode([self prefs]) && extraState && [NSDate date].timeIntervalSince1970-[extraState[@"updated"] doubleValue]<3600;
-    NSString *vpnName=[extraState[@"vpnName"] length]?extraState[@"vpnName"]:state[@"vpnName"];
+    NSString *vpnName=extraFresh && [extraState[@"vpnName"] length]?extraState[@"vpnName"]:state[@"vpnName"];
     BOOL vpnUp=extraFresh?[extraState[@"vpnActive"] boolValue]:![@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"Active VPN",@"Активный VPN"),L(@"The VPN profile selected in iOS Settings and the icon of the app it belongs to. Built-in iOS VPN profiles (IKEv2, IPsec) have no app and show a shield.",@"Профиль VPN, выбранный в настройках iOS, и иконка приложения, которому он принадлежит. У встроенных профилей iOS (IKEv2, IPsec) приложения нет — для них показывается щит.")]];
+    if(ASVIsMultiMode([self prefs]))headers[headers.count-1]=@[headers.lastObject[0],L(@"All connected MULTI profiles, with the icon of each VPN app. The badge VPN:N counts connected profiles, not assigned apps.",@"Все подключённые профили MULTI с иконками их VPN-приложений. Значок VPN:N считает подключённые профили, не назначенные приложения.")];
+    NSArray *activeProfiles=ASVIsMultiMode([self prefs]) && [state[@"activeProfiles"] isKindOfClass:NSArray.class]?state[@"activeProfiles"]:@[];
+    if(ASVIsMultiMode([self prefs])){
+        for(NSDictionary *profile in activeProfiles){
+            PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:profile[@"name"] target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+            [active setProperty:@"green" forKey:@"asvDot"];[active setProperty:profile[@"owner"] forKey:@"asvApp"];[items addObject:active];
+        }
+        if(!activeProfiles.count)[items addObject:[PSSpecifier preferenceSpecifierNamed:L(@"Not connected",@"Не подключён") target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];
+    }else{
     NSString *activeName=vpnUp?(vpnName.length?vpnName:L(@"Connected",@"Подключён")):L(@"Not connected",@"Не подключён");
     PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:activeName target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [active setProperty:vpnUp?@"green":@"gray" forKey:@"asvDot"];
     if ([extraState[@"vpnApp"] length]) [active setProperty:extraState[@"vpnApp"] forKey:@"asvApp"];
     [items addObject:active];
+    }
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[[NSString stringWithFormat:@"%@ %@",healthy?@"🟢":@"🔴",L(@"Status",@"Статус")],L(@"NECP rules: one system rule per executable, i.e. the app itself plus each of its extensions (widgets, share, notifications, keyboards). That is why there are more rules than apps. Offloaded and deleted apps get no rule until they are installed again.\n\nPublic IP: the address and country with which the Settings app reaches the Internet, so with BYPASS it is usually the VPN address and with TUNNEL ONLY the direct one. It is checked when this page opens and when the VPN or mode changes; the service is set in Extra → Tuning.\n\nThe routing log shows the current route of every app in the active list and updates automatically.",@"Правил NECP: одно системное правило на каждый исполняемый файл — само приложение плюс каждое его расширение (виджеты, «Поделиться», уведомления, клавиатуры). Поэтому правил больше, чем приложений. Выгруженные и удалённые приложения не получают правил до повторной установки.\n\nБелый IP — адрес и страна, с которыми выходит в интернет приложение «Настройки»: при BYPASS это обычно адрес VPN, при TUNNEL ONLY — прямой. Проверяется при открытии страницы и при смене VPN или режима; сервис задаётся в «Дополнительно → Тюнинг».\n\nЖурнал маршрутизации показывает текущий маршрут каждого приложения из активного списка и обновляется автоматически.")]];
     PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
+    if(ASVIsMultiMode([self prefs]))headers[headers.count-1]=@[headers.lastObject[0],L(@"NECP rules count executable identities, including app extensions.\n\nMULTI public IP is checked separately through each connected profile using an assigned app's native routing policy. The connection's local address must match that profile's tunnel; otherwise it is shown as unavailable. Checks run on connection, page opening and Refresh status, not continuously. The default service has a numeric Cloudflare fallback if DNS is unavailable.",@"Правила NECP считают исполняемые файлы, включая расширения приложений.\n\nВ MULTI белый IP проверяется отдельно через каждый подключённый профиль по штатным правилам назначенного приложения. Локальный адрес соединения должен соответствовать туннелю профиля; иначе показывается «недоступен». Проверки выполняются при подключении, открытии страницы и нажатии «Обновить статус», не постоянно. Для стандартного сервиса есть резервный числовой адрес Cloudflare, если DNS недоступен.")];
     [items addObject:[self button:L(@"Refresh status",@"Обновить статус") action:@selector(fetchIP)]];
     [items addObject:[self button:L(@"Routing log",@"Журнал маршрутизации") action:@selector(openRouteLog)]];
     _headers=[headers copy];

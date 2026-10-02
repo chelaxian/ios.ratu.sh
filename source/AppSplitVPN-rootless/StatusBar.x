@@ -9,6 +9,7 @@
 
 static uint64_t splitMode; // 0: inactive, 1: BYPASS, 2: TUNNEL ONLY
 static BOOL colorOff;      // user switched the badge coloring off
+static NSUInteger activeCount;
 static NSHashTable<UILabel *> *badges;
 static NSHashTable<UIView *> *statusBars;
 static NSString *const ASVBadgeText = @"VPN½";
@@ -17,8 +18,9 @@ static const NSInteger ASVTunnelBadgeTag=0x41535650;
 static BOOL ASVApplyingColor;
 
 static BOOL ASVIsVPNText(NSString *text) {
-    return [text isEqualToString:@"VPN"] || [text isEqualToString:ASVBadgeText];
+    return [text isEqualToString:@"VPN"] || [text isEqualToString:ASVBadgeText] || [text hasPrefix:@"VPN:"];
 }
+static NSString *ASVCurrentText(void){return splitMode==3?[NSString stringWithFormat:@"VPN:%lu",(unsigned long)activeCount]:ASVBadgeText;}
 
 // Color the badge should have now; nil keeps whatever the system asked for.
 static UIColor *ASVWantedColor(UILabel *label) {
@@ -35,6 +37,7 @@ static uint64_t ASVReadState(BOOL *noColor) {
     uint64_t value = 0;
     notify_get_state(token, &value);
     *noColor=(value & 4)!=0;
+    activeCount=(NSUInteger)((value>>8)&127);
     value&=3;
     return value;
 }
@@ -55,12 +58,12 @@ static void ASVStyleNativeBadge(UILabel *label) {
 }
 
 static NSString *ASVBadge(UILabel *label, NSString *text) {
-    if (![text isEqualToString:@"VPN"] && ![text isEqualToString:ASVBadgeText]) {
+    if (!ASVIsVPNText(text)) {
         [badges removeObject:label];
         return text;
     }
     [badges addObject:label];
-    return splitMode ? ASVBadgeText : @"VPN";
+    return splitMode ? ASVCurrentText() : @"VPN";
 }
 
 static UIView *ASVFindAnchor(UIView *view, Class wanted) {
@@ -70,6 +73,12 @@ static UIView *ASVFindAnchor(UIView *view, Class wanted) {
         if (found) return found;
     }
     return nil;
+}
+static BOOL ASVHasNativeBadge(UIView *view){
+    if(view.hidden || view.alpha<0.01)return NO;
+    if(view.tag!=ASVTunnelBadgeTag && [view isKindOfClass:UILabel.class] && ASVIsVPNText(((UILabel *)view).text))return YES;
+    for(UIView *child in view.subviews)if(ASVHasNativeBadge(child))return YES;
+    return NO;
 }
 
 // Neutral badge color when coloring is off: follow the clock's current tint.
@@ -92,6 +101,8 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     if (!foreground) return;
     UILabel *badge=(UILabel *)[foreground viewWithTag:ASVTunnelBadgeTag];
     if (splitMode!=2 && splitMode!=3) { [badge removeFromSuperview];return; }
+    // Never add a second indicator when the system is already rendering one.
+    if(ASVHasNativeBadge(foreground)){[badge removeFromSuperview];return;}
     Class wifiClass=NSClassFromString(@"STUIStatusBarWifiSignalView");
     Class cellularClass=NSClassFromString(@"STUIStatusBarCellularSignalView");
     UIView *anchor=wifiClass?ASVFindAnchor(foreground,wifiClass):nil;
@@ -104,12 +115,13 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     CGRect position=[row convertRect:CGRectMake(right+3,anchor.frame.origin.y-1,43,18) toView:foreground];
     if (!badge) {
         badge=[[UILabel alloc] initWithFrame:position];badge.tag=ASVTunnelBadgeTag;
-        badge.text=ASVBadgeText;badge.font=[UIFont systemFontOfSize:10 weight:UIFontWeightSemibold];
+        badge.text=ASVCurrentText();badge.font=[UIFont systemFontOfSize:10 weight:UIFontWeightSemibold];
         badge.textAlignment=NSTextAlignmentCenter;badge.textColor=UIColor.systemGreenColor;
         badge.backgroundColor=UIColor.clearColor;badge.layer.cornerRadius=5;
         badge.layer.borderWidth=1.25;badge.layer.borderColor=UIColor.systemGreenColor.CGColor;
         badge.userInteractionEnabled=NO;[foreground addSubview:badge];
     } else badge.frame=position;
+    badge.text=ASVCurrentText();
     UIColor *tint=colorOff?ASVNeutralColor(foreground):(splitMode==3?UIColor.systemBlueColor:UIColor.systemGreenColor);
     if (![badge.textColor isEqual:tint]) { badge.textColor=tint;badge.layer.borderColor=tint.CGColor; }
 }
@@ -173,8 +185,9 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     int token;
     notify_register_dispatch(ASV_STATE_NOTIFY, &token, dispatch_get_main_queue(), ^(__unused int t) {
         BOOL noColor=NO;
+        NSUInteger oldCount=activeCount;
         uint64_t now = ASVReadState(&noColor);
-        if (now == splitMode && noColor == colorOff) return;
+        if (now == splitMode && noColor == colorOff && oldCount==activeCount) return;
         splitMode = now;
         colorOff = noColor;
         for (UILabel *label in badges.allObjects) {
