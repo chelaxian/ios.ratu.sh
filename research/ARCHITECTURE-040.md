@@ -94,6 +94,18 @@ realApplication: не доказывает допустимость этого �
 Неизменившиеся NECP-правила больше не публикуются заново каждые три секунды.
 После смены профилей необходим полный выход и повторный запуск выбранных приложений.
 
+## Бюджет демона
+
+У тестового процесса launchd зафиксировал `JETSAM_REASON_MEMORY_PERPROCESSLIMIT`
+при лимите 6 МБ. Plist-варианты MemoryLimit и JetsamMemoryLimit на этой системе
+не поменяли фактический лимит, поэтому в пакете они не оставлены как фиктивный fix.
+Beta4 вызывает штатный memorystatus_control GET/SET_MEMLIMIT_PROPERTIES только
+для getpid(): 32 МБ, сохраняя fatal attributes и приоритет. Не меняет другие PID,
+системный jetsam database или VPN extension budgets. Повторный GET подтвердил
+32/32 на телефоне; memoryBudgetMB=32 записывается только для диагностики.
+ExitTimeOut=30 даёт время штатному восстановлению транзакции при остановке job.
+ABI: https://github.com/apple-oss-distributions/xnu/blob/xnu-10002.1.13/bsd/sys/kern_memorystatus.h
+
 ## Ограничения первого кандидата
 
 Неуправляемые PacketTunnel-профили, максимум 16 разных провайдеров.

@@ -1,6 +1,7 @@
 #import "PolicyEngine.h"
 #import "ASVSupervisor.h"
 #import "ASVMulti.h"
+#import "ASVMemoryBudget.h"
 #import "Shared.h"
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
@@ -24,6 +25,7 @@ static NSString *lastRouteFingerprint;
 static NSString *currentMode;
 static BOOL badgeColor=YES;
 static BOOL shuttingDown;
+static int memoryBudget;
 
 // Current routing table: a single block (no history) listing every selected app and its outcome.
 // Rewritten only when the effective rules change.
@@ -96,7 +98,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta3"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta4"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -163,6 +165,7 @@ static void SetEnabled(BOOL enabled) {
 }
 int main(int argc,char **argv) { @autoreleasepool {
     (void)argc; (void)argv;
+    memoryBudget=ASVConfigureOwnMemoryBudget();
     dlopen("/System/Library/Frameworks/NetworkExtension.framework/NetworkExtension",RTLD_NOW);
     dlopen("/System/Library/Frameworks/CoreServices.framework/CoreServices",RTLD_NOW);
     void *library=dlopen("/usr/lib/system/libsystem_networkextension.dylib",RTLD_NOW);
