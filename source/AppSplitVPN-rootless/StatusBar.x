@@ -122,11 +122,22 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     UIView *anchor=wifiClass?ASVFindAnchor(foreground,wifiClass):nil;
     if (!anchor && cellularClass) anchor=ASVFindAnchor(foreground,cellularClass);
     if (!anchor || !anchor.superview) return;
-    UIView *row=anchor.superview;
-    CGFloat right=CGRectGetMaxX(anchor.frame);
-    for (UIView *sibling in row.subviews)
-        if (sibling!=badge && !sibling.hidden) right=MAX(right,CGRectGetMaxX(sibling.frame));
-    CGRect position=[row convertRect:CGRectMake(right+3,anchor.frame.origin.y-1,43,18) toView:foreground];
+    CGRect anchorFrame=[anchor.superview convertRect:anchor.frame toView:foreground];
+    CGFloat nextLeft=CGRectGetMaxX(foreground.bounds)-3;
+    // Ignore decorative backdrop/avoidance views: their frames span the screen.
+    for(UIView *sibling in foreground.subviews){
+        NSString *name=NSStringFromClass(sibling.class);
+        if(sibling==badge || sibling==anchor || sibling.hidden || sibling.alpha<0.01 ||
+           (![name hasPrefix:@"STUIStatusBar"] && ![name hasPrefix:@"_UIStatusBar"]))continue;
+        if(CGRectGetMinX(sibling.frame)>=CGRectGetMaxX(anchorFrame)-1)nextLeft=MIN(nextLeft,CGRectGetMinX(sibling.frame));
+    }
+    CGRect position=CGRectMake(CGRectGetMaxX(anchorFrame)+3,anchorFrame.origin.y-1,43,18);
+    if(CGRectGetMaxX(position)>nextLeft-3){
+        // Dynamic Island leaves too little horizontal room. Keep the fallback
+        // inside the 54pt bar, below the signal row, without moving native items.
+        position=CGRectMake(MAX(3,MIN(CGRectGetMaxX(anchorFrame)-43,foreground.bounds.size.width-46)),
+            MAX(0,MIN(CGRectGetMaxY(anchorFrame)+2,foreground.bounds.size.height-16)),43,16);
+    }
     if (!badge) {
         badge=[[UILabel alloc] initWithFrame:position];badge.tag=ASVTunnelBadgeTag;
         badge.text=ASVCurrentText();badge.font=[UIFont systemFontOfSize:10 weight:UIFontWeightSemibold];
@@ -135,6 +146,7 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
         badge.layer.borderWidth=1.25;badge.layer.borderColor=UIColor.systemGreenColor.CGColor;
         badge.userInteractionEnabled=NO;[foreground addSubview:badge];
     } else badge.frame=position;
+    badge.font=[UIFont systemFontOfSize:position.size.height<18?9:10 weight:UIFontWeightSemibold];
     badge.text=ASVCurrentText();
     UIColor *tint=colorOff?ASVNeutralColor(foreground):(splitMode==3?UIColor.systemBlueColor:UIColor.systemGreenColor);
     if (![badge.textColor isEqual:tint]) { badge.textColor=tint;badge.layer.borderColor=tint.CGColor; }
