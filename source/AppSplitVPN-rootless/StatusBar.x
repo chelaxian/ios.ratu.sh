@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <notify.h>
 #import <objc/runtime.h>
+#import <objc/message.h>
 #import "Shared.h"
 
 // In BYPASS, iOS keeps its VPN badge; in TUNNEL ONLY its system view is detached.
@@ -80,6 +81,19 @@ static BOOL ASVHasNativeBadge(UIView *view){
     for(UIView *child in view.subviews)if(ASVHasNativeBadge(child))return YES;
     return NO;
 }
+static BOOL ASVNativeVPNEnabled(UIView *statusBar){
+    // Native badges may be rasterized from a detached UILabel and have no view
+    // in the live hierarchy. Consult the bar's actual display data as well.
+    @try{
+        for(NSString *name in @[@"currentAggregatedData",@"currentData"]){
+            SEL getter=NSSelectorFromString(name);if(![statusBar respondsToSelector:getter])continue;
+            id data=((id(*)(id,SEL))objc_msgSend)(statusBar,getter);SEL entry=NSSelectorFromString(@"vpnEntry");
+            if(![data respondsToSelector:entry])continue;id vpn=((id(*)(id,SEL))objc_msgSend)(data,entry);
+            SEL enabled=NSSelectorFromString(@"isEnabled");if([vpn respondsToSelector:enabled] && ((BOOL(*)(id,SEL))objc_msgSend)(vpn,enabled))return YES;
+        }
+    }@catch(__unused NSException *exception){}
+    return NO;
+}
 
 // Neutral badge color when coloring is off: follow the clock's current tint.
 static UIColor *ASVNeutralColor(UIView *foreground) {
@@ -102,7 +116,7 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     UILabel *badge=(UILabel *)[foreground viewWithTag:ASVTunnelBadgeTag];
     if (splitMode!=2 && splitMode!=3) { [badge removeFromSuperview];return; }
     // Never add a second indicator when the system is already rendering one.
-    if(ASVHasNativeBadge(foreground)){[badge removeFromSuperview];return;}
+    if(ASVNativeVPNEnabled(statusBar) || ASVHasNativeBadge(statusBar)){[badge removeFromSuperview];return;}
     Class wifiClass=NSClassFromString(@"STUIStatusBarWifiSignalView");
     Class cellularClass=NSClassFromString(@"STUIStatusBarCellularSignalView");
     UIView *anchor=wifiClass?ASVFindAnchor(foreground,wifiClass):nil;
