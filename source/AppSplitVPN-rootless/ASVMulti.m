@@ -103,7 +103,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
 }
 - (void)begin:(NSDictionary *)matrix{
     if(!matrix.count){NSString *error=nil;BOOL ok=[_engine replaceMatrix:@{} interfaces:@{} providerIDs:@[] error:&error];_matrix=matrix;_status=ok?@"active":@"error";_error=error;return;}
-    if(matrix.count>2048 || [NSSet setWithArray:matrix.allValues].count>16){[self fail:@"MULTI assignment limit exceeded"];return;}
+    if(matrix.count>2048 || [NSSet setWithArray:matrix.allValues].count>64){[self fail:@"MULTI ownership manifest limit exceeded"];return;}
     int token=-1;uint64_t ready=0;notify_register_check(ASV_MULTI_COMPAT_READY,&token);if(token>=0){notify_get_state(token,&ready);notify_cancel(token);}
     pid_t pid=(pid_t)(ready>>32);if(!(ready&1) || pid<=1 || (kill(pid,0)!=0 && errno!=EPERM)){[self fail:@"MULTI compatibility module is not loaded; restart VPN service"];return;}
     _busy=YES;_status=@"connecting";_error=nil;NSUInteger generation=++_generation;
