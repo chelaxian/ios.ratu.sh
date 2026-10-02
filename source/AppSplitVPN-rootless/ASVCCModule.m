@@ -73,6 +73,7 @@ static UIImage *ASVGlyph(void) {
 // Green for TUNNEL ONLY, red for BYPASS, matching the status bar badge.
 - (UIColor *)selectedColor {
     NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
+    if([prefs[@"mode"] isEqual:@"multiVPN"])return UIColor.systemBlueColor;
     return [prefs[@"mode"] isEqual:@"tunnelOnly"]?UIColor.systemGreenColor:UIColor.systemRedColor;
 }
 @end

@@ -25,6 +25,7 @@ static UIColor *ASVWantedColor(UILabel *label) {
     if (colorOff || !ASVIsVPNText(label.text)) return nil;
     if (splitMode==1) return UIColor.systemRedColor;
     if (splitMode==2) return UIColor.systemGreenColor;
+    if (splitMode==3) return UIColor.systemBlueColor;
     return nil;
 }
 
@@ -35,7 +36,7 @@ static uint64_t ASVReadState(BOOL *noColor) {
     notify_get_state(token, &value);
     *noColor=(value & 4)!=0;
     value&=3;
-    return value <= 2 ? value : 0;
+    return value;
 }
 
 static void ASVStyleNativeBadge(UILabel *label) {
@@ -90,7 +91,7 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     UIView *foreground=ASVFindAnchor(statusBar,foregroundClass);
     if (!foreground) return;
     UILabel *badge=(UILabel *)[foreground viewWithTag:ASVTunnelBadgeTag];
-    if (splitMode!=2) { [badge removeFromSuperview];return; }
+    if (splitMode!=2 && splitMode!=3) { [badge removeFromSuperview];return; }
     Class wifiClass=NSClassFromString(@"STUIStatusBarWifiSignalView");
     Class cellularClass=NSClassFromString(@"STUIStatusBarCellularSignalView");
     UIView *anchor=wifiClass?ASVFindAnchor(foreground,wifiClass):nil;
@@ -109,7 +110,7 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
         badge.layer.borderWidth=1.25;badge.layer.borderColor=UIColor.systemGreenColor.CGColor;
         badge.userInteractionEnabled=NO;[foreground addSubview:badge];
     } else badge.frame=position;
-    UIColor *tint=colorOff?ASVNeutralColor(foreground):UIColor.systemGreenColor;
+    UIColor *tint=colorOff?ASVNeutralColor(foreground):(splitMode==3?UIColor.systemBlueColor:UIColor.systemGreenColor);
     if (![badge.textColor isEqual:tint]) { badge.textColor=tint;badge.layer.borderColor=tint.CGColor; }
 }
 

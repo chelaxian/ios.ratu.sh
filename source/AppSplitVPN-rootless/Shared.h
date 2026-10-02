@@ -13,6 +13,23 @@
 // The two selection arrays persist independently. Only the current mode is evaluated.
 #define ASV_VPN @"vpnApps"
 #define ASV_DIRECT @"directApps"
+#define ASV_MATRIX @"vpnMatrix"
+#define ASV_PROFILE_CATALOG @"/var/mobile/Library/Preferences/com.ratush.appsplitvpn.profiles.plist"
+#define ASV_PROFILES_NOTIFY "com.ratush.appsplitvpn.profiles.changed"
+#define ASV_REDUNDANCY @"redundancy"
+#define ASV_RESERVES @"reserveProfiles"
+#define ASV_RED_ALGORITHM @"redundancyAlgorithm"
+#define ASV_HC_TIMEOUT @"hcTimeout"
+#define ASV_DEFAULT_HC_TIMEOUT 15
+
+// The single-profile supervisor must never act on MULTI VPN sessions.
+// Keep inactive preferences intact so returning to a mode restores its setup.
+static inline BOOL ASVIsMultiMode(NSDictionary *prefs) {
+    return [prefs[@"mode"] isEqual:@"multiVPN"];
+}
+static inline BOOL ASVExtraOptionActive(NSDictionary *prefs, NSString *key) {
+    return !ASVIsMultiMode(prefs) && [prefs[key] boolValue];
+}
 
 // Extra options (0.3.0). They act on the system VPN selected in iOS Settings and
 // work independently of the split-routing switch.
@@ -26,6 +43,12 @@
 #define ASV_ALWAYS_ON @"alwaysOn"
 #define ASV_HEALTH @"healthCheck"
 #define ASV_LS_DELAY @"lsDelay"
+#define ASV_LS_MEDIA @"lsKeepMedia"
+// SpringBoard's UI lock state: bit 1 valid, bit 0 locked. No control commands.
+#define ASV_UI_LOCK_NOTIFY "com.ratush.appsplitvpn.ui-lock"
+#define ASV_MULTI_DIR @"/var/jb/var/lib/appsplitvpn"
+#define ASV_MULTI_MANIFEST @"/var/jb/var/lib/appsplitvpn/multi-manifest.plist"
+#define ASV_MULTI_COMPAT_READY "com.ratush.appsplitvpn.multi-compat.ready"
 #define ASV_HC_METHOD @"hcMethod"
 #define ASV_HC_TARGET @"hcTarget"
 #define ASV_HC_PORT @"hcPort"

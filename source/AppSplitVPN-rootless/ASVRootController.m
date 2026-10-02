@@ -20,6 +20,7 @@
 static UIColor *ASVModeColor(NSString *text) {
     if ([text isEqual:@"TUNNEL ONLY"] || [text isEqual:@"tunnelOnly"]) return UIColor.systemGreenColor;
     if ([text isEqual:@"BYPASS"] || [text isEqual:@"bypass"]) return UIColor.systemRedColor;
+    if ([text isEqual:@"MULTI VPN"] || [text isEqual:@"multiVPN"]) return UIColor.systemBlueColor;
     return nil;
 }
 
@@ -218,8 +219,8 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 - (NSString *)language { return [L(@"en",@"ru") isEqual:@"ru"] ? @"ru":@"en"; }
 - (NSDictionary *)prefs { return [NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] ?: @{}; }
 - (NSUInteger)countFor:(NSString *)key {
-    NSArray *items=[self prefs][key];
-    return [items isKindOfClass:NSArray.class]?items.count:0;
+    id items=[self prefs][key];
+    return [items isKindOfClass:NSArray.class] || [items isKindOfClass:NSDictionary.class]?[items count]:0;
 }
 - (NSString *)statusFingerprint {
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
@@ -227,9 +228,9 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSDictionary *prefs=[self prefs];
     // Include the switch and mode so a change made from Control Center shows up here too.
     NSDictionary *extra=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
-    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@|%@|%@|%d",state[@"status"] ?: @"",state[@"error"] ?: @"",
+    return [NSString stringWithFormat:@"%@|%@|%@|%@|%@|%@|%d|%d|%@|%@|%@|%d|%lu",state[@"status"] ?: @"",state[@"error"] ?: @"",
         state[@"rules"] ?: @0,state[@"unresolved"] ?: @[],state[@"vpnName"] ?: @"",state[@"mode"] ?: @"",stale,
-        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @"",extra[@"vpnName"] ?: @"",extra[@"vpnApp"] ?: @"",[extra[@"vpnActive"] boolValue]];
+        [prefs[@"enabled"] boolValue],prefs[@"mode"] ?: @"",extra[@"vpnName"] ?: @"",extra[@"vpnApp"] ?: @"",[extra[@"vpnActive"] boolValue],(unsigned long)[ASVExtraController enabledCount]];
 }
 - (void)updateStatusIfChanged {
     if (![_statusFingerprint isEqualToString:[self statusFingerprint]]) [self refreshStatus];
@@ -307,6 +308,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if (codeOut) *codeOut=code;
     BOOL enabled=[prefs[@"enabled"] boolValue];
     BOOL tunnel=[prefs[@"mode"] isEqual:@"tunnelOnly"];
+    BOOL multi=[prefs[@"mode"] isEqual:@"multiVPN"];
     BOOL applied=[@[@"active",@"partial"] containsObject:code];
     NSUInteger vpnApps=[self countFor:ASV_VPN], directApps=[self countFor:ASV_DIRECT];
     NSMutableAttributedString *text=[NSMutableAttributedString new];
@@ -317,10 +319,11 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):([code isEqual:@"disabled"]?L(@"not used",@"не используется"):L(@"connected",@"подключён"));
     if ([code isEqual:@"unavailable"] || [code isEqual:@"stopped"]) vpnState=L(@"service stopped",@"служба не запущена");
     line(@"VPN:",vpnState,down?red:green);
-    line(L(@"Mode:",@"Режим:"),tunnel?@"TUNNEL ONLY":@"BYPASS",tunnel?green:red);
+    line(L(@"Mode:",@"Режим:"),multi?@"MULTI VPN":(tunnel?@"TUNNEL ONLY":@"BYPASS"),multi?UIColor.systemBlueColor:(tunnel?green:red));
     line(L(@"NECP rules:",@"Правил NECP:"),applied?([state[@"rules"] description] ?: @"0"):@"0",UIColor.whiteColor);
-    line(L(@"VPN list:",@"Список VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)vpnApps],green);
-    line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
+    if(tunnel)line(L(@"VPN list:",@"Список VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)vpnApps],green);
+    if(!tunnel && !multi)line(L(@"DIRECT list:",@"Список DIRECT:"),[NSString stringWithFormat:@"%lu",(unsigned long)directApps],red);
+    if(multi)line(@"VPN MATRIX:",[NSString stringWithFormat:@"%lu",(unsigned long)[self countFor:ASV_MATRIX]],UIColor.systemBlueColor);
     NSString *ip=_ipLoading?@"…":(_ip.count?[NSString stringWithFormat:@"%@ %@",_ip[0],_ip.count>1?ASVFlag(_ip[1]):@""]:@"—");
     line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
@@ -334,7 +337,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     [headers addObject:@[@"App Split VPN",L(@"Uses the active system VPN of any app. Its own settings and routes still apply.\n\nTUNNEL ONLY: only apps from the VPN list use the tunnel, all others go direct.\nBYPASS: apps from the DIRECT list go direct, all others use the VPN.\n\nExtra: disconnecting the VPN on the lock screen, Always ON VPN and Health Check VPN Disconnect with their tuning, and the event log. They work with any VPN and independently of the Enable switch.",@"Работает с активным системным VPN любого приложения. Его собственные настройки и маршруты сохраняются.\n\nTUNNEL ONLY: через туннель идут только приложения из списка VPN, остальные — напрямую.\nBYPASS: приложения из списка DIRECT идут напрямую, остальные — через VPN.\n\nДополнительно: отключение VPN на экране блокировки, «Всегда включать VPN» и «Отключать VPN по Health Check» с настройкой параметров, журнал событий. Работают с любым VPN и независимо от переключателя «Включить».")]];
     [items addObject:[self setting:L(@"Enable",@"Включить") key:@"enabled" type:PSSwitchCell fallback:@NO detail:nil]];
     PSSpecifier *mode=[self setting:L(@"Mode",@"Режим") key:@"mode" type:PSLinkListCell fallback:@"bypass" detail:ASVModeListController.class];
-    if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass"] titles:@[@"TUNNEL ONLY",@"BYPASS"]];
+    if ([mode respondsToSelector:@selector(setValues:titles:)]) [mode setValues:@[@"tunnelOnly",@"bypass",@"multiVPN"] titles:@[@"TUNNEL ONLY",@"BYPASS",@"MULTI VPN"]];
     else [mode setProperty:@NO forKey:@"enabled"];
     [mode setProperty:@YES forKey:@"asvMode"];
     [items addObject:mode];
@@ -342,19 +345,29 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
+    if(ASVIsMultiMode([self prefs])) {
+        headers[0]=@[headers[0][0],L(@"MULTI VPN assigns each selected app to a saved VPN profile in VPN MATRIX. Unassigned apps use DIRECT. This experimental mode remains disabled until real traffic through concurrent tunnels is verified. Single-profile Extra controls are hidden in this mode; their saved settings are preserved.",@"MULTI VPN назначает каждому выбранному приложению сохранённый профиль из VPN MATRIX. Для остальных — DIRECT. Экспериментальный режим пока заблокирован: требуется подтвердить передачу реального трафика через одновременные туннели. Однопрофильные опции Extra в этом режиме скрыты, их настройки сохраняются.")];
+    }
+    if(!ASVIsMultiMode([self prefs]))headers[0]=@[headers[0][0],[headers[0][1] stringByAppendingString:L(@"\n\nExtra → Tuning → Keep VPN for PiP / music on LS: optionally prevents lock-screen disconnection while system media playback is active. It is available only with Disconnect VPN on LS enabled and is off by default.",@"\n\nДополнительно → Тюнинг → PiP / музыка не отключают VPN на LS: по желанию сохраняет VPN при активном системном воспроизведении. Доступно только при включённом отключении VPN на LS; по умолчанию выключено.")]];
     PSSpecifier *extra=[self button:L(@"Extra",@"Дополнительно") action:@selector(openExtra)];
-    [extra setProperty:[NSString stringWithFormat:@"%lu/3",(unsigned long)[ASVExtraController enabledCount]] forKey:@"asvCount"];
-    [extra setProperty:@"plain" forKey:@"asvColor"];[items addObject:extra];
+    [extra setProperty:[NSString stringWithFormat:@"%lu/4",(unsigned long)[ASVExtraController enabledCount]] forKey:@"asvCount"];
+    [extra setProperty:@"plain" forKey:@"asvColor"];
+    // These controls operate on one selected system VPN, not a matrix of sessions.
+    if(!ASVIsMultiMode([self prefs]))[items addObject:extra];
 
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"App lists",@"Списки приложений"),L(@"The two lists are independent; only the list of the current mode is applied.\n\nAfter changing the rules, reopen the affected apps: already open connections keep their old route.\n\nImport skips apps that are not installed and keeps them in the list for a later reinstall.",@"Списки независимы: применяется только список текущего режима.\n\nПосле изменения правил переоткройте нужные приложения — уже открытые соединения сохраняют прежний маршрут.\n\nПри импорте отсутствующие приложения пропускаются и остаются в списке до установки.")]];
     NSUInteger total=[ASVAppListController installedApplicationCount];
     PSSpecifier *vpn=[self button:@"VPN" action:@selector(openVPNList)];
     [vpn setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_VPN],(unsigned long)total] forKey:@"asvCount"];
-    [vpn setProperty:@"green" forKey:@"asvColor"];[items addObject:vpn];
+    [vpn setProperty:@"green" forKey:@"asvColor"];if([[self prefs][@"mode"] isEqual:@"tunnelOnly"])[items addObject:vpn];
     PSSpecifier *direct=[self button:@"DIRECT" action:@selector(openDirectList)];
     [direct setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_DIRECT],(unsigned long)total] forKey:@"asvCount"];
-    [direct setProperty:@"red" forKey:@"asvColor"];[items addObject:direct];
+    [direct setProperty:@"red" forKey:@"asvColor"];if(![[self prefs][@"mode"] isEqual:@"tunnelOnly"] && ![[self prefs][@"mode"] isEqual:@"multiVPN"])[items addObject:direct];
+    if([[self prefs][@"mode"] isEqual:@"multiVPN"]) {
+        PSSpecifier *matrix=[self button:@"VPN MATRIX" action:@selector(openMatrix)];[matrix setProperty:@"blue" forKey:@"asvColor"];
+        [matrix setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_MATRIX],(unsigned long)total] forKey:@"asvCount"];[items addObject:matrix];
+    }
     // A static-text Preferences cell does not reliably forward touches to child controls.
     PSSpecifier *transfer=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [transfer setProperty:@YES forKey:@"asvTransfer"];[items addObject:transfer];
@@ -415,7 +428,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
         if (tint) cell.detailTextLabel.textColor=tint;
     } else if (color) {
         BOOL plain=[color isEqual:@"plain"];
-        UIColor *tint=plain?UIColor.labelColor:([color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor);
+        UIColor *tint=plain?UIColor.labelColor:([color isEqual:@"blue"]?UIColor.systemBlueColor:([color isEqual:@"green"]?UIColor.systemGreenColor:UIColor.systemRedColor));
         cell.textLabel.textColor=tint;
         UILabel *count=[UILabel new];count.text=[specifier propertyForKey:@"asvCount"];count.textColor=plain?UIColor.secondaryLabelColor:tint;
         count.font=[UIFont monospacedDigitSystemFontOfSize:17 weight:UIFontWeightRegular];[count sizeToFit];
@@ -477,11 +490,12 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 }
 - (void)openVPNList { [self openList:ASV_VPN]; }
 - (void)openDirectList { [self openList:ASV_DIRECT]; }
+- (void)openMatrix { [self openList:ASV_MATRIX]; }
 - (void)openExtra { [self.navigationController pushViewController:[ASVExtraController new] animated:YES]; }
 - (void)openRouteLog { [self.navigationController pushViewController:[ASVLogController new] animated:YES]; }
 - (void)exportLists {
     NSDictionary *prefs=[self prefs];
-    NSDictionary *payload=@{@"format":@"appsplitvpn-lists-v1",ASV_VPN:prefs[ASV_VPN] ?: @[],ASV_DIRECT:prefs[ASV_DIRECT] ?: @[]};
+    NSDictionary *payload=@{@"format":@"appsplitvpn-lists-v2",ASV_VPN:prefs[ASV_VPN] ?: @[],ASV_DIRECT:prefs[ASV_DIRECT] ?: @[],ASV_MATRIX:prefs[ASV_MATRIX] ?: @{}};
     NSError *error=nil;
     NSData *data=[NSJSONSerialization dataWithJSONObject:payload options:NSJSONWritingPrettyPrinted error:&error];
     NSURL *url=[[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"AppSplitVPN-lists.json"];
@@ -501,21 +515,38 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     NSData *data=[NSData dataWithContentsOfURL:urls.firstObject options:0 error:nil];
     NSDictionary *payload=data?[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
-    BOOL valid=[payload isKindOfClass:NSDictionary.class] && [payload[@"format"] isEqual:@"appsplitvpn-lists-v1"];
+    BOOL v2=[payload isKindOfClass:NSDictionary.class] && [payload[@"format"] isEqual:@"appsplitvpn-lists-v2"];
+    BOOL valid=[payload isKindOfClass:NSDictionary.class] && (v2 || [payload[@"format"] isEqual:@"appsplitvpn-lists-v1"]);
     NSCharacterSet *bad=[NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"].invertedSet;
     for (NSString *key in @[ASV_VPN,ASV_DIRECT]) {
         NSArray *items=valid?payload[key]:nil;
         if (![items isKindOfClass:NSArray.class] || items.count>2048) valid=NO;
         for (id item in items) if (![item isKindOfClass:NSString.class] || [item length]<1 || [item length]>255 || [item rangeOfCharacterFromSet:bad].location!=NSNotFound) valid=NO;
     }
+    NSMutableDictionary *matrix=[NSMutableDictionary dictionary];NSUInteger skippedProfiles=0;
+    if(valid && v2) {
+        id assignments=payload[ASV_MATRIX];
+        if(![assignments isKindOfClass:NSDictionary.class] || [assignments count]>2048)valid=NO;
+        NSMutableSet *known=[NSMutableSet set];
+        for(NSDictionary *record in [NSArray arrayWithContentsOfFile:ASV_PROFILE_CATALOG])if([record[@"id"] isKindOfClass:NSString.class])[known addObject:record[@"id"]];
+        if(valid)for(id app in assignments) {
+            id profile=assignments[app];
+            if(![app isKindOfClass:NSString.class] || [app length]<1 || [app length]>255 || [app rangeOfCharacterFromSet:bad].location!=NSNotFound || ![profile isKindOfClass:NSString.class] || ![[NSUUID alloc] initWithUUIDString:profile]){valid=NO;break;}
+            matrix[app]=profile;
+            if(![known containsObject:profile])skippedProfiles++;
+        }
+    }
     if (valid) {
         NSMutableDictionary *prefs=[[self prefs] mutableCopy];
         prefs[ASV_VPN]=[[NSOrderedSet orderedSetWithArray:payload[ASV_VPN]] array];
         prefs[ASV_DIRECT]=[[NSOrderedSet orderedSetWithArray:payload[ASV_DIRECT]] array];
+        if(v2)prefs[ASV_MATRIX]=matrix;
         valid=[prefs writeToFile:ASV_PREFS atomically:YES];
         if (valid) { notify_post(ASV_NOTIFY);[self refreshStatus]; }
     }
-    UIAlertController *alert=[UIAlertController alertControllerWithTitle:valid?L(@"Lists imported",@"Списки импортированы"):L(@"Invalid list file",@"Неверный файл списков") message:valid?L(@"Missing apps are kept in the lists and skipped until installed.",@"Отсутствующие приложения сохраняются в списках и пропускаются до установки."):nil preferredStyle:UIAlertControllerStyleAlert];
+    NSString *message=valid?L(@"Missing apps are kept in the lists and skipped until installed.",@"Отсутствующие приложения сохраняются в списках и пропускаются до установки."):nil;
+    if(valid && skippedProfiles)message=[message stringByAppendingFormat:L(@"\nUnavailable VPN profile assignments kept: %lu. Select a local profile in VPN MATRIX; these apps must not fall back to DIRECT.",@"\nСохранено назначений недоступных VPN-профилей: %lu. Выберите местный профиль в VPN MATRIX; эти приложения не должны переходить в DIRECT."),(unsigned long)skippedProfiles];
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:valid?L(@"Lists imported",@"Списки импортированы"):L(@"Invalid list file",@"Неверный файл списков") message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }

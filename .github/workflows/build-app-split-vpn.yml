@@ -34,6 +34,12 @@ jobs:
           cc="$tmp/var/jb/Library/ControlCenter/Bundles/AppSplitVPNCC.bundle/AppSplitVPNCC"
           lipo -thin arm64e "$cc" -output "$tmp/cc-arm64e"
           test "$(xxd -p -s 8 -l 4 "$tmp/cc-arm64e")" = 02000080
+          for name in AppSplitVPNStatusBar AppSplitVPNLockState AppSplitVPNMultiCompat; do
+            dylib="$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/$name.dylib"
+            test -f "$dylib"
+            lipo -thin arm64e "$dylib" -output "$tmp/$name-arm64e"
+            test "$(xxd -p -s 8 -l 4 "$tmp/$name-arm64e")" = 02000080
+          done
           test -x "$tmp/var/jb/usr/libexec/appsplitvpn-register"
           ldid -h "$tmp/var/jb/usr/libexec/appsplitvpnd"
           ldid -e "$tmp/var/jb/usr/libexec/appsplitvpnd"

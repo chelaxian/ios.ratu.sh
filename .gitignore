@@ -1,0 +1,7 @@
+artifacts/
+research/multi-inspect
+research/multi-session-probe
+research/media-state-probe
+source/AppSplitVPN-rootless/.theos/
+source/AppSplitVPN-rootless/packages/
+source/AppSplitVPN-rootless/artifacts/

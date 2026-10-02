@@ -8,11 +8,14 @@
 @end
 @interface NEPolicyCondition : NSObject
 + (instancetype)effectiveApplication:(NSUUID *)uuid;
++ (instancetype)realApplication:(NSUUID *)uuid;
 + (instancetype)allInterfaces;
 @end
 @interface NEPolicyResult : NSObject
 + (instancetype)scopeToDirectInterface;
 + (instancetype)skipWithOrder:(unsigned)order;
++ (instancetype)tunnelIPToInterfaceName:(NSString *)name secondaryResultType:(NSInteger)type;
++ (instancetype)drop;
 @end
 @interface NEPolicy : NSObject
 - (instancetype)initWithOrder:(unsigned)order result:(id)result conditions:(NSArray *)conditions;

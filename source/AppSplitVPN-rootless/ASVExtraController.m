@@ -5,6 +5,7 @@
 #import <notify.h>
 #import "ASVUI.h"
 #import "ASVExtraController.h"
+#import "ASVProfileListController.h"
 @interface PSSpecifier (ASVExtraValues)
 - (void)setValues:(NSArray *)values titles:(NSArray *)titles;
 @end
@@ -59,8 +60,13 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
     else if ([code isEqual:@"hcFail"]) { text=[NSString stringWithFormat:@"Health Check: %@ %@",L(@"fail",@"сбой"),detail];tint=UIColor.systemRedColor; }
     else if ([code isEqual:@"lock"]) { text=L(@"Screen locked",@"Экран заблокирован");tint=UIColor.systemGrayColor; }
     else if ([code isEqual:@"unlock"]) { text=L(@"Screen unlocked",@"Экран разблокирован");tint=UIColor.systemGrayColor; }
+    else if ([code isEqual:@"lsMediaHold"]) { text=L(@"LS: VPN retained for media playback / unavailable playback state",@"LS: VPN сохранён для медиа / состояние воспроизведения недоступно");tint=UIColor.systemBlueColor; }
+    else if ([code isEqual:@"lsMediaRelease"]) { text=L(@"LS: media stopped, disconnect delay started",@"LS: воспроизведение остановлено, начата задержка отключения");tint=UIColor.systemOrangeColor; }
     else if ([code isEqual:@"vpnUp"]) { text=[L(@"VPN connected",@"VPN подключён") stringByAppendingString:detail.length?[@": " stringByAppendingString:detail]:@""];tint=UIColor.systemGreenColor; }
     else if ([code isEqual:@"vpnDown"]) { text=[L(@"VPN disconnected",@"VPN отключён") stringByAppendingString:detail.length?[@": " stringByAppendingString:detail]:@""];tint=UIColor.systemRedColor; }
+    else if ([code isEqual:@"reserveSwitch"]) { text=[L(@"Redundancy: switching to ",@"Резервирование: переключение на ") stringByAppendingString:detail];tint=UIColor.systemBlueColor; }
+    else if ([code isEqual:@"circuitOpen"]) { text=[L(@"Automatic recovery stopped: ",@"Автовосстановление остановлено: ") stringByAppendingString:detail];tint=UIColor.systemRedColor; }
+    else if ([code isEqual:@"badCycle"]) { text=[L(@"Cycle without a successful check: ",@"Цикл без успешной проверки: ") stringByAppendingString:detail];tint=UIColor.systemOrangeColor; }
     else if (detail.length) text=[NSString stringWithFormat:@"%@ %@",code,detail];
     if (color) *color=tint;
     return text;
@@ -128,6 +134,7 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
     NSArray<NSArray<NSString *> *> *_headers;
     NSTimer *_timer;
     NSDate *_stateStamp;
+    NSDate *_prefsStamp;
     NSAttributedString *_stateText;
     UIAlertAction *_okAction;
     UIAlertController *_editor;
@@ -136,12 +143,12 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
 + (NSUInteger)enabledCount {
     NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] ?: @{};
     NSUInteger count=0;
-    for (NSString *key in @[ASV_LS_DISCONNECT,ASV_ALWAYS_ON,ASV_HEALTH]) if ([prefs[key] boolValue]) count++;
+    for (NSString *key in @[ASV_LS_DISCONNECT,ASV_ALWAYS_ON,ASV_HEALTH,ASV_REDUNDANCY]) if (ASVExtraOptionActive(prefs,key)) count++;
     return count;
 }
 - (NSDictionary *)prefs { return [NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] ?: @{}; }
 // Field key -> @[low, high] for whole numbers.
-- (NSDictionary *)limits { return @{ASV_LS_DELAY:@[@0,@600],ASV_HC_PORT:@[@1,@65535],ASV_HC_INTERVAL:@[@10,@3600],ASV_HC_FAILURES:@[@1,@10]}; }
+- (NSDictionary *)limits { return @{ASV_LS_DELAY:@[@0,@600],ASV_HC_PORT:@[@1,@65535],ASV_HC_INTERVAL:@[@10,@3600],ASV_HC_FAILURES:@[@1,@10],ASV_HC_TIMEOUT:@[@1,@120]}; }
 - (NSString *)fieldValue:(NSString *)key {
     NSDictionary *prefs=[self prefs];
     if ([key isEqual:ASV_LS_DELAY]) return [@(ASVIntSetting(prefs,key,ASV_DEFAULT_LS_DELAY,0,600)) stringValue];
@@ -150,6 +157,7 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
     if ([key isEqual:ASV_HC_PORT]) { NSInteger port=ASVIntSetting(prefs,key,0,0,65535);return port>0?[@(port) stringValue]:@""; }
     if ([key isEqual:ASV_HC_TARGET]) return ASVHealthTarget(prefs);
     if ([key isEqual:ASV_IP_SERVICE]) return ASVIPService(prefs);
+    if ([key isEqual:ASV_HC_TIMEOUT]) return [@(ASVIntSetting(prefs,key,ASV_DEFAULT_HC_TIMEOUT,1,120)) stringValue];
     return @"";
 }
 - (id)readPreferenceValue:(PSSpecifier *)specifier {
@@ -175,9 +183,14 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
 // Switches and the check method; text values go through the editor window.
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier {
     NSString *key=[specifier propertyForKey:@"key"];
-    BOOL toggle=[@[ASV_LS_DISCONNECT,ASV_ALWAYS_ON,ASV_HEALTH] containsObject:key];
-    if (!toggle && ![key isEqual:ASV_HC_METHOD]) return;
-    if (![self save:^(NSMutableDictionary *prefs){ prefs[key]=value; }]) return;
+    BOOL toggle=[@[ASV_LS_DISCONNECT,ASV_ALWAYS_ON,ASV_HEALTH,ASV_REDUNDANCY,ASV_LS_MEDIA] containsObject:key];
+    if (!toggle && ![key isEqual:ASV_HC_METHOD] && ![key isEqual:ASV_RED_ALGORITHM]) return;
+    if(ASVIsMultiMode([self prefs]))return;
+    if (![self save:^(NSMutableDictionary *prefs){
+        prefs[key]=value;
+        if([key isEqual:ASV_REDUNDANCY] && [value boolValue]){prefs[ASV_HEALTH]=@YES;prefs[ASV_ALWAYS_ON]=@YES;}
+        if(( [key isEqual:ASV_HEALTH] || [key isEqual:ASV_ALWAYS_ON]) && ![value boolValue])prefs[ASV_REDUNDANCY]=@NO;
+    }]) return;
     // Tuning rows depend on the switches and the method: rebuild the page.
     dispatch_async(dispatch_get_main_queue(),^{ [self reloadSpecifiers]; });
 }
@@ -272,17 +285,29 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
     if (_specifiers) return _specifiers;
     self.title=L(@"Extra",@"Дополнительно");
     NSDictionary *prefs=[self prefs];
-    BOOL ls=[prefs[ASV_LS_DISCONNECT] boolValue], health=[prefs[ASV_HEALTH] boolValue];
+    BOOL ls=ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT), health=ASVExtraOptionActive(prefs,ASV_HEALTH);
+    BOOL redundancy=ASVExtraOptionActive(prefs,ASV_REDUNDANCY);
     NSMutableArray *items=[NSMutableArray array], *headers=[NSMutableArray array];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"Extra",@"Дополнительно"),L(@"Disconnect VPN on LS: after the delay set in Tuning, locking the screen switches the active VPN off; unlocking switches it back on. A VPN you turned off yourself stays off.\n\nAlways ON VPN: reconnects the VPN last selected in iOS whenever it drops, for example when iOS kills it for memory. While the option is on, a manual disconnect is undone too: turn the option off first to stop the VPN. With \"Disconnect VPN on LS\" on, nothing is reconnected while the phone is locked.\n\nHealth Check VPN Disconnect: while the VPN is connected, periodically checks that traffic passes through the tunnel to a public resource. After several failures in a row it disconnects the broken VPN; together with Always ON the VPN then reconnects at once. No checks run without a VPN, without a network, or on the locked screen when \"Disconnect VPN on LS\" is on.\n\nThe options work with any VPN app and do not depend on the Enable switch.",@"Отключать VPN на LS — через заданную в «Тюнинге» задержку после блокировки экрана отключает активный VPN, после разблокировки подключает снова. VPN, выключенный вами вручную, остаётся выключенным.\n\nВсегда включать VPN — подключает последний выбранный в iOS VPN, если он отвалился, например когда iOS выгрузила его из-за нехватки памяти. Пока опция включена, ручное отключение VPN тоже отменяется: чтобы выключить VPN, сначала выключите опцию. При включённом «Отключать VPN на LS» на заблокированном телефоне переподключения нет.\n\nОтключать VPN по Health Check — пока VPN подключён, периодически проверяет, проходит ли через туннель трафик до публичного ресурса. После нескольких неудач подряд отключает неработающий VPN; вместе с «Всегда включать VPN» он сразу подключается заново. Без VPN, без сети и на заблокированном экране при включённом «Отключать VPN на LS» проверок нет.\n\nОпции работают с любым VPN-приложением и не зависят от переключателя «Включить».")]];
     [items addObject:[self setting:L(@"Disconnect VPN on LS",@"Отключать VPN на LS") key:ASV_LS_DISCONNECT type:PSSwitchCell fallback:@NO]];
     [items addObject:[self setting:L(@"Always ON VPN",@"Всегда включать VPN") key:ASV_ALWAYS_ON type:PSSwitchCell fallback:@NO]];
     [items addObject:[self setting:L(@"Health Check VPN Disconnect",@"Отключать VPN по Health Check") key:ASV_HEALTH type:PSSwitchCell fallback:@NO]];
+    [items addObject:[self setting:L(@"Redundancy",@"Резервирование") key:ASV_REDUNDANCY type:PSSwitchCell fallback:@NO]];
+    headers[0]=@[headers[0][0],[headers[0][1] stringByAppendingString:L(@"\n\nRedundancy is available only in BYPASS and TUNNEL ONLY. Enabling it enables Health Check and Always ON. Reserve profiles are tried in selection order (Round-Robin) or in a random order without repeats. If every reserve fails, VPN, Redundancy and Always ON are stopped until you intervene.\n\nWithout Redundancy, the same failure threshold also limits consecutive reconnect cycles with no successful check. Reaching it disables Health Check and Always ON. A successful check breaks the failed-cycle sequence.",@"\n\nРезервирование доступно только в BYPASS и TUNNEL ONLY. Включение активирует Health Check и «Всегда включать VPN». Резервные профили проверяются в порядке выбора (Round-Robin) или в случайном порядке без повторов. Если не работает ни один резерв, VPN, резервирование и автоматическое подключение выключаются до вашего вмешательства.\n\nБез резервирования тот же порог неудач ограничивает последовательные циклы переподключения без успешной проверки. По достижении порога Health Check и автоматическое подключение выключаются. Успешная проверка прерывает последовательность неудачных циклов.")]];
+    if(redundancy) {
+        PSSpecifier *reserves=[PSSpecifier preferenceSpecifierNamed:L(@"Reserve VPNs",@"Резервные VPN") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];[reserves setButtonAction:@selector(openReserves)];[items addObject:reserves];
+    }
 
+    if(ls || health) {
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"Tuning",@"Тюнинг"),L(@"Settings of an option appear only while that option is on. Tap a row to change it; an empty value restores the default.\n\nLS delay: seconds between locking and disconnecting the VPN (0–600).\n\nCheck method: HTTPS — TLS connection and an HTTP reply, the strictest (default); HTTP — TCP connection and an HTTP reply; TCP — connection only; PING — ICMP echo (some VPNs do not pass ICMP, no port).\n\nHealth Check target: IPv4 address or domain. Port: 1–65535, auto = 443 for HTTPS and TCP, 80 for HTTP.\n\nInterval: how often a working VPN is checked (10–3600 s); after a failure the check repeats in 10 s. Failures in a row: how many checks must fail before the VPN is disconnected (1–10).\n\nIP check service: http(s) address for the public IP on the main page. Cloudflare trace, JSON (ip, country) and plain-text replies are understood; if the default service is unreachable, Yandex is used (no country).",@"Настройки опции показываются, только когда она включена. Нажмите на строку, чтобы изменить значение; пустое значение возвращает значение по умолчанию.\n\nЗадержка LS — сколько секунд после блокировки ждать перед отключением VPN (0–600).\n\nМетод проверки: HTTPS — TLS-соединение и HTTP-ответ, самая строгая (по умолчанию); HTTP — TCP-соединение и HTTP-ответ; TCP — только соединение; PING — ICMP echo (часть VPN не пропускает ICMP, порт не нужен).\n\nРесурс Health Check — IPv4-адрес или домен. Порт: 1–65535, авто — 443 для HTTPS и TCP, 80 для HTTP.\n\nИнтервал — как часто проверяется работающий VPN (10–3600 с); после неудачи повтор через 10 с. Неудач подряд — сколько проверок должно провалиться, чтобы VPN был отключён (1–10).\n\nСервис проверки IP — адрес http(s) для белого IP на главной странице. Понимает ответы Cloudflare trace, JSON (ip, country) и простой текст; если сервис по умолчанию недоступен, используется Яндекс (без страны).")]];
-    if (ls) [items addObject:[self field:L(@"LS delay, s",@"Задержка LS, с") key:ASV_LS_DELAY]];
+    if (ls) {
+        [items addObject:[self field:L(@"LS delay, s",@"Задержка LS, с") key:ASV_LS_DELAY]];
+        [items addObject:[self setting:L(@"Keep VPN for PiP / music on LS",@"PiP / музыка не отключают VPN на LS") key:ASV_LS_MEDIA type:PSSwitchCell fallback:@NO]];
+        NSUInteger h=headers.count-1;
+        headers[h]=@[headers[h][0],[headers[h][1] stringByAppendingString:L(@"\n\nKeep VPN for PiP / music: while system media playback is active, locking does not disconnect VPN. Pausing or stopping playback starts the usual LS delay. An unavailable playback state conservatively keeps VPN connected. This option is off by default.",@"\n\nPiP / музыка: пока система сообщает об активном воспроизведении, блокировка не отключает VPN. Пауза или остановка запускает обычную задержку LS. Если состояние воспроизведения недоступно, VPN сохраняется. Опция по умолчанию выключена.")]];
+    }
     if (health) {
         PSSpecifier *method=[self setting:L(@"Check method",@"Метод проверки") key:ASV_HC_METHOD type:PSLinkListCell fallback:ASV_DEFAULT_HC_METHOD];
         if ([method respondsToSelector:@selector(setValues:titles:)]) [method setValues:@[@"https",@"http",@"tcp",@"ping"] titles:@[@"HTTPS",@"HTTP",@"TCP",@"PING"]];
@@ -290,16 +315,25 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         [items addObject:[self field:L(@"Health Check target",@"Ресурс Health Check") key:ASV_HC_TARGET]];
         if (![ASVHealthMethod(prefs) isEqual:@"ping"]) [items addObject:[self field:L(@"Port",@"Порт") key:ASV_HC_PORT]];
         [items addObject:[self field:L(@"Interval, s",@"Интервал, с") key:ASV_HC_INTERVAL]];
+        [items addObject:[self field:L(@"Timeout, s",@"Таймаут, с") key:ASV_HC_TIMEOUT]];
         [items addObject:[self field:L(@"Failures in a row",@"Неудач подряд") key:ASV_HC_FAILURES]];
+    }
+    if(redundancy) {
+        PSSpecifier *algorithm=[self setting:L(@"Redundancy Switch Algorithm",@"Алгоритм резервирования") key:ASV_RED_ALGORITHM type:PSLinkListCell fallback:@"roundRobin"];
+        [algorithm setValues:@[@"roundRobin",@"random"] titles:@[@"Round-Robin",@"Random"]];[items addObject:algorithm];
     }
     [items addObject:[self field:L(@"IP check service",@"Сервис проверки IP") key:ASV_IP_SERVICE]];
     PSSpecifier *reset=[PSSpecifier preferenceSpecifierNamed:L(@"Reset tuning",@"Сбросить тюнинг") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [reset setButtonAction:@selector(resetTuning)];[items addObject:reset];
+    }
 
+    if([ASVExtraController enabledCount]>0) {
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"State",@"Состояние"),L(@"The VPN profile selected in iOS, its connection state, the latest Health Check result and the extra options that are on. Updates automatically.\n\n\"No link\" means the VPN is connected but the last checks failed.\n\nThe event log keeps the last 300 events: VPN connections and disconnections, Health Check results, reconnects and screen locks.",@"Профиль VPN, выбранный в iOS, состояние его подключения, последний результат Health Check и включённые дополнительные опции. Обновляется автоматически.\n\n«Нет связи» — VPN подключён, но последние проверки не прошли.\n\nЖурнал событий хранит последние 300 событий: подключения и отключения VPN, результаты Health Check, переподключения и блокировки экрана.")]];
     PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
+    }
+    // Keep the journal reachable after the safety breaker switches all options off.
     PSSpecifier *log=[PSSpecifier preferenceSpecifierNamed:L(@"Event log",@"Журнал событий") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [log setButtonAction:@selector(openEventLog)];[items addObject:log];
     _stateText=[self buildState];
@@ -308,8 +342,12 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
     return _specifiers;
 }
 - (void)openEventLog { [self.navigationController pushViewController:[ASVEventLogController new] animated:YES]; }
+- (void)openReserves {
+    if(ASVExtraOptionActive([self prefs],ASV_REDUNDANCY))
+        [self.navigationController pushViewController:[[ASVProfileListController alloc] initForReserves] animated:YES];
+}
 - (void)resetTuning {
-    if ([self save:^(NSMutableDictionary *prefs){ [prefs removeObjectsForKeys:@[ASV_LS_DELAY,ASV_HC_METHOD,ASV_HC_TARGET,ASV_HC_PORT,ASV_HC_INTERVAL,ASV_HC_FAILURES,ASV_IP_SERVICE]]; }]) [self reloadSpecifiers];
+    if ([self save:^(NSMutableDictionary *prefs){ [prefs removeObjectsForKeys:@[ASV_LS_DELAY,ASV_LS_MEDIA,ASV_HC_METHOD,ASV_HC_TARGET,ASV_HC_PORT,ASV_HC_INTERVAL,ASV_HC_FAILURES,ASV_IP_SERVICE,ASV_HC_TIMEOUT,ASV_RED_ALGORITHM]]; }]) [self reloadSpecifiers];
 }
 - (NSAttributedString *)buildState {
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE] ?: @{};
@@ -339,15 +377,18 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         else if ([healthText isEqual:@"notunnel"]) { value=L(@"no tunnel",@"нет туннеля");color=orange; }
         else { value=active?L(@"waiting",@"ожидание"):L(@"VPN is off",@"VPN выключен");color=white; }
     }
-    ASVTerminalLine(text,L(@"Check:",@"Проверка:"),value,color,10);
+    if(health)ASVTerminalLine(text,L(@"Check:",@"Проверка:"),value,color,10);
     NSMutableArray *options=[NSMutableArray array];
     if ([prefs[ASV_LS_DISCONNECT] boolValue]) [options addObject:@"LS"];
     if ([prefs[ASV_ALWAYS_ON] boolValue]) [options addObject:@"Always ON"];
     if (health) [options addObject:@"Health Check"];
+    if ([prefs[ASV_REDUNDANCY] boolValue]) [options addObject:L(@"Redundancy",@"Резервирование")];
     ASVTerminalLine(text,L(@"Options:",@"Опции:"),options.count?[options componentsJoinedByString:@", "]:L(@"none",@"нет"),options.count?green:gray,10);
     return text;
 }
 - (void)refreshState {
+    NSDate *prefsStamp=[[NSFileManager defaultManager] attributesOfItemAtPath:ASV_PREFS error:nil].fileModificationDate;
+    if(![prefsStamp isEqual:_prefsStamp]){_prefsStamp=prefsStamp;_specifiers=nil;[self reloadSpecifiers];}
     NSDate *stamp=[[NSFileManager defaultManager] attributesOfItemAtPath:ASV_EXTRA_STATE error:nil].fileModificationDate;
     if (stamp && [stamp isEqualToDate:_stateStamp]) return;
     _stateStamp=stamp;

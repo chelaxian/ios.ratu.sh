@@ -62,7 +62,7 @@ static void RefreshVPNName(void) {
 
 static NSDictionary *ReadPreferences(void) {
     NSDictionary *raw = [NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
-    NSString *mode = [raw[@"mode"] isEqual:@"tunnelOnly"] ? @"tunnelOnly" : @"bypass";
+    NSString *mode = [@[@"tunnelOnly",@"bypass",@"multiVPN"] containsObject:raw[@"mode"]] ? raw[@"mode"] : @"bypass";
     NSMutableDictionary *validated = [@{@"enabled": @([raw[@"enabled"] isKindOfClass:NSNumber.class] && [raw[@"enabled"] boolValue]), @"mode": mode} mutableCopy];
     NSCharacterSet *allowed = [NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"];
     for (NSString *key in @[ASV_VPN, ASV_DIRECT]) {
@@ -113,6 +113,9 @@ static void Reconcile(BOOL force) {
         if (!force && initialized && active == lastActive && [prefs isEqual:lastPrefs] && now-lastRefresh < 60) return;
         initialized = YES; lastActive = active; lastPrefs = prefs; lastRefresh = now;
         if (![prefs[@"enabled"] boolValue]) { [engine clear]; State(@"disabled",nil); RouteJournal(@"disabled: all apps use the system VPN",nil,nil,nil); return; }
+        // Never silently interpret the experimental mode as BYPASS. Activation
+        // remains gated until concurrent tunnels pass the live data-plane tests.
+        if (ASVIsMultiMode(prefs)) { [engine clear]; State(@"unsupported",@"MULTI VPN data-plane validation is not complete");RouteJournal(@"MULTI VPN: data-plane validation pending",nil,nil,nil);return; }
         if (!anyVPNActive) { [engine clear]; State(@"unsupported",@"System VPN status API unavailable"); return; }
         if (!active) { [engine clear]; State(@"waitingVPN",nil); RouteJournal(@"no active VPN: rules removed",nil,nil,nil); return; }
         NSString *mode = prefs[@"mode"];

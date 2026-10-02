@@ -1,5 +1,6 @@
 #import "ASVAppListController.h"
 #import "Shared.h"
+#import "ASVProfileListController.h"
 #import <notify.h>
 
 @interface LSApplicationWorkspace : NSObject
@@ -109,6 +110,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 @property(nonatomic,copy) NSString *sortMode;
 @property(nonatomic,copy) NSString *filterField;
 @property(nonatomic,copy) NSString *filterValue;
+@property(nonatomic,strong) NSMutableDictionary *matrix;
 @end
 
 @implementation ASVAppListController
@@ -121,7 +123,8 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 - (instancetype)initWithListKey:(NSString *)key language:(NSString *)language {
     if ((self=[super initWithStyle:UITableViewStyleInsetGrouped])) {
         _listKey=[key copy];_language=[language copy];_groupMode=@"name";_groupSort=@"asc";_sortMode=@"asc";
-        NSArray *saved=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][key];
+        id saved=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][key];
+        if([key isEqual:ASV_MATRIX]) { _matrix=[NSMutableDictionary dictionaryWithDictionary:[saved isKindOfClass:NSDictionary.class]?saved:@{}];saved=_matrix.allKeys; }
         _selected=[NSMutableSet setWithArray:[saved isKindOfClass:NSArray.class]?saved:@[]];
     }
     return self;
@@ -139,14 +142,29 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController { [self rebuild]; }
 - (void)save {
     NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
-    prefs[_listKey]=[[_selected allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    prefs[_listKey]=_matrix ?: (id)[[_selected allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     if ([prefs writeToFile:ASV_PREFS atomically:YES]) notify_post(ASV_NOTIFY);
 }
 - (void)changed:(UISwitch *)sender {
     NSString *identifier=sender.accessibilityIdentifier;
     if (!identifier.length) return;
-    if (sender.on) [_selected addObject:identifier]; else [_selected removeObject:identifier];
+    if(_matrix && sender.on) { sender.on=NO;[self pickProfile:identifier];return; }
+    if (sender.on) [_selected addObject:identifier]; else { [_selected removeObject:identifier];[_matrix removeObjectForKey:identifier]; }
     [self save];[self rebuild];
+}
+- (void)pickProfile:(NSString *)identifier {
+    __weak typeof(self) weakSelf=self;
+    ASVProfileListController *picker=[[ASVProfileListController alloc] initWithSelection:_matrix[identifier] completion:^(NSString *uuid){
+        weakSelf.matrix[identifier]=uuid;[weakSelf.selected addObject:identifier];[weakSelf save];[weakSelf rebuild];
+    }];
+    [self.navigationController pushViewController:picker animated:YES];
+}
+- (NSString *)profileName:(NSString *)uuid {
+    for(NSDictionary *r in [NSArray arrayWithContentsOfFile:ASV_PROFILE_CATALOG]) if([r[@"id"] isEqual:uuid]) return r[@"name"];
+    return uuid.length?[self t:@"Profile unavailable" ru:@"Профиль недоступен"]:[self t:@"No VPN" ru:@"Без VPN"];
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)path {
+    [tableView deselectRowAtIndexPath:path animated:YES];if(_matrix)[self pickProfile:_sections[path.section][path.row][@"id"]];
 }
 - (NSString *)stateLabel:(NSString *)state {
     if ([state isEqual:@"installed"]) return [self t:@"Installed" ru:@"Установлено"];
@@ -164,6 +182,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
 }
 // Group/filter key of a record for a field. "—" and "#" mean "unnamed" and always go last.
 - (NSString *)keyFor:(NSDictionary *)record field:(NSString *)field {
+    if([field isEqual:@"vpnProfile"])return _matrix[record[@"id"]] ?: @"—";
     if ([field isEqual:@"name"]) {
         NSString *name=record[@"name"];
         NSString *letter=name.length?[[name substringToIndex:1] uppercaseString]:@"#";
@@ -177,15 +196,19 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
     return @"";
 }
 - (NSString *)titleForKey:(NSString *)key field:(NSString *)field {
+    if([field isEqual:@"vpnProfile"])return [self profileName:[key isEqual:@"—"]?nil:key];
     if ([key isEqual:@"—"]) return [field isEqual:@"vendor"]?[self t:@"Unknown developer" ru:@"Разработчик не указан"]:[self t:@"No category" ru:@"Без категории"];
     return key;
 }
 static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—"] || [key isEqual:@"#"]; }
 - (NSArray<NSString *> *)sortedKeys:(NSArray<NSString *> *)keys descending:(BOOL)descending {
+    return [self sortedKeys:keys descending:descending field:self.groupMode];
+}
+- (NSArray<NSString *> *)sortedKeys:(NSArray<NSString *> *)keys descending:(BOOL)descending field:(NSString *)field {
     return [keys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){
         BOOL aa=ASVUnnamed(a), bb=ASVUnnamed(b);
         if (aa!=bb) return aa?NSOrderedDescending:NSOrderedAscending;
-        NSComparisonResult r=[a localizedCaseInsensitiveCompare:b];
+        NSComparisonResult r=[([field isEqual:@"vpnProfile"]?[self profileName:a]:a) localizedCaseInsensitiveCompare:([field isEqual:@"vpnProfile"]?[self profileName:b]:b)];
         return descending?-r:r;
     }];
 }
@@ -216,7 +239,7 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
         }]];
     }
     _sections=[sections copy];
-    self.title=[NSString stringWithFormat:@"%@ %lu/%lu",[_listKey isEqual:ASV_VPN]?@"VPN":@"DIRECT",(unsigned long)_selected.count,(unsigned long)ASVCatalog().count];
+    self.title=[NSString stringWithFormat:@"%@ %lu/%lu",_matrix?@"VPN MATRIX":([_listKey isEqual:ASV_VPN]?@"VPN":@"DIRECT"),(unsigned long)_selected.count,(unsigned long)ASVCatalog().count];
     [self updateFilterBanner];
     [self.tableView reloadData];
 }
@@ -249,7 +272,7 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
     if (!cell) cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"app"];
     NSDictionary *r=_sections[path.section][path.row];
     cell.textLabel.text=r[@"name"];
-    cell.detailTextLabel.text=r[@"id"];
+    cell.detailTextLabel.text=_matrix && _matrix[r[@"id"]]?[NSString stringWithFormat:@"%@ · %@",r[@"id"],[self profileName:_matrix[r[@"id"]]]]:r[@"id"];
     cell.detailTextLabel.textColor=UIColor.secondaryLabelColor;
     cell.imageView.image=ASVIcon(r[@"id"]);
     cell.imageView.layer.cornerRadius=6.5;cell.imageView.clipsToBounds=YES;
@@ -258,6 +281,7 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
     else if ([r[@"state"] isEqual:@"deleted"]) { symbol=@"trash";tint=UIColor.systemRedColor; }
     else if ([r[@"state"] isEqual:@"profileExpired"]) { symbol=@"exclamationmark.shield";tint=UIColor.systemOrangeColor; }
     UISwitch *sw=[[UISwitch alloc] init];sw.accessibilityIdentifier=r[@"id"];
+    if(_matrix)sw.onTintColor=UIColor.systemBlueColor;
     sw.on=[_selected containsObject:r[@"id"]];[sw addTarget:self action:@selector(changed:) forControlEvents:UIControlEventValueChanged];
     [sw sizeToFit];
     if (symbol) {
@@ -272,7 +296,8 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
     return cell;
 }
 - (NSArray<NSArray<NSString *> *> *)fields {
-    return @[@[@"name",[self t:@"Alphabet" ru:@"Алфавит"]],@[@"vendor",[self t:@"Developer" ru:@"Разработчик"]],@[@"category",[self t:@"Category" ru:@"Категория"]],@[@"type",[self t:@"User / system" ru:@"Пользовательское / системное"]],@[@"state",[self t:@"Installation state" ru:@"Состояние установки"]],@[@"selected",[self t:@"Selected / unselected" ru:@"Выбрано / не выбрано"]]];
+    NSArray *fields=@[@[@"name",[self t:@"Alphabet" ru:@"Алфавит"]],@[@"vendor",[self t:@"Developer" ru:@"Разработчик"]],@[@"category",[self t:@"Category" ru:@"Категория"]],@[@"type",[self t:@"User / system" ru:@"Пользовательское / системное"]],@[@"state",[self t:@"Installation state" ru:@"Состояние установки"]],@[@"selected",[self t:@"Selected / unselected" ru:@"Выбрано / не выбрано"]]];
+    return _matrix?[fields arrayByAddingObject:@[@"vpnProfile",[self t:@"VPN profile" ru:@"VPN-профиль"]]]:fields;
 }
 - (NSString *)fieldTitle:(NSString *)field {
     for (NSArray *f in [self fields]) if ([f[0] isEqual:field]) return f[1];
@@ -295,7 +320,7 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
         counts[key]=@(counts[key].integerValue+1);
     }
     NSMutableArray *values=[NSMutableArray array];
-    for (NSString *key in [self sortedKeys:counts.allKeys descending:NO]) [values addObject:@[key,[self titleForKey:key field:field],counts[key]]];
+    for (NSString *key in [self sortedKeys:counts.allKeys descending:NO field:field]) [values addObject:@[key,[self titleForKey:key field:field],counts[key]]];
     ASVValuePicker *picker=[[ASVValuePicker alloc] initWithStyle:UITableViewStyleInsetGrouped];
     picker.title=[self fieldTitle:field];picker.values=values;
     __weak typeof(self) weakSelf=self;
@@ -314,7 +339,7 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
             if ([v isEqual:@"all"]) [self clearFilter]; else [self pickFilterValueForField:v];
         }];
     }]];
-    [sheet addAction:[UIAlertAction actionWithTitle:[self t:@"Sort groups" ru:@"Сортировка групп"] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){
+    if(![_groupMode isEqual:@"none"])[sheet addAction:[UIAlertAction actionWithTitle:[self t:@"Sort groups" ru:@"Сортировка групп"] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){
         [self sheet:[self t:@"Sort groups" ru:@"Сортировка групп"] options:@[@[@"asc",[self t:@"A–Z" ru:@"А–Я"]],@[@"desc",[self t:@"Z–A" ru:@"Я–А"]]] current:self.groupSort pick:^(NSString *v){ self.groupSort=v;[self rebuild]; }];
     }]];
     [sheet addAction:[UIAlertAction actionWithTitle:[self t:@"Sort apps" ru:@"Сортировка приложений"] style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *a){

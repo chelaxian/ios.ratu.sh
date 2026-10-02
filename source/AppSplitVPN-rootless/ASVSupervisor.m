@@ -1,5 +1,8 @@
 #import "ASVSupervisor.h"
 #import "Shared.h"
+#import "ASVProfiles.h"
+#import "RecoveryCore.h"
+#import "MediaCore.h"
 #import <Network/Network.h>
 #import <arpa/inet.h>
 #import <dlfcn.h>
@@ -33,8 +36,13 @@ static NSString *configApp;
 static NSTimeInterval lastConfigLoad;
 static BOOL configLoading;
 static int lockToken=-1;
+static int uiLockToken=-1;
 static BOOL locked;
 static NSTimeInterval lockedAt;
+static void (*mediaIsPlaying)(dispatch_queue_t,void (^)(BOOL));
+static BOOL mediaKnown, mediaPlaying, mediaPending, mediaHeld;
+static NSTimeInterval mediaPollAt, mediaUpdatedAt;
+static NSUInteger mediaGeneration;
 static NSUUID *lsStoppedUUID;
 static BOOL wasActive;
 static NSTimeInterval activeSince, downSince, nextStartAllowed, nextHealth, statusRequestedAt;
@@ -47,6 +55,12 @@ static NSTimeInterval lastStatusPoll;
 static BOOL statusPolling;
 static int clearToken=-1;
 static NSDictionary *prefsCache;
+static ASVRecovery recovery;
+static NSMutableSet *failedReserves;
+static NSString *pendingReserve,*pinnedProfile;
+static BOOL profileStarting, circuitLatched;
+static NSTimeInterval connectDeadline;
+static BOOL lastAutomation;
 static struct timespec prefsStamp;
 
 static NSTimeInterval Now(void) { return [NSDate date].timeIntervalSince1970; }
@@ -69,7 +83,22 @@ static NSDictionary *Prefs(void) {
     }
     return prefsCache;
 }
-static BOOL Suspended(NSDictionary *prefs) { return locked && [prefs[ASV_LS_DISCONNECT] boolValue]; }
+static BOOL MediaProtected(NSDictionary *prefs) {
+    // Never disconnect on an unavailable or stale observation of playback.
+    return ASVMediaShouldHold(locked,ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT),[prefs[ASV_LS_MEDIA] boolValue],mediaKnown,mediaPlaying,Now()-mediaUpdatedAt);
+}
+static BOOL Suspended(NSDictionary *prefs) { return locked && ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT) && !MediaProtected(prefs); }
+
+static void PollMedia(NSDictionary *prefs,NSTimeInterval now) {
+    if(!locked || !ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT) || ![prefs[ASV_LS_MEDIA] boolValue])return;
+    if(!mediaIsPlaying || (mediaPending && now-mediaPollAt<6) || now-mediaPollAt<2)return;
+    mediaPending=YES;mediaPollAt=now;
+    NSUInteger generation=++mediaGeneration;
+    mediaIsPlaying(dispatch_get_main_queue(),^(BOOL playing){
+        if(generation!=mediaGeneration)return;
+        mediaPending=NO;mediaKnown=YES;mediaPlaying=playing;mediaUpdatedAt=Now();dirty=YES;
+    });
+}
 
 static void Event(NSString *code,NSString *detail) {
     [events addObject:@{@"time":@(Now()),@"code":code,@"detail":detail ?: @""}];
@@ -86,8 +115,9 @@ static void WriteState(void) {
     if (!dirty) return;
     dirty=NO;
     NSDictionary *state=@{@"health":healthText ?: @"",@"healthFails":@(healthFails),
-        @"locked":@(locked),@"lsStopped":lsStoppedUUID.UUIDString ?: @"",@"vpnName":configName ?: @"",
-        @"vpnApp":configApp ?: @"",@"vpnStatus":@(vpnStatus),@"vpnActive":@(wasActive),@"updated":@(Now())};
+        @"locked":@(locked),@"mediaHeld":@(mediaHeld),@"lsStopped":lsStoppedUUID.UUIDString ?: @"",@"vpnName":configName ?: @"",
+        @"vpnApp":configApp ?: @"",@"vpnStatus":@(vpnStatus),@"vpnActive":@(wasActive),@"updated":@(Now()),
+        @"failedCycles":@(recovery.cycles),@"cycleHealthy":@(recovery.healthy),@"failedReserves":failedReserves.allObjects ?: @[],@"pinnedProfile":pinnedProfile ?: @"",@"circuitLatched":@(circuitLatched)};
     [state writeToFile:ASV_EXTRA_STATE atomically:YES];
     chmod(ASV_EXTRA_STATE.fileSystemRepresentation,0644);
     notify_post(ASV_EXTRA_NOTIFY);
@@ -139,6 +169,7 @@ static void LoadConfiguration(void) {
         }
         NSArray *chosen=found.firstObject;
         for (NSArray *item in found) if ([item[0] isEqual:configUUID]) chosen=item;
+        if(pinnedProfile.length)for(NSArray *item in found)if([[item[0] UUIDString] isEqual:pinnedProfile])chosen=item;
         NSUUID *uuid=chosen[0];
         if (![uuid isEqual:configUUID] || ![chosen[1] isEqual:configName] || ![chosen[2] isEqual:configApp]) dirty=YES;
         configUUID=uuid;
@@ -151,16 +182,19 @@ static void LoadConfiguration(void) {
 
 typedef struct { BOOL found; int family; unsigned index; char address[INET6_ADDRSTRLEN]; } ASVTunnel;
 static BOOL GlobalIPv6(const struct in6_addr *a) { return (a->s6_addr[0]&0xE0)==0x20; }
-// The tunnel is the utun/ipsec/ppp interface carrying an address. Carrier
-// IMS/VoWiFi tunnels (192.0.0.0/24, ULA) and the empty system utuns are skipped.
+// Resolve the selected protocol's service, not the newest utun. Otherwise an
+// unrelated live VPN could make a broken reserve falsely pass its health check.
 static ASVTunnel FindTunnel(void) {
     ASVTunnel best={0};
+    NSString *expected=configUUID?ASVProfileInterface(configUUID.UUIDString):nil;
+    if(!expected.length)return best;
     int bestScore=0;
     struct ifaddrs *list=NULL;
     if (getifaddrs(&list)!=0) return best;
     for (struct ifaddrs *item=list;item;item=item->ifa_next) {
         if (!item->ifa_addr || !(item->ifa_flags&IFF_UP)) continue;
         const char *name=item->ifa_name;
+        if(strcmp(name,expected.UTF8String))continue;
         BOOL utun=!strncmp(name,"utun",4), other=!strncmp(name,"ipsec",5) || !strncmp(name,"ppp",3);
         if (!utun && !other) continue;
         int score=0;
@@ -220,7 +254,7 @@ static uint16_t Checksum(const void *data,size_t length) {
     while (sum>>16) sum=(sum&0xFFFF)+(sum>>16);
     return (uint16_t)~sum;
 }
-static NSString *Ping(NSString *host,ASVTunnel tunnel) {
+static NSString *Ping(NSString *host,ASVTunnel tunnel,NSInteger timeout) {
     struct addrinfo hints={0},*result=NULL;
     hints.ai_family=tunnel.family;hints.ai_socktype=SOCK_DGRAM;
     if (getaddrinfo(host.UTF8String,NULL,&hints,&result)!=0 || !result) return @"dns";
@@ -232,7 +266,8 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel) {
     uint16_t ident=(uint16_t)arc4random();
     NSString *reason=@"timeout";
     // Tunnels often answer ICMP slowly and drop some echoes: four tries, 2.5 s each.
-    for (uint16_t seq=1;seq<=4;seq++) {
+    NSTimeInterval totalDeadline=Now()+timeout;
+    for (uint16_t seq=1;seq<=4 && Now()<totalDeadline;seq++) {
         uint8_t packet[24]={0};
         packet[0]=v4?ICMP_ECHO:ICMP6_ECHO_REQUEST;
         memcpy(packet+4,&ident,2);
@@ -240,7 +275,7 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel) {
         memcpy(packet+6,&netSeq,2);
         if (v4) { uint16_t sum=Checksum(packet,sizeof packet);memcpy(packet+2,&sum,2); }
         if (sendto(fd,packet,sizeof packet,0,result->ai_addr,result->ai_addrlen)<0) { reason=@"send";continue; }
-        NSTimeInterval deadline=Now()+2.5;
+        NSTimeInterval deadline=MIN(totalDeadline,Now()+MAX(0.25,timeout/4.0));
         while (Now()<deadline) {
             struct pollfd poller={fd,POLLIN,0};
             if (poll(&poller,1,(int)MAX(1,(deadline-Now())*1000))<=0) break;
@@ -256,7 +291,7 @@ static NSString *Ping(NSString *host,ASVTunnel tunnel) {
     freeaddrinfo(result);
     return reason;
 }
-static void Probe(NSString *method,NSString *host,NSInteger port,ASVTunnel tunnel,ASVProbeDone done) {
+static void Probe(NSString *method,NSString *host,NSInteger port,NSInteger timeout,ASVTunnel tunnel,ASVProbeDone done) {
     dispatch_queue_t queue=ProbeQueue();
     CFAbsoluteTime start=CFAbsoluteTimeGetCurrent();
     __block BOOL finished=NO;
@@ -270,7 +305,7 @@ static void Probe(NSString *method,NSString *host,NSInteger port,ASVTunnel tunne
         dispatch_async(dispatch_get_main_queue(),^{ done(reason==nil,ms,reason); });
     };
     if ([method isEqual:@"ping"]) {
-        dispatch_async(queue,^{ finish(Ping(host,tunnel)); });
+        dispatch_async(queue,^{ finish(Ping(host,tunnel,timeout)); });
         return;
     }
     BOOL tls=[method isEqual:@"https"], http=tls || [method isEqual:@"http"];
@@ -301,11 +336,57 @@ static void Probe(NSString *method,NSString *host,NSInteger port,ASVTunnel tunne
             });
         }
     });
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,15*NSEC_PER_SEC),queue,^{ finish(@"timeout"); });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,timeout*NSEC_PER_SEC),queue,^{ finish(@"timeout"); });
     nw_connection_start(current);
 }
 
 #pragma mark - Supervisor
+
+static void CircuitOpen(BOOL reserves,NSString *reason) {
+    NSMutableDictionary *prefs=[Prefs() mutableCopy];prefs[ASV_ALWAYS_ON]=@NO;prefs[ASV_REDUNDANCY]=@NO;
+    if(!reserves)prefs[ASV_HEALTH]=@NO;
+    if([prefs writeToFile:ASV_PREFS atomically:YES]) { chown(ASV_PREFS.UTF8String,501,501);chmod(ASV_PREFS.UTF8String,0644);prefsCache=nil;notify_post(ASV_NOTIFY); }
+    circuitLatched=YES;pendingReserve=nil;connectDeadline=0;profileStarting=NO;
+    if(configUUID)Control(configUUID,NO);Event(@"circuitOpen",reason);dirty=YES;
+}
+static void FailedCycle(NSString *reason) {
+    NSDictionary *prefs=Prefs();unsigned limit=(unsigned)ASVIntSetting(prefs,ASV_HC_FAILURES,3,1,10);
+    BOOL exhausted=ASVRecoveryCycleFailed(&recovery,limit);
+    Event(@"badCycle",[NSString stringWithFormat:@"%u/%u",recovery.cycles,limit]);dirty=YES;
+    if(ASVExtraOptionActive(prefs,ASV_REDUNDANCY)) {
+        if(!failedReserves)failedReserves=[NSMutableSet set];if(configUUID)[failedReserves addObject:configUUID.UUIDString];
+        NSArray *raw=[prefs[ASV_RESERVES] isKindOfClass:NSArray.class]?prefs[ASV_RESERVES]:@[];
+        NSMutableOrderedSet *unique=[NSMutableOrderedSet orderedSet];for(id v in raw)if([v isKindOfClass:NSString.class] && [[NSUUID alloc] initWithUUIDString:v])[unique addObject:v];
+        NSArray *candidates=unique.array;NSUInteger count=MIN((NSUInteger)64,candidates.count);uint64_t tried=0;unsigned after=count?(unsigned)count-1:0;
+        for(unsigned i=0;i<count;i++){if([failedReserves containsObject:candidates[i]])tried|=UINT64_C(1)<<i;if([candidates[i] isEqual:configUUID.UUIDString])after=i;}
+        int next=ASVReserveNext(tried,(unsigned)count,after,[prefs[ASV_RED_ALGORITHM] isEqual:@"random"],arc4random());
+        if(next<0){CircuitOpen(YES,@"All reserve profiles failed; manual intervention required");return;}
+        pendingReserve=candidates[next];nextStartAllowed=Now()+3;connectDeadline=0;
+        Event(@"reserveSwitch",ASVProfileRecord(pendingReserve)[@"name"] ?: pendingReserve);
+    } else if(exhausted && [prefs[ASV_ALWAYS_ON] boolValue]) CircuitOpen(NO,reason ?: @"No successful health check in consecutive recovery cycles");
+}
+static void StartReservedProfile(void) {
+    NSString *uuid=pendingReserve;pendingReserve=nil;profileStarting=YES;pinnedProfile=uuid;
+    NSDictionary *snapshot=Prefs();
+    NSString *mode=[snapshot[@"mode"] copy];
+    NSArray *reserves=[snapshot[ASV_RESERVES] copy];
+    BOOL (^valid)(void)=^BOOL{
+        NSDictionary *current=Prefs();
+        return !circuitLatched && !ASVIsMultiMode(current) &&
+            [current[@"mode"] isEqual:mode] &&
+            [current[ASV_RESERVES] isEqual:reserves] &&
+            ASVExtraOptionActive(current,ASV_REDUNDANCY) &&
+            ASVExtraOptionActive(current,ASV_ALWAYS_ON) &&
+            ASVExtraOptionActive(current,ASV_HEALTH) && !Suspended(current);
+    };
+    ASVProfileConnect(uuid,valid,^(BOOL ok,NSString *error){
+        if(!valid() || [error isEqual:@"Cancelled"]){profileStarting=NO;pinnedProfile=nil;dirty=YES;return;}
+        profileStarting=NO;configUUID=[[NSUUID alloc] initWithUUIDString:uuid];configName=ASVProfileRecord(uuid)[@"name"];configApp=ASVProfileRecord(uuid)[@"owner"];
+        vpnStatus=ok?2:1;wasActive=NO;activeSince=0;downSince=Now();healthText=nil;lastStatusPoll=0;dirty=YES;
+        if(ok)connectDeadline=Now()+MAX(30,ASVIntSetting(Prefs(),ASV_HC_TIMEOUT,15,1,120)*2);
+        else { Event(@"reserveStartError",error);FailedCycle(error); }
+    });
+}
 
 static void RunHealth(NSDictionary *prefs) {
     NSInteger interval=ASVIntSetting(prefs,ASV_HC_INTERVAL,ASV_DEFAULT_HC_INTERVAL,10,3600);
@@ -316,12 +397,13 @@ static void RunHealth(NSDictionary *prefs) {
     NSInteger threshold=ASVIntSetting(prefs,ASV_HC_FAILURES,ASV_DEFAULT_HC_FAILURES,1,10);
     NSTimeInterval session=activeSince;
     NSUUID *target=configUUID;
-    Probe(ASVHealthMethod(prefs),ASVHealthTarget(prefs),ASVHealthPort(prefs),tunnel,^(BOOL ok,NSInteger ms,NSString *reason){
+    Probe(ASVHealthMethod(prefs),ASVHealthTarget(prefs),ASVHealthPort(prefs),ASVIntSetting(prefs,ASV_HC_TIMEOUT,15,1,120),tunnel,^(BOOL ok,NSInteger ms,NSString *reason){
         probing=NO;
-        if (!VPNActive() || session!=activeSince) return;
+        if (!VPNActive() || session!=activeSince || ![target isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_HEALTH)) return;
         dirty=YES;
         if (ok) {
             healthFails=0;healthText=[NSString stringWithFormat:@"ok:%ld",(long)ms];nextHealth=Now()+interval;
+            ASVRecoverySuccess(&recovery);[failedReserves removeAllObjects];connectDeadline=0;
             Event(@"hcOK",[NSString stringWithFormat:@"%ld",(long)ms]);
             return;
         }
@@ -333,14 +415,17 @@ static void RunHealth(NSDictionary *prefs) {
             healthFails=0;
             nextHealth=Now()+interval;
             nextStartAllowed=Now()+5;
+            if(ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON))FailedCycle(reason);
         } else nextHealth=Now()+MIN(10,interval);
     });
 }
 static void LockChanged(BOOL nowLocked) {
     if (nowLocked==locked) return;
     locked=nowLocked;
+    mediaKnown=NO;mediaPending=NO;mediaPollAt=0;++mediaGeneration;
     dirty=YES;
     Event(locked?@"lock":@"unlock",nil);
+    if(ASVIsMultiMode(Prefs()))return;
     if (locked) { lockedAt=Now();return; }
     if (lsStoppedUUID) {
         NSUUID *uuid=lsStoppedUUID;
@@ -352,36 +437,69 @@ static void LockChanged(BOOL nowLocked) {
 }
 // Fine-grained session state (connecting, reasserting, disconnecting) for the State read-out.
 static void PollStatus(NSTimeInterval now) {
+    if(statusPolling && now-lastStatusPoll>10)statusPolling=NO;
     if (statusPolling || now-lastStatusPoll<3) return;
     ASVNESession target=configUUID ? SessionFor(configUUID) : NULL;
     if (!target || !neGetStatus) { if (vpnStatus) { vpnStatus=0;dirty=YES; } return; }
     lastStatusPoll=now;
     statusPolling=YES;
+    NSUUID *uuid=configUUID;
     neGetStatus(target,dispatch_get_main_queue(),^(int status){
         statusPolling=NO;
+        if(![uuid isEqual:configUUID])return;
         if (status!=vpnStatus) { vpnStatus=status;dirty=YES; }
     });
 }
 void ASVSupervisorTick(void) {
     NSTimeInterval now=Now();
     NSDictionary *prefs=Prefs();
-    BOOL lsOption=[prefs[ASV_LS_DISCONNECT] boolValue], always=[prefs[ASV_ALWAYS_ON] boolValue], health=[prefs[ASV_HEALTH] boolValue];
-    BOOL active=VPNActive();
+    uint64_t uiLock=0;
+    if(uiLockToken>=0 && notify_get_state(uiLockToken,&uiLock)==NOTIFY_STATUS_OK && (uiLock&2) && locked!=((uiLock&1)!=0)){
+        LockChanged((uiLock&1)!=0);return;
+    }
+    static NSTimeInterval lastCatalog; if(now-lastCatalog>10){lastCatalog=now;ASVProfilesRefresh();}
+    if(ASVIsMultiMode(prefs)) { WriteState();return; }
+    BOOL lsOption=ASVExtraOptionActive(prefs,ASV_LS_DISCONNECT), always=ASVExtraOptionActive(prefs,ASV_ALWAYS_ON), health=ASVExtraOptionActive(prefs,ASV_HEALTH);
+    static BOOL lastMediaOption;
+    BOOL mediaOption=lsOption && [prefs[ASV_LS_MEDIA] boolValue];
+    if(mediaOption!=lastMediaOption){
+        lastMediaOption=mediaOption;mediaKnown=NO;mediaPending=NO;mediaPollAt=0;++mediaGeneration;
+    }
+    PollMedia(prefs,now);
+    BOOL hold=MediaProtected(prefs);
+    if(hold!=mediaHeld){
+        mediaHeld=hold;dirty=YES;
+        if(locked){lockedAt=now;Event(hold?@"lsMediaHold":@"lsMediaRelease",nil);}
+    }
+    BOOL automation=always || ASVExtraOptionActive(prefs,ASV_REDUNDANCY);
+    if(automation && !lastAutomation){circuitLatched=NO;recovery=(ASVRecovery){0};[failedReserves removeAllObjects];dirty=YES;}
+    lastAutomation=automation;
+    BOOL active=pinnedProfile.length?(vpnStatus==3||vpnStatus==4):VPNActive();
+    static NSTimeInterval pausedAt;
+    BOOL paused=Suspended(prefs) || !HasPhysicalNetwork();
+    if(paused && !pausedAt)pausedAt=now;
+    else if(!paused && pausedAt){if(connectDeadline)connectDeadline+=now-pausedAt;pausedAt=0;}
     if (now-lastConfigLoad>(configUUID?30:5) || (active && !wasActive)) LoadConfiguration();
-    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+30;dirty=YES;Event(@"vpnUp",configName); }
+    if (active && !wasActive) { activeSince=now;startFailures=0;healthFails=0;healthText=nil;nextHealth=now+30;connectDeadline=0;dirty=YES;Event(@"vpnUp",configName); }
     if (!active && (wasActive || downSince==0)) {
         if (wasActive) Event(@"vpnDown",configName);
         downSince=now;healthText=nil;dirty=YES;
     }
     wasActive=active;
     PollStatus(now);
-    if (lsOption && locked && active && !lsStoppedUUID && configUUID &&
+    if(!automation){pendingReserve=nil;connectDeadline=0;pinnedProfile=nil;}
+    if(!Suspended(prefs) && HasPhysicalNetwork() && connectDeadline && now>=connectDeadline && !active){connectDeadline=0;Control(configUUID,NO);FailedCycle(@"VPN connection timed out");}
+    if(pendingReserve && !Suspended(prefs) && HasPhysicalNetwork() && !active && vpnStatus!=5 && !profileStarting && now>=nextStartAllowed){StartReservedProfile();WriteState();return;}
+    // Do not disconnect while the latest playback query is still in flight.
+    // A temporary pending query must not restart the LS delay or flood the log.
+    if (mediaHeld && active && [lsStoppedUUID isEqual:configUUID]) { lsStoppedUUID=nil;dirty=YES; }
+    if (lsOption && locked && !mediaHeld && (!mediaOption || !mediaPending) && active && !lsStoppedUUID && configUUID &&
         now-lockedAt>=ASVIntSetting(prefs,ASV_LS_DELAY,ASV_DEFAULT_LS_DELAY,0,600) && Control(configUUID,NO)) {
         lsStoppedUUID=configUUID;
         Event(@"lsStop",nil);
     }
     if (statusPending && now-statusRequestedAt>10) statusPending=NO;
-    if (always && !Suspended(prefs) && !active && configUUID && !statusPending && now>=nextStartAllowed && now-downSince>=3) {
+    if (always && !circuitLatched && !pendingReserve && !profileStarting && !Suspended(prefs) && HasPhysicalNetwork() && !active && configUUID && !statusPending && now>=nextStartAllowed && now-downSince>=3) {
         ASVNESession target=SessionFor(configUUID);
         if (target && neGetStatus) {
             NSUUID *uuid=configUUID;
@@ -389,10 +507,11 @@ void ASVSupervisorTick(void) {
             statusRequestedAt=now;
             neGetStatus(target,dispatch_get_main_queue(),^(int status){
                 statusPending=NO;
-                if (VPNActive() || ![uuid isEqual:configUUID] || Suspended(Prefs()) || ![Prefs()[ASV_ALWAYS_ON] boolValue]) return;
+                if (VPNActive() || circuitLatched || ![uuid isEqual:configUUID] || Suspended(Prefs()) || !ASVExtraOptionActive(Prefs(),ASV_ALWAYS_ON)) return;
                 if (status==ASVStatusConnecting || status==ASVStatusReasserting || status==ASVStatusDisconnecting) { nextStartAllowed=Now()+3;return; }
                 if (!Control(uuid,YES)) return;
                 startFailures++;
+                if(!connectDeadline && [Prefs()[ASV_HEALTH] boolValue])connectDeadline=Now()+MAX(30,ASVIntSetting(Prefs(),ASV_HC_TIMEOUT,15,1,120)*2);
                 nextStartAllowed=Now()+MIN(15*startFailures,120);
                 Event(@"alwaysOn",nil);
             });
@@ -404,6 +523,8 @@ void ASVSupervisorTick(void) {
 }
 NSString *ASVSupervisorVPNName(void) { return configName; }
 void ASVSupervisorStart(void) {
+    void *media=dlopen("/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote",RTLD_NOW);
+    if(media)mediaIsPlaying=dlsym(media,"MRMediaRemoteGetNowPlayingApplicationIsPlaying");
     void *library=dlopen("/usr/lib/system/libsystem_networkextension.dylib",RTLD_NOW);
     neCreate=dlsym(library ?: RTLD_DEFAULT,"ne_session_create");
     neStart=dlsym(library ?: RTLD_DEFAULT,"ne_session_start");
@@ -412,6 +533,11 @@ void ASVSupervisorStart(void) {
     neRelease=dlsym(library ?: RTLD_DEFAULT,"ne_session_release");
     neAnyActive=dlsym(library ?: RTLD_DEFAULT,"ne_session_manager_has_active_sessions");
     NSDictionary *saved=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
+    recovery.cycles=[saved[@"failedCycles"] unsignedIntValue];recovery.healthy=[saved[@"cycleHealthy"] boolValue];
+    failedReserves=[NSMutableSet setWithArray:[saved[@"failedReserves"] isKindOfClass:NSArray.class]?saved[@"failedReserves"]:@[]];
+    pinnedProfile=[saved[@"pinnedProfile"] length]?saved[@"pinnedProfile"]:nil;circuitLatched=[saved[@"circuitLatched"] boolValue];
+    lastAutomation=[Prefs()[ASV_ALWAYS_ON] boolValue];
+    ASVProfilesRefresh();
     events=[NSMutableArray array];
     NSArray *journal=[NSArray arrayWithContentsOfFile:ASV_EXTRA_LOG];
     if (![journal isKindOfClass:NSArray.class]) journal=[saved[@"events"] isKindOfClass:NSArray.class] ? saved[@"events"] : @[];
@@ -428,12 +554,17 @@ void ASVSupervisorStart(void) {
     if ([saved[@"lsStopped"] length]) lsStoppedUUID=[[NSUUID alloc] initWithUUIDString:saved[@"lsStopped"]];
     notify_register_dispatch("com.apple.springboard.lockstate",&lockToken,dispatch_get_main_queue(),^(int token){
         uint64_t value=0;
+        if(uiLockToken>=0 && notify_get_state(uiLockToken,&value)==NOTIFY_STATUS_OK && (value&2)){LockChanged((value&1)!=0);return;}
         notify_get_state(token,&value);
         LockChanged(value!=0);
+    });
+    notify_register_dispatch(ASV_UI_LOCK_NOTIFY,&uiLockToken,dispatch_get_main_queue(),^(int token){
+        uint64_t value=0;if(notify_get_state(token,&value)==NOTIFY_STATUS_OK && (value&2))LockChanged((value&1)!=0);
     });
     uint64_t value=0;
     if (lockToken>=0) notify_get_state(lockToken,&value);
     locked=value!=0;
+    value=0;if(uiLockToken>=0 && notify_get_state(uiLockToken,&value)==NOTIFY_STATUS_OK && (value&2))locked=(value&1)!=0;
     // A service restart is not a VPN connection: start from the current state without logging it.
     wasActive=VPNActive();
     if (wasActive) { activeSince=Now();nextHealth=activeSince+30; } else downSince=Now();

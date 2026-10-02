@@ -19,6 +19,54 @@
     return result;
 }
 - (void)dealloc { [self clear]; }
+- (BOOL)replaceMatrix:(NSDictionary<NSString *,NSString *> *)matrix interfaces:(NSDictionary<NSString *,NSString *> *)interfaces providerIDs:(NSArray<NSString *> *)providers error:(NSString **)error {
+    Class result=NSClassFromString(@"NEPolicyResult");
+    if(![NSClassFromString(@"NEPolicyCondition") respondsToSelector:@selector(realApplication:)]){if(error)*error=@"Provider identity API unavailable";return NO;}
+    NEPolicySession *candidate=[NSClassFromString(@"NEPolicySession") new];candidate.priority=1;
+    NSMutableArray *unresolved=[NSMutableArray array];NSUInteger count=0;
+    [NSClassFromString(@"NEProcessInfo") clearUUIDCache];
+    // Provider transports must reach their servers directly, never another assigned tunnel.
+    for(NSString *provider in providers)for(NSUUID *uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:provider uid:501]) {
+        id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:10 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") realApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+        if(![candidate addPolicy:p]){if(error)*error=@"Provider transport exception rejected";return NO;}count++;
+    }
+    for(NSUUID *uuid in self.selfUUIDs) {
+        id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:20 result:[result skipWithOrder:0] conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+        if(![candidate addPolicy:p]){if(error)*error=@"Supervisor exception rejected";return NO;}count++;
+    }
+    for(NSString *identifier in matrix) {
+        NSMutableOrderedSet *identities=[NSMutableOrderedSet orderedSet];
+        for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:identifier uid:501])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
+        id proxy=[NSClassFromString(@"LSApplicationProxy") applicationProxyForIdentifier:identifier];
+        NSURL *url=[proxy respondsToSelector:@selector(bundleURL)]?[proxy bundleURL]:nil;
+        NSString *executable=[NSBundle bundleWithURL:url].executablePath;
+        if(!identities.count && executable.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:executable])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
+        if(!identities.count){
+            [unresolved addObject:identifier];
+            if(executable.length){if(error)*error=@"Could not resolve a selected MATRIX application's identity";return NO;}
+            continue;
+        }
+        if([proxy respondsToSelector:@selector(plugInKitPlugins)])for(id plugin in [proxy plugInKitPlugins]) {
+            NSURL *pluginURL=[plugin respondsToSelector:@selector(bundleURL)]?[plugin bundleURL]:nil;
+            NSString *path=[NSBundle bundleWithURL:pluginURL].executablePath;
+            if(path.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
+        }
+        NSString *interface=interfaces[matrix[identifier]];
+        // Native NEVPNApp rules select the assigned session. A hand-written
+        // IP_TUNNEL result failed live tests; don't replace Apple's per-app
+        // socket and DNS selection. Not-ready assignments remain fail-closed.
+        id outcome=interface.length?[result skipWithOrder:0]:[result drop];
+        for(NSUUID *uuid in identities) {
+            if(count>=4096){if(error)*error=@"Matrix application rule limit exceeded";return NO;}
+            id p=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:100 result:outcome conditions:@[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+            if(![candidate addPolicy:p]){if(error)*error=@"Matrix application policy rejected";return NO;}count++;
+        }
+    }
+    id fallback=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:1000 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+    if(![candidate addPolicy:fallback] || ![candidate apply]){if(error)*error=@"Matrix policies could not be applied";return NO;}
+    NEPolicySession *previous=_session;_session=candidate;_count=count+1;_unresolved=unresolved;
+    [previous removeAllPolicies];[previous apply];return YES;
+}
 - (BOOL)replaceMode:(NSString *)mode applications:(NSArray<NSString *> *)apps error:(NSString **)error {
     if (![@[@"tunnelOnly", @"bypass"] containsObject:mode]) {
         if (error) *error = @"Invalid routing mode";

@@ -4,7 +4,7 @@ ARCHS = arm64 arm64e
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = appsplitvpnd appsplitvpn-register
-appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m ASVSupervisor.m
+appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m ASVSupervisor.m ASVProfiles.m
 appsplitvpnd_ARCHS = arm64
 appsplitvpnd_CFLAGS = -fobjc-arc -Wall -Wextra
 appsplitvpnd_FRAMEWORKS = Foundation Network
@@ -18,7 +18,7 @@ appsplitvpn-register_CODESIGN_FLAGS = -Cadhoc -S
 appsplitvpn-register_INSTALL_PATH = /usr/libexec
 
 BUNDLE_NAME = AppSplitVPNPrefs
-AppSplitVPNPrefs_FILES = ASVRootController.m ASVAppListController.m ASVExtraController.m
+AppSplitVPNPrefs_FILES = ASVRootController.m ASVAppListController.m ASVExtraController.m ASVProfileListController.m
 AppSplitVPNPrefs_CFLAGS = -fobjc-arc -Wall -Wextra
 AppSplitVPNPrefs_FRAMEWORKS = UIKit Foundation UniformTypeIdentifiers
 AppSplitVPNPrefs_PRIVATE_FRAMEWORKS = Preferences
@@ -39,6 +39,16 @@ TWEAK_NAME = AppSplitVPNStatusBar
 AppSplitVPNStatusBar_FILES = StatusBar.x
 AppSplitVPNStatusBar_CFLAGS = -fobjc-arc
 AppSplitVPNStatusBar_FRAMEWORKS = UIKit
+
+TWEAK_NAME += AppSplitVPNLockState
+AppSplitVPNLockState_FILES = LockState.x
+AppSplitVPNLockState_CFLAGS = -fobjc-arc -Wall -Wextra
+AppSplitVPNLockState_FRAMEWORKS = UIKit Foundation
+
+TWEAK_NAME += AppSplitVPNMultiCompat
+AppSplitVPNMultiCompat_FILES = MultiPacketCompat.x
+AppSplitVPNMultiCompat_CFLAGS = -fobjc-arc -Wall -Wextra
+AppSplitVPNMultiCompat_FRAMEWORKS = Foundation
 
 include $(THEOS_MAKE_PATH)/tool.mk
 include $(THEOS_MAKE_PATH)/bundle.mk
