@@ -83,14 +83,17 @@ static int ASVSet(int fd,int level,int option,const void *value,socklen_t length
     errno=savedError;return result;
 }
 
-%hook NESMVPNSession
-- (void)plugin:(id)plugin didRequestVirtualInterfaceWithParameters:(id)parameters completionHandler:(id)completion {
-    id configuration=[(id)self respondsToSelector:@selector(configuration)]?((id(*)(id,SEL))objc_msgSend)((id)self,@selector(configuration)):nil;
+static void (*originalRequest)(id,SEL,id,id,id);
+static void ASVRequest(id self,SEL command,id plugin,id parameters,id completion) {
+    id configuration=[self respondsToSelector:@selector(configuration)]?((id(*)(id,SEL))objc_msgSend)(self,@selector(configuration)):nil;
     BOOL previous=legacyScope;legacyScope=ASVOwnedConfiguration(configuration);
-    @try { %orig; } @finally { legacyScope=previous; }
+    @try {
+        originalRequest(self,command,plugin,parameters,completion);
+    } @finally {
+        legacyScope=previous;
+    }
 }
-%end
-%ctor {
+__attribute__((constructor)) static void ASVInitializeCompatibility(void) {
     if(strcmp(getprogname(),"nesessionmanager"))return;
     Class cls=NSClassFromString(@"NESMVPNSession");SEL selector=@selector(plugin:didRequestVirtualInterfaceWithParameters:completionHandler:);
     Method method=class_getInstanceMethod(cls,selector);
@@ -101,6 +104,6 @@ static int ASVSet(int fd,int level,int option,const void *value,socklen_t length
     if(!send || !set)return;
     MSHookFunction(send,(void *)ASVSend,(void **)&originalSend);
     MSHookFunction(set,(void *)ASVSet,(void **)&originalSet);
-    %init;
+    MSHookMessageEx(cls,selector,(IMP)ASVRequest,(IMP *)&originalRequest);
     if(notify_register_check(ASV_MULTI_COMPAT_READY,&readyToken)==NOTIFY_STATUS_OK){notify_set_state(readyToken,((uint64_t)getpid()<<32)|1);notify_post(ASV_MULTI_COMPAT_READY);}
 }
