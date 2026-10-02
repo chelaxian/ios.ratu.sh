@@ -83,13 +83,17 @@ static BOOL ASVHasNativeBadge(UIView *view){
 }
 static BOOL ASVNativeVPNEnabled(UIView *statusBar){
     // Native badges may be rasterized from a detached UILabel and have no view
-    // in the live hierarchy. Consult the bar's actual display data as well.
+    // in the live hierarchy. Check its actual allocated display slot, not the
+    // global vpnEntry flag (which is true even when Dynamic Island hides it).
     @try{
-        for(NSString *name in @[@"currentAggregatedData",@"currentData"]){
-            SEL getter=NSSelectorFromString(name);if(![statusBar respondsToSelector:getter])continue;
-            id data=((id(*)(id,SEL))objc_msgSend)(statusBar,getter);SEL entry=NSSelectorFromString(@"vpnEntry");
-            if(![data respondsToSelector:entry])continue;id vpn=((id(*)(id,SEL))objc_msgSend)(data,entry);
-            SEL enabled=NSSelectorFromString(@"isEnabled");if([vpn respondsToSelector:enabled] && ((BOOL(*)(id,SEL))objc_msgSend)(vpn,enabled))return YES;
+        SEL statesSelector=NSSelectorFromString(@"displayItemStates"),frameSelector=NSSelectorFromString(@"frameForDisplayItemWithIdentifier:");
+        if(![statusBar respondsToSelector:statesSelector] || ![statusBar respondsToSelector:frameSelector])return NO;
+        NSDictionary *states=((id(*)(id,SEL))objc_msgSend)(statusBar,statesSelector);
+        if(![states isKindOfClass:NSDictionary.class])return NO;
+        for(id identifier in states){NSString *name=[[identifier description] uppercaseString];
+            if(![name containsString:@"VPN"] || [name containsString:@"DISCONNECT"])continue;
+            CGRect frame=((CGRect(*)(id,SEL,id))objc_msgSend)(statusBar,frameSelector,identifier);
+            if(!CGRectIsNull(frame) && !CGRectIsInfinite(frame) && frame.size.width>1 && frame.size.height>1)return YES;
         }
     }@catch(__unused NSException *exception){}
     return NO;
