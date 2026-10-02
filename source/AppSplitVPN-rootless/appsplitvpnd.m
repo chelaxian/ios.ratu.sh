@@ -1,5 +1,6 @@
 #import "PolicyEngine.h"
 #import "ASVSupervisor.h"
+#import "ASVMulti.h"
 #import "Shared.h"
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
@@ -9,6 +10,7 @@
 #import <objc/message.h>
 #import <unistd.h>
 static ASVPolicyEngine *engine;
+static ASVMulti *multi;
 static NSDictionary *lastPrefs;
 static BOOL lastActive;
 static BOOL initialized;
@@ -21,6 +23,7 @@ static NSTimeInterval lastVPNLookup;
 static NSString *lastRouteFingerprint;
 static NSString *currentMode;
 static BOOL badgeColor=YES;
+static BOOL shuttingDown;
 
 // Current routing table: a single block (no history) listing every selected app and its outcome.
 // Rewritten only when the effective rules change.
@@ -76,6 +79,13 @@ static NSDictionary *ReadPreferences(void) {
         validated[key] = apps.array;
     }
     validated[@"badgeColor"] = @(raw[@"badgeColor"] == nil || [raw[@"badgeColor"] boolValue]);
+    NSMutableDictionary *matrix=[NSMutableDictionary dictionary];
+    if([raw[ASV_MATRIX] isKindOfClass:NSDictionary.class] && [raw[ASV_MATRIX] count]<=2048){
+        for(id bundle in raw[ASV_MATRIX]){id profile=raw[ASV_MATRIX][bundle];
+            if([bundle isKindOfClass:NSString.class] && [bundle length]>0 && [bundle length]<=255 && [bundle rangeOfCharacterFromSet:allowed.invertedSet].location==NSNotFound && [profile isKindOfClass:NSString.class]){NSUUID *uuid=[[NSUUID alloc] initWithUUIDString:profile];if(uuid)matrix[bundle]=uuid.UUIDString;}
+        }
+    }
+    validated[ASV_MATRIX]=matrix;
     return validated;
 }
 static void State(NSString *status, NSString *error) {
@@ -86,13 +96,13 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.3.0"};
+        @"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"mode":currentMode ?: @"bypass", @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.0~beta1"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
     if (splitToken < 0) notify_register_check(ASV_STATE_NOTIFY, &splitToken);
     // Bits 0-1: 0 inactive, 1 BYPASS, 2 TUNNEL ONLY. Bit 2: badge coloring switched off.
-    uint64_t split=([status isEqual:@"active"] || [status isEqual:@"partial"]) ? ([currentMode isEqual:@"tunnelOnly"] ? 2 : 1) : 0;
+    uint64_t split=([status isEqual:@"active"] || [status isEqual:@"partial"]) ? (ASVIsMultiMode(@{@"mode":currentMode ?: @""}) ? 3 : ([currentMode isEqual:@"tunnelOnly"] ? 2 : 1)) : 0;
     if (split && !badgeColor) split|=4;
     if (splitToken >= 0) notify_set_state(splitToken, split);
     if (changed) {
@@ -101,10 +111,21 @@ static void State(NSString *status, NSString *error) {
     }
 }
 static void Reconcile(BOOL force) {
+    if(shuttingDown)return;
     @autoreleasepool { @try {
         NSDictionary *prefs = ReadPreferences();
         currentMode=prefs[@"mode"];
         badgeColor=[prefs[@"badgeColor"] boolValue];
+        BOOL multiMode=ASVIsMultiMode(prefs);
+        [multi tickMatrix:prefs[ASV_MATRIX] enabled:multiMode && [prefs[@"enabled"] boolValue]];
+        if(multiMode || multi.ownsProfiles || multi.busy){
+            vpnName=multi.names;
+            State(multiMode?multi.status:@"recovering",multi.error);
+            NSMutableArray *lines=[NSMutableArray array];
+            for(NSString *bundle in [prefs[ASV_MATRIX] allKeys]){NSString *uuid=prefs[ASV_MATRIX][bundle];[lines addObject:[NSString stringWithFormat:@"VPN %@ -> %@",bundle,uuid]];}
+            RouteJournal([NSString stringWithFormat:@"MULTI VPN: %@",multi.status],@"MATRIX",lines,engine.unresolved);
+            initialized=NO;return;
+        }
         BOOL active = anyVPNActive && anyVPNActive() != 0;
         NSTimeInterval now = [NSDate date].timeIntervalSince1970;
         if (active && now-lastVPNLookup>25) { lastVPNLookup=now;RefreshVPNName(); }
@@ -113,9 +134,6 @@ static void Reconcile(BOOL force) {
         if (!force && initialized && active == lastActive && [prefs isEqual:lastPrefs] && now-lastRefresh < 60) return;
         initialized = YES; lastActive = active; lastPrefs = prefs; lastRefresh = now;
         if (![prefs[@"enabled"] boolValue]) { [engine clear]; State(@"disabled",nil); RouteJournal(@"disabled: all apps use the system VPN",nil,nil,nil); return; }
-        // Never silently interpret the experimental mode as BYPASS. Activation
-        // remains gated until concurrent tunnels pass the live data-plane tests.
-        if (ASVIsMultiMode(prefs)) { [engine clear]; State(@"unsupported",@"MULTI VPN data-plane validation is not complete");RouteJournal(@"MULTI VPN: data-plane validation pending",nil,nil,nil);return; }
         if (!anyVPNActive) { [engine clear]; State(@"unsupported",@"System VPN status API unavailable"); return; }
         if (!active) { [engine clear]; State(@"waitingVPN",nil); RouteJournal(@"no active VPN: rules removed",nil,nil,nil); return; }
         NSString *mode = prefs[@"mode"];
@@ -149,6 +167,7 @@ int main(int argc,char **argv) { @autoreleasepool {
     void *library=dlopen("/usr/lib/system/libsystem_networkextension.dylib",RTLD_NOW);
     anyVPNActive=dlsym(library ?: RTLD_DEFAULT,"ne_session_manager_has_active_sessions");
     engine=[ASVPolicyEngine new];
+    multi=[[ASVMulti alloc] initWithEngine:engine];
     // TUNNEL ONLY sends unlisted processes direct; the health check of this
     // service must still reach the tunnel it binds to.
     char executable[PATH_MAX]={0};
@@ -174,11 +193,11 @@ int main(int argc,char **argv) { @autoreleasepool {
     });
     dispatch_source_t timer=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_main_queue());
     dispatch_source_set_timer(timer,DISPATCH_TIME_NOW,NSEC_PER_SEC,100*NSEC_PER_MSEC);
-    dispatch_source_set_event_handler(timer,^{Reconcile(NO);ASVSupervisorTick();}); dispatch_resume(timer);
+    dispatch_source_set_event_handler(timer,^{if(!shuttingDown){Reconcile(NO);ASVSupervisorTick();}}); dispatch_resume(timer);
     signal(SIGTERM,SIG_IGN); signal(SIGINT,SIG_IGN);
     dispatch_source_t term=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGTERM,0,dispatch_get_main_queue());
-    dispatch_source_set_event_handler(term,^{[engine clear];State(@"stopped",nil);exit(0);}); dispatch_resume(term);
+    dispatch_source_set_event_handler(term,^{if(shuttingDown)return;shuttingDown=YES;[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(term);
     dispatch_source_t interrupt=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGINT,0,dispatch_get_main_queue());
-    dispatch_source_set_event_handler(interrupt,^{[engine clear];State(@"stopped",nil);exit(0);}); dispatch_resume(interrupt);
+    dispatch_source_set_event_handler(interrupt,^{if(shuttingDown)return;shuttingDown=YES;[multi restoreWithCompletion:^(BOOL ok){[engine clear];State(@"stopped",ok?nil:@"MULTI recovery pending");exit(ok?0:1);}];}); dispatch_resume(interrupt);
     [[NSRunLoop mainRunLoop] run];
 } return 0; }

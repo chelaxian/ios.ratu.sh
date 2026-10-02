@@ -4,7 +4,7 @@ ARCHS = arm64 arm64e
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = appsplitvpnd appsplitvpn-register
-appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m ASVSupervisor.m ASVProfiles.m
+appsplitvpnd_FILES = appsplitvpnd.m PolicyEngine.m ASVSupervisor.m ASVProfiles.m ASVMulti.m
 appsplitvpnd_ARCHS = arm64
 appsplitvpnd_CFLAGS = -fobjc-arc -Wall -Wextra
 appsplitvpnd_FRAMEWORKS = Foundation Network

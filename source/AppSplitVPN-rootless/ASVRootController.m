@@ -318,6 +318,9 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     BOOL down=[@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
     NSString *vpnState=[code isEqual:@"waitingVPN"]?L(@"not connected",@"не подключён"):([code isEqual:@"disabled"]?L(@"not used",@"не используется"):L(@"connected",@"подключён"));
     if ([code isEqual:@"unavailable"] || [code isEqual:@"stopped"]) vpnState=L(@"service stopped",@"служба не запущена");
+    if ([code isEqual:@"connecting"]) {vpnState=L(@"connecting",@"подключается");down=YES;}
+    if ([code isEqual:@"recovering"]) {vpnState=L(@"restoring profiles",@"восстановление профилей");down=YES;}
+    if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) {vpnState=L(@"error",@"ошибка");down=YES;}
     line(@"VPN:",vpnState,down?red:green);
     line(L(@"Mode:",@"Режим:"),multi?@"MULTI VPN":(tunnel?@"TUNNEL ONLY":@"BYPASS"),multi?UIColor.systemBlueColor:(tunnel?green:red));
     line(L(@"NECP rules:",@"Правил NECP:"),applied?([state[@"rules"] description] ?: @"0"):@"0",UIColor.whiteColor);
@@ -346,7 +349,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
     if(ASVIsMultiMode([self prefs])) {
-        headers[0]=@[headers[0][0],L(@"MULTI VPN assigns each selected app to a saved VPN profile in VPN MATRIX. Unassigned apps use DIRECT. This experimental mode remains disabled until real traffic through concurrent tunnels is verified. Single-profile Extra controls are hidden in this mode; their saved settings are preserved.",@"MULTI VPN назначает каждому выбранному приложению сохранённый профиль из VPN MATRIX. Для остальных — DIRECT. Экспериментальный режим пока заблокирован: требуется подтвердить передачу реального трафика через одновременные туннели. Однопрофильные опции Extra в этом режиме скрыты, их настройки сохраняются.")];
+        headers[0]=@[headers[0][0],L(@"MULTI VPN assigns each app to a profile in VPN MATRIX. Unassigned apps use DIRECT. Assigned apps are blocked while their VPN is unavailable. Experimental: ordinary PacketTunnel profiles only; use different VPN providers. Switching off or leaving MULTI restores the original profiles. Extra controls are hidden and inactive in this mode.",@"MULTI VPN назначает каждому приложению профиль из VPN MATRIX. Остальные идут DIRECT. Пока назначенный VPN недоступен, трафик приложения блокируется. Эксперимент: только обычные профили PacketTunnel; выбирайте разные VPN-приложения. При выключении или выходе из MULTI исходные профили восстанавливаются. Дополнительные опции в этом режиме скрыты и не действуют.")];
     }
     if(!ASVIsMultiMode([self prefs]))headers[0]=@[headers[0][0],[headers[0][1] stringByAppendingString:L(@"\n\nExtra → Tuning → Keep VPN for PiP / music on LS: optionally prevents lock-screen disconnection while system media playback is active. It is available only with Disconnect VPN on LS enabled and is off by default.",@"\n\nДополнительно → Тюнинг → PiP / музыка не отключают VPN на LS: по желанию сохраняет VPN при активном системном воспроизведении. Доступно только при включённом отключении VPN на LS; по умолчанию выключено.")]];
     PSSpecifier *extra=[self button:L(@"Extra",@"Дополнительно") action:@selector(openExtra)];
@@ -380,7 +383,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     NSDictionary *state=[NSDictionary dictionaryWithContentsOfFile:ASV_STATE];
     NSDictionary *extraState=[NSDictionary dictionaryWithContentsOfFile:ASV_EXTRA_STATE];
     // The supervisor tracks the profile selected in iOS; fall back to the split service's view.
-    BOOL extraFresh=extraState && [NSDate date].timeIntervalSince1970-[extraState[@"updated"] doubleValue]<3600;
+    BOOL extraFresh=!ASVIsMultiMode([self prefs]) && extraState && [NSDate date].timeIntervalSince1970-[extraState[@"updated"] doubleValue]<3600;
     NSString *vpnName=[extraState[@"vpnName"] length]?extraState[@"vpnName"]:state[@"vpnName"];
     BOOL vpnUp=extraFresh?[extraState[@"vpnActive"] boolValue]:![@[@"waitingVPN",@"unavailable",@"stopped"] containsObject:code];
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
