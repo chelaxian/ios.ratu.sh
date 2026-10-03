@@ -341,12 +341,11 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if(multi){
         NSArray *profiles=[state[@"activeProfiles"] isKindOfClass:NSArray.class]?state[@"activeProfiles"]:@[];
         line(L(@"Active VPNs:",@"Активных VPN:"),[NSString stringWithFormat:@"%lu",(unsigned long)profiles.count],UIColor.systemBlueColor);
+        NSUInteger profileNumber=0;
         for(NSDictionary *profile in profiles){
             NSArray *address=[profile[@"publicIP"] isKindOfClass:NSArray.class]?profile[@"publicIP"]:@[];
             NSString *value=address.count?[NSString stringWithFormat:@"%@ %@",address[0],address.count>1?ASVFlag(address[1]):@""]:([profile[@"ipPending"] boolValue]?@"…":L(@"unavailable",@"недоступен"));
-            // Profile names may be long: put the address on its own line, never truncate it.
-            ASVTerminalLine(text,@"",profile[@"name"] ?: @"VPN",UIColor.systemBlueColor,0);
-            line(L(@"Public IP:",@"Белый IP:"),value,address.count?UIColor.whiteColor:gray);
+            line([NSString stringWithFormat:L(@"Public IP %lu:",@"Белый IP %lu:"),(unsigned long)++profileNumber],value,address.count?UIColor.whiteColor:gray);
         }
     }else line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
@@ -411,8 +410,10 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     if(ASVIsMultiMode([self prefs]))headers[headers.count-1]=@[headers.lastObject[0],L(@"All connected MULTI profiles, with the icon of each VPN app. The badge VPN:N counts connected profiles, not assigned apps.",@"Все подключённые профили MULTI с иконками их VPN-приложений. Значок VPN:N считает подключённые профили, не назначенные приложения.")];
     NSArray *activeProfiles=ASVIsMultiMode([self prefs]) && [state[@"activeProfiles"] isKindOfClass:NSArray.class]?state[@"activeProfiles"]:@[];
     if(ASVIsMultiMode([self prefs])){
+        NSUInteger profileNumber=0;
         for(NSDictionary *profile in activeProfiles){
-            PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:profile[@"name"] target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
+            NSString *name=[NSString stringWithFormat:@"%lu. %@",(unsigned long)++profileNumber,profile[@"name"] ?: @"VPN"];
+            PSSpecifier *active=[PSSpecifier preferenceSpecifierNamed:name target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
             [active setProperty:@"green" forKey:@"asvDot"];[active setProperty:profile[@"owner"] forKey:@"asvApp"];[items addObject:active];
         }
         if(!activeProfiles.count)[items addObject:[PSSpecifier preferenceSpecifierNamed:L(@"Not connected",@"Не подключён") target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil]];

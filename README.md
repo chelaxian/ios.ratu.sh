@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- App Split VPN 0.4.0 — VPN/DIRECT и экспериментальный MULTI VPN: назначения приложений разным PacketTunnel-профилям, отдельные IP, синий VPN:N. Дополнительно: резервирование VPN, защита музыки/PiP на LS, Health Check и Always ON. Один профиль каждого VPN-приложения одновременно; MULTI проверен с Default VPN и WireGuard. Диапазон установки iOS 15.0–26.0.1, фактическая проверка iOS 17.0; это не гарантия совместимости со всеми версиями и VPN-клиентами. [Описание и ограничения](source/AppSplitVPN-rootless/README.md#новое-в-040), [матрица совместимости](source/AppSplitVPN-rootless/README.md#совместимость).
+- App Split VPN 0.4.2 — VPN/DIRECT и экспериментальный MULTI VPN: назначения приложений разным PacketTunnel-профилям, отдельные IP, синий VPN:N. Дополнительно: резервирование VPN, защита музыки/PiP на LS, Health Check и Always ON. Один профиль каждого VPN-приложения одновременно; MULTI проверен с Default VPN и WireGuard. Диапазон установки iOS 15.0–26.0.1, фактическая проверка iOS 17.0; это не гарантия совместимости со всеми версиями и VPN-клиентами. [Описание и ограничения](source/AppSplitVPN-rootless/README.md#новое-в-040), [матрица совместимости](source/AppSplitVPN-rootless/README.md#совместимость).
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC

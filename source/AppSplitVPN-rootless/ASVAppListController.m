@@ -134,6 +134,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
     _searchController=[[UISearchController alloc] initWithSearchResultsController:nil];
     _searchController.searchResultsUpdater=self;
     _searchController.obscuresBackgroundDuringPresentation=NO;
+    self.definesPresentationContext=YES;
     self.navigationItem.searchController=_searchController;
     self.navigationItem.hidesSearchBarWhenScrolling=NO;
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:[self t:@"Options" ru:@"Параметры"] style:UIBarButtonItemStylePlain target:self action:@selector(showOptions)];
@@ -164,7 +165,14 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
     return uuid.length?[self t:@"Profile unavailable" ru:@"Профиль недоступен"]:[self t:@"No VPN" ru:@"Без VPN"];
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)path {
-    [tableView deselectRowAtIndexPath:path animated:YES];if(_matrix)[self pickProfile:_sections[path.section][path.row][@"id"]];
+    [tableView deselectRowAtIndexPath:path animated:YES];
+    NSDictionary *record=[self recordAtIndexPath:path];
+    if(_matrix && record)[self pickProfile:record[@"id"]];
+}
+- (NSDictionary *)recordAtIndexPath:(NSIndexPath *)path {
+    if(path.section<0 || path.section>=(NSInteger)_sections.count)return nil;
+    NSArray *rows=_sections[path.section];
+    return path.row>=0 && path.row<(NSInteger)rows.count?rows[path.row]:nil;
 }
 - (NSString *)stateLabel:(NSString *)state {
     if ([state isEqual:@"installed"]) return [self t:@"Installed" ru:@"Установлено"];
@@ -223,10 +231,10 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
         if (!groups[group]) groups[group]=[NSMutableArray array];
         [groups[group] addObject:record];
     }
-    _sectionNames=[self sortedKeys:groups.allKeys descending:[_groupSort isEqual:@"desc"]];
+    NSArray *sectionNames=[self sortedKeys:groups.allKeys descending:[_groupSort isEqual:@"desc"]];
     NSString *mode=_sortMode;
     NSMutableArray *sections=[NSMutableArray array];
-    for (NSString *name in _sectionNames) {
+    for (NSString *name in sectionNames) {
         [sections addObject:[groups[name] sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *a,NSDictionary *b){
             int ra=0, rb=0; // rank: lower first
             if ([mode hasPrefix:@"selected"]) { ra=![self.selected containsObject:a[@"id"]];rb=![self.selected containsObject:b[@"id"]]; }
@@ -238,13 +246,16 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
             return [mode isEqual:@"desc"]?-r:r;
         }]];
     }
+    // Publish matching names/rows without UIKit calls between them. Reload before
+    // changing the header: setTableHeaderView synchronously queries cached sections.
+    _sectionNames=sectionNames;
     _sections=[sections copy];
+    [self.tableView reloadData];
     self.title=[NSString stringWithFormat:@"%@ %lu/%lu",_matrix?@"VPN MATRIX":([_listKey isEqual:ASV_VPN]?@"VPN":@"DIRECT"),(unsigned long)_selected.count,(unsigned long)ASVCatalog().count];
     [self updateFilterBanner];
-    [self.tableView reloadData];
 }
 - (void)updateFilterBanner {
-    if (!_filterField) { self.tableView.tableHeaderView=nil;return; }
+    if (!_filterField) { if(self.tableView.tableHeaderView)self.tableView.tableHeaderView=nil;return; }
     UIButton *chip=[UIButton buttonWithType:UIButtonTypeSystem];
     UIButtonConfiguration *config=[UIButtonConfiguration tintedButtonConfiguration];
     config.title=[NSString stringWithFormat:@"%@: %@",[self fieldTitle:_filterField],[self titleForKey:_filterValue field:_filterField]];
@@ -258,9 +269,9 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
 }
 - (void)clearFilter { _filterField=nil;_filterValue=nil;[self rebuild]; }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView { return _sections.count; }
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section { return _sections[section].count; }
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section { return section>=0 && section<(NSInteger)_sections.count?_sections[section].count:0; }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if ([_groupMode isEqual:@"none"]) return nil;
+    if ([_groupMode isEqual:@"none"] || section<0 || section>=(NSInteger)_sectionNames.count) return nil;
     return [self titleForKey:_sectionNames[section] field:_groupMode];
 }
 - (NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView {
@@ -270,7 +281,8 @@ static BOOL ASVUnnamed(NSString *key) { return !key.length || [key isEqual:@"—
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)path {
     UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"app"];
     if (!cell) cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"app"];
-    NSDictionary *r=_sections[path.section][path.row];
+    NSDictionary *r=[self recordAtIndexPath:path];
+    if(!r){cell.textLabel.text=nil;cell.detailTextLabel.text=nil;cell.imageView.image=nil;cell.accessoryView=nil;return cell;}
     cell.textLabel.text=r[@"name"];
     cell.detailTextLabel.text=_matrix && _matrix[r[@"id"]]?[NSString stringWithFormat:@"%@ · %@",r[@"id"],[self profileName:_matrix[r[@"id"]]]]:r[@"id"];
     cell.detailTextLabel.textColor=UIColor.secondaryLabelColor;

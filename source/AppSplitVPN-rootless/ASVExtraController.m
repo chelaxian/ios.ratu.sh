@@ -300,7 +300,6 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         PSSpecifier *reserves=[PSSpecifier preferenceSpecifierNamed:L(@"Reserve VPNs",@"Резервные VPN") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];[reserves setButtonAction:@selector(openReserves)];[items addObject:reserves];
     }
 
-    BOOL always=ASVExtraOptionConfigured(prefs,ASV_ALWAYS_ON);
     void (^section)(NSString *,NSString *)=^(NSString *title,NSString *help){
         [items addObject:[PSSpecifier groupSpecifierWithName:nil]];[headers addObject:@[title,help]];
     };
@@ -308,10 +307,6 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         section(L(@"Tuning: Lock screen",@"Тюнинг: Экран блокировки"),L(@"LS delay: 0–600 seconds. PiP/music protection keeps VPN connected while media plays; pausing starts the delay.",@"Задержка LS: 0–600 секунд. Защита PiP/музыки сохраняет VPN при воспроизведении; после паузы начинается задержка."));
         [items addObject:[self field:L(@"LS delay, s",@"Задержка LS, с") key:ASV_LS_DELAY]];
         [items addObject:[self setting:L(@"Keep VPN for PiP/music on LS",@"PiP/музыка не ВЫКЛ VPN на LS") key:ASV_LS_MEDIA type:PSSwitchCell fallback:@NO]];
-    }
-    if(always) {
-        section(L(@"Tuning: Always ON",@"Тюнинг: Автоподключение"),L(@"Retries use automatic backoff of 15–120 seconds. With Health Check and without Redundancy, its failure threshold also limits reconnect cycles without a successful check. All automation stops when the master switch is off.",@"Повторное подключение использует автоматическую задержку 15–120 секунд. При включённом Health Check без резервирования его порог неудач также ограничивает циклы переподключения без успешной проверки. Мастер-переключатель останавливает всю автоматику."));
-        [items addObject:[self setting:L(@"Retry delay, s",@"Повтор через, с") key:@"asvFixedRetryDelay" type:PSTitleValueCell fallback:@"15–120"]];
     }
     if(health) {
         section(L(@"Tuning: Health Check",@"Тюнинг: Health Check"),L(@"Checks are shared with Redundancy. Failures before OFF counts individual failed probes (1–10, default 3); reaching it disconnects VPN. Timeout: 1–120 s; interval: 10–3600 s. HTTPS/HTTP check a reply, TCP checks connection, PING uses ICMP without a port. Empty port means auto: 443 for HTTPS/TCP, 80 for HTTP.",@"Проверки общие с резервированием. «Неудач подряд для ВЫКЛ» — число неудачных проверок (1–10, по умолчанию 3), после которого VPN отключается. Таймаут: 1–120 с; интервал: 10–3600 с. HTTPS/HTTP проверяют ответ, TCP — соединение, PING — ICMP без порта. Пустой порт — авто: 443 для HTTPS/TCP, 80 для HTTP."));
@@ -329,7 +324,7 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         PSSpecifier *algorithm=[self setting:L(@"Redundancy Switch Algorithm",@"Алгоритм резервирования") key:ASV_RED_ALGORITHM type:PSLinkListCell fallback:@"roundRobin"];
         [algorithm setValues:@[@"roundRobin",@"random"] titles:@[@"Round-Robin",@"Random"]];[items addObject:algorithm];
     }
-    if(ls || health || always || redundancy) {
+    {
         section(L(@"Tuning: General",@"Тюнинг: Общие"),L(@"Public IP service: an HTTP(S) URL returning Cloudflare trace, JSON or plain IP. Reset tuning restores defaults for all tuning sections; app lists and VPN selections remain saved.",@"Сервис белого IP: HTTP(S)-адрес с ответом Cloudflare trace, JSON или IP текстом. Сброс тюнинга возвращает значения по умолчанию во всех секциях; списки приложений и выбранные VPN сохраняются."));
         [items addObject:[self field:L(@"IP check service",@"Сервис проверки IP") key:ASV_IP_SERVICE]];
         PSSpecifier *reset=[PSSpecifier preferenceSpecifierNamed:L(@"Reset tuning",@"Сбросить тюнинг") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
