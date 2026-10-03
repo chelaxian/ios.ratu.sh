@@ -4,6 +4,14 @@ chmod 755 /var/jb/usr/libexec/appsplitvpnd
 chown root:wheel /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
 chmod 644 /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
 /var/jb/bin/launchctl bootout system/com.ratush.appsplitvpn 2>/dev/null || true
+# A respring does not restart the VPN service. It may still predate jailbreak
+# injection, or hold the previous compatibility dylib. Refresh this service only,
+# before starting our daemon; do not change its launchd configuration or profiles.
+if /var/jb/bin/launchctl print user/501/com.apple.nesessionmanager >/dev/null 2>&1; then
+    /var/jb/bin/launchctl kickstart -k user/501/com.apple.nesessionmanager || true
+elif /var/jb/bin/launchctl print system/com.apple.nesessionmanager >/dev/null 2>&1; then
+    /var/jb/bin/launchctl kickstart -k system/com.apple.nesessionmanager || true
+fi
 /var/jb/bin/launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.ratush.appsplitvpn.plist
 /var/jb/usr/libexec/appsplitvpn-register || true
 /usr/bin/killall ControlCenterUIKit 2>/dev/null || true

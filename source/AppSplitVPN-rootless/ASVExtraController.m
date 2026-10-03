@@ -330,12 +330,10 @@ static NSString *ASVEventText(NSDictionary *event,UIColor **color) {
         PSSpecifier *reset=[PSSpecifier preferenceSpecifierNamed:L(@"Reset tuning",@"Сбросить тюнинг") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
         [reset setButtonAction:@selector(resetTuning)];[items addObject:reset];
     }
-    if([ASVExtraController enabledCount]>0) {
     [items addObject:[PSSpecifier groupSpecifierWithName:nil]];
     [headers addObject:@[L(@"State",@"Состояние"),L(@"The VPN profile selected in iOS, its connection state, the latest Health Check result and the extra options that are on. Updates automatically.\n\n\"No link\" means the VPN is connected but the last checks failed.\n\nThe event log keeps the last 300 events: VPN connections and disconnections, Health Check results, reconnects and screen locks.",@"Профиль VPN, выбранный в iOS, состояние его подключения, последний результат Health Check и включённые дополнительные опции. Обновляется автоматически.\n\n«Нет связи» — VPN подключён, но последние проверки не прошли.\n\nЖурнал событий хранит последние 300 событий: подключения и отключения VPN, результаты Health Check, переподключения и блокировки экрана.")]];
     PSSpecifier *terminal=[PSSpecifier preferenceSpecifierNamed:@"" target:self set:nil get:nil detail:nil cell:PSStaticTextCell edit:nil];
     [terminal setProperty:@YES forKey:@"asvTerminal"];[items addObject:terminal];
-    }
     // Keep the journal reachable after the safety breaker switches all options off.
     PSSpecifier *log=[PSSpecifier preferenceSpecifierNamed:L(@"Event log",@"Журнал событий") target:self set:nil get:nil detail:nil cell:PSButtonCell edit:nil];
     [log setButtonAction:@selector(openEventLog)];[items addObject:log];
