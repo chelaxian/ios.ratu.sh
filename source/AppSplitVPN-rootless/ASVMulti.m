@@ -12,6 +12,9 @@
 #import <uuid/uuid.h>
 #import <signal.h>
 #import <errno.h>
+#import <spawn.h>
+#import <sys/wait.h>
+extern char **environ;
 
 static NSString *const ArchiveName=@"originals.archive";
 static id Get(id o,NSString *name){SEL s=NSSelectorFromString(name);return [o respondsToSelector:s]?((id(*)(id,SEL))objc_msgSend)(o,s):nil;}
@@ -44,7 +47,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
 
 @implementation ASVMulti {
     ASVPolicyEngine *_engine;
-    BOOL _busy,_ownsProfiles,_wanted,_restoring,_startupDone;
+    BOOL _busy,_ownsProfiles,_wanted,_restoring,_startupDone,_compatRestartAttempted;
     NSString *_status,*_error,*_names;
     NSDictionary *_matrix,*_requested;
     NSDictionary *_publishedInterfaces;
@@ -149,7 +152,23 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     if(!matrix.count){NSString *error=nil;BOOL ok=[_engine replaceMatrix:@{} interfaces:@{} providerIDs:@[] error:&error];_matrix=matrix;_status=ok?@"active":@"error";_error=error;return;}
     if(matrix.count>2048 || [NSSet setWithArray:matrix.allValues].count>64){[self fail:@"MULTI ownership manifest limit exceeded"];return;}
     int token=-1;uint64_t ready=0;notify_register_check(ASV_MULTI_COMPAT_READY,&token);if(token>=0){notify_get_state(token,&ready);notify_cancel(token);}
-    pid_t pid=(pid_t)(ready>>32);if(!(ready&1) || pid<=1 || (kill(pid,0)!=0 && errno!=EPERM)){[self fail:@"MULTI compatibility module is not loaded; restart VPN service"];return;}
+    pid_t pid=(pid_t)(ready>>32);if(!(ready&1) || pid<=1 || (kill(pid,0)!=0 && errno!=EPERM)){
+        // One bounded recovery per activation, before profiles are converted.
+        // Never restart a service during restoration, or bypass the readiness gate.
+        NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
+        if(!_compatRestartAttempted && !_ownsProfiles && !Exists(ArchiveName) &&
+           _wanted && [prefs[@"enabled"] boolValue] && ASVIsMultiMode(prefs)){
+            _compatRestartAttempted=YES;
+            const char *path="/var/jb/bin/launchctl";
+            char *args[]={(char *)path,"kickstart","-k","user/501/com.apple.nesessionmanager",NULL};
+            pid_t child=0;int result=posix_spawn(&child,path,NULL,NULL,args,environ);
+            if(!result){
+                _busy=YES;_status=@"connecting";_error=nil;
+                [self waitCompatibilityRestart:child deadline:Clock()+5];return;
+            }
+        }
+        [self fail:@"MULTI compatibility module is not loaded; restart VPN service or check tweak injection"];return;
+    }
     _busy=YES;_status=@"connecting";_error=nil;NSUInteger generation=++_generation;
     [self load:^(NSArray *configs,NSError *error){
         if(error || !self->_wanted || generation!=self->_generation){self->_busy=NO;if(error)[self fail:@"Cannot load VPN profiles"];return;}
@@ -176,6 +195,19 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW,NSEC_PER_SEC),dispatch_get_main_queue(),^{[self waitOrdinaryStopped:Clock()+20 generation:generation];});
         });
     }];
+}
+- (void)waitCompatibilityRestart:(pid_t)child deadline:(double)deadline {
+    int status=0;pid_t result=waitpid(child,&status,WNOHANG);
+    if(result==child || (result<0 && errno!=EINTR)){
+        _busy=NO;_retry=Clock()+2;
+        if(_wanted && (result<0 || !WIFEXITED(status) || WEXITSTATUS(status)!=0))
+            [self fail:@"Cannot restart MULTI VPN service; check tweak injection"];
+        return;
+    }
+    if(Clock()>=deadline)kill(child,SIGKILL); // Only our launchctl child, not VPN providers.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,NSEC_PER_SEC/10),dispatch_get_main_queue(),^{
+        [self waitCompatibilityRestart:child deadline:deadline];
+    });
 }
 - (void)waitOrdinaryStopped:(double)deadline generation:(NSUInteger)generation{
     if(!_wanted || generation!=_generation){_busy=NO;return;}
@@ -210,6 +242,7 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
 }
 - (void)tickMatrix:(NSDictionary *)matrix enabled:(BOOL)enabled{
     _wanted=enabled;_requested=[matrix copy];
+    if(!enabled)_compatRestartAttempted=NO;
     if(!_startupDone){if(!_busy && Clock()>=_retry)[self restoreWithCompletion:^(__unused BOOL ok){}];return;}
     if(_busy)return;
     if(_ownsProfiles && (!enabled || ![_matrix isEqual:matrix] || [_status isEqual:@"error"])){[self restoreWithCompletion:^(__unused BOOL ok){}];return;}
