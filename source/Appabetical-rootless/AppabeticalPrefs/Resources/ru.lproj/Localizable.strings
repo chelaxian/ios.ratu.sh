@@ -6,6 +6,7 @@
 "toggle_sortfolders" = "Сортировать папки на раб.столе";
 "toggle_sortinside" = "Сортировать ярлыки внутри папок";
 "toggle_dock" = "Сортировать ярлыки внутри дока";
+"toggle_compact" = "Сдвигать пустые ячейки";
 "toggle_autosort" = "Автосортировка при respring";
 "button_sortnow" = "Отсортировать сейчас";
 "button_presets" = "Пресеты раскладки";

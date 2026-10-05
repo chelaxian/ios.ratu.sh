@@ -6,6 +6,7 @@
 "toggle_sortfolders" = "Sort folder icons on Home Screen";
 "toggle_sortinside" = "Sort icons inside folders";
 "toggle_dock" = "Sort icons inside dock";
+"toggle_compact" = "Shift empty cells";
 "toggle_autosort" = "Auto-sort on respring";
 "button_sortnow" = "Sort Now";
 "button_presets" = "Layout Presets";
