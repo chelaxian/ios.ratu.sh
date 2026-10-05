@@ -24,7 +24,7 @@ static int Run(NSArray *args, NSString **output) {
     posix_spawn_file_actions_adddup2(&fa,p[1],STDOUT_FILENO);
     posix_spawn_file_actions_adddup2(&fa,p[1],STDERR_FILENO);
     posix_spawn_file_actions_addclose(&fa,p[0]);
-    char **av=calloc(args.count+2,sizeof(char*)); av[0]="/bin/launchctl";
+    char **av=calloc(args.count+2,sizeof(char*)); av[0]="/var/jb/usr/bin/launchctl";
     for(NSUInteger i=0;i<args.count;i++) av[i+1]=(char*)[args[i] UTF8String];
     pid_t pid=0; int rc=posix_spawn(&pid,av[0],&fa,NULL,av,environ);
     free(av); posix_spawn_file_actions_destroy(&fa); close(p[1]);
