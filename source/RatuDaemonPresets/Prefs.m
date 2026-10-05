@@ -1,5 +1,6 @@
 #import "Shared.h"
 #import <Preferences/PSListController.h>
+#import <Preferences/PSViewController.h>
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
@@ -18,7 +19,8 @@
  }return self;
 }
 @end
-@interface RPProtectedController : UITableViewController <UISearchBarDelegate>
+@interface RPProtectedController : PSViewController <UISearchBarDelegate,UITableViewDelegate,UITableViewDataSource>
+@property(nonatomic,strong) UITableView *tableView;
 @property(nonatomic,strong) NSArray *inventory;
 @property(nonatomic,strong) NSArray *filtered;
 @end
@@ -83,7 +85,7 @@
 - (NSString*)pageKind {return @"reviewed";}
 @end
 @implementation RPProtectedController
-- (void)viewDidLoad {[super viewDidLoad];self.title=@"Защищённые службы";self.tableView.rowHeight=56;self.tableView.estimatedRowHeight=56;UISearchBar *search=[[UISearchBar alloc] init];search.placeholder=@"Поиск по имени службы";search.delegate=self;[search sizeToFit];self.tableView.tableHeaderView=search;UIActivityIndicatorView *spinner=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];[spinner startAnimating];self.tableView.backgroundView=spinner;
+- (void)viewDidLoad {[super viewDidLoad];self.tableView=[[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleInsetGrouped];self.tableView.autoresizingMask=UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;self.tableView.delegate=self;self.tableView.dataSource=self;[self.view addSubview:self.tableView];self.title=@"Защищённые службы";self.tableView.rowHeight=56;self.tableView.estimatedRowHeight=56;UISearchBar *search=[[UISearchBar alloc] init];search.placeholder=@"Поиск по имени службы";search.delegate=self;[search sizeToFit];self.tableView.tableHeaderView=search;UIActivityIndicatorView *spinner=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];[spinner startAnimating];self.tableView.backgroundView=spinner;
  dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^{@autoreleasepool{NSMutableSet *reviewed=[NSMutableSet set];for(NSDictionary *j in Catalog()[@"jobs"])[reviewed addObject:j[@"label"]];NSDictionary *critical=@{@"com.apple.backboardd":@"Ввод и графическая оболочка",@"com.apple.SpringBoard":@"Домашний экран",@"com.apple.cfprefsd.xpc.daemon":@"Системные настройки",@"com.apple.mobile.lockdown":@"Подключение и доверие устройства",@"com.apple.securityd":@"Связка ключей и безопасность",@"com.apple.trustd":@"Проверка сертификатов",@"com.apple.runningboardd":@"Жизненный цикл приложений",@"com.apple.assertiond":@"Жизненный цикл приложений",@"com.apple.notifyd":@"Уведомления процессов",@"com.apple.configd":@"Конфигурация сети",@"com.apple.mDNSResponder":@"Разрешение сетевых имён",@"com.apple.CommCenter":@"Сотовая связь",@"com.apple.wifid":@"Wi-Fi",@"com.apple.powerd":@"Питание и сон",@"com.apple.watchdogd":@"Контроль работоспособности",@"com.apple.logd":@"Системный журнал",@"com.apple.installd":@"Установка приложений",@"com.apple.lsd":@"Регистрация приложений",@"com.apple.tccd.system":@"Разрешения приложений",@"com.apple.nehelper":@"Сетевые расширения",@"com.apple.nesessionmanager":@"VPN и сетевые сеансы",@"com.ratush.daemonpresetsd":@"Управление этим твиком"};NSMutableDictionary *unique=[NSMutableDictionary dictionary];NSFileManager *fm=NSFileManager.defaultManager;
  for(NSString *dir in @[@"/System/Library/LaunchDaemons",@"/System/Library/LaunchAgents",@"/var/jb/Library/LaunchDaemons",@"/var/jb/Library/LaunchAgents"])for(NSString *file in [fm contentsOfDirectoryAtPath:dir error:nil]){if(![file.pathExtension isEqual:@"plist"])continue;NSString *path=[dir stringByAppendingPathComponent:file];NSDictionary *d=[NSDictionary dictionaryWithContentsOfFile:path];NSString *label=d[@"Label"];if(![label isKindOfClass:NSString.class] || [reviewed containsObject:label])continue;NSString *role=critical[label];BOOL protected=role!=nil || [label containsString:@"sshd"] || [label containsString:@"jailbreak"] || [label containsString:@"dopamine"];NSString *note=protected?[NSString stringWithFormat:@"Критическая / защищённая: %@. Отключение заблокировано.",role?:@"доступ и работа jailbreak"]:@"Не проверена для отключения. Переключатель заблокирован; это не утверждение о критичности.";unique[label]=@{@"label":label,@"path":path,@"note":note,@"critical":@(protected)};}
  NSArray *rows=[unique.allValues sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *x,NSDictionary *y){if([x[@"critical"] boolValue]!=[y[@"critical"] boolValue])return [x[@"critical"] boolValue]?NSOrderedAscending:NSOrderedDescending;return [x[@"label"] localizedCaseInsensitiveCompare:y[@"label"]];}];dispatch_async(dispatch_get_main_queue(),^{self.inventory=rows;self.filtered=rows;self.tableView.backgroundView=nil;self.title=[NSString stringWithFormat:@"Защищённые — %lu",(unsigned long)rows.count];[self.tableView reloadData];});}});}
