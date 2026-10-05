@@ -63,6 +63,26 @@ static NSDictionary *Disabled(void){
         d[[s substringWithRange:[m rangeAtIndex:1]]]=@([[s substringWithRange:[m rangeAtIndex:2]] isEqual:@"disabled"]);
     return d;
 }
+// Match launchd labels to their actual PID. Never guess from executable names:
+// several jobs can share a process, so totals must deduplicate PID samples.
+static NSDictionary *MemoryByLabel(void){
+    NSString *text=nil;if(Run(@[@"list"],&text)!=0)return @{};
+    NSMutableDictionary *out=[NSMutableDictionary dictionary],*samples=[NSMutableDictionary dictionary];
+    for(NSString *line in [text componentsSeparatedByCharactersInSet:NSCharacterSet.newlineCharacterSet]){
+        NSArray *f=[line componentsSeparatedByString:@"\t"];if(f.count!=3 || [f[0] isEqual:@"PID"])continue;
+        if([f[0] isEqual:@"-"]){out[f[2]]=@{@"known":@YES,@"bytes":@0,@"pid":@0};continue;}
+        int pid=[f[0] intValue];if(pid<=0)continue;NSString *key=f[0];NSDictionary *sample=samples[key];
+        if(!sample){struct rusage_info_v2 r={0};BOOL known=proc_pid_rusage(pid,RUSAGE_INFO_V2,(rusage_info_t*)&r)==0;
+            sample=@{@"known":@(known),@"bytes":@(known?r.ri_phys_footprint:0),@"pid":@(pid),@"start":@(known?r.ri_proc_start_abstime:0)};samples[key]=sample;}
+        out[f[2]]=sample;
+    }
+    return out;
+}
+static BOOL SampleGone(NSDictionary *sample){
+    int pid=[sample[@"pid"] intValue];if(pid<=0)return YES;
+    struct rusage_info_v2 r={0};if(proc_pid_rusage(pid,RUSAGE_INFO_V2,(rusage_info_t*)&r)==0)return r.ri_proc_start_abstime!=[sample[@"start"] unsignedLongLongValue];
+    return kill(pid,0)<0 && errno==ESRCH;
+}
 static void Save(void){
     [[NSFileManager defaultManager] createDirectoryAtPath:[RPPrivate stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0700} error:nil];
     [state writeToFile:RPPrivate atomically:YES]; chmod(RPPrivate.UTF8String,0600);
@@ -79,12 +99,19 @@ static NSArray *Planned(void){
 static NSArray *Desired(void){return [state[@"enabled"] boolValue]?Planned():@[];}
 static void Publish(void){
     NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet(); NSMutableDictionary *jobs=[NSMutableDictionary dictionary];
+    NSDictionary *memory=MemoryByLabel();NSMutableDictionary *released=[NSMutableDictionary dictionary];NSUInteger missing=0;
     BOOL verified=loadedSet!=nil && disabled!=nil;
     NSArray *desired=Desired();
     for(NSDictionary *j in catalog[@"jobs"]){
         BOOL loaded=[loadedSet containsObject:j[@"label"]],off=[disabled[j[@"label"]] boolValue],selected=[desired containsObject:j[@"id"]];
         if(selected && (!off || loaded)) verified=NO;
-        jobs[j[@"id"]]=@{@"disabled":@(off),@"loaded":@(loaded),@"selected":@(selected)};
+        NSDictionary *before=state[@"baseline"][j[@"id"]][@"memory"],*now=memory[j[@"label"]];
+        BOOL measured=[before[@"known"] boolValue],known=selected?measured:[now[@"known"] boolValue];
+        uint64_t estimate=[(selected?before:now)[@"bytes"] unsignedLongLongValue];
+        jobs[j[@"id"]]=@{@"disabled":@(off),@"loaded":@(loaded),@"selected":@(selected),@"ramKnown":@(known),@"ramBytes":@(estimate),@"ramCurrentBytes":now[@"bytes"]?:@0};
+        if(selected){if(!measured)missing++;else if(off && !loaded && ![state[@"baseline"][j[@"id"]][@"disabled"] boolValue] && SampleGone(before)){
+            NSString *key=[NSString stringWithFormat:@"%@:%@",before[@"pid"],before[@"start"]];released[key]=before[@"bytes"]?:@0;
+        }}
     }
     for(NSString *jid in state[@"baseline"]){
         if([desired containsObject:jid])continue;
@@ -92,6 +119,8 @@ static void Publish(void){
         if(!live || [live[@"disabled"] boolValue]!=[b[@"disabled"] boolValue] || [live[@"loaded"] boolValue]!=[b[@"loaded"] boolValue])verified=NO;
     }
     NSMutableDictionary *pub=[state mutableCopy]; [pub removeObjectForKey:@"baseline"];
+    uint64_t total=0;for(NSNumber *bytes in released.allValues)total+=bytes.unsignedLongLongValue;
+    pub[@"ramByLabel"]=memory;pub[@"ramSavedBytes"]=@(total);pub[@"ramMissingJobs"]=@(missing);pub[@"ramUpdated"]=[NSDate date];
     if(![state[@"enabled"] boolValue] && [state[@"baseline"] count])verified=NO;
     pub[@"jobs"]=jobs;pub[@"verified"]=@(verified);pub[@"errors"]=verified?@[]:[errors copy];pub[@"operation"]=lastOperation;pub[@"updated"]=[NSDate date];
     [pub writeToFile:RPStatus atomically:YES];chmod(RPStatus.UTF8String,0644);
@@ -117,7 +146,8 @@ static void Apply(void){
     NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet();
     if(!loadedSet || !disabled){Error(@"Не удалось получить состояния служб launchd");Publish();return;}
     // Journal every original service state before the first mutation.
-    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@([loadedSet containsObject:j[@"label"]])};}
+    NSDictionary *memory=MemoryByLabel();
+    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@([loadedSet containsObject:j[@"label"]]),@"memory":memory[j[@"label"]]?:@{@"known":@([loadedSet containsObject:j[@"label"]]?NO:YES),@"bytes":@0,@"pid":@0,@"start":@0},@"memorySampled":[NSDate date]};}
     state[@"baseline"]=baseline; Save();
     for(NSString *jid in [baseline.allKeys copy]){
         if([want containsObject:jid]) continue;
