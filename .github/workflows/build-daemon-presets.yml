@@ -28,14 +28,17 @@ jobs:
           deb="$(echo packages/*.deb)"
           tmp="$(mktemp -d)"
           dpkg-deb -x "$deb" "$tmp"
+          dpkg-deb -f "$deb" Architecture
           test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
           for b in "$tmp/var/jb/Library/PreferenceBundles/RatuDaemonPrefs.bundle/RatuDaemonPrefs" "$tmp/var/jb/Library/ControlCenter/Bundles/RatuDaemonCC.bundle/RatuDaemonCC"; do
             lipo -thin arm64e "$b" -output "$tmp/slice"
+            xxd -p -s 8 -l 4 "$tmp/slice"
             test "$(xxd -p -s 8 -l 4 "$tmp/slice")" = 02000080
           done
           test -f "$tmp/var/jb/usr/share/ratu-daemon-presets/catalog.plist"
           shasum -a 256 "$deb"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: daemon-presets-rootless
           path: source/RatuDaemonPresets/packages/*.deb
