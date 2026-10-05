@@ -44,7 +44,19 @@ static int Run(NSArray *args, NSString **output) {
     if(output) *output=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"";
     return finished && WIFEXITED(status) ? WEXITSTATUS(status) : 254;
 }
-static NSString *Target(NSDictionary *job){ return [@"system/" stringByAppendingString:job[@"label"]]; }
+static NSString *Domain(NSDictionary *job){NSDictionary *b=state[@"baseline"][job[@"id"]];return b?(b[@"domain"]?:@"system"):(state[@"domains"][job[@"id"]]?:@"system");}
+static NSString *Target(NSDictionary *job){ return [NSString stringWithFormat:@"%@/%@",Domain(job),job[@"label"]]; }
+static void ResolveDomains(void){
+    NSMutableDictionary *domains=[state[@"domains"] mutableCopy]?:[NSMutableDictionary dictionary];
+    for(NSDictionary *job in catalog[@"jobs"]){if(state[@"baseline"][job[@"id"]])continue;BOOL found=NO;
+        for(NSString *candidate in @[@"system",@"user/501"]){NSString *text=nil;int rc=Run(@[@"print",[NSString stringWithFormat:@"%@/%@",candidate,job[@"label"]]],&text);if(rc)continue;
+            for(NSString *line in [text componentsSeparatedByString:@"\n"])for(NSString *domain in @[@"system",@"user/501"])
+                if([line hasPrefix:[NSString stringWithFormat:@"%@/%@ = {",domain,job[@"label"]]]){domains[job[@"id"]]=domain;found=YES;break;}
+            if(found)break;
+        }
+    }
+    state[@"domains"]=domains;
+}
 static BOOL Loaded(NSDictionary *job){return Run(@[@"print",Target(job)],NULL)==0;}
 static NSSet *LoadedSet(void){
     NSString *s=nil; if(Run(@[@"list"],&s)!=0)return nil;
@@ -53,20 +65,28 @@ static NSSet *LoadedSet(void){
         NSArray *fields=[line componentsSeparatedByString:@"\t"];
         if(fields.count==3 && ![fields[0] isEqual:@"PID"])[set addObject:fields[2]];
     }
+    for(NSDictionary *job in catalog[@"jobs"]){[set removeObject:job[@"label"]];if(Loaded(job))[set addObject:job[@"label"]];}
     return set;
 }
-static NSDictionary *Disabled(void){
-    NSString *s=nil; if(Run(@[@"print-disabled",@"system"],&s)!=0)return nil;
+static NSDictionary *DisabledForDomain(NSString *domain){
+    NSString *s=nil; if(Run(@[@"print-disabled",domain],&s)!=0)return nil;
     NSMutableDictionary *d=[NSMutableDictionary dictionary];
     NSRegularExpression *rx=[NSRegularExpression regularExpressionWithPattern:@"\"([^\"]+)\"\\s*=>\\s*(disabled|enabled)" options:0 error:nil];
     for(NSTextCheckingResult *m in [rx matchesInString:s?:@"" options:0 range:NSMakeRange(0,s.length)])
         d[[s substringWithRange:[m rangeAtIndex:1]]]=@([[s substringWithRange:[m rangeAtIndex:2]] isEqual:@"disabled"]);
     return d;
 }
+static NSDictionary *Disabled(void){
+    NSDictionary *system=DisabledForDomain(@"system"),*user=DisabledForDomain(@"user/501");if(!system || !user)return nil;
+    NSMutableDictionary *out=[NSMutableDictionary dictionary];for(NSDictionary *job in catalog[@"jobs"])out[job[@"label"]]=[Domain(job) isEqual:@"system"]?(system[job[@"label"]]?:@NO):(user[job[@"label"]]?:@NO);return out;
+}
 // Match launchd labels to their actual PID. Never guess from executable names:
 // several jobs can share a process, so totals must deduplicate PID samples.
 static NSDictionary *MemoryByLabel(void){
     NSString *text=nil;if(Run(@[@"list"],&text)!=0)return @{};
+    NSString *system=nil;if(Run(@[@"print",@"system"],&system)==0){
+        NSRange start=[system rangeOfString:@"\tservices = {\n"];if(start.location!=NSNotFound){NSString *tail=[system substringFromIndex:NSMaxRange(start)];NSRange end=[tail rangeOfString:@"\n\t}"];if(end.location!=NSNotFound){NSString *section=[tail substringToIndex:end.location];NSRegularExpression *rx=[NSRegularExpression regularExpressionWithPattern:@"^\\s*(\\d+)\\s+\\S+\\s+(\\S+)\\s*$" options:NSRegularExpressionAnchorsMatchLines error:nil];NSMutableString *combined=[text mutableCopy];for(NSTextCheckingResult *m in [rx matchesInString:section options:0 range:NSMakeRange(0,section.length)]){NSString *pid=[section substringWithRange:[m rangeAtIndex:1]],*label=[section substringWithRange:[m rangeAtIndex:2]];[combined appendFormat:@"\n%@\t0\t%@",[pid isEqual:@"0"]?@"-":pid,label];}text=combined;}}
+    }
     NSMutableDictionary *out=[NSMutableDictionary dictionary],*samples=[NSMutableDictionary dictionary];
     for(NSString *line in [text componentsSeparatedByCharactersInSet:NSCharacterSet.newlineCharacterSet]){
         NSArray *f=[line componentsSeparatedByString:@"\t"];if(f.count!=3 || [f[0] isEqual:@"PID"])continue;
@@ -130,7 +150,7 @@ static BOOL RestoreJob(NSDictionary *j,NSDictionary *b){
     NSString *t=Target(j); int rc=Run(@[[b[@"disabled"] boolValue]?@"disable":@"enable",t],NULL);
     if(rc){Error([NSString stringWithFormat:@"%@: восстановление запрета: %d",j[@"name"],rc]);return NO;}
     if([b[@"loaded"] boolValue] && !Loaded(j)){
-        rc=Run(@[@"bootstrap",@"system",j[@"path"]],NULL);
+        rc=Run(@[@"bootstrap",Domain(j),j[@"path"]],NULL);
         if(rc && !Loaded(j)){Error([NSString stringWithFormat:@"%@: восстановление загрузки: %d",j[@"name"],rc]);return NO;}
     } else if(![b[@"loaded"] boolValue] && Loaded(j)) {
         Run(@[@"bootout",t],NULL);
@@ -143,11 +163,15 @@ static BOOL RestoreJob(NSDictionary *j,NSDictionary *b){
 static void Apply(void){
     errors=[NSMutableArray array]; NSArray *want=Desired();
     NSMutableDictionary *baseline=[state[@"baseline"] mutableCopy]?:[NSMutableDictionary dictionary];
+    // Older versions journaled system targets. Restore them before recapturing
+    // the actual domain, rather than losing their original override state.
+    for(NSString *jid in [baseline.allKeys copy])if(!baseline[jid][@"domain"]){NSDictionary *job=Job(jid);if(!job || !RestoreJob(job,baseline[jid])){Publish();return;}[baseline removeObjectForKey:jid];state[@"baseline"]=baseline;Save();}
+    ResolveDomains();
     NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet();
     if(!loadedSet || !disabled){Error(@"Не удалось получить состояния служб launchd");Publish();return;}
     // Journal every original service state before the first mutation.
     NSDictionary *memory=MemoryByLabel();
-    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@([loadedSet containsObject:j[@"label"]]),@"memory":memory[j[@"label"]]?:@{@"known":@([loadedSet containsObject:j[@"label"]]?NO:YES),@"bytes":@0,@"pid":@0,@"start":@0},@"memorySampled":[NSDate date]};}
+    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"domain":Domain(j),@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@([loadedSet containsObject:j[@"label"]]),@"memory":memory[j[@"label"]]?:@{@"known":@([loadedSet containsObject:j[@"label"]]?NO:YES),@"bytes":@0,@"pid":@0,@"start":@0},@"memorySampled":[NSDate date]};}
     state[@"baseline"]=baseline; Save();
     for(NSString *jid in [baseline.allKeys copy]){
         if([want containsObject:jid]) continue;
