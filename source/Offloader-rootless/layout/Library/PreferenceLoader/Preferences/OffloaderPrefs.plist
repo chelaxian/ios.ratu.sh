@@ -1,1 +1,10 @@
-{ entry = { bundle = OffloaderPrefs; cell = PSLinkCell; detail = OffRootListController; label = Offloader; }; }
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>entry</key><dict>
+<key>bundle</key><string>OffloaderPrefs</string>
+<key>cell</key><string>PSLinkCell</string>
+<key>detail</key><string>OffRootListController</string>
+<key>label</key><string>Offloader</string>
+<key>id</key><string>Offloader</string>
+<key>isController</key><true/>
+</dict></dict></plist>

@@ -56,6 +56,19 @@ int main(void) { @autoreleasepool {
     OFTestView *view=[OFTestView new]; view.icon=[NSObject new]; CHECK(OFViewBundle(view)==nil);
     SBHApplicationIcon *icon=[SBHApplicationIcon new]; icon.applicationBundleID=@"com.example.app"; view.icon=icon; CHECK([OFViewBundle(view) isEqual:icon.applicationBundleID]);
     icon.applicationBundleID=@"../invalid"; CHECK(OFViewBundle(view)==nil);
+    UIMenu *decorated=OFDecorateMenu([UIMenu menuWithTitle:@"Original" children:@[custom]],@"com.example.app",@{},YES,NO);
+    CHECK([decorated.title isEqual:@"Original"]); CHECK(decorated.children.firstObject==custom); CHECK(decorated.children.count==2);
+    CHECK([((UIAction *)decorated.children.lastObject).identifier isEqual:@"com.level3tjg.offloader/offload"]);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,NO).children.count==2);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},NO,NO).children.count==1);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,YES).children.count==1);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{@"3doffload":@NO},YES,NO).children.count==1);
+    __block unsigned providerCalls=0;
+    UIContextMenuConfiguration *configuration=[UIContextMenuConfiguration configurationWithIdentifier:@"test" previewProvider:nil actionProvider:^UIMenu *(NSArray<UIMenuElement *> *suggested){ ++providerCalls; CHECK(suggested.firstObject==custom); return [UIMenu menuWithTitle:@"Native" children:suggested]; }];
+    CHECK(OFWrapConfiguration(configuration,@"com.example.app")==configuration);
+    OFMenuProvider provider=(OFMenuProvider)OFObject(configuration,@selector(actionProvider)); CHECK(provider!=nil);
+    UIMenu *provided=provider(@[custom]); CHECK(providerCalls==1); CHECK(provided.children.firstObject==custom); CHECK([provided.title isEqual:@"Native"]);
+    OFWrapConfiguration(configuration,@"com.example.app"); CHECK(OFObject(configuration,@selector(actionProvider))==provider);
     printf("PASS: %u UIKit assertions; nested menus, all toggle combinations, original actions, custom action conservation and icon discrimination.\n",assertions);
     return 0;
 } }

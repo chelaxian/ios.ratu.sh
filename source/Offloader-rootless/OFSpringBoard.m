@@ -128,7 +128,34 @@ static NSArray<UIMenuElement *> *OFFilterMenu(NSArray *items, NSDictionary *sett
     }
     return result;
 }
-static IMP OFItemsOriginal, OFEffectiveOriginal, OFMenuOriginal;
+static UIMenu *OFDecorateMenu(UIMenu *original, NSString *bundle, NSDictionary *settings, BOOL eligible, BOOL protected) {
+    UIMenu *menu = original ?: [UIMenu menuWithTitle:@"" children:@[]];
+    NSMutableDictionary *withoutOffload = [settings mutableCopy];
+    withoutOffload[@"3doffload"] = @NO;
+    // Remove any cached instance of our action before rebuilding exactly once.
+    NSMutableArray *items = [OFFilterMenu(menu.children,withoutOffload) mutableCopy];
+    if (OFShowKind(OFActionOffload,settings) && eligible && !protected) {
+        [items addObject:[UIAction actionWithTitle:OFText(@"Offload App",@"Выгрузить приложение") image:[UIImage systemImageNamed:@"icloud.and.arrow.down"] identifier:@"com.level3tjg.offloader/offload" handler:^(__unused UIAction *action){OFConfirmOffload(bundle);}]];
+    }
+    return [menu menuByReplacingChildren:items];
+}
+typedef UIMenu *(^OFMenuProvider)(NSArray<UIMenuElement *> *);
+static char OFProviderMarker;
+static id OFWrapConfiguration(id configuration, NSString *bundle) {
+    SEL setter = @selector(setActionProvider:);
+    if (!bundle || ![configuration isKindOfClass:UIContextMenuConfiguration.class] || objc_getAssociatedObject(configuration,&OFProviderMarker) ||
+        !OFCanCall(configuration,@selector(actionProvider),'@',"") || !OFCanCall(configuration,setter,'v',"k")) return configuration;
+    OFMenuProvider original = (OFMenuProvider)OFObject(configuration,@selector(actionProvider));
+    OFMenuProvider wrapped = ^UIMenu *(NSArray<UIMenuElement *> *suggested) {
+        UIMenu *menu = original ? original(suggested) : [UIMenu menuWithTitle:@"" children:suggested ?: @[]];
+        if (menu && ![menu isKindOfClass:UIMenu.class]) return menu;
+        return OFDecorateMenu(menu,bundle,OFPreferences(OFDomain),OFEligible(bundle),OFProtected(bundle));
+    };
+    ((void(*)(id,SEL,id))[configuration methodForSelector:setter])(configuration,setter,wrapped);
+    objc_setAssociatedObject(configuration,&OFProviderMarker,@YES,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    return configuration;
+}
+static IMP OFItemsOriginal, OFEffectiveOriginal, OFConfigurationOriginal;
 static id OFItems(id self, SEL cmd) {
     id original = ((id(*)(id,SEL))OFItemsOriginal)(self,cmd);
     return OFViewBundle(self) ? OFFilterShortcuts(original,OFPreferences(OFDomain)) : original;
@@ -137,17 +164,9 @@ static id OFEffective(id self, SEL cmd) {
     id original = ((id(*)(id,SEL))OFEffectiveOriginal)(self,cmd);
     return OFViewBundle(self) ? OFFilterShortcuts(original,OFPreferences(OFDomain)) : original;
 }
-static id OFMenu(id self, SEL cmd, id interaction, id configuration) {
-    id original = ((id(*)(id,SEL,id,id))OFMenuOriginal)(self,cmd,interaction,configuration);
-    NSString *bundle = OFViewBundle(self);
-    if (!bundle || (original && ![original isKindOfClass:NSArray.class])) return original;
-    NSDictionary *settings = OFPreferences(OFDomain);
-    NSMutableArray *items = [OFFilterMenu(original ?: @[],settings) mutableCopy];
-    if (OFShowKind(OFActionOffload,settings) && !OFProtected(bundle) && OFEligible(bundle)) {
-        UIAction *action = [UIAction actionWithTitle:OFText(@"Offload App",@"Выгрузить приложение") image:[UIImage systemImageNamed:@"icloud.and.arrow.down"] identifier:@"com.level3tjg.offloader/offload" handler:^(__unused UIAction *a){OFConfirmOffload(bundle);}];
-        [items addObject:action];
-    }
-    return items;
+static id OFConfiguration(id self, SEL cmd, id interaction, CGPoint location) {
+    id configuration = ((id(*)(id,SEL,id,CGPoint))OFConfigurationOriginal)(self,cmd,interaction,location);
+    return OFWrapConfiguration(configuration,OFViewBundle(self));
 }
 #ifndef OFFLOADER_UI_TEST
 __attribute__((constructor)) static void OFSpringBoardStart(void) {
@@ -156,7 +175,7 @@ __attribute__((constructor)) static void OFSpringBoardStart(void) {
         Class cls = NSClassFromString(@"SBIconView");
         OFHook(cls,NO,@"applicationShortcutItems",(IMP)OFItems,&OFItemsOriginal,'@',"");
         OFHook(cls,NO,@"effectiveApplicationShortcutItems",(IMP)OFEffective,&OFEffectiveOriginal,'@',"");
-        OFHook(cls,NO,@"_contextMenuInteraction:overrideSuggestedActionsForConfiguration:",(IMP)OFMenu,&OFMenuOriginal,'@',"@@");
+        OFHook(cls,NO,@"contextMenuInteraction:configurationForMenuAtLocation:",(IMP)OFConfiguration,&OFConfigurationOriginal,'@',"@{");
         dispatch_async(dispatch_get_main_queue(),^{
             if (![NSFileManager.defaultManager fileExistsAtPath:OF_PROTECTION_PATH]) {
                 NSError *error;

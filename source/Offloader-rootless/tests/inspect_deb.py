@@ -2,6 +2,7 @@
 import hashlib
 import io
 import pathlib
+import plistlib
 import struct
 import sys
 import tarfile
@@ -60,7 +61,8 @@ def inspect(path):
     control = control_tar.extractfile(next(m for m in control_tar if m.name.rstrip("/").endswith("control"))).read().decode()
     assert "Architecture: iphoneos-arm64\n" in control
     assert "Package: com.level3tjg.offloader\n" in control
-    assert "Version: 1.0.0\n" in control
+    version = next(line.split(": ",1)[1] for line in pathlib.Path(__file__).resolve().parent.parent.joinpath("control").read_text().splitlines() if line.startswith("Version: "))
+    assert f"Version: {version}\n" in control
     for obsolete in ("libmryipc", "altlist", "roothide"):
         assert obsolete not in control.lower()
     print(control.strip())
@@ -72,6 +74,9 @@ def inspect(path):
         name = member.name.lstrip("./")
         assert name.startswith("var/jb/"), name
         raw = payload.extractfile(member).read()
+        if name.endswith("PreferenceLoader/Preferences/OffloaderPrefs.plist"):
+            entry = plistlib.loads(raw)["entry"]
+            assert entry["isController"] is True and entry["detail"] == "OffRootListController"
         if not (name.endswith(".dylib") or name.endswith("OffloaderPrefs.bundle/OffloaderPrefs")):
             continue
         binaries += 1
