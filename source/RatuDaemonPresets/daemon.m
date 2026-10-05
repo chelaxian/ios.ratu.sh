@@ -46,28 +46,23 @@ static int Run(NSArray *args, NSString **output) {
 }
 static NSString *Domain(NSDictionary *job){NSDictionary *b=state[@"baseline"][job[@"id"]];return b?(b[@"domain"]?:@"system"):(state[@"domains"][job[@"id"]]?:@"system");}
 static NSString *Target(NSDictionary *job){ return [NSString stringWithFormat:@"%@/%@",Domain(job),job[@"label"]]; }
-static void ResolveDomains(void){
-    NSMutableDictionary *domains=[state[@"domains"] mutableCopy]?:[NSMutableDictionary dictionary];
-    for(NSDictionary *job in catalog[@"jobs"]){if(state[@"baseline"][job[@"id"]])continue;BOOL found=NO;
-        for(NSString *candidate in @[@"system",@"user/501"]){NSString *text=nil;int rc=Run(@[@"print",[NSString stringWithFormat:@"%@/%@",candidate,job[@"label"]]],&text);if(rc)continue;
-            for(NSString *line in [text componentsSeparatedByString:@"\n"])for(NSString *domain in @[@"system",@"user/501"])
-                if([line hasPrefix:[NSString stringWithFormat:@"%@/%@ = {",domain,job[@"label"]]]){domains[job[@"id"]]=domain;found=YES;break;}
-            if(found)break;
-        }
+static NSDictionary *serviceTables;
+static NSDictionary *ServiceTables(void){
+    if(serviceTables)return serviceTables;NSMutableDictionary *tables=[NSMutableDictionary dictionary];
+    NSRegularExpression *rx=[NSRegularExpression regularExpressionWithPattern:@"^\\s*(\\d+)\\s+\\S+\\s+(\\S+)\\s*$" options:NSRegularExpressionAnchorsMatchLines error:nil];
+    for(NSString *domain in @[@"system",@"user/501"]){NSString *text=nil;if(Run(@[@"print",domain],&text)!=0)return nil;
+        NSRange start=[text rangeOfString:@"\tservices = {\n"];if(start.location==NSNotFound)return nil;NSString *tail=[text substringFromIndex:NSMaxRange(start)];NSRange end=[tail rangeOfString:@"\n\t}"];if(end.location==NSNotFound)return nil;
+        NSString *section=[tail substringToIndex:end.location];NSMutableDictionary *rows=[NSMutableDictionary dictionary];for(NSTextCheckingResult *m in [rx matchesInString:section options:0 range:NSMakeRange(0,section.length)])rows[[section substringWithRange:[m rangeAtIndex:2]]]=@([[section substringWithRange:[m rangeAtIndex:1]] intValue]);tables[domain]=rows;
     }
+    serviceTables=tables;return serviceTables;
+}
+static void ResolveDomains(void){
+    NSDictionary *tables=ServiceTables();NSMutableDictionary *domains=[state[@"domains"] mutableCopy]?:[NSMutableDictionary dictionary];
+    for(NSDictionary *job in catalog[@"jobs"]){if(state[@"baseline"][job[@"id"]])continue;for(NSString *domain in @[@"system",@"user/501"])if(tables[domain][job[@"label"]]){domains[job[@"id"]]=domain;break;}}
     state[@"domains"]=domains;
 }
 static BOOL Loaded(NSDictionary *job){return Run(@[@"print",Target(job)],NULL)==0;}
-static NSSet *LoadedSet(void){
-    NSString *s=nil; if(Run(@[@"list"],&s)!=0)return nil;
-    NSMutableSet *set=[NSMutableSet set];
-    for(NSString *line in [s componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]){
-        NSArray *fields=[line componentsSeparatedByString:@"\t"];
-        if(fields.count==3 && ![fields[0] isEqual:@"PID"])[set addObject:fields[2]];
-    }
-    for(NSDictionary *job in catalog[@"jobs"]){[set removeObject:job[@"label"]];if(Loaded(job))[set addObject:job[@"label"]];}
-    return set;
-}
+static NSSet *LoadedSet(void){NSDictionary *tables=ServiceTables();if(!tables)return nil;NSMutableSet *set=[NSMutableSet set];for(NSDictionary *job in catalog[@"jobs"])if(tables[Domain(job)][job[@"label"]])[set addObject:job[@"label"]];return set;}
 static NSDictionary *DisabledForDomain(NSString *domain){
     NSString *s=nil; if(Run(@[@"print-disabled",domain],&s)!=0)return nil;
     NSMutableDictionary *d=[NSMutableDictionary dictionary];
@@ -83,18 +78,13 @@ static NSDictionary *Disabled(void){
 // Match launchd labels to their actual PID. Never guess from executable names:
 // several jobs can share a process, so totals must deduplicate PID samples.
 static NSDictionary *MemoryByLabel(void){
-    NSString *text=nil;if(Run(@[@"list"],&text)!=0)return @{};
-    NSString *system=nil;if(Run(@[@"print",@"system"],&system)==0){
-        NSRange start=[system rangeOfString:@"\tservices = {\n"];if(start.location!=NSNotFound){NSString *tail=[system substringFromIndex:NSMaxRange(start)];NSRange end=[tail rangeOfString:@"\n\t}"];if(end.location!=NSNotFound){NSString *section=[tail substringToIndex:end.location];NSRegularExpression *rx=[NSRegularExpression regularExpressionWithPattern:@"^\\s*(\\d+)\\s+\\S+\\s+(\\S+)\\s*$" options:NSRegularExpressionAnchorsMatchLines error:nil];NSMutableString *combined=[text mutableCopy];for(NSTextCheckingResult *m in [rx matchesInString:section options:0 range:NSMakeRange(0,section.length)]){NSString *pid=[section substringWithRange:[m rangeAtIndex:1]],*label=[section substringWithRange:[m rangeAtIndex:2]];[combined appendFormat:@"\n%@\t0\t%@",[pid isEqual:@"0"]?@"-":pid,label];}text=combined;}}
-    }
-    NSMutableDictionary *out=[NSMutableDictionary dictionary],*samples=[NSMutableDictionary dictionary];
-    for(NSString *line in [text componentsSeparatedByCharactersInSet:NSCharacterSet.newlineCharacterSet]){
-        NSArray *f=[line componentsSeparatedByString:@"\t"];if(f.count!=3 || [f[0] isEqual:@"PID"])continue;
-        if([f[0] isEqual:@"-"]){out[f[2]]=@{@"known":@YES,@"bytes":@0,@"pid":@0};continue;}
-        int pid=[f[0] intValue];if(pid<=0)continue;NSString *key=f[0];NSDictionary *sample=samples[key];
-        if(!sample){struct rusage_info_v2 r={0};BOOL known=proc_pid_rusage(pid,RUSAGE_INFO_V2,(rusage_info_t*)&r)==0;
-            sample=@{@"known":@(known),@"bytes":@(known?r.ri_phys_footprint:0),@"pid":@(pid),@"start":@(known?r.ri_proc_start_abstime:0)};samples[key]=sample;}
-        out[f[2]]=sample;
+    NSDictionary *tables=ServiceTables();NSMutableDictionary *out=[NSMutableDictionary dictionary],*samples=[NSMutableDictionary dictionary];
+    for(NSString *domain in @[@"system",@"user/501"])for(NSString *label in tables[domain]){
+        NSNumber *pidValue=tables[domain][label];int pid=pidValue.intValue;
+        if(pid<=0){out[label]=@{@"known":@YES,@"bytes":@0,@"pid":@0,@"start":@0};continue;}
+        NSDictionary *sample=samples[pidValue];if(!sample){struct rusage_info_v2 r={0};BOOL known=proc_pid_rusage(pid,RUSAGE_INFO_V2,(rusage_info_t*)&r)==0;
+            sample=@{@"known":@(known),@"bytes":@(known?r.ri_phys_footprint:0),@"pid":@(pid),@"start":@(known?r.ri_proc_start_abstime:0)};samples[pidValue]=sample;}
+        out[label]=sample;
     }
     return out;
 }
@@ -118,6 +108,7 @@ static NSArray *Planned(void){
 }
 static NSArray *Desired(void){return [state[@"enabled"] boolValue]?Planned():@[];}
 static void Publish(void){
+    serviceTables=nil;
     NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet(); NSMutableDictionary *jobs=[NSMutableDictionary dictionary];
     NSDictionary *memory=MemoryByLabel();NSMutableDictionary *released=[NSMutableDictionary dictionary];NSUInteger missing=0;
     BOOL verified=loadedSet!=nil && disabled!=nil;
@@ -161,6 +152,7 @@ static BOOL RestoreJob(NSDictionary *j,NSDictionary *b){
     return YES;
 }
 static void Apply(void){
+    serviceTables=nil;
     errors=[NSMutableArray array]; NSArray *want=Desired();
     NSMutableDictionary *baseline=[state[@"baseline"] mutableCopy]?:[NSMutableDictionary dictionary];
     // Older versions journaled system targets. Restore them before recapturing
