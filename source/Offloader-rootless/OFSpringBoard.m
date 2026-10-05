@@ -34,7 +34,7 @@ static void OFFinish(NSString *identifier, NSString *message) {
 static void OFPoll(NSString *identifier, NSDate *started) {
     if (![OFPending isEqual:identifier]) return;
     id response = OFPreferences(OFDomain)[@"response"];
-    if ([response isKindOfClass:NSDictionary.class] && [response[@"id"] isEqual:identifier]) {
+    if (OFResponseMatches(response,identifier)) {
         NSString *message = [response[@"message"] isKindOfClass:NSString.class] ? response[@"message"] : OFText(@"Offload finished.",@"Выгрузка завершена.");
         OFFinish(identifier,message); return;
     }

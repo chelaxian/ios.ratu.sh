@@ -52,6 +52,16 @@ static BOOL OFValidID(id identifier) {
 static BOOL OFValueBool(id value, BOOL fallback) {
     return [value isKindOfClass:NSNumber.class] ? [value boolValue] : fallback;
 }
+static BOOL OFRequestValid(id request, NSDate *now) {
+    if (![request isKindOfClass:NSDictionary.class]) return NO;
+    NSDate *date = request[@"date"];
+    return OFValidID(request[@"id"]) && OFValidID(request[@"bundle"]) && [date isKindOfClass:NSDate.class] &&
+        [now timeIntervalSinceDate:date] <= 45 && [now timeIntervalSinceDate:date] >= -5;
+}
+static BOOL OFResponseMatches(id response, NSString *identifier) {
+    return [response isKindOfClass:NSDictionary.class] && OFValidID(identifier) && [response[@"id"] isEqual:identifier] &&
+        [response[@"ok"] isKindOfClass:NSNumber.class] && [response[@"message"] isKindOfClass:NSString.class];
+}
 static NSDictionary *OFPreferences(NSString *domain) {
     CFPreferencesSynchronize((__bridge CFStringRef)domain,kCFPreferencesCurrentUser,kCFPreferencesAnyHost);
     id value = CFBridgingRelease(CFPreferencesCopyMultiple(NULL,(__bridge CFStringRef)domain,kCFPreferencesCurrentUser,kCFPreferencesAnyHost));

@@ -82,6 +82,17 @@ int main(void) { @autoreleasepool {
         CHECK(OFShowKind(OFActionOffload,prefs)==((mask&1)!=0)); CHECK(OFShowKind(OFActionDelete,prefs)==((mask&2)!=0)); CHECK(OFShowKind(OFActionEdit,prefs)==((mask&4)!=0)); CHECK(OFShowKind(OFActionOther,prefs));
     }
     CHECK(OFShowKind(OFActionDelete,@{}));
+    NSDate *now=[NSDate dateWithTimeIntervalSince1970:1000];
+    CHECK(OFRequestValid(@{@"id":@"123",@"bundle":@"com.example.app",@"date":now},now));
+    CHECK(!OFRequestValid(@{@"id":@"123",@"bundle":@"../bad",@"date":now},now));
+    CHECK(!OFRequestValid(@{@"id":@"123",@"bundle":@"com.example.app",@"date":[now dateByAddingTimeInterval:-46]},now));
+    CHECK(!OFRequestValid(@{@"id":@"123",@"bundle":@"com.example.app",@"date":[now dateByAddingTimeInterval:6]},now));
+    CHECK(!OFRequestValid(@{@"id":@"123",@"bundle":@"com.example.app",@"date":@"bad"},now));
+    CHECK(!OFRequestValid(@[],now));
+    CHECK(OFResponseMatches(@{@"id":@"123",@"ok":@NO,@"message":@"error"},@"123"));
+    CHECK(!OFResponseMatches(@{@"id":@"stale",@"ok":@YES,@"message":@"ok"},@"123"));
+    CHECK(!OFResponseMatches(@{@"id":@"123",@"message":@"ok"},@"123"));
+    CHECK(!OFResponseMatches(@[],@"123"));
     CHECK(!OFCanCall(IXAppInstallCoordinator.class,@selector(description),'b',""));
     CHECK(!OFCanCall(IXAppInstallCoordinator.class,NSSelectorFromString(@"missing:"),'v',"@"));
     CHECK(OFCanCall(IXAppInstallCoordinator.class,NSSelectorFromString(@"demoteAppToPlaceholderWithBundleID:forReason:error:"),'b',"@q^"));

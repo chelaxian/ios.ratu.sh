@@ -1,5 +1,4 @@
 #import "OFApplications.h"
-#import <UIKit/UIKit.h>
 
 static NSString *OFBridgeActive;
 static NSString *OFBridgeLast;
@@ -10,13 +9,11 @@ static void OFBridgeReply(NSString *identifier, BOOL ok, NSString *message) {
 static void OFBridgeCheck(void) {
     // All state transitions are on main; the actual IX work runs off main.
     NSDictionary *request = OFPreferences(OFDomain)[@"request"];
-    if (![request isKindOfClass:NSDictionary.class]) return;
+    if (!OFRequestValid(request,NSDate.date)) return;
     NSString *identifier = request[@"id"], *bundle = request[@"bundle"];
-    NSDate *date = request[@"date"];
-    if (!OFValidID(identifier) || !OFValidID(bundle) || ![date isKindOfClass:NSDate.class] ||
-        -date.timeIntervalSinceNow > 45 || date.timeIntervalSinceNow > 5 || OFBridgeActive || [OFBridgeLast isEqual:identifier]) return;
+    if (OFBridgeActive || [OFBridgeLast isEqual:identifier]) return;
     NSDictionary *response = OFPreferences(OFDomain)[@"response"];
-    if ([response isKindOfClass:NSDictionary.class] && [response[@"id"] isEqual:identifier]) return;
+    if (OFResponseMatches(response,identifier)) return;
     OFBridgeActive = identifier;
     OFBridgeLast = identifier;
     // No durable command replay after a Settings restart, including an in-flight command.
