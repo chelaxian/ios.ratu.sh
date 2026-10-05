@@ -4,6 +4,7 @@
 #import <sys/stat.h>
 #import <unistd.h>
 #import <signal.h>
+#import <fcntl.h>
 #import <sys/resource.h>
 extern int proc_listpids(uint32_t, uint32_t, void *, int);
 extern int proc_pidpath(int, void *, uint32_t);
@@ -68,9 +69,11 @@ static void Save(void){
 }
 static void Error(NSString *text){[errors addObject:text]; NSLog(@"%@",text);}
 static NSDictionary *Job(NSString *jid){for(NSDictionary *j in catalog[@"jobs"]) if([j[@"id"] isEqual:jid]) return j; return nil;}
+static NSArray *AllPresets(void){NSMutableArray *a=[catalog[@"presets"] mutableCopy];[a addObjectsFromArray:state[@"userPresets"]?:@[]];return a;}
+static BOOL ValidPreset(NSString *pid){for(NSDictionary *p in AllPresets())if([p[@"id"] isEqual:pid])return YES;return NO;}
 static NSArray *Planned(void){
     if([state[@"preset"] isEqual:@"custom"]) return state[@"custom"]?:@[];
-    for(NSDictionary *p in catalog[@"presets"]) if([p[@"id"] isEqual:state[@"preset"]]) return p[@"jobs"];
+    for(NSDictionary *p in AllPresets()) if([p[@"id"] isEqual:state[@"preset"]]) return p[@"jobs"];
     return @[];
 }
 static NSArray *Desired(void){return [state[@"enabled"] boolValue]?Planned():@[];}
@@ -134,17 +137,60 @@ static void Apply(void){
     dispatch_group_wait(work,DISPATCH_TIME_FOREVER);
     Save();Publish();
 }
+// Only bounded regular files are read from mobile. Imported jobs are identifiers,
+// never executable paths or launchctl arguments. The immutable catalog is the allowlist.
+static NSDictionary *ReadRequest(void){
+    int fd=open(RPRequest.UTF8String,O_RDONLY|O_NOFOLLOW|O_NONBLOCK);if(fd<0)return nil;
+    struct stat st;if(fstat(fd,&st) || !S_ISREG(st.st_mode) || st.st_size<1 || st.st_size>65536){close(fd);return nil;}
+    NSMutableData *d=[NSMutableData dataWithLength:(NSUInteger)st.st_size];size_t n=0;
+    while(n<d.length){ssize_t r=read(fd,(char*)d.mutableBytes+n,d.length-n);if(r<=0)break;n+=r;}close(fd);
+    if(n!=d.length)return nil;
+    id o=[NSPropertyListSerialization propertyListWithData:d options:NSPropertyListImmutable format:nil error:nil];return [o isKindOfClass:NSDictionary.class]?o:nil;
+}
+static NSString *FreeSlot(NSArray *a){for(int i=0;i<32;i++){NSString *pid=[NSString stringWithFormat:@"user%02d",i];BOOL exists=NO;for(NSDictionary *p in a)if([p[@"id"] isEqual:pid])exists=YES;if(!exists)return pid;}return nil;}
+static void LibraryCommand(void){
+    NSDictionary *r=ReadRequest();NSMutableArray *a=[state[@"userPresets"] mutableCopy]?:[NSMutableArray array];NSString *failure=nil;
+    NSString *op=r[@"op"];BOOL reapply=NO;
+    if([op isEqual:@"delete"]){
+        NSString *pid=r[@"id"];NSDictionary *found=nil;for(NSDictionary *p in a)if([p[@"id"] isEqual:pid])found=p;
+        if(!found)failure=@"Свой пресет не найден";
+        else {if([state[@"preset"] isEqual:pid]){state[@"custom"]=Planned();state[@"preset"]=@"custom";reapply=YES;}[a removeObject:found];NSMutableArray *cc=[state[@"ccPresets"] mutableCopy];[cc removeObject:pid];state[@"ccPresets"]=cc;}
+    } else if([op isEqual:@"save"] || [op isEqual:@"import"]){
+        NSArray *incoming=nil;
+        if([op isEqual:@"save"])incoming=@[@{@"name":r[@"name"]?:@"",@"jobs":Planned()}];
+        else {id document=r[@"document"];if([document isKindOfClass:NSDictionary.class] && [document[@"schema"] isEqual:@1] && [document[@"presets"] isKindOfClass:NSArray.class])incoming=document[@"presets"];}
+        if(!incoming.count || incoming.count>32 || a.count+incoming.count>32)failure=@"Неверный формат или превышен лимит: 32 своих пресета";
+        NSMutableArray *added=[NSMutableArray array];
+        if(!failure)for(id item in incoming){
+            if(![item isKindOfClass:NSDictionary.class]){failure=@"Неверная запись пресета";break;}
+            id name=item[@"name"],list=item[@"jobs"];
+            if(![name isKindOfClass:NSString.class] || ![name stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].length || [name length]>80 || ![list isKindOfClass:NSArray.class] || [list count]>[catalog[@"jobs"] count]){failure=@"Название должно содержать 1–80 символов, а состав — проверенные службы";break;}
+            NSMutableArray *ids=[NSMutableArray array];
+            for(id value in list){NSDictionary *j=nil;if([value isKindOfClass:NSString.class])for(NSDictionary *candidate in catalog[@"jobs"])if([candidate[@"id"] isEqual:value] || [candidate[@"label"] isEqual:value]){j=candidate;break;}
+                if(!j){failure=@"Импорт отклонён: есть неизвестная или защищённая служба";break;}if(![ids containsObject:j[@"id"]])[ids addObject:j[@"id"]];}
+            if(failure)break;
+            NSMutableArray *used=[a mutableCopy];[used addObjectsFromArray:added];NSString *pid=FreeSlot(used);
+            [added addObject:@{@"id":pid,@"name":[name stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet],@"jobs":ids}];
+        }
+        if(!failure)[a addObjectsFromArray:added];
+    } else failure=@"Неверный запрос библиотеки пресетов";
+    if(!failure)state[@"userPresets"]=a;
+    state[@"libraryError"]=failure?:@"";state[@"libraryRequest"]= [r[@"request"] isKindOfClass:NSString.class]?r[@"request"]:@"";
+    Save();if(reapply)Apply();else Publish();
+}
 static void HandleCommand(NSString *cmd){
     lastOperation=cmd;
     if([cmd isEqual:@"query"]){Publish();return;}
+    if([cmd isEqual:@"library"]){LibraryCommand();return;}
     if([cmd isEqual:@"toggle"])state[@"enabled"]=@(![state[@"enabled"] boolValue]);
     else if([cmd isEqual:@"on"])state[@"enabled"]=@YES;
     else if([cmd isEqual:@"off"])state[@"enabled"]=@NO;
-    else if([cmd hasPrefix:@"preset."]){state[@"preset"]=[cmd substringFromIndex:7];}
-    else if([cmd hasPrefix:@"cc."]){NSMutableArray *a=[state[@"ccPresets"] mutableCopy];NSString *p=[cmd substringFromIndex:3];if([a containsObject:p])[a removeObject:p];else [a addObject:p];state[@"ccPresets"]=a;Save();Publish();return;}
+    else if([cmd hasPrefix:@"preset."]){NSString *pid=[cmd substringFromIndex:7];if(!ValidPreset(pid))return;state[@"preset"]=pid;}
+    else if([cmd hasPrefix:@"cc."]){NSMutableArray *a=[state[@"ccPresets"] mutableCopy];NSString *p=[cmd substringFromIndex:3];if(!ValidPreset(p))return;if([a containsObject:p])[a removeObject:p];else [a addObject:p];state[@"ccPresets"]=a;Save();Publish();return;}
     else if([cmd hasPrefix:@"job."]){
         NSMutableArray *a=[Planned() mutableCopy];
         NSString *jid=[cmd substringFromIndex:4]; if([a containsObject:jid])[a removeObject:jid];else [a addObject:jid];
+        if(!Job(jid))return;
         state[@"preset"]=@"custom";state[@"custom"]=a; // editing while off does not enable the master
     } else return;
     Apply();
@@ -185,9 +231,10 @@ int main(int argc,char **argv){@autoreleasepool{
     errors=[NSMutableArray array];
     if(argc==2 && !strcmp(argv[1],"--restore")){state[@"enabled"]=@NO;Apply();return errors.count?1:0;}
     queue=dispatch_queue_create("com.ratush.daemonpresets.worker",DISPATCH_QUEUE_SERIAL);
-    NSMutableArray *commands=[@[@"query",@"toggle",@"on",@"off"] mutableCopy];
+    NSMutableArray *commands=[@[@"query",@"toggle",@"on",@"off",@"library"] mutableCopy];
     for(NSDictionary *p in catalog[@"presets"]){[commands addObject:[@"preset." stringByAppendingString:p[@"id"]]];[commands addObject:[@"cc." stringByAppendingString:p[@"id"]]];}
     for(NSDictionary *j in catalog[@"jobs"])[commands addObject:[@"job." stringByAppendingString:j[@"id"]]];
+    for(int i=0;i<32;i++){NSString *pid=[NSString stringWithFormat:@"user%02d",i];[commands addObject:[@"preset." stringByAppendingString:pid]];[commands addObject:[@"cc." stringByAppendingString:pid]];}
     if(argc==3 && !strcmp(argv[1],"--command")){
         NSString *c=@(argv[2]); if(![commands containsObject:c])return 64; Command(c);return 0;
     }

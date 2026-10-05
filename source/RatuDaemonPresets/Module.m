@@ -27,7 +27,7 @@
  if(g.state==UIGestureRecognizerStateEnded || g.state==UIGestureRecognizerStateCancelled){self.suppressUntil=CACurrentMediaTime()+.8;return;}
  if(g.state!=UIGestureRecognizerStateBegan)return;self.suppressUntil=CACurrentMediaTime()+60;
  NSDictionary *s=Status();UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Демоны iOS" message:[s[@"enabled"] boolValue]?@"Выберите активный набор":@"Твик выключен. Выбор сохранится до включения." preferredStyle:UIAlertControllerStyleActionSheet];
- NSUInteger count=0;for(NSDictionary *p in Catalog()[@"presets"]){if(![s[@"ccPresets"] containsObject:p[@"id"]])continue;count++;NSString *title=[NSString stringWithFormat:@"%@%@",[p[@"id"] isEqual:s[@"preset"]]?@"✓ ":@"",p[@"name"]];[a addAction:[UIAlertAction actionWithTitle:title style:UIAlertActionStyleDefault handler:^(UIAlertAction *action){self.suppressUntil=CACurrentMediaTime()+.8;Command([@"preset." stringByAppendingString:p[@"id"]]);}]];}
+ NSUInteger count=0;for(NSDictionary *p in Presets()){if(![s[@"ccPresets"] containsObject:p[@"id"]])continue;count++;NSString *title=[NSString stringWithFormat:@"%@%@",[p[@"id"] isEqual:s[@"preset"]]?@"✓ ":@"",p[@"name"]];[a addAction:[UIAlertAction actionWithTitle:title style:UIAlertActionStyleDefault handler:^(UIAlertAction *action){self.suppressUntil=CACurrentMediaTime()+.8;Command([@"preset." stringByAppendingString:p[@"id"]]);}]];}
  if(!count)a.message=@"Выберите наборы для этого списка в настройках твика.";
  [a addAction:[UIAlertAction actionWithTitle:@"Отмена" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action){self.suppressUntil=CACurrentMediaTime()+.8;}]];
  UIViewController *vc=self.controller.view.window.rootViewController;while(vc.presentedViewController)vc=vc.presentedViewController;
@@ -35,3 +35,4 @@
  if(vc)[vc presentViewController:a animated:YES completion:nil];else self.suppressUntil=0;
 }
 @end
+
