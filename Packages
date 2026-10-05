@@ -1169,17 +1169,17 @@ Author: chelaxian
 Name: Instagram 3x3 Grid Feed
 
 Package: com.ratush.igotblind17
-Version: 0.1.0
+Version: 0.1.1
 Architecture: iphoneos-arm64
 Maintainer: Ratu
 Installed-Size: 240
 Depends: firmware (>= 17.0), firmware (<< 17.1), mobilesubstrate
 Conflicts: xyz.cypwn.igotblind, com.miro.igotblind
-Filename: debs/com.ratush.igotblind17_0.1.0_iphoneos-arm64.deb
-Size: 13944
-MD5sum: a8f850bbc9d292f49b58371d08e58673
-SHA1: 048e365ffba3714e0cd88884ddc78ad227919e92
-SHA256: b362de7f105c5c6b8f90cfba6b225b06a34fde85a0048a1b65164e3c258f5964
+Filename: debs/com.ratush.igotblind17_0.1.1_iphoneos-arm64.deb
+Size: 15396
+MD5sum: 1d771a23c9c7ec8a4861f57c1acb14e3
+SHA1: 856dc304ea2a9df9dc9eee20fb342ac69c039879
+SHA256: 2b90fe6a141bbf4e4377c6d1f3a7dce8d3f76a774e2b74e52888d390834c9eec
 Section: Tweaks
 Description: Locate and highlight Home Screen apps from Spotlight on iOS 17.0.
 Author: Ratu
