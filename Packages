@@ -952,16 +952,16 @@ Icon: https://ios.ratu.sh/icons/com.ratush.crontweak.png
 Name: CronTweak
 
 Package: com.ratush.daemonpresets
-Version: 1.1.4
+Version: 1.2.3
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
-Installed-Size: 544
+Installed-Size: 560
 Depends: firmware (>= 17.0), firmware (<< 17.1), preferenceloader, com.opa334.ccsupport, launchctl
-Filename: debs/com.ratush.daemonpresets_1.1.4_iphoneos-arm64.deb
-Size: 50640
-MD5sum: 1e02890aa2042fcb8ae35e5611ca2ace
-SHA1: a557b9bfa9c86252e4786f30b74486b5b8d00f3b
-SHA256: 5cb226336ba46f946dd3c20e565fce50f54c14d863610a01cd07292faa0fa46f
+Filename: debs/com.ratush.daemonpresets_1.2.3_iphoneos-arm64.deb
+Size: 56130
+MD5sum: 3f63e5e005439e6f649c94bb82a38669
+SHA1: 45e4811147ca2a7ed51ad180010cc113cbbb0f29
+SHA256: c0b897b31400cf50b85576454e3fe0165c2b72204f16824e21ab846aabaed18e
 Section: Tweaks
 Description: Реальное управление службами iOS с пресетами, восстановлением и переключателем пункта управления.
 Author: chelaxian

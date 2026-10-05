@@ -1,6 +1,6 @@
 Package: com.ratush.daemonpresets
 Name: Демоны iOS
-Version: 1.2.2
+Version: 1.2.3
 Architecture: iphoneos-arm64
 Description: Реальное управление службами iOS с пресетами, восстановлением и переключателем пункта управления.
 Maintainer: chelaxian
