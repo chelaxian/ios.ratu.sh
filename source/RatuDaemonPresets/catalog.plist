@@ -190,7 +190,7 @@
 			<key>name</key>
 			<string>photoanalysisd</string>
 			<key>note</key>
-			<string>Лица, сцены и поиск Фото; нужен для индексирования скрытых фото HPM.</string>
+			<string>Лица, сцены и поиск в Фото. Отключение приостанавливает новую индексацию.</string>
 			<key>path</key>
 			<string>/System/Library/LaunchDaemons/com.apple.photoanalysisd.plist</string>
 			<key>program</key>
@@ -206,7 +206,7 @@
 			<key>name</key>
 			<string>mediaanalysisd</string>
 			<key>note</key>
-			<string>Медиаанализ Фото и HomeKit; нужен для распознавания HPM.</string>
+			<string>Медиаанализ Фото и HomeKit. Отключение ограничивает распознавание медиа.</string>
 			<key>path</key>
 			<string>/System/Library/LaunchDaemons/com.apple.mediaanalysisd.plist</string>
 			<key>program</key>
@@ -390,7 +390,7 @@
 				<string>progressd</string>
 			</array>
 			<key>name</key>
-			<string>Отчёт: проверенный набор, HPM работает</string>
+			<string>Базовый</string>
 		</dict>
 		<dict>
 			<key>id</key>
@@ -410,7 +410,7 @@
 				<string>mediaanalysisd.service</string>
 			</array>
 			<key>name</key>
-			<string>Отчёт: проверенный набор + фотоанализ</string>
+			<string>Базовый + фотоанализ</string>
 		</dict>
 		<dict>
 			<key>id</key>
@@ -422,7 +422,7 @@
 				<string>mediaanalysisd.service</string>
 			</array>
 			<key>name</key>
-			<string>Только фотоанализ: пауза HPM</string>
+			<string>Только фотоанализ</string>
 		</dict>
 		<dict>
 			<key>id</key>
