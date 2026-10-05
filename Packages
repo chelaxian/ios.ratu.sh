@@ -218,6 +218,24 @@ Author: level3tjg
 Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
+Package: com.level3tjg.offloader
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 584
+Depends: firmware (>= 17.0), ellekit, preferenceloader (>= 2.2)
+Conflicts: com.ratush.offloaderruntimefix, com.ratush.offloaderprefsfix, com.ratush.offloaderantioffloadfix, com.ratush.offloadervanillacapture
+Replaces: com.ratush.offloaderruntimefix, com.ratush.offloaderprefsfix, com.ratush.offloaderantioffloadfix, com.ratush.offloadervanillacapture
+Filename: debs/com.level3tjg.offloader_1.0.0_iphoneos-arm64.deb
+Size: 37610
+MD5sum: 786f59df10fadc2ec1c2c7bb668ce0ce
+SHA1: 5ebdde63966c8c2a065d465b2cda15eac3068146
+SHA256: f20de88b1d16bde25a0a29596decf64c875595c815dd184055b59e803f2e7ed9
+Section: Tweaks
+Description: Native app offloading and per-app protection for iOS 17 Dopamine rootless.
+Author: chelaxian; original concept by level3tjg
+Name: Offloader
+
 Package: com.muirey03.libmryipc
 Version: 2.0.1
 Architecture: iphoneos-arm64
