@@ -27,8 +27,12 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 ## Blocked by missing source or rootless base
 
 - `com.ratush.vpnappbridge`: depends on `com.snail.autovpn.global`; only a RootHide arm64e binary is present and no source is available.
-- `com.snail.autovpn.global`, `com.level3tjg.offloader`, `com.choco.tg`, `com.netskao.appdata`, `com.noisyflake.albummanager`, and `xyz.cypwn.cr4shed`: no owned buildable source in this repository.
-- `com.ratush.offloader*fix`: local diagnostic build artifacts only, not the Offloader product; no rootless base for the actual third-party tweak.
+- `com.snail.autovpn.global`, `com.choco.tg`, `com.netskao.appdata`, `com.noisyflake.albummanager`, and `xyz.cypwn.cr4shed`: no owned buildable source in this repository.
+- `com.ratush.offloader*fix`: historical diagnostic helpers, superseded by the independent implementation below.
+
+## 2026-10-05 — Offloader replacement
+
+`com.level3tjg.offloader` `1.0.0` is rebuilt from the new owned source in [`Offloader-rootless`](Offloader-rootless). Its macOS/Xcode build, 252 host assertions, 103 UIKit Simulator assertions, rootless layout, PTRAUTH ABI and signed code page hashes pass. The old closed-source base is not included. Physical iOS 17.0/Dopamine behavior is **NOT TESTED** because the owner forbids phone access and will install/check it independently. See [validation](Offloader-rootless/VALIDATION-20261005.md) for the per-function matrix and artifact hash.
 
 ## Remaining owned-source migrations
 
