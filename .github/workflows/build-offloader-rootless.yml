@@ -10,6 +10,8 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: source/Offloader-rootless
       - name: Test shared logic and IX guards on macOS
         run: |
           cd source/Offloader-rootless
@@ -30,7 +32,7 @@ jobs:
           test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
           dpkg-deb -x "$deb" "$tmp"
           for binary in "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/Offloader.dylib" "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/OffloaderGuard.dylib" "$tmp/var/jb/Library/PreferenceBundles/OffloaderPrefs.bundle/OffloaderPrefs"; do
-            lipo -verify_arch arm64 arm64e "$binary"
+            lipo "$binary" -verify_arch arm64 arm64e
             lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
             test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
             otool -L "$binary"

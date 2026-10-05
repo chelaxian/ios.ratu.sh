@@ -96,10 +96,10 @@ static OFActionKind OFKind(NSString *identifier, NSString *title, BOOL nativeDel
     NSString *type = identifier.lowercaseString ?: @"";
     // Match system identifiers, not arbitrary application actions containing "delete".
     if (nativeDelete || [@[@"delete-app",@"remove-app",@"com.level3tjg.offloader/delete"] containsObject:type] ||
-        ([type hasPrefix:@"com.apple."] && ([type hasSuffix:@"delete-app"] || [type hasSuffix:@"remove-app"]))) return OFActionDelete;
+        ([type hasPrefix:@"com.apple."] && ([type hasSuffix:@"delete-app"] || [type hasSuffix:@"remove-app"] || [type hasSuffix:@"deleteapp"] || [type hasSuffix:@"removeapp"] || [type hasSuffix:@".delete"] || [type hasSuffix:@".remove"]))) return OFActionDelete;
     if ([@[@"rearrange-icons",@"edit-home-screen",@"com.level3tjg.offloader/edit"] containsObject:type] ||
-        ([type hasPrefix:@"com.apple."] && ([type hasSuffix:@"rearrange-icons"] || [type hasSuffix:@"edit-home-screen"]))) return OFActionEdit;
-    if ([type hasPrefix:@"com.apple."] || type.length == 0) {
+        ([type hasPrefix:@"com.apple."] && ([type hasSuffix:@"rearrange-icons"] || [type hasSuffix:@"edit-home-screen"] || [type hasSuffix:@"edithomescreen"] || [type hasSuffix:@"rearrangeicons"] || [type hasSuffix:@".edit"]))) return OFActionEdit;
+    if ([type hasPrefix:@"com.apple."] || type.length == 0 || [[NSUUID alloc] initWithUUIDString:type]) {
         if ([@[@"Delete App",@"Remove App",@"Удалить приложение"] containsObject:title]) return OFActionDelete;
         if ([@[@"Edit Home Screen",@"Изменить экран «Домой»",@"Изменить экран Домой"] containsObject:title]) return OFActionEdit;
     }

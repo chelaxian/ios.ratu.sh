@@ -78,7 +78,9 @@ static void OFConfirmOffload(NSString *bundle) {
         NSString *message = [NSString stringWithFormat:OFText(@"Offload %@? Its documents and data will be kept. Reinstalling later requires the app to remain available.",@"Выгрузить %@? Документы и данные сохранятся. Для повторной установки приложение должно оставаться доступным."),name];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:OFText(@"Offload App",@"Выгрузить приложение") message:message preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Cancel",@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
-        [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Offload",@"Выгрузить") style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action){OFStartOffload(bundle);}]];
+        [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Offload",@"Выгрузить") style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action){
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW,300*NSEC_PER_MSEC),dispatch_get_main_queue(),^{OFStartOffload(bundle);});
+        }]];
         [presenter presentViewController:alert animated:YES completion:nil];
     });
 }

@@ -1,7 +1,21 @@
 #import "../OFShared.h"
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
+#import <Preferences/PSSwitchTableCell.h>
 #import <UIKit/UIKit.h>
+
+@interface OFApplicationSwitchCell : PSSwitchTableCell
+@end
+@implementation OFApplicationSwitchCell
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)identifier specifier:(PSSpecifier *)specifier {
+    self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier specifier:specifier];
+    if (self) { self.detailTextLabel.text = [specifier propertyForKey:@"subtitle"]; self.detailTextLabel.font = [UIFont systemFontOfSize:11]; }
+    return self;
+}
+- (void)refreshCellContentsWithSpecifier:(PSSpecifier *)specifier {
+    [super refreshCellContentsWithSpecifier:specifier]; self.detailTextLabel.text = [specifier propertyForKey:@"subtitle"];
+}
+@end
 
 static void OFPreferencesAlert(UIViewController *controller, NSString *message) {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Offloader" message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -96,7 +110,7 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
     for (NSDictionary *row in self.applications) {
         if (query.length && [row[@"name"] rangeOfString:query options:NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch].location == NSNotFound && [row[@"id"] rangeOfString:query options:NSCaseInsensitiveSearch].location == NSNotFound) continue;
         PSSpecifier *item = [PSSpecifier preferenceSpecifierNamed:row[@"name"] target:self set:@selector(setProtected:specifier:) get:@selector(readProtected:) detail:nil cell:PSSwitchCell edit:nil];
-        [item setProperty:row[@"id"] forKey:@"key"]; [item setProperty:row[@"id"] forKey:@"subtitle"]; [items addObject:item];
+        [item setProperty:row[@"id"] forKey:@"key"]; [item setProperty:row[@"id"] forKey:@"subtitle"]; [item setProperty:OFApplicationSwitchCell.class forKey:@"cellClass"]; [items addObject:item];
     }
     _specifiers = items; return _specifiers;
 }
