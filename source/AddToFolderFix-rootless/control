@@ -1,0 +1,9 @@
+Package: com.ratush.addtofolderfix
+Name: AddToFolder Fix
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Live Home Screen folder selection and verified icon moves for AddToFolder on Dopamine iOS 17. Install alongside the original AddToFolder.
+Maintainer: chelaxian
+Author: chelaxian
+Section: Tweaks
+Depends: ellekit, com.anthopak.addtofolder-rootless (>= 1.4) | com.anthopak.addtofolder (>= 1.4)

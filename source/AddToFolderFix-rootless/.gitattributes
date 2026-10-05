@@ -1,0 +1,6 @@
+*.m text eol=lf
+*.md text eol=lf
+*.plist text eol=lf
+*.sh text eol=lf
+Makefile text eol=lf
+control text eol=lf
