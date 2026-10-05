@@ -45,8 +45,17 @@ static int Run(NSArray *args, NSString **output) {
 }
 static NSString *Target(NSDictionary *job){ return [@"system/" stringByAppendingString:job[@"label"]]; }
 static BOOL Loaded(NSDictionary *job){return Run(@[@"print",Target(job)],NULL)==0;}
+static NSSet *LoadedSet(void){
+    NSString *s=nil; if(Run(@[@"list"],&s)!=0)return nil;
+    NSMutableSet *set=[NSMutableSet set];
+    for(NSString *line in [s componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]){
+        NSArray *fields=[[line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
+        if(fields.count==3 && ![fields[0] isEqual:@"PID"])[set addObject:fields[2]];
+    }
+    return set;
+}
 static NSDictionary *Disabled(void){
-    NSString *s=nil; Run(@[@"print-disabled",@"system"],&s);
+    NSString *s=nil; if(Run(@[@"print-disabled",@"system"],&s)!=0)return nil;
     NSMutableDictionary *d=[NSMutableDictionary dictionary];
     NSRegularExpression *rx=[NSRegularExpression regularExpressionWithPattern:@"\"([^\"]+)\"\\s*=>\\s*(disabled|enabled)" options:0 error:nil];
     for(NSTextCheckingResult *m in [rx matchesInString:s?:@"" options:0 range:NSMakeRange(0,s.length)])
@@ -59,18 +68,18 @@ static void Save(void){
 }
 static void Error(NSString *text){[errors addObject:text]; NSLog(@"%@",text);}
 static NSDictionary *Job(NSString *jid){for(NSDictionary *j in catalog[@"jobs"]) if([j[@"id"] isEqual:jid]) return j; return nil;}
-static NSArray *Desired(void){
-    if(![state[@"enabled"] boolValue]) return @[];
+static NSArray *Planned(void){
     if([state[@"preset"] isEqual:@"custom"]) return state[@"custom"]?:@[];
     for(NSDictionary *p in catalog[@"presets"]) if([p[@"id"] isEqual:state[@"preset"]]) return p[@"jobs"];
     return @[];
 }
+static NSArray *Desired(void){return [state[@"enabled"] boolValue]?Planned():@[];}
 static void Publish(void){
-    NSDictionary *disabled=Disabled(); NSMutableDictionary *jobs=[NSMutableDictionary dictionary];
-    BOOL verified=YES;
+    NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet(); NSMutableDictionary *jobs=[NSMutableDictionary dictionary];
+    BOOL verified=loadedSet!=nil && disabled!=nil;
     NSArray *desired=Desired();
     for(NSDictionary *j in catalog[@"jobs"]){
-        BOOL loaded=Loaded(j),off=[disabled[j[@"label"]] boolValue],selected=[desired containsObject:j[@"id"]];
+        BOOL loaded=[loadedSet containsObject:j[@"label"]],off=[disabled[j[@"label"]] boolValue],selected=[desired containsObject:j[@"id"]];
         if(selected && (!off || loaded)) verified=NO;
         jobs[j[@"id"]]=@{@"disabled":@(off),@"loaded":@(loaded),@"selected":@(selected)};
     }
@@ -97,24 +106,27 @@ static BOOL RestoreJob(NSDictionary *j,NSDictionary *b){
 static void Apply(void){
     errors=[NSMutableArray array]; NSArray *want=Desired();
     NSMutableDictionary *baseline=[state[@"baseline"] mutableCopy]?:[NSMutableDictionary dictionary];
-    NSDictionary *disabled=Disabled();
+    NSDictionary *disabled=Disabled(); NSSet *loadedSet=LoadedSet();
+    if(!loadedSet || !disabled){Error(@"Не удалось получить состояния служб launchd");Publish();return;}
     // Journal every original service state before the first mutation.
-    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@(Loaded(j))};}
+    for(NSString *jid in want){NSDictionary *j=Job(jid); if(j && !baseline[jid]) baseline[jid]=@{@"disabled":@([disabled[j[@"label"]] boolValue]),@"loaded":@([loadedSet containsObject:j[@"label"]])};}
     state[@"baseline"]=baseline; Save();
     for(NSString *jid in [baseline.allKeys copy]){
         if([want containsObject:jid]) continue;
         NSDictionary *j=Job(jid);if(j && RestoreJob(j,baseline[jid])){[baseline removeObjectForKey:jid];state[@"baseline"]=baseline;Save();}
     }
+    dispatch_group_t work=dispatch_group_create();
+    dispatch_semaphore_t slots=dispatch_semaphore_create(4);
     for(NSString *jid in want){
         NSDictionary *j=Job(jid); if(!j || ![[NSFileManager defaultManager] fileExistsAtPath:j[@"path"]]){Error([NSString stringWithFormat:@"%@: служба отсутствует",jid]);continue;}
-        int rc=Run(@[@"disable",Target(j)],NULL);
-        if(rc){Error([NSString stringWithFormat:@"%@: запрет запуска: %d",jid,rc]);continue;}
-        if(Loaded(j)) {
-            Run(@[@"bootout",Target(j)],NULL);
-            for(int i=0;i<10 && Loaded(j);i++)usleep(100000);
-        }
-        if(Loaded(j) || ![Disabled()[j[@"label"]] boolValue]) Error([NSString stringWithFormat:@"%@: отключение не подтверждено",jid]);
+        dispatch_semaphore_wait(slots,DISPATCH_TIME_FOREVER);
+        dispatch_group_async(work,dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{@autoreleasepool{
+            if(![disabled[j[@"label"]] boolValue])Run(@[@"disable",Target(j)],NULL);
+            if([loadedSet containsObject:j[@"label"]])Run(@[@"bootout",Target(j)],NULL);
+            dispatch_semaphore_signal(slots);
+        }});
     }
+    dispatch_group_wait(work,DISPATCH_TIME_FOREVER);
     Save();Publish();
 }
 static void HandleCommand(NSString *cmd){
@@ -126,7 +138,7 @@ static void HandleCommand(NSString *cmd){
     else if([cmd hasPrefix:@"preset."]){state[@"preset"]=[cmd substringFromIndex:7];}
     else if([cmd hasPrefix:@"cc."]){NSMutableArray *a=[state[@"ccPresets"] mutableCopy];NSString *p=[cmd substringFromIndex:3];if([a containsObject:p])[a removeObject:p];else [a addObject:p];state[@"ccPresets"]=a;Save();Publish();return;}
     else if([cmd hasPrefix:@"job."]){
-        NSMutableArray *a=[Desired() mutableCopy];if(![state[@"enabled"] boolValue])a=[state[@"custom"] mutableCopy]?:[NSMutableArray array];
+        NSMutableArray *a=[Planned() mutableCopy];
         NSString *jid=[cmd substringFromIndex:4]; if([a containsObject:jid])[a removeObject:jid];else [a addObject:jid];
         state[@"preset"]=@"custom";state[@"custom"]=a; // editing while off does not enable the master
     } else return;
