@@ -1,5 +1,6 @@
 #import "../OFShared.h"
 #import "../OFApplications.h"
+#import "../OFAppStore.h"
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
 #import <Preferences/PSSwitchTableCell.h>
@@ -30,6 +31,8 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
 @property(nonatomic) BOOL loading;
 @end
 @interface OffRootListController : PSListController
+@property(nonatomic,strong) UIAlertController *storeProgress;
+@property(nonatomic,copy) NSString *storeRequest;
 @end
 @implementation OffRootListController
 - (NSString *)title { return @"Offloader"; }
@@ -39,10 +42,16 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
     PSSpecifier *group = [PSSpecifier groupSpecifierWithName:OFText(@"Home Screen Menu",@"Меню экрана Домой")];
     [group setProperty:OFText(@"Changes apply when you next open an app's menu. Delete and Edit use the standard iOS actions.",@"Изменения действуют при следующем открытии меню приложения. Удаление и редактирование используют штатные действия iOS.") forKey:@"footerText"];
     [items addObject:group];
-    for (NSArray *row in @[@[@"3doffload",OFText(@"Offload App",@"Выгрузить приложение")],@[@"3ddelete",OFText(@"Delete / Remove App",@"Удалить приложение")],@[@"3dedit",OFText(@"Edit Home Screen",@"Изменить экран Домой")]]) {
+    for (NSArray *row in @[@[@"3doffload",OFText(@"Offload App",@"Выгрузить приложение")],@[@"3ddelete",OFText(@"Delete / Remove App",@"Удалить приложение")],@[@"3dedit",OFText(@"Edit Home Screen",@"Изменить экран Домой")],@[@"3drestartstore",OFText(@"Restart Stalled Download",@"Перезапуск зависшей загрузки")]]) {
         PSSpecifier *item = [PSSpecifier preferenceSpecifierNamed:row[1] target:self set:@selector(setPreferenceValue:specifier:) get:@selector(readPreferenceValue:) detail:nil cell:PSSwitchCell edit:nil];
         [item setProperty:row[0] forKey:@"key"]; [item setProperty:@YES forKey:@"default"]; [item setProperty:OFDomain forKey:@"defaults"]; [items addObject:item];
     }
+    PSSpecifier *store = [PSSpecifier groupSpecifierWithName:@"App Store"];
+    [store setProperty:OFText(@"Use this when an app download or reinstall from the cloud icon stops progressing. It restarts the system App Store service (appstored); downloads continue on their own. The same action is in the menu of a downloading or offloaded app icon.",@"Используйте, если загрузка или повторная установка приложения через значок облака перестала двигаться. Кнопка перезапускает системную службу App Store (appstored), загрузки продолжаются сами. То же действие есть в меню значка загружаемого или выгруженного приложения.") forKey:@"footerText"];
+    [items addObject:store];
+    PSSpecifier *restart = [PSSpecifier preferenceSpecifierNamed:OFText(@"Restart App Store Service (appstored)",@"Перезапустить службу App Store (appstored)") target:self set:NULL get:NULL detail:nil cell:PSButtonCell edit:nil];
+    restart.buttonAction = @selector(restartAppStore:);
+    [items addObject:restart];
     PSSpecifier *protection = [PSSpecifier groupSpecifierWithName:OFText(@"Protection",@"Защита")];
     [protection setProperty:OFText(@"Selected apps cannot be offloaded manually or automatically. This does not block deleting an app. Documents and data remain when an app is offloaded.",@"Выбранные приложения защищены от ручной и автоматической выгрузки. Защита не запрещает удаление приложения. При выгрузке документы и данные сохраняются.") forKey:@"footerText"];
     [items addObject:protection];
@@ -55,6 +64,37 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
         OFPreferencesAlert(self,OFText(@"Could not save this setting.",@"Не удалось сохранить настройку.")); [self reloadSpecifiers]; return;
     }
     notify_post(OFChanged);
+}
+- (void)restartAppStore:(PSSpecifier *)specifier {
+    if (self.storeRequest) return;
+    NSString *identifier = NSUUID.UUID.UUIDString;
+    if (!OFWrite(OFDomain,OFStoreRequestKey,@{@"id":identifier,@"date":NSDate.date})) {
+        OFPreferencesAlert(self,OFText(@"Could not send the restart request.",@"Не удалось отправить команду перезапуска.")); return;
+    }
+    self.storeRequest = identifier;
+    self.storeProgress = [UIAlertController alertControllerWithTitle:@"Offloader" message:OFText(@"Restarting appstored…",@"Перезапуск appstored…") preferredStyle:UIAlertControllerStyleAlert];
+    [self presentViewController:self.storeProgress animated:YES completion:nil];
+    notify_post(OFStoreRestart);
+    [self pollAppStore:identifier started:NSDate.date];
+}
+- (void)finishAppStore:(NSString *)message {
+    self.storeRequest = nil;
+    UIAlertController *progress = self.storeProgress; self.storeProgress = nil;
+    if (progress.presentingViewController) [progress dismissViewControllerAnimated:YES completion:^{OFPreferencesAlert(self,message);}];
+    else OFPreferencesAlert(self,message);
+}
+- (void)pollAppStore:(NSString *)identifier started:(NSDate *)started {
+    if (![self.storeRequest isEqual:identifier]) return;
+    id response = OFPreferences(OFDomain)[OFStoreResponseKey];
+    if (OFResponseMatches(response,identifier)) { [self finishAppStore:response[@"message"]]; return; }
+    if (-started.timeIntervalSinceNow > 25) {
+        id request = OFPreferences(OFDomain)[OFStoreRequestKey];
+        if ([request isKindOfClass:NSDictionary.class] && [request[@"id"] isEqual:identifier]) OFWrite(OFDomain,OFStoreRequestKey,nil);
+        [self finishAppStore:OFText(@"SpringBoard did not answer. Make sure Offloader is enabled for SpringBoard (Choicy), respring, and try again.",@"SpringBoard не ответил. Убедитесь, что Offloader включён для SpringBoard (Choicy), сделайте респринг и повторите.")]; return;
+    }
+    notify_post(OFStoreRestart);
+    __weak typeof(self) weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,500*NSEC_PER_MSEC),dispatch_get_main_queue(),^{[weakSelf pollAppStore:identifier started:started];});
 }
 @end
 @implementation OffAntiOffloadListController

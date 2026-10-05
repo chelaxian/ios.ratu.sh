@@ -14,6 +14,11 @@ static unsigned assertions;
 @end
 @implementation SBHApplicationIcon
 @end
+@interface OFTestLeafIcon : NSObject
+@property(nonatomic,copy) NSString *applicationBundleID;
+@end
+@implementation OFTestLeafIcon
+@end
 @interface OFTestView : NSObject
 @property(nonatomic,strong) id icon;
 @end
@@ -69,13 +74,26 @@ int main(void) { @autoreleasepool {
     OFTestView *view=[OFTestView new]; view.icon=[NSObject new]; CHECK(OFViewBundle(view)==nil);
     SBHApplicationIcon *icon=[SBHApplicationIcon new]; icon.applicationBundleID=@"com.example.app"; view.icon=icon; CHECK([OFViewBundle(view) isEqual:icon.applicationBundleID]);
     icon.applicationBundleID=@"../invalid"; CHECK(OFViewBundle(view)==nil);
-    UIMenu *decorated=OFDecorateMenu([UIMenu menuWithTitle:@"Original" children:@[custom]],@"com.example.app",@{},YES,NO);
+    UIMenu *decorated=OFDecorateMenu([UIMenu menuWithTitle:@"Original" children:@[custom]],@"com.example.app",@{},YES,NO,NO);
     CHECK([decorated.title isEqual:@"Original"]); CHECK(decorated.children.firstObject==custom); CHECK(decorated.children.count==2);
     CHECK([((UIAction *)decorated.children.lastObject).identifier isEqual:@"com.level3tjg.offloader/offload"]);
-    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,NO).children.count==2);
-    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},NO,NO).children.count==1);
-    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,YES).children.count==1);
-    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{@"3doffload":@NO},YES,NO).children.count==1);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,NO,NO).children.count==2);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},NO,NO,NO).children.count==1);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{},YES,YES,NO).children.count==1);
+    CHECK(OFDecorateMenu(decorated,@"com.example.app",@{@"3doffload":@NO},YES,NO,NO).children.count==1);
+    UIMenu *stalled=OFDecorateMenu([UIMenu menuWithTitle:@"Original" children:@[custom]],@"com.example.app",@{},NO,NO,YES);
+    CHECK(stalled.children.count==2); CHECK([((UIAction *)stalled.children.lastObject).identifier isEqual:@"com.level3tjg.offloader/restart-appstored"]);
+    CHECK(OFDecorateMenu(stalled,@"com.example.app",@{},NO,NO,YES).children.count==2);
+    CHECK(OFDecorateMenu(stalled,@"com.example.app",@{},NO,NO,NO).children.count==1);
+    CHECK(OFDecorateMenu(stalled,@"com.example.app",@{@"3drestartstore":@NO},NO,NO,YES).children.count==1);
+    CHECK(OFDecorateMenu(stalled,@"com.example.app",@{},YES,NO,YES).children.count==3);
+    CHECK([OFStoreTarget(501) isEqual:@"user/501/com.apple.appstored"]);
+    CHECK(OFStoreRequestValid(@{@"id":@"A-1",@"date":NSDate.date},NSDate.date));
+    CHECK(!OFStoreRequestValid(@{@"id":@"A-1",@"date":[NSDate dateWithTimeIntervalSinceNow:-60]},NSDate.date));
+    CHECK(!OFStoreRequestValid(@{@"id":@"../x",@"date":NSDate.date},NSDate.date)); CHECK(!OFStoreRequestValid(nil,NSDate.date));
+    OFTestView *loose=[OFTestView new]; OFTestLeafIcon *other=[OFTestLeafIcon new]; other.applicationBundleID=@"com.example.downloading"; loose.icon=other;
+    CHECK(OFViewBundle(loose)==nil); CHECK([OFMenuBundle(loose) isEqual:@"com.example.downloading"]);
+    loose.icon=[NSObject new]; CHECK(OFMenuBundle(loose)==nil);
     __block unsigned providerCalls=0;
     UIContextMenuConfiguration *configuration=[UIContextMenuConfiguration configurationWithIdentifier:@"test" previewProvider:nil actionProvider:^UIMenu *(NSArray<UIMenuElement *> *suggested){ ++providerCalls; CHECK(suggested.firstObject==custom); return [UIMenu menuWithTitle:@"Native" children:suggested]; }];
     CHECK(OFWrapConfiguration(configuration,@"com.example.app")==configuration);

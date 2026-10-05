@@ -3,7 +3,7 @@ set -euo pipefail
 src="$(cd -- "$(dirname -- "$0")" && pwd)"
 build="$(mktemp -d /tmp/offloader-preflight.XXXXXX)"
 trap 'rm -rf "$build"' EXIT
-cp "$src"/{Makefile,control,OFShared.h,OFHook.h,OFApplications.h,OFNativeOffload.h,OFGuard.m,OFBridge.m,OFSpringBoard.m,Offloader.plist,OffloaderGuard.plist} "$build/"
+cp "$src"/{Makefile,control,OFShared.h,OFHook.h,OFApplications.h,OFNativeOffload.h,OFAppStore.h,OFGuard.m,OFBridge.m,OFSpringBoard.m,Offloader.plist,OffloaderGuard.plist} "$build/"
 cp -R "$src/Preferences" "$src/layout" "$build/"
 python3 - "$build" <<'PY'
 import pathlib, sys

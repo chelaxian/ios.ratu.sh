@@ -79,6 +79,8 @@ int main(void) { @autoreleasepool {
     CHECK(OFKind(@"rearrange-icons",@"任意标题",NO)==OFActionEdit);
     CHECK(OFKind(@"com.apple.springboard.remove-app",nil,NO)==OFActionDelete);
     CHECK(OFKind(@"com.level3tjg.offloader/offload",nil,NO)==OFActionOffload);
+    CHECK(OFKind(@"com.level3tjg.offloader/restart-appstored",nil,NO)==OFActionRestartStore);
+    CHECK(OFShowKind(OFActionRestartStore,@{})); CHECK(!OFShowKind(OFActionRestartStore,@{@"3drestartstore":@NO}));
     CHECK(OFKind(@"unrelated",nil,YES)==OFActionDelete);
     for(unsigned mask=0;mask<8;++mask) {
         NSDictionary *prefs=@{@"3doffload":@((mask&1)!=0),@"3ddelete":@((mask&2)!=0),@"3dedit":@((mask&4)!=0)};

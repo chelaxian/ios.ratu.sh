@@ -1,9 +1,11 @@
 #import "OFHook.h"
 #import "OFApplications.h"
+#import "OFAppStore.h"
 #import <UIKit/UIKit.h>
 
 static NSString *OFPending;
 static UIAlertController *OFProgress;
+static BOOL OFStoreBusy;
 static UIViewController *OFPresenter(void) {
     Class cls = NSClassFromString(@"SBIconController");
     UIViewController *controller = OFObject(OFObject(cls,@selector(sharedInstance)),@selector(rootViewController));
@@ -23,6 +25,35 @@ static void OFMessage(NSString *message) {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Offloader" message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:OFText(@"OK",@"ОК") style:UIAlertActionStyleDefault handler:nil]];
     [presenter presentViewController:alert animated:YES completion:nil];
+}
+// Restart appstored off the main thread; reply to Settings when it asked.
+static void OFStartStoreRestart(NSString *requestID, BOOL showAlert) {
+    if (OFStoreBusy) { if (showAlert) OFMessage(OFText(@"appstored is already restarting.",@"appstored уже перезапускается.")); return; }
+    OFStoreBusy = YES;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{
+        NSString *message = nil;
+        BOOL ok = OFRestartAppStore(&message);
+        dispatch_async(dispatch_get_main_queue(),^{
+            OFStoreBusy = NO;
+            if (requestID) OFWrite(OFDomain,OFStoreResponseKey,@{@"id":requestID,@"ok":@(ok),@"message":message ?: @"",@"date":NSDate.date});
+            if (showAlert) OFMessage(message);
+        });
+    });
+}
+static void OFStoreRequestReceived(void) {
+    id request = OFPreferences(OFDomain)[OFStoreRequestKey];
+    if (!OFStoreRequestValid(request,NSDate.date)) return;
+    // Consume first, so a repeated notification cannot restart the daemon twice.
+    OFWrite(OFDomain,OFStoreRequestKey,nil);
+    OFStartStoreRestart(request[@"id"],NO);
+}
+// Icons whose app is downloading, waiting, offloaded or otherwise not fully installed.
+static BOOL OFNeedsStore(NSString *bundle) {
+    @try {
+        id proxy = OFProxy(bundle);
+        if (!proxy) return NO;
+        return OFBool(proxy,@selector(isPlaceholder)) || !OFBool(proxy,@selector(isInstalled)) || [OFObject(proxy,@selector(installProgress)) isKindOfClass:NSProgress.class];
+    } @catch (__unused NSException *exception) { return NO; }
 }
 static void OFFinish(NSString *identifier, NSString *message) {
     if (![OFPending isEqual:identifier]) return;
@@ -97,6 +128,13 @@ static NSString *OFViewBundle(id view) {
     if (!OFValidID(identifier)) identifier = OFString(view,@selector(applicationBundleIdentifierForShortcuts));
     return OFValidID(identifier) ? identifier : nil;
 }
+// Downloading icons may use another leaf icon class; they still name their app.
+static NSString *OFMenuBundle(id view) {
+    NSString *identifier = OFViewBundle(view);
+    if (identifier) return identifier;
+    identifier = OFString(OFObject(view,@selector(icon)),@selector(applicationBundleID));
+    return OFValidID(identifier) ? identifier : nil;
+}
 static NSArray *OFFilterShortcuts(NSArray *items, NSDictionary *settings) {
     if (![items isKindOfClass:NSArray.class]) return items;
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:items.count];
@@ -122,14 +160,18 @@ static NSArray<UIMenuElement *> *OFFilterMenu(NSArray *items, NSDictionary *sett
     }
     return result;
 }
-static UIMenu *OFDecorateMenu(UIMenu *original, NSString *bundle, NSDictionary *settings, BOOL eligible, BOOL protected) {
+static UIMenu *OFDecorateMenu(UIMenu *original, NSString *bundle, NSDictionary *settings, BOOL eligible, BOOL protected, BOOL needsStore) {
     UIMenu *menu = original ?: [UIMenu menuWithTitle:@"" children:@[]];
     NSMutableDictionary *withoutOffload = [settings mutableCopy];
     withoutOffload[@"3doffload"] = @NO;
-    // Remove any cached instance of our action before rebuilding exactly once.
+    withoutOffload[@"3drestartstore"] = @NO;
+    // Remove any cached instance of our actions before rebuilding exactly once.
     NSMutableArray *items = [OFFilterMenu(menu.children,withoutOffload) mutableCopy];
     if (OFShowKind(OFActionOffload,settings) && eligible && !protected) {
         [items addObject:[UIAction actionWithTitle:OFText(@"Offload App",@"Выгрузить приложение") image:[UIImage systemImageNamed:@"icloud.and.arrow.down"] identifier:@"com.level3tjg.offloader/offload" handler:^(__unused UIAction *action){OFConfirmOffload(bundle);}]];
+    }
+    if (OFShowKind(OFActionRestartStore,settings) && needsStore) {
+        [items addObject:[UIAction actionWithTitle:OFText(@"Restart App Store Download",@"Перезапустить загрузку (appstored)") image:[UIImage systemImageNamed:@"arrow.clockwise.icloud"] identifier:@"com.level3tjg.offloader/restart-appstored" handler:^(__unused UIAction *action){OFStartStoreRestart(nil,YES);}]];
     }
     return [menu menuByReplacingChildren:items];
 }
@@ -143,7 +185,7 @@ static id OFWrapConfiguration(id configuration, NSString *bundle) {
     OFMenuProvider wrapped = ^UIMenu *(NSArray<UIMenuElement *> *suggested) {
         UIMenu *menu = original ? original(suggested) : [UIMenu menuWithTitle:@"" children:suggested ?: @[]];
         if (menu && ![menu isKindOfClass:UIMenu.class]) return menu;
-        return OFDecorateMenu(menu,bundle,OFPreferences(OFDomain),OFEligible(bundle),OFProtected(bundle));
+        return OFDecorateMenu(menu,bundle,OFPreferences(OFDomain),OFEligible(bundle),OFProtected(bundle),OFNeedsStore(bundle));
     };
     ((void(*)(id,SEL,id))[configuration methodForSelector:setter])(configuration,setter,wrapped);
     objc_setAssociatedObject(configuration,&OFProviderMarker,@YES,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -160,7 +202,7 @@ static id OFEffective(id self, SEL cmd) {
 }
 static id OFConfiguration(id self, SEL cmd, id interaction, CGPoint location) {
     id configuration = ((id(*)(id,SEL,id,CGPoint))OFConfigurationOriginal)(self,cmd,interaction,location);
-    return OFWrapConfiguration(configuration,OFViewBundle(self));
+    return OFWrapConfiguration(configuration,OFMenuBundle(self));
 }
 #ifndef OFFLOADER_UI_TEST
 __attribute__((constructor)) static void OFSpringBoardStart(void) {
@@ -170,6 +212,8 @@ __attribute__((constructor)) static void OFSpringBoardStart(void) {
         OFHook(cls,NO,@"applicationShortcutItems",(IMP)OFItems,&OFItemsOriginal,'@',"");
         OFHook(cls,NO,@"effectiveApplicationShortcutItems",(IMP)OFEffective,&OFEffectiveOriginal,'@',"");
         OFHook(cls,NO,@"contextMenuInteraction:configurationForMenuAtLocation:",(IMP)OFConfiguration,&OFConfigurationOriginal,'@',"@{");
+        int storeToken = 0;
+        notify_register_dispatch(OFStoreRestart,&storeToken,dispatch_get_main_queue(),^(__unused int token){ OFStoreRequestReceived(); });
         dispatch_async(dispatch_get_main_queue(),^{
             if (![NSFileManager.defaultManager fileExistsAtPath:OF_PROTECTION_PATH]) {
                 NSError *error;

@@ -100,9 +100,10 @@ static NSError *OFError(NSInteger code, NSString *message) {
 static NSString *OFText(NSString *english, NSString *russian) {
     return [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"] ? russian : english;
 }
-typedef NS_ENUM(NSInteger, OFActionKind) { OFActionOther, OFActionOffload, OFActionDelete, OFActionEdit };
+typedef NS_ENUM(NSInteger, OFActionKind) { OFActionOther, OFActionOffload, OFActionDelete, OFActionEdit, OFActionRestartStore };
 static OFActionKind OFKind(NSString *identifier, NSString *title, BOOL nativeDelete) {
     if ([identifier isEqual:@"com.level3tjg.offloader/offload"]) return OFActionOffload;
+    if ([identifier isEqual:@"com.level3tjg.offloader/restart-appstored"]) return OFActionRestartStore;
     NSString *type = identifier.lowercaseString ?: @"";
     // Match system identifiers, not arbitrary application actions containing "delete".
     if (nativeDelete || [@[@"delete-app",@"remove-app",@"com.level3tjg.offloader/delete"] containsObject:type] ||
@@ -116,6 +117,6 @@ static OFActionKind OFKind(NSString *identifier, NSString *title, BOOL nativeDel
     return OFActionOther;
 }
 static BOOL OFShowKind(OFActionKind kind, NSDictionary *settings) {
-    NSString *key = kind == OFActionOffload ? @"3doffload" : kind == OFActionDelete ? @"3ddelete" : kind == OFActionEdit ? @"3dedit" : nil;
+    NSString *key = kind == OFActionOffload ? @"3doffload" : kind == OFActionDelete ? @"3ddelete" : kind == OFActionEdit ? @"3dedit" : kind == OFActionRestartStore ? @"3drestartstore" : nil;
     return !key || OFValueBool(settings[key],YES);
 }

@@ -1,6 +1,6 @@
 Package: com.level3tjg.offloader
 Name: Offloader
-Version: 1.0.3
+Version: 1.0.4
 Architecture: iphoneos-arm64
 Description: Native app offloading and per-app protection for iOS 17 Dopamine rootless.
 Maintainer: chelaxian
