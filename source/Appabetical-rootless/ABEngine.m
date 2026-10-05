@@ -107,7 +107,9 @@ static ABEntry *ABEntryForIcon(id icon,NSUInteger index) {
         if(ABBool(ABOptions,@"placeBookmarksAtEnd",NO))entry.end=1;
         NSURL *url=ABGet(ABGet(icon,@"webClip"),@"pageURL");if([url isKindOfClass:NSURL.class]&&[url.scheme.lowercaseString isEqual:@"shortcuts"])entry.tier=2;
     }else if(ABFlag(icon,@"isApplicationIcon")&&ABBool(ABOptions,@"placeOffloadedAtEnd",YES)) {
-        NSString *bid=ABGet(ABGet(icon,@"application"),@"bundleIdentifier");if([bid isKindOfClass:NSString.class]){id proxy=ABGet1(NSClassFromString(@"LSApplicationProxy"),@"applicationProxyForIdentifier:",bid);if(proxy&&[proxy respondsToSelector:NSSelectorFromString(@"isInstalled")]&&!ABFlag(proxy,@"isInstalled"))entry.end=2;}
+        // Offloaded icons have no live SBApplication object on iOS 17.
+        NSString *bid=ABGet(ABGet(icon,@"application"),@"bundleIdentifier") ?: ABGet(icon,@"applicationBundleID") ?: ABGet(icon,@"nodeIdentifier");
+        if([bid isKindOfClass:NSString.class]){id proxy=ABGet1(NSClassFromString(@"LSApplicationProxy"),@"applicationProxyForIdentifier:",bid);if(proxy&&[proxy respondsToSelector:NSSelectorFromString(@"isInstalled")]&&!ABFlag(proxy,@"isInstalled"))entry.end=2;}
     }return entry;
 }
 static NSComparisonResult ABCompare(ABEntry *a,ABEntry *b) {
