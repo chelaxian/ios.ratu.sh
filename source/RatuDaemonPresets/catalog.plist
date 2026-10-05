@@ -372,6 +372,70 @@
 			<key>program</key>
 			<string>/System/Library/PrivateFrameworks/MapsSupport.framework/navd</string>
 		</dict>
+		<dict>
+			<key>group</key>
+			<string>optional</string>
+			<key>id</key>
+			<string>videosubscriptionsd</string>
+			<key>label</key>
+			<string>com.apple.videosubscriptionsd</string>
+			<key>name</key>
+			<string>videosubscriptionsd</string>
+			<key>note</key>
+			<string>Данные учётной записи ТВ-провайдера / VideoSubscriberAccount. Отключение может нарушить вход у провайдера и работу связанных видеоприложений. Не универсальный ускоритель.</string>
+			<key>path</key>
+			<string>/System/Library/LaunchDaemons/com.apple.videosubscriptionsd.plist</string>
+			<key>program</key>
+			<string>/usr/libexec/videosubscriptionsd</string>
+		</dict>
+		<dict>
+			<key>group</key>
+			<string>optional</string>
+			<key>id</key>
+			<string>askpermissiond</string>
+			<key>label</key>
+			<string>com.apple.askpermissiond</string>
+			<key>name</key>
+			<string>askpermissiond</string>
+			<key>note</key>
+			<string>AskPermission: запросы одобрения покупок в семье и их уведомления. Не отключайте, если используется «Попросить купить»; это не общий демон разрешений камеры и микрофона.</string>
+			<key>path</key>
+			<string>/System/Library/LaunchDaemons/com.apple.askpermissiond.plist</string>
+			<key>program</key>
+			<string>/System/Library/PrivateFrameworks/AskPermission.framework/Support/askpermissiond</string>
+		</dict>
+		<dict>
+			<key>group</key>
+			<string>optional</string>
+			<key>id</key>
+			<string>nanobackupd</string>
+			<key>label</key>
+			<string>com.apple.nanobackupd</string>
+			<key>name</key>
+			<string>nanobackupd</string>
+			<key>note</key>
+			<string>Резервное копирование Apple Watch. Отключайте только без часов; включите перед сопряжением и резервным копированием.</string>
+			<key>path</key>
+			<string>/System/Library/LaunchDaemons/com.apple.nanobackupd.plist</string>
+			<key>program</key>
+			<string>/System/Library/PrivateFrameworks/NanoBackup.framework/nanobackupd</string>
+		</dict>
+		<dict>
+			<key>group</key>
+			<string>optional</string>
+			<key>id</key>
+			<string>tipsd</string>
+			<key>label</key>
+			<string>com.apple.tipsd</string>
+			<key>name</key>
+			<string>tipsd</string>
+			<key>note</key>
+			<string>Контент, обновления и подсказки приложения «Советы». При отключении эти функции перестанут обновляться.</string>
+			<key>path</key>
+			<string>/System/Library/LaunchDaemons/com.apple.tipsd.plist</string>
+			<key>program</key>
+			<string>/usr/libexec/tipsd</string>
+		</dict>
 	</array>
 	<key>presets</key>
 	<array>
@@ -444,6 +508,7 @@
 			<array>
 				<string>nanoregistryd</string>
 				<string>wcd</string>
+				<string>nanobackupd</string>
 			</array>
 			<key>name</key>
 			<string>Без Apple Watch</string>
@@ -459,6 +524,18 @@
 			</array>
 			<key>name</key>
 			<string>Подсказки и персонализация: с ограничениями</string>
+		</dict>
+		<dict>
+			<key>id</key>
+			<string>legacy-selective</string>
+			<key>jobs</key>
+			<array>
+				<string>tipsd</string>
+				<string>videosubscriptionsd</string>
+				<string>nanobackupd</string>
+			</array>
+			<key>name</key>
+			<string>Cappd / Appcd: выборочный набор</string>
 		</dict>
 		<dict>
 			<key>id</key>
