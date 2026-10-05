@@ -43,8 +43,8 @@ SpringBoard caches.
 |---|---|
 | Source review / original binary inspection | PASS |
 | WSL compilation, arm64 + arm64e | PASS; platform ABI output is unsuitable for installation |
-| macOS build and current arm64e ABI | Pending Actions artifact inspection |
-| APT publication and checksums | Pending publication |
+| macOS build and current arm64e ABI | PASS; macOS run 37326382100, PTRAUTH 0x80000002, both slices signed |
+| APT publication and checksums | Repository release workflow generates the index; public hashes are checked during publication |
 | Current-device injection and UI | NOT TESTED |
 | Current-device moves / new folder / removal / pages | NOT TESTED |
 | Current-device persistence and compatibility with Appabetical | NOT TESTED |
@@ -58,3 +58,8 @@ Rollback: remove only `com.ratush.addtofolderfix` and restart SpringBoard.
 Before mutation, the companion stores a layout snapshot under
 `/var/mobile/Library/SpringBoard/AddToFolderFixRecovery/<UUID>/IconState.plist`.
 No automatic full-model reload or external device-control operation is used.
+
+Artifact: com.ratush.addtofolderfix_1.0.0_iphoneos-arm64.deb.
+SHA256: b8179d19e23faba0b663a9e6c34ad5e967e052025a2707c11f46a8a4ddb70a50.
+Build: https://github.com/chelaxian/ios.ratu.sh/actions/runs/37326382100 (success).
+The first CI attempts failed on an incomplete source commit and lipo argument order; both were corrected before producing this artifact.
