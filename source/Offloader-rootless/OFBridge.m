@@ -1,4 +1,5 @@
 #import "OFApplications.h"
+#import "OFNativeOffload.h"
 #import <UIKit/UIKit.h>
 
 static NSString *OFBridgeActive;
@@ -45,11 +46,7 @@ static void OFBridgeCheck(void) {
                 if (OFProtected(bundle)) error = OFError(1,OFText(@"This app is protected from offloading.",@"Это приложение защищено от выгрузки."));
                 else if (!OFEligible(bundle)) error = OFError(2,OFText(@"iOS does not allow this app to be offloaded.",@"iOS не разрешает выгрузить это приложение."));
                 else {
-                    Class cls = NSClassFromString(@"IXAppInstallCoordinator");
-                    SEL selector = NSSelectorFromString(@"demoteAppToPlaceholderWithBundleID:forReason:waitForDeletion:ignoreRemovability:error:");
-                    if (OFCanCall(cls,selector,'b',"@qbb^")) {
-                        ok = ((BOOL(*)(id,SEL,id,NSUInteger,BOOL,BOOL,NSError**))[cls methodForSelector:selector])(cls,selector,bundle,0,YES,NO,&error);
-                    } else error = OFError(3,OFText(@"The iOS offload API is unavailable.",@"API выгрузки iOS недоступен."));
+                    ok = OFNativeDemote(bundle,&error);
                     // Completion means deletion finished; also verify the LaunchServices state.
                     if (ok) {
                         for (unsigned attempt=0; attempt<20 && OFBool(OFProxy(bundle),@selector(isInstalled)); ++attempt) [NSThread sleepForTimeInterval:0.25];

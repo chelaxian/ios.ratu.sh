@@ -1,8 +1,10 @@
 #define OFFLOADER_HOST_TEST 1
 #define OF_PROTECTION_PATH ([NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"offloader-tests-%d/Protected.plist",getpid()]])
 #import "../OFGuard.m"
+#import "../OFNativeOffload.h"
 
 static unsigned assertions, originalCalls;
+static NSUInteger expectedNativeReason = 42;
 #define CHECK(expression) do { ++assertions; if (!(expression)) { NSLog(@"FAIL line %d: %s",__LINE__,#expression); exit(1); } } while(0)
 @interface OFTestIdentity : NSObject
 @property(nonatomic,copy) NSString *bundleID;
@@ -23,7 +25,7 @@ static unsigned assertions, originalCalls;
 @implementation IXAppInstallCoordinator
 + (BOOL)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r error:(NSError **)e { ++originalCalls; if(e)*e=nil; return YES; }
 + (BOOL)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w error:(NSError **)e { ++originalCalls; CHECK(r==42); CHECK(w==YES); if(e)*e=nil; return YES; }
-+ (BOOL)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w ignoreRemovability:(BOOL)i error:(NSError **)e { ++originalCalls; CHECK(r==42); CHECK(w==YES); CHECK(i==NO); if(e)*e=nil; return YES; }
++ (BOOL)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w ignoreRemovability:(BOOL)i error:(NSError **)e { ++originalCalls; CHECK(r==expectedNativeReason); CHECK(w==YES); CHECK(i==NO); if(e)*e=nil; return YES; }
 + (BOOL)demoteAppToPlaceholderWithApplicationIdentity:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w ignoreRemovability:(BOOL)i error:(NSError **)e { ++originalCalls; CHECK(r==42); CHECK(w==YES); CHECK(i==NO); if(e)*e=nil; return YES; }
 + (void)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w completion:(void(^)(NSError *))c { ++originalCalls; CHECK(r==42); CHECK(w==YES); if(c)c(nil); }
 + (void)demoteAppToPlaceholderWithBundleID:(id)b forReason:(NSUInteger)r waitForDeletion:(BOOL)w ignoreRemovability:(BOOL)i completion:(void(^)(NSError *))c { ++originalCalls; CHECK(r==42); CHECK(w==YES); CHECK(i==NO); if(c)c(nil); }
@@ -101,6 +103,14 @@ int main(void) { @autoreleasepool {
     CHECK(OFWriteProtectionSnapshot(@{@"com.test.protected":@YES,@"com.test.no":@NO,@"../bad":@YES,@"com.test.string":@"true"},NULL));
     CHECK(OFProtection().count==1); CHECK(OFProtected(@"com.test.protected")); CHECK(!OFProtected(@"com.test.no"));
     TestGuard();
+    expectedNativeReason = 1;
+    CHECK(OFDemotionReason == 1);
+    unsigned beforeNative = originalCalls;
+    NSError *nativeError = nil;
+    CHECK(OFNativeDemote(@"com.test.allowed",&nativeError)); CHECK(nativeError == nil); CHECK(originalCalls == beforeNative + 1);
+    CHECK(OFNativeDemote(@"com.test.allowed",NULL)); CHECK(originalCalls == beforeNative + 2);
+    CHECK(!OFNativeDemote(@"com.test.protected",&nativeError)); CHECK([nativeError.domain isEqual:@"com.ratush.offloader"]); CHECK(originalCalls == beforeNative + 2);
+    CHECK(!OFNativeDemote(@"../invalid",NULL)); CHECK(originalCalls == beforeNative + 2);
     CHECK(OFWriteProtectionSnapshot(@{},NULL)); CHECK(OFProtection().count==0); CHECK(!OFProtected(@"com.test.protected"));
     NSString *domain=[@"com.ratush.offloader.tests." stringByAppendingString:NSUUID.UUID.UUIDString];
     CHECK(OFWrite(domain,@"request",@{@"id":@"123",@"date":NSDate.date})); CHECK([OFPreferences(domain)[@"request"] isKindOfClass:NSDictionary.class]); CHECK(OFWrite(domain,@"request",nil)); CHECK(OFPreferences(domain)[@"request"]==nil);
