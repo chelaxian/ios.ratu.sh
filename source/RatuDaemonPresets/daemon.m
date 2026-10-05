@@ -37,7 +37,7 @@ static int Run(NSArray *args, NSString **output) {
         char b[4096]; ssize_t n; while((n=read(readfd,b,sizeof b))>0) if(data.length<262144) [data appendBytes:b length:n]; close(readfd);
     });
     int status=0; BOOL finished=NO;
-    for(int i=0;i<100;i++){if(waitpid(pid,&status,WNOHANG)==pid){finished=YES;break;} usleep(50000);}
+    for(int i=0;i<100;i++){pid_t w=waitpid(pid,&status,WNOHANG);if(w==pid){finished=YES;break;}if(w<0){NSLog(@"waitpid failed: %d",errno);break;}usleep(50000);}
     if(!finished){kill(pid,SIGKILL);waitpid(pid,&status,0);}
     dispatch_group_wait(g,DISPATCH_TIME_FOREVER);
     if(output) *output=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"";
@@ -67,7 +67,7 @@ static NSArray *Desired(void){
 }
 static void Publish(void){
     NSDictionary *disabled=Disabled(); NSMutableDictionary *jobs=[NSMutableDictionary dictionary];
-    BOOL verified=errors.count==0;
+    BOOL verified=YES;
     NSArray *desired=Desired();
     for(NSDictionary *j in catalog[@"jobs"]){
         BOOL loaded=Loaded(j),off=[disabled[j[@"label"]] boolValue],selected=[desired containsObject:j[@"id"]];
@@ -75,7 +75,8 @@ static void Publish(void){
         jobs[j[@"id"]]=@{@"disabled":@(off),@"loaded":@(loaded),@"selected":@(selected)};
     }
     NSMutableDictionary *pub=[state mutableCopy]; [pub removeObjectForKey:@"baseline"];
-    pub[@"jobs"]=jobs;pub[@"verified"]=@(verified);pub[@"errors"]=[errors copy];pub[@"operation"]=lastOperation;pub[@"updated"]=[NSDate date];
+    if(![state[@"enabled"] boolValue] && [state[@"baseline"] count])verified=NO;
+    pub[@"jobs"]=jobs;pub[@"verified"]=@(verified);pub[@"errors"]=verified?@[]:[errors copy];pub[@"operation"]=lastOperation;pub[@"updated"]=[NSDate date];
     [pub writeToFile:RPStatus atomically:YES];chmod(RPStatus.UTF8String,0644);
     notify_post("com.ratush.daemonpresets.changed");
 }
@@ -108,7 +109,10 @@ static void Apply(void){
         NSDictionary *j=Job(jid); if(!j || ![[NSFileManager defaultManager] fileExistsAtPath:j[@"path"]]){Error([NSString stringWithFormat:@"%@: служба отсутствует",jid]);continue;}
         int rc=Run(@[@"disable",Target(j)],NULL);
         if(rc){Error([NSString stringWithFormat:@"%@: запрет запуска: %d",jid,rc]);continue;}
-        if(Loaded(j)) Run(@[@"bootout",Target(j)],NULL);
+        if(Loaded(j)) {
+            Run(@[@"bootout",Target(j)],NULL);
+            for(int i=0;i<10 && Loaded(j);i++)usleep(100000);
+        }
         if(Loaded(j) || ![Disabled()[j[@"label"]] boolValue]) Error([NSString stringWithFormat:@"%@: отключение не подтверждено",jid]);
     }
     Save();Publish();
@@ -137,6 +141,7 @@ static void Snapshot(void){
     NSData *json=[NSJSONSerialization dataWithJSONObject:d options:NSJSONWritingPrettyPrinted error:nil];fwrite(json.bytes,1,json.length,stdout);puts("");
 }
 int main(int argc,char **argv){@autoreleasepool{
+    signal(SIGCHLD,SIG_DFL);
     if(getuid()!=0){fprintf(stderr,"root required\n");return 77;}
     if(argc==2 && !strcmp(argv[1],"--snapshot")){Snapshot();return 0;}
     catalog=Catalog();if(![catalog[@"jobs"] count])return 78;
@@ -147,6 +152,9 @@ int main(int argc,char **argv){@autoreleasepool{
     NSMutableArray *commands=[@[@"query",@"toggle",@"on",@"off"] mutableCopy];
     for(NSDictionary *p in catalog[@"presets"]){[commands addObject:[@"preset." stringByAppendingString:p[@"id"]]];[commands addObject:[@"cc." stringByAppendingString:p[@"id"]]];}
     for(NSDictionary *j in catalog[@"jobs"])[commands addObject:[@"job." stringByAppendingString:j[@"id"]]];
+    if(argc==3 && !strcmp(argv[1],"--command")){
+        NSString *c=@(argv[2]); if(![commands containsObject:c])return 64; Command(c);return 0;
+    }
     for(NSString *c in commands){int token;notify_register_dispatch([[RPPrefix stringByAppendingString:c] UTF8String],&token,queue,^(int t){@autoreleasepool{HandleCommand(c);}});}
     dispatch_async(queue,^{Apply();});dispatch_main();
 }}
