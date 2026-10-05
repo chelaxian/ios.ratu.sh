@@ -1,0 +1,10 @@
+*.m text eol=lf
+*.h text eol=lf
+*.x text eol=lf
+*.sh text eol=lf
+*.plist text eol=lf
+*.strings text eol=lf
+*.md text eol=lf
+control text eol=lf
+Makefile text eol=lf
+LICENSE text eol=lf
