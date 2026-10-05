@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.ratush.daemonpresets.prefs</string><key>CFBundleName</key><string>RatuDaemonPrefs</string><key>CFBundleExecutable</key><string>RatuDaemonPrefs</string><key>CFBundlePackageType</key><string>BNDL</string><key>NSPrincipalClass</key><string>RPListController</string></dict></plist>

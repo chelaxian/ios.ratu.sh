@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+mkdir -p /var/jb/var/lib/ratu-daemon-presets /var/jb/var/log
+chmod 700 /var/jb/var/lib/ratu-daemon-presets
+/bin/launchctl bootout system/com.ratush.daemonpresetsd 2>/dev/null || true
+/bin/launchctl enable system/com.ratush.daemonpresetsd
+/bin/launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.ratush.daemonpresetsd.plist
+exit 0
