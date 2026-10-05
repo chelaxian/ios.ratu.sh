@@ -105,7 +105,9 @@ static void AFWalk(id folder, NSArray *lists, NSString *location, NSMutableArray
     NSUInteger page = 0;
     for (id list in lists) {
         NSString *where = [NSString stringWithFormat:@"%@ · %lu", location, (unsigned long)++page];
+        NSUInteger position = 0;
         for (id icon in [AFArray(AFGet(list, @"icons")) copy]) {
+            position++;
             [slots addObject:@{@"icon":icon, @"folder":folder, @"list":list, @"location":where}];
             if (AFBoolean(icon, @"isFolderIcon")) {
                 id child = AFGet(icon, @"folder");
@@ -114,7 +116,8 @@ static void AFWalk(id folder, NSArray *lists, NSString *location, NSMutableArray
                 BOOL existing = NO;
                 for (NSDictionary *record in folders) if ([record[@"id"] isEqual:identity]) { existing = YES; break; }
                 NSString *name = AFGet(child, @"displayName") ?: AFGet(icon, @"displayName") ?: @"Folder";
-                if (!existing) [folders addObject:@{@"id":identity, @"name":name, @"icon":icon, @"folder":child, @"location":where}];
+                NSString *folderLocation = [NSString stringWithFormat:@"%@ · %lu", where, (unsigned long)position];
+                if (!existing) [folders addObject:@{@"id":identity, @"name":name, @"icon":icon, @"folder":child, @"location":folderLocation}];
                 AFWalk(child, AFArray(AFGet(child, @"lists")), name, slots, folders, seen, depth+1);
             }
         }
