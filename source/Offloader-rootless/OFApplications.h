@@ -8,8 +8,8 @@ static id OFProxy(NSString *identifier) {
 static BOOL OFEligible(NSString *identifier) {
     id proxy = OFProxy(identifier);
     if (!proxy || !OFBool(proxy,@selector(isInstalled)) || OFBool(proxy,@selector(isPlaceholder))) return NO;
-    if (![OFString(proxy,@selector(applicationType)) isEqual:@"User"]) return NO;
-    // StorageData owns STStorageApp on iOS 17. Its decision includes restrictions.
+    // StorageData owns STStorageApp on iOS 17. Its decision includes restrictions
+    // and covers removable Apple apps too; do not infer eligibility from app type.
     static dispatch_once_t once;
     dispatch_once(&once,^{ dlopen("/System/Library/PrivateFrameworks/StorageData.framework/StorageData",RTLD_NOW); });
     Class cls = NSClassFromString(@"STStorageApp");

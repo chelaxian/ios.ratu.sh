@@ -9,7 +9,7 @@ static const char *OFChanged = "com.level3tjg.offloader/settings.changed";
 static const char *OFCommand = "com.ratush.offloader.command";
 static const char *OFResponse = "com.ratush.offloader.response";
 #ifndef OF_PROTECTION_PATH
-#define OF_PROTECTION_PATH @"/var/mobile/Library/Application Support/Offloader/Protected.plist"
+#define OF_PROTECTION_PATH @"/var/mobile/Library/Preferences/com.ratush.offloader.protection-snapshot.plist"
 #endif
 
 // Private calls and hooks must match the actual ABI before an IMP is used.

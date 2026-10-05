@@ -1,4 +1,5 @@
 #import "../OFShared.h"
+#import "../OFApplications.h"
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
 #import <Preferences/PSSwitchTableCell.h>
@@ -83,7 +84,8 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
                 if (![applications isKindOfClass:NSArray.class]) failure = OFText(@"The app list is unavailable. Your protection selections are kept.",@"Список приложений недоступен. Выбор защиты сохранён.");
                 else for (id proxy in applications) {
                     NSString *identifier = OFString(proxy,@selector(bundleIdentifier));
-                    if (!OFValidID(identifier) || ![OFString(proxy,@selector(applicationType)) isEqual:@"User"]) continue;
+                    if (!OFValidID(identifier)) continue;
+                    if (![OFString(proxy,@selector(applicationType)) isEqual:@"User"] && !OFEligible(identifier)) continue;
                     rows[identifier] = @{@"id":identifier,@"name":OFString(proxy,@selector(localizedName)) ?: identifier};
                 }
             } @catch (NSException *exception) { failure = exception.reason; }
