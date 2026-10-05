@@ -47,8 +47,8 @@ jobs:
             test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
             otool -L "$binary"
             if otool -L "$binary" | grep -E 'libroothide|libmryipc|AltList'; then exit 1; fi
-            codesign --verify "$binary"
           done
+          python3 tests/inspect_deb.py "$deb"
           mkdir artifacts && cp "$deb" artifacts/
       - uses: actions/upload-artifact@v4
         with:
