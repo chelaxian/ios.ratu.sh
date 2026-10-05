@@ -1,7 +1,7 @@
 #import <Preferences/PSListController.h>
-
-@interface ABPRootListController : PSListController
+@interface ABPCommandController : PSListController
 @end
-
-@interface ABPPresetsController : PSListController
+@interface ABPRootListController : ABPCommandController
+@end
+@interface ABPPresetsController : ABPCommandController
 @end

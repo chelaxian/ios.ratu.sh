@@ -9,7 +9,7 @@ PROJECT = Appabetical
 TWEAK_NAME = Appabetical
 Appabetical_FILES = Tweak.x
 Appabetical_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
-Appabetical_FRAMEWORKS = Foundation CoreServices
+Appabetical_FRAMEWORKS = Foundation UIKit CoreServices
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
