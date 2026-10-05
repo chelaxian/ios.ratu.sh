@@ -49,7 +49,7 @@ static NSSet *LoadedSet(void){
     NSString *s=nil; if(Run(@[@"list"],&s)!=0)return nil;
     NSMutableSet *set=[NSMutableSet set];
     for(NSString *line in [s componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]){
-        NSArray *fields=[[line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
+        NSArray *fields=[line componentsSeparatedByString:@"\t"];
         if(fields.count==3 && ![fields[0] isEqual:@"PID"])[set addObject:fields[2]];
     }
     return set;
