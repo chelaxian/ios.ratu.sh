@@ -405,6 +405,22 @@ Description: Alphabetically sort Home Screen icons and folder contents. Latin A-
 Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine implementation by chelaxian
 Name: Appabetical
 
+Package: com.ratush.appabetical
+Version: 2.0.1
+Architecture: iphoneos-arm64
+Maintainer: chelaxian
+Installed-Size: 460
+Depends: ellekit, preferenceloader (>= 2.2)
+Filename: debs/com.ratush.appabetical_2.0.1_iphoneos-arm64.deb
+Size: 45206
+MD5sum: df3ca09f885936c474a918d779089da9
+SHA1: 387f28a8328ceaf1442a6e8068e8116651f352b0
+SHA256: 73cf3681720cad260f9535403df35aff106ffa0b14f14627bac7dc6b8db8be17
+Section: Tweaks
+Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). Dopamine rootless implementation with live SpringBoard sorting and verified layout presets.
+Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine implementation by chelaxian
+Name: Appabetical
+
 Package: com.ratush.appsplitvpn
 Version: 0.2.4
 Architecture: iphoneos-arm64
