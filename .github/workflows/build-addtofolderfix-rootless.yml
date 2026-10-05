@@ -30,7 +30,7 @@ jobs:
           test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
           dpkg-deb -x "$deb" "$tmp"
           binary="$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AddToFolderFix.dylib"
-          lipo -verify_arch arm64 arm64e "$binary"
+          lipo "$binary" -verify_arch arm64 arm64e
           lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
           test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
           if otool -L "$binary" | grep -E 'libroothide|/rootfs'; then exit 1; fi
