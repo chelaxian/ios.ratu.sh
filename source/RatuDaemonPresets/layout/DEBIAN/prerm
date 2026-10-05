@@ -3,5 +3,6 @@ set -e
 if [ "$1" = remove ] || [ "$1" = deconfigure ]; then
  /var/jb/usr/bin/launchctl bootout system/com.ratush.daemonpresetsd 2>/dev/null || true
  /var/jb/usr/libexec/ratu-daemonpresetsd --restore
+ /var/jb/usr/libexec/ratu-daemonpresetsd --unregister-cc
 fi
 exit 0

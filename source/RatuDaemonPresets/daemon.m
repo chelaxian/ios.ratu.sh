@@ -152,9 +152,28 @@ static void Snapshot(void){
     NSDictionary *d=@{@"processes":processes,@"free":@((uint64_t)vm.free_count*pagesize),@"inactive":@((uint64_t)vm.inactive_count*pagesize),@"compressor":@((uint64_t)vm.compressor_page_count*pagesize),@"timestamp":@([[NSDate date] timeIntervalSince1970])};
     NSData *json=[NSJSONSerialization dataWithJSONObject:d options:NSJSONWritingPrettyPrinted error:nil];fwrite(json.bytes,1,json.length,stdout);puts("");
 }
+static int RegisterCC(BOOL add){
+    NSFileManager *fm=[NSFileManager defaultManager];NSString *path=nil;
+    for(NSString *p in @[@"/var/jb/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist",@"/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist"])
+        if([fm fileExistsAtPath:p]){path=p;break;}
+    if(!path)return 0;
+    NSMutableDictionary *d=[[NSDictionary dictionaryWithContentsOfFile:path] mutableCopy];if(!d)return 1;
+    NSString *identifier=@"com.ratush.daemonpresets.cc";NSMutableArray *a=[d[@"module-identifiers"] mutableCopy];if(!a)return 1;
+    if(add==[a containsObject:identifier])return 0;
+    NSString *suffix=[NSString stringWithFormat:@".ratu-daemonpresets.%.0f.bak",[[NSDate date] timeIntervalSince1970]];
+    NSString *backup=[path stringByAppendingString:suffix];NSError *e=nil;
+    if(![fm copyItemAtPath:path toPath:backup error:&e])return 1;
+    [fm createDirectoryAtPath:@"/var/jb/var/root/ratu-daemon-backups" withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0700} error:nil];
+    if(![fm copyItemAtPath:path toPath:[@"/var/jb/var/root/ratu-daemon-backups" stringByAppendingPathComponent:backup.lastPathComponent] error:&e])return 1;
+    struct stat st;stat(path.UTF8String,&st);
+    if(add)[a addObject:identifier];else [a removeObject:identifier];d[@"module-identifiers"]=a;
+    if(![d writeToFile:path atomically:YES])return 1;chown(path.UTF8String,st.st_uid,st.st_gid);chmod(path.UTF8String,0644);return 0;
+}
 int main(int argc,char **argv){@autoreleasepool{
     signal(SIGCHLD,SIG_DFL);
     if(getuid()!=0){fprintf(stderr,"root required\n");return 77;}
+    if(argc==2 && !strcmp(argv[1],"--register-cc"))return RegisterCC(YES);
+    if(argc==2 && !strcmp(argv[1],"--unregister-cc"))return RegisterCC(NO);
     if(argc==2 && !strcmp(argv[1],"--snapshot")){Snapshot();return 0;}
     catalog=Catalog();if(![catalog[@"jobs"] count])return 78;
     state=[[NSDictionary dictionaryWithContentsOfFile:RPPrivate] mutableCopy]?:[@{@"enabled":@NO,@"preset":@"report",@"custom":@[],@"ccPresets":@[@"report",@"report-photos",@"photos"],@"baseline":@{}} mutableCopy];

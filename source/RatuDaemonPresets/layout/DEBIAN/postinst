@@ -5,4 +5,5 @@ chmod 700 /var/jb/var/lib/ratu-daemon-presets
 /var/jb/usr/bin/launchctl bootout system/com.ratush.daemonpresetsd 2>/dev/null || true
 /var/jb/usr/bin/launchctl enable system/com.ratush.daemonpresetsd
 /var/jb/usr/bin/launchctl bootstrap system /var/jb/Library/LaunchDaemons/com.ratush.daemonpresetsd.plist
+/var/jb/usr/libexec/ratu-daemonpresetsd --register-cc
 exit 0
