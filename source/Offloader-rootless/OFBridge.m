@@ -1,9 +1,25 @@
 #import "OFApplications.h"
+#import <UIKit/UIKit.h>
 
 static NSString *OFBridgeActive;
 static NSString *OFBridgeLast;
 static void OFBridgeReply(NSString *identifier, BOOL ok, NSString *message) {
-    OFWrite(OFDomain,@"response",@{@"id":identifier,@"ok":@(ok),@"message":message ?: @"",@"date":NSDate.date});
+    BOOL shown = NO;
+    if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
+        UIViewController *presenter = nil;
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+            if (![scene isKindOfClass:UIWindowScene.class]) continue;
+            for (UIWindow *window in ((UIWindowScene *)scene).windows) if(window.isKeyWindow){presenter=window.rootViewController;break;}
+            if (presenter) break;
+        }
+        while (presenter.presentedViewController && !presenter.presentedViewController.isBeingDismissed) presenter = presenter.presentedViewController;
+        if (presenter.view.window) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Offloader" message:message preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:OFText(@"OK",@"ОК") style:UIAlertActionStyleDefault handler:nil]];
+            [presenter presentViewController:alert animated:YES completion:nil]; shown = YES;
+        }
+    }
+    OFWrite(OFDomain,@"response",@{@"id":identifier,@"ok":@(ok),@"message":message ?: @"",@"date":NSDate.date,@"shownInSettings":@(shown)});
     notify_post(OFResponse);
 }
 static void OFBridgeCheck(void) {
