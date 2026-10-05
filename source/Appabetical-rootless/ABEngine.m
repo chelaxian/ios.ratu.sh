@@ -155,7 +155,17 @@ static void ABSort(NSDictionary *request) {
 }
 static NSDictionary *ABPresets(void){id value=[NSDictionary dictionaryWithContentsOfFile:ABPresetPath];return [value isKindOfClass:NSDictionary.class]?value:@{};}
 static void ABCatalog(void){ABWritePreference(@"presetCatalog",[ABPresets().allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]);}
-static NSDictionary *ABCCPaths(void){return @{@"ccSupport":@"/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist",@"ccConfig":@"/var/mobile/Library/ControlCenter/ModuleConfiguration.plist"};}
+static NSDictionary *ABCCPaths(void){
+    NSMutableDictionary *paths=[@{@"ccSupport":@"/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist",@"ccConfig":@"/var/mobile/Library/ControlCenter/ModuleConfiguration.plist"} mutableCopy];
+    // CCSupport can redirect its store into the Dopamine overlay. Resolve the
+    // live provider's URL; never save a preboot UUID into the preset envelope.
+    NSURL *url=ABGet(NSClassFromString(@"CCSModuleSettingsProvider"),@"_configurationFileURL");
+    if([url isKindOfClass:NSURL.class]&&url.isFileURL){
+        if([url.lastPathComponent isEqual:@"ModuleConfiguration_CCSupport.plist"])paths[@"ccSupport"]=url.path;
+        else if([url.lastPathComponent isEqual:@"ModuleConfiguration.plist"])paths[@"ccConfig"]=url.path;
+    }
+    return paths;
+}
 static void ABSavePreset(NSDictionary *request) {
     NSString *name=request[@"name"];NSError *error=nil;NSDictionary *state=ABSnapshot(&error);if(!state){ABRespond(request,NO,error.localizedDescription ?: @"Cannot read layout",nil);return;}
     NSMutableDictionary *entry=[@{@"@appab_format":@3,@"iconState":state,@"created":NSDate.date} mutableCopy];
