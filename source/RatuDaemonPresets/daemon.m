@@ -83,6 +83,11 @@ static void Publish(void){
         if(selected && (!off || loaded)) verified=NO;
         jobs[j[@"id"]]=@{@"disabled":@(off),@"loaded":@(loaded),@"selected":@(selected)};
     }
+    for(NSString *jid in state[@"baseline"]){
+        if([desired containsObject:jid])continue;
+        NSDictionary *b=state[@"baseline"][jid],*live=jobs[jid];
+        if(!live || [live[@"disabled"] boolValue]!=[b[@"disabled"] boolValue] || [live[@"loaded"] boolValue]!=[b[@"loaded"] boolValue])verified=NO;
+    }
     NSMutableDictionary *pub=[state mutableCopy]; [pub removeObjectForKey:@"baseline"];
     if(![state[@"enabled"] boolValue] && [state[@"baseline"] count])verified=NO;
     pub[@"jobs"]=jobs;pub[@"verified"]=@(verified);pub[@"errors"]=verified?@[]:[errors copy];pub[@"operation"]=lastOperation;pub[@"updated"]=[NSDate date];
