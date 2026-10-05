@@ -8,6 +8,8 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: source/RatuDaemonPresets
       - name: Prepare Theos
         run: |
           brew install ldid dpkg
