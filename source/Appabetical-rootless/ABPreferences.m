@@ -8,7 +8,11 @@
 static NSString *ABLanguage(void){id value=ABReadPreference(@"appLanguage");if([value isEqual:@"en"]||[value isEqual:@"ru"])return value;return [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"]?@"ru":@"en";}
 static NSString *ABText(NSString *en,NSString *ru){return [ABLanguage() isEqual:@"ru"]?ru:en;}
 static NSString *ABL(NSString *key){NSBundle *bundle=[NSBundle bundleForClass:ABPRootListController.class];NSString *path=[bundle pathForResource:@"Localizable" ofType:@"strings" inDirectory:[ABLanguage() stringByAppendingString:@".lproj"]];NSDictionary *table=path?[NSDictionary dictionaryWithContentsOfFile:path]:nil;return [table[key] length]?table[key]:key;}
-static NSString *ABResultText(NSDictionary *response){NSString *message=response[@"message"];NSDictionary *known=@{
+static NSString *ABResultText(NSDictionary *response){NSString *message=response[@"message"];
+    NSArray *skipped=[response[@"skipped"] isKindOfClass:NSArray.class]?response[@"skipped"]:@[];NSString *list=[[skipped subarrayWithRange:NSMakeRange(0,MIN(skipped.count,(NSUInteger)5))] componentsJoinedByString:@", "];
+    if([message isEqual:@"sortedPartial"])return [NSString stringWithFormat:ABText(@"Icons sorted. Skipped (see debug log): %@",@"Иконки отсортированы. Пропущено (подробности в debug-логе): %@"),list];
+    if([message isEqual:@"partialFailed"])return [NSString stringWithFormat:ABText(@"Nothing was moved. These containers could not be sorted: %@",@"Ничего не перемещено. Не удалось отсортировать: %@"),list];
+    NSDictionary *known=@{
     @"sorted":ABText(@"Icons sorted.",@"Иконки отсортированы."),@"alreadySorted":ABText(@"The layout is already sorted with these settings.",@"Раскладка уже отсортирована с текущими настройками."),
     @"disabled":ABL(@"alert_disabled"),@"busy":ABText(@"SpringBoard is starting or processing another action. Try again shortly.",@"SpringBoard запускается или выполняет другую команду. Повторите чуть позже."),
     @"saved":ABText(@"Layout saved.",@"Раскладка сохранена."),@"restored":ABText(@"Layout restored and verified.",@"Раскладка восстановлена и проверена."),@"deleted":ABText(@"Preset deleted.",@"Пресет удалён."),
@@ -46,7 +50,7 @@ static NSString *ABResultText(NSDictionary *response){NSString *message=response
 - (NSString *)title{return @"Appabetical";}
 - (NSArray *)specifiers{
     if(_specifiers)return _specifiers;NSMutableArray *items=NSMutableArray.array;
-    NSArray *toggles=@[@[@"enabled",@"toggle_enabled",@YES],@[@"placeOffloadedAtEnd",@"toggle_offloaded",@YES],@[@"placeBookmarksAtEnd",@"toggle_bookmarks",@NO],@[@"ignoreEmoji",@"toggle_emoji",@YES],@[@"sortFolders",@"toggle_sortfolders",@YES],@[@"sortInsideFolders",@"toggle_sortinside",@YES],@[@"includeDock",@"toggle_dock",@NO],@[@"autoSortOnRespring",@"toggle_autosort",@YES]];
+    NSArray *toggles=@[@[@"enabled",@"toggle_enabled",@YES],@[@"placeOffloadedAtEnd",@"toggle_offloaded",@YES],@[@"placeBookmarksAtEnd",@"toggle_bookmarks",@NO],@[@"ignoreEmoji",@"toggle_emoji",@YES],@[@"sortFolders",@"toggle_sortfolders",@YES],@[@"sortInsideFolders",@"toggle_sortinside",@YES],@[@"includeDock",@"toggle_dock",@NO],@[@"compactLayout",@"toggle_compact",@NO],@[@"autoSortOnRespring",@"toggle_autosort",@YES]];
     for(NSArray *row in toggles)[items addObject:[self toggle:row[0] title:ABL(row[1]) defaultValue:[row[2] boolValue]]];
     PSSpecifier *language=[PSSpecifier preferenceSpecifierNamed:ABL(@"label_language") target:self set:NULL get:NULL detail:nil cell:PSButtonCell edit:nil];[language setProperty:@"language" forKey:@"action"];[language setButtonAction:@selector(showLanguageMenu)];[items addObject:language];
     PSSpecifier *sort=[PSSpecifier preferenceSpecifierNamed:ABL(@"button_sortnow") target:self set:NULL get:NULL detail:nil cell:PSButtonCell edit:nil];[sort setProperty:@"sort" forKey:@"action"];[sort setButtonAction:@selector(sortNow)];[items addObject:sort];
