@@ -222,6 +222,7 @@ static void AFMove(id requestedIcon, NSString *destinationID, NSNumber *page, NS
     id icon = requestedIcon, source = nil, createdIcon = nil;
     NSIndexPath *originalPath = nil;
     NSDictionary *before = nil;
+    NSMutableArray *ancestors = NSMutableArray.array;
     BOOL began = NO;
     @try {
         NSDictionary *layout = AFLayout();
@@ -229,6 +230,21 @@ static void AFMove(id requestedIcon, NSString *destinationID, NSNumber *page, NS
         if (positions.count > 1) AFFail(@"The source icon has several Home Screen positions; reopen its menu from one position.");
         if (positions.count) { icon = positions[0][@"icon"]; source = positions[0][@"folder"]; originalPath = AFGet1(source, @"indexPathForIcon:", icon); }
         if (source && !originalPath) AFFail(@"The source icon no longer has a valid position");
+        // Moving the last icon can prune its source folder. Keep the original
+        // ancestor icons/positions so rollback can reattach that live hierarchy.
+        id ancestor = source;
+        for (NSUInteger depth = 0; ancestor && ancestor != AFRoot() && depth < 32; depth++) {
+            NSDictionary *record = nil;
+            for (NSDictionary *candidate in layout[@"folders"]) if (candidate[@"folder"] == ancestor) { record = candidate; break; }
+            if (!record) AFFail(@"The source folder is no longer attached to the Home Screen");
+            NSArray *parentSlots = AFPositions(layout, record[@"icon"]);
+            if (parentSlots.count != 1) AFFail(@"The source folder has an ambiguous position");
+            id parent = parentSlots[0][@"folder"];
+            NSIndexPath *path = AFGet1(parent, @"indexPathForIcon:", record[@"icon"]);
+            if (!path) AFFail(@"The source folder has no valid parent position");
+            [ancestors addObject:@{@"parent":parent, @"icon":record[@"icon"], @"path":path}];
+            ancestor = parent;
+        }
         id destination = AFRoot();
         if (destinationID) {
             NSDictionary *record = AFFindFolder(destinationID);
@@ -272,12 +288,14 @@ static void AFMove(id requestedIcon, NSString *destinationID, NSNumber *page, NS
         if (began) {
             @try {
                 if (source && originalPath) {
+                    for (NSDictionary *step in ancestors.reverseObjectEnumerator)
+                        if (!AFContains(step[@"parent"], step[@"icon"])) AFInsert(step[@"parent"], step[@"icon"], step[@"path"]);
                     AFInsert(source, icon, originalPath);
                     for (NSDictionary *slot in AFPositions(AFLayout(), icon))
                         if (slot[@"folder"] != source) AFInvoke(slot[@"folder"], @"removeIcon:options:", @[icon], YES);
                 }
                 else for (NSDictionary *slot in AFPositions(AFLayout(), icon)) AFInvoke(slot[@"folder"], @"removeIcon:options:", @[icon], YES);
-                if (createdIcon) AFInvoke(AFRoot(), @"removeIcon:options:", @[createdIcon], YES);
+                if (createdIcon && AFContains(AFRoot(), createdIcon)) AFInvoke(AFRoot(), @"removeIcon:options:", @[createdIcon], YES);
                 AFSnapshot(); AFRelayout();
                 if (![AFCounts(AFLayout()) isEqual:before]) NSLog(@"[AddToFolderFix] rollback inventory mismatch; snapshot=%@", AFRecovery);
             } @catch (NSException *rollback) { NSLog(@"[AddToFolderFix] rollback failed %@ snapshot=%@", rollback.reason, AFRecovery); }
