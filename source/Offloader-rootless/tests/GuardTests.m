@@ -57,14 +57,15 @@ static void TestGuard(void) {
         NSArray *labels = [name componentsSeparatedByString:@":"];
         for (NSUInteger i=4;i<signature.numberOfArguments-1;++i) { BOOL value=[labels[i-2] isEqual:@"waitForDeletion"]; [invocation setArgument:&value atIndex:i]; }
         __block unsigned callbacks=0; __block NSError *callbackError=nil;
-        void(^completion)(NSError*)=^(NSError *error){++callbacks; callbackError=error;};
+        dispatch_semaphore_t finished=dispatch_semaphore_create(0);
+        void(^completion)(NSError*)=^(NSError *error){++callbacks; callbackError=error; dispatch_semaphore_signal(finished);};
         if(nullResult)completion=nil;
         NSError *__autoreleasing error=nil; NSError *__autoreleasing *errorPointer = nullResult ? NULL : &error;
         BOOL async=[name hasSuffix:@"completion:"];
         [invocation setArgument:async ? (void *)&completion : (void *)&errorPointer atIndex:signature.numberOfArguments-1];
         unsigned previous=originalCalls; [invocation invoke];
         CHECK(originalCalls == previous + (protected ? 0 : 1));
-        if(async) { CHECK(callbacks == (nullResult ? 0 : 1)); if(!nullResult)CHECK(protected ? callbackError.code==1 : callbackError==nil); }
+        if(async) { if(!nullResult)CHECK(dispatch_semaphore_wait(finished,dispatch_time(DISPATCH_TIME_NOW,NSEC_PER_SEC))==0); CHECK(callbacks == (nullResult ? 0 : 1)); if(!nullResult)CHECK(protected ? callbackError.code==1 : callbackError==nil); }
         else { BOOL result=NO; [invocation getReturnValue:&result]; CHECK(result==!protected); if(!nullResult)CHECK(protected ? error.code==1 : error==nil); }
     }
 }

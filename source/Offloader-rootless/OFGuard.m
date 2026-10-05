@@ -14,6 +14,10 @@ static NSError *OFProtectionError(id identity) {
 }
 static IMP OFSync3Original, OFSync4Original, OFSync5Original, OFSyncIdentityOriginal;
 static IMP OFAsync4Original, OFAsync5Original, OFAsyncPrivateOriginal, OFAsyncIdentityOriginal, OFAsyncIdentityPrivateOriginal;
+static void OFDeniedCompletion(void(^completion)(NSError *), NSError *error) {
+    // Preserve asynchronous delivery and avoid re-entering a caller holding a lock.
+    if (completion) dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT,0),^{completion(error);});
+}
 static BOOL OFSync3(id self, SEL cmd, id bundle, NSUInteger reason, NSError **error) {
     NSError *denied = OFProtectionError(bundle);
     if (denied) { if (error) *error = denied; return NO; }
@@ -36,27 +40,27 @@ static BOOL OFSyncIdentity(id self, SEL cmd, id identity, NSUInteger reason, BOO
 }
 static void OFAsync4(id self, SEL cmd, id bundle, NSUInteger reason, BOOL wait, void(^completion)(NSError *)) {
     NSError *denied = OFProtectionError(bundle);
-    if (denied) { if (completion) completion(denied); return; }
+    if (denied) { OFDeniedCompletion(completion,denied); return; }
     ((void(*)(id,SEL,id,NSUInteger,BOOL,id))OFAsync4Original)(self,cmd,bundle,reason,wait,completion);
 }
 static void OFAsync5(id self, SEL cmd, id bundle, NSUInteger reason, BOOL wait, BOOL ignore, void(^completion)(NSError *)) {
     NSError *denied = OFProtectionError(bundle);
-    if (denied) { if (completion) completion(denied); return; }
+    if (denied) { OFDeniedCompletion(completion,denied); return; }
     ((void(*)(id,SEL,id,NSUInteger,BOOL,BOOL,id))OFAsync5Original)(self,cmd,bundle,reason,wait,ignore,completion);
 }
 static void OFAsyncPrivate(id self, SEL cmd, id bundle, NSUInteger reason, BOOL wait, BOOL ignore, void(^completion)(NSError *)) {
     NSError *denied = OFProtectionError(bundle);
-    if (denied) { if (completion) completion(denied); return; }
+    if (denied) { OFDeniedCompletion(completion,denied); return; }
     ((void(*)(id,SEL,id,NSUInteger,BOOL,BOOL,id))OFAsyncPrivateOriginal)(self,cmd,bundle,reason,wait,ignore,completion);
 }
 static void OFAsyncIdentity(id self, SEL cmd, id identity, NSUInteger reason, BOOL wait, BOOL ignore, void(^completion)(NSError *)) {
     NSError *denied = OFProtectionError(identity);
-    if (denied) { if (completion) completion(denied); return; }
+    if (denied) { OFDeniedCompletion(completion,denied); return; }
     ((void(*)(id,SEL,id,NSUInteger,BOOL,BOOL,id))OFAsyncIdentityOriginal)(self,cmd,identity,reason,wait,ignore,completion);
 }
 static void OFAsyncIdentityPrivate(id self, SEL cmd, id identity, NSUInteger reason, BOOL wait, BOOL ignore, BOOL early, void(^completion)(NSError *)) {
     NSError *denied = OFProtectionError(identity);
-    if (denied) { if (completion) completion(denied); return; }
+    if (denied) { OFDeniedCompletion(completion,denied); return; }
     ((void(*)(id,SEL,id,NSUInteger,BOOL,BOOL,BOOL,id))OFAsyncIdentityPrivateOriginal)(self,cmd,identity,reason,wait,ignore,early,completion);
 }
 static void OFInstallGuard(void) {
