@@ -62,6 +62,7 @@
     }
     .package-symbol.tool { background: #46a6d8; color: #07141c; }
     .package-symbol.library { background: #d27c67; color: #1a0b08; }
+    .package-symbol.archive { background: #9298a3; color: #121417; }
     .package-name { margin: 0; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
     .package-id { margin-top: 3px; color: #858c96; font-size: 12px; overflow-wrap: anywhere; }
     .package-description {
@@ -89,7 +90,7 @@
       .header-inner { align-items: flex-start; flex-wrap: wrap; }
       .add-button { width: 100%; }
       .toolbar { grid-template-columns: 1fr; }
-      .segments { display: grid; grid-template-columns: repeat(5, 1fr); }
+      .segments { display: grid; grid-template-columns: repeat(3, 1fr); }
       .segments button { padding: 0 4px; font-size: 11px; }
       .package-row { grid-template-columns: 38px minmax(0, 1fr); }
       .package-symbol { width: 38px; height: 38px; }
@@ -121,6 +122,7 @@
         <button type="button" role="tab" data-filter="tools" aria-selected="false">Инструменты</button>
         <button type="button" role="tab" data-filter="libraries" aria-selected="false">Библиотеки</button>
         <button type="button" role="tab" data-filter="dylibs" aria-selected="false">Dylibs</button>
+        <button type="button" role="tab" data-filter="archive" aria-selected="false">Архив</button>
       </div>
     </div>
     <div class="summary"><span id="package-count">Загрузка индекса…</span><span>iOS 15–17</span></div>
@@ -144,6 +146,18 @@
     const toolSections = new Set(['Development', 'Utilities', 'Packaging', 'Administration', 'Networking', 'Security', 'Archiving', 'Scripting', 'Text_Editors', 'Terminal_Support']);
     const librarySections = new Set(['Libraries', 'System', 'Tweak Injection', 'Keyrings']);
     const libraryPackages = new Set([]);
+    const archivedPackages = new Set([
+      'com.netskao.appdata',
+      'com.ratush.vpnappbridge',
+      'com.snail.autovpn.global',
+      'com.catmcp.daemon',
+      'com.ratush.catmcp-fix',
+      'com.ratush.cchppe',
+      'xyz.cypwn.cr4shed',
+      'com.ratush.iggridfeed',
+      'com.ratush.jetsamfix',
+      'com.ratush.safeguard'
+    ]);
 
     function parseIndex(text) {
       const stanzas = text.trim().split(/\n\s*\n/).map(block => {
@@ -172,6 +186,7 @@
     }
 
     function kindOf(item) {
+      if (archivedPackages.has(item.Package)) return 'archive';
       if (libraryPackages.has(item.Package)) return 'libraries';
       if ((item.Section || '').startsWith('Tweaks')) return 'tweaks';
       if (librarySections.has(item.Section)) return 'libraries';
@@ -274,15 +289,16 @@
       const groups = [
         ['tweaks', 'Твики'],
         ['tools', 'Инструменты'],
-        ['libraries', 'Системные компоненты и библиотеки']
+        ['libraries', 'Системные компоненты и библиотеки'],
+        ['archive', 'Архив']
       ];
       catalog.className = '';
       const aptHtml = groups.map(([kind, title]) => {
         const items = visible.filter(item => kindOf(item) === kind);
         if (!items.length) return '';
         const rows = items.map(item => {
-          const iconClass = kind === 'tweaks' ? '' : kind === 'libraries' ? 'library' : 'tool';
-          const symbol = kind === 'tweaks' ? '⌁' : kind === 'libraries' ? 'L' : '›_';
+          const iconClass = kind === 'archive' ? 'archive' : kind === 'tweaks' ? '' : kind === 'libraries' ? 'library' : 'tool';
+          const symbol = kind === 'archive' ? '▣' : kind === 'tweaks' ? '⌁' : kind === 'libraries' ? 'L' : '›_';
           return `<li class="package-row">
             <span class="package-symbol ${iconClass}" aria-hidden="true">${symbol}</span>
             <div>
