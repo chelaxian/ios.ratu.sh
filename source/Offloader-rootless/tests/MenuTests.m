@@ -36,7 +36,7 @@ int main(void) { @autoreleasepool {
         CHECK(filtered.firstObject==custom);
         CHECK(filtered.count == 1 + ((mask&6) ? 1 : 0) + ((mask&1) ? 1 : 0));
         if(mask&6) {
-            UIMenu *outer=filtered[1]; UIMenu *inner=outer.children.firstObject;
+            UIMenu *outer=filtered[1]; UIMenu *inner=(UIMenu *)outer.children.firstObject;
             CHECK([outer.title isEqual:@"Nested"]); CHECK([inner.identifier isEqual:@"native"]); CHECK(inner.options==UIMenuOptionsDisplayInline);
             CHECK(inner.children.count == ((mask&2) ? 1 : 0) + ((mask&4) ? 1 : 0));
             if(mask&2)CHECK(inner.children.firstObject==remove); if(mask&4)CHECK(inner.children.lastObject==edit);

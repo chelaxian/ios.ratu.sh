@@ -108,7 +108,9 @@ static NSArray<UIMenuElement *> *OFFilterMenu(NSArray *items, NSDictionary *sett
         if ([item isKindOfClass:UIMenu.class]) {
             UIMenu *menu = item;
             NSArray *children = OFFilterMenu(menu.children,settings);
-            if (children.count) [result addObject:[children isEqual:menu.children] ? menu : [menu menuByReplacingChildren:children]];
+            // UIMenu equality compares identity, not its children. Always replace
+            // children so a filtered nested menu cannot revert to the original.
+            if (children.count) [result addObject:[menu menuByReplacingChildren:children]];
         } else if ([item isKindOfClass:UIAction.class]) {
             UIAction *action = item;
             if (OFShowKind(OFKind(action.identifier,action.title,NO),settings)) [result addObject:action];
