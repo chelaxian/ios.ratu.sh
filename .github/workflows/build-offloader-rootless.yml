@@ -1,0 +1,45 @@
+name: Build Offloader rootless
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/Offloader-rootless/**'
+      - '.github/workflows/build-offloader-rootless.yml'
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test shared logic and IX guards on macOS
+        run: |
+          cd source/Offloader-rootless
+          clang -fobjc-arc -fblocks -Wno-unused-function -Itests -framework Foundation tests/GuardTests.m -o /tmp/offloader-tests
+          /tmp/offloader-tests
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/offloader-sdks
+          cd /tmp/offloader-sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/offloader-sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build and inspect rootless package
+        run: |
+          cd source/Offloader-rootless
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          dpkg-deb -x "$deb" "$tmp"
+          for binary in "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/Offloader.dylib" "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/OffloaderGuard.dylib" "$tmp/var/jb/Library/PreferenceBundles/OffloaderPrefs.bundle/OffloaderPrefs"; do
+            lipo -verify_arch arm64 arm64e "$binary"
+            lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
+            test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
+            otool -L "$binary"
+            if otool -L "$binary" | grep -E 'libroothide|libmryipc|AltList'; then exit 1; fi
+            codesign --verify "$binary"
+          done
+          mkdir artifacts && cp "$deb" artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offloader-rootless-deb
+          path: source/Offloader-rootless/artifacts/*.deb
+          if-no-files-found: error
