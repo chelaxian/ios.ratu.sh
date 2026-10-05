@@ -814,19 +814,19 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.choicy
-Version: 1.6.0-1
+Version: 1.6.1-1
 Architecture: iphoneos-arm64
 Maintainer: Ratu
-Installed-Size: 1408
+Installed-Size: 1440
 Depends: mobilesubstrate, preferenceloader
 Conflicts: com.opa334.choicy
 Replaces: com.opa334.choicy
 Provides: com.opa334.choicy (= 1.5.4)
-Filename: debs/com.ratush.choicy_1.6.0-1_iphoneos-arm64.deb
-Size: 222024
-MD5sum: b0512cfee95e4144a0b81884bb574caa
-SHA1: 88a1f5bf88a76a2b88c56b9154980996bad2a83e
-SHA256: 63c85b7b6cbb27c9e7bf5d9e3fedcc577f0cff2a91af1a79c512b1c9bc93912d
+Filename: debs/com.ratush.choicy_1.6.1-1_iphoneos-arm64.deb
+Size: 223804
+MD5sum: df891b64e65a46bcf40561186acd87b9
+SHA1: 56808f17f7627a7f85f9d7a44fd25110119b3984
+SHA256: 5174926b40ac0dd8d88ba717ad7c8e7480906a8409d63a097ec9f296478fc226
 Section: Tweaks
 Homepage: https://github.com/chelaxian/Choicy-Ratu
 Description: Unified injection rules with Ratu app and dylib navigators.
