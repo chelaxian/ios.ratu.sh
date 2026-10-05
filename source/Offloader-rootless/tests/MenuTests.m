@@ -19,10 +19,23 @@ static unsigned assertions;
 @end
 @implementation OFTestView
 @end
+@interface OFTestLauncher : NSObject
+@property(nonatomic) BOOL succeed;
+@property(nonatomic) BOOL called;
+@property(nonatomic) BOOL suspended;
+@property(nonatomic,copy) NSString *identifier;
+- (BOOL)launchApplicationWithIdentifier:(NSString *)identifier suspended:(BOOL)suspended;
+@end
+@implementation OFTestLauncher
+- (BOOL)launchApplicationWithIdentifier:(NSString *)identifier suspended:(BOOL)suspended { self.called=YES; self.identifier=identifier; self.suspended=suspended; return self.succeed; }
+@end
 static UIAction *Action(NSString *identifier,NSString *title) {
     return [UIAction actionWithTitle:title image:nil identifier:identifier handler:^(__unused UIAction *action){}];
 }
 int main(void) { @autoreleasepool {
+    OFTestLauncher *launcher=[OFTestLauncher new]; launcher.succeed=YES;
+    CHECK(OFLaunchSettings(launcher)); CHECK(launcher.called); CHECK(!launcher.suspended); CHECK([launcher.identifier isEqual:@"com.apple.Preferences"]);
+    launcher.succeed=NO; CHECK(!OFLaunchSettings(launcher)); CHECK(!OFLaunchSettings([NSObject new]));
     UIAction *offload = Action(@"com.level3tjg.offloader/offload",@"Offload App");
     UIAction *remove = Action(@"delete-app",@"Удалить приложение");
     UIAction *edit = Action(@"rearrange-icons",@"Edit Home Screen");

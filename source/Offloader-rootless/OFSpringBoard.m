@@ -46,6 +46,12 @@ static void OFPoll(NSString *identifier, NSDate *started) {
     notify_post(OFCommand);
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,500*NSEC_PER_MSEC),dispatch_get_main_queue(),^{OFPoll(identifier,started);});
 }
+static BOOL OFLaunchSettings(id app) {
+    SEL selector = @selector(launchApplicationWithIdentifier:suspended:);
+    if (OFCanCall(app,selector,'b',"@b")) return ((BOOL(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",NO);
+    if (OFCanCall(app,selector,'v',"@b")) { ((void(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",NO); return YES; }
+    return NO;
+}
 static void OFStartOffload(NSString *bundle) {
     if (OFPending) { OFMessage(OFText(@"An offload is already in progress.",@"Выгрузка уже выполняется.")); return; }
     if (OFProtected(bundle) || !OFEligible(bundle)) { OFMessage(OFText(@"This app cannot be offloaded or is protected.",@"Это приложение нельзя выгрузить или оно защищено.")); return; }
@@ -58,25 +64,13 @@ static void OFStartOffload(NSString *bundle) {
     if (presenter) [presenter presentViewController:OFProgress animated:YES completion:nil];
     notify_post(OFCommand);
     // The Settings process has the native storage-management privileges.
-    // Launch in the background; its constructor consumes commands on cold launch.
-    UIApplication *app = UIApplication.sharedApplication;
-    SEL selector = @selector(launchApplicationWithIdentifier:suspended:);
-    if (OFCanCall(app,selector,'b',"@b")) ((BOOL(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",YES);
-    else if (OFCanCall(app,selector,'v',"@b")) ((void(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",YES);
-    else {
+    // Claiming a command is not completion: a suspended launch can freeze the
+    // worker after it removes the request. Keep Settings active for the operation.
+    if (!OFLaunchSettings(UIApplication.sharedApplication)) {
         OFWrite(OFDomain,@"request",nil);
         OFFinish(identifier,OFText(@"Open Settings once, then try Offload again.",@"Откройте Настройки, затем повторите выгрузку.")); return;
     }
-    // Darwin notifications do not wake a suspended Settings process. If the
-    // background launch did not claim this command, activate Settings once.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,2*NSEC_PER_SEC),dispatch_get_main_queue(),^{
-        if (![OFPending isEqual:identifier]) return;
-        id request = OFPreferences(OFDomain)[@"request"];
-        if (!OFRequestValid(request,NSDate.date) || ![request[@"id"] isEqual:identifier]) return;
-        if (OFCanCall(app,selector,'b',"@b")) ((BOOL(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",NO);
-        else if (OFCanCall(app,selector,'v',"@b")) ((void(*)(id,SEL,id,BOOL))[app methodForSelector:selector])(app,selector,@"com.apple.Preferences",NO);
-        notify_post(OFCommand);
-    });
+    notify_post(OFCommand);
     OFPoll(identifier,started);
 }
 static void OFConfirmOffload(NSString *bundle) {
@@ -85,7 +79,7 @@ static void OFConfirmOffload(NSString *bundle) {
         UIViewController *presenter = OFPresenter();
         if (!presenter) return;
         NSString *name = OFString(OFProxy(bundle),@selector(localizedName)) ?: bundle;
-        NSString *message = [NSString stringWithFormat:OFText(@"Offload %@? Its documents and data will be kept. Settings may open to complete the action. Reinstalling later requires the app to remain available.",@"Выгрузить %@? Документы и данные сохранятся. Для выполнения могут открыться Настройки. Для повторной установки приложение должно оставаться доступным."),name];
+        NSString *message = [NSString stringWithFormat:OFText(@"Offload %@? Its documents and data will be kept. Settings will open to complete the action. Reinstalling later requires the app to remain available.",@"Выгрузить %@? Документы и данные сохранятся. Для выполнения откроются Настройки. Для повторной установки приложение должно оставаться доступным."),name];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:OFText(@"Offload App",@"Выгрузить приложение") message:message preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Cancel",@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
         [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Offload",@"Выгрузить") style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action){
