@@ -1,0 +1,43 @@
+name: Build AddToFolder Fix rootless
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/AddToFolderFix-rootless/**'
+      - '.github/workflows/build-addtofolderfix-rootless.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build rootless and inspect platform ABI
+        run: |
+          cd source/AddToFolderFix-rootless
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          dpkg-deb -x "$deb" "$tmp"
+          binary="$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AddToFolderFix.dylib"
+          lipo -verify_arch arm64 arm64e "$binary"
+          lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
+          test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
+          if otool -L "$binary" | grep -E 'libroothide|/rootfs'; then exit 1; fi
+          codesign -d "$binary"
+          mkdir artifacts && cp "$deb" artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: addtofolderfix-rootless-deb
+          path: source/AddToFolderFix-rootless/artifacts/*.deb
+          if-no-files-found: error
