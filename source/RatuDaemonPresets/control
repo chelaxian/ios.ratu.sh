@@ -6,4 +6,4 @@ Description: Реальное управление службами iOS с пр�
 Maintainer: chelaxian
 Author: chelaxian
 Section: Tweaks
-Depends: firmware (>= 17.0), firmware (<< 17.1), preferenceloader, com.opa334.ccsupport
+Depends: firmware (>= 17.0), firmware (<< 17.1), preferenceloader, com.opa334.ccsupport, launchctl

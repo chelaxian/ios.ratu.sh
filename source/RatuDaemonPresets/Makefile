@@ -25,5 +25,8 @@ RatuDaemonCC_RESOURCE_DIRS = cc-resources
 include $(THEOS_MAKE_PATH)/tool.mk
 include $(THEOS_MAKE_PATH)/bundle.mk
 before-package::
-	mkdir -p $(THEOS_STAGING_DIR)/var/jb/usr/share/ratu-daemon-presets
-	cp catalog.plist $(THEOS_STAGING_DIR)/var/jb/usr/share/ratu-daemon-presets/catalog.plist
+	mkdir -p $(THEOS_STAGING_DIR)/usr/share/ratu-daemon-presets
+	cp catalog.plist $(THEOS_STAGING_DIR)/usr/share/ratu-daemon-presets/catalog.plist
+	chmod -R go-w $(THEOS_STAGING_DIR)
+	find $(THEOS_STAGING_DIR) -type d -exec chmod 755 {} \;
+	find $(THEOS_STAGING_DIR) -name '*.plist' -exec chmod 644 {} \;
