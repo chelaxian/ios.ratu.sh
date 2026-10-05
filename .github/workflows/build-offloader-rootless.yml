@@ -24,6 +24,16 @@ jobs:
           git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/offloader-sdks
           cd /tmp/offloader-sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
           mkdir -p "$HOME/theos/sdks" && cp -a /tmp/offloader-sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Test UIKit menu filtering in isolated iOS Simulator
+        run: |
+          cd source/Offloader-rootless
+          device="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS-17" in k for x in v if x["name"].startswith("iPhone")))')"
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          xcrun --sdk iphonesimulator clang -target x86_64-apple-ios17.0-simulator -fobjc-arc -fblocks -Wno-unused-function -Itests -framework Foundation -framework UIKit tests/MenuTests.m -o /tmp/offloader-menu-tests
+          codesign --force --sign - /tmp/offloader-menu-tests
+          xcrun simctl spawn "$device" /tmp/offloader-menu-tests
+          xcrun simctl shutdown "$device"
       - name: Build and inspect rootless package
         run: |
           cd source/Offloader-rootless

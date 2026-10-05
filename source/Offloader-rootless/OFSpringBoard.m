@@ -137,6 +137,7 @@ static id OFMenu(id self, SEL cmd, id interaction, id configuration) {
     }
     return items;
 }
+#ifndef OFFLOADER_UI_TEST
 __attribute__((constructor)) static void OFSpringBoardStart(void) {
     @autoreleasepool {
         if (![NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]) return;
@@ -153,3 +154,4 @@ __attribute__((constructor)) static void OFSpringBoardStart(void) {
         });
     }
 }
+#endif

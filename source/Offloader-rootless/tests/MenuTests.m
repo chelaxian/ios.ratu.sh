@@ -1,0 +1,61 @@
+#define OFFLOADER_UI_TEST 1
+#import "../OFSpringBoard.m"
+static unsigned assertions;
+#define CHECK(expression) do { ++assertions; if (!(expression)) { NSLog(@"FAIL line %d: %s",__LINE__,#expression); exit(1); } } while(0)
+@interface OFTestShortcut : NSObject
+@property(nonatomic,copy) NSString *type;
+@property(nonatomic,copy) NSString *localizedTitle;
+@property(nonatomic) BOOL sbh_isShortcutDeleteOrRemove;
+@end
+@implementation OFTestShortcut
+@end
+@interface SBHApplicationIcon : NSObject
+@property(nonatomic,copy) NSString *applicationBundleID;
+@end
+@implementation SBHApplicationIcon
+@end
+@interface OFTestView : NSObject
+@property(nonatomic,strong) id icon;
+@end
+@implementation OFTestView
+@end
+static UIAction *Action(NSString *identifier,NSString *title) {
+    return [UIAction actionWithTitle:title image:nil identifier:identifier handler:^(__unused UIAction *action){}];
+}
+int main(void) { @autoreleasepool {
+    UIAction *offload = Action(@"com.level3tjg.offloader/offload",@"Offload App");
+    UIAction *remove = Action(@"delete-app",@"Удалить приложение");
+    UIAction *edit = Action(@"rearrange-icons",@"Edit Home Screen");
+    UIAction *custom = Action(@"com.example.delete",@"Delete App");
+    UIMenu *native = [UIMenu menuWithTitle:@"System" image:nil identifier:@"native" options:UIMenuOptionsDisplayInline children:@[remove,edit]];
+    UIMenu *nested = [UIMenu menuWithTitle:@"Nested" children:@[native]];
+    NSArray *original = @[custom,nested,offload];
+    for(unsigned mask=0;mask<8;++mask) {
+        NSDictionary *settings = @{@"3doffload":@((mask&1)!=0),@"3ddelete":@((mask&2)!=0),@"3dedit":@((mask&4)!=0)};
+        NSArray *filtered = OFFilterMenu(original,settings);
+        CHECK(filtered.firstObject==custom);
+        CHECK(filtered.count == 1 + ((mask&6) ? 1 : 0) + ((mask&1) ? 1 : 0));
+        if(mask&6) {
+            UIMenu *outer=filtered[1]; UIMenu *inner=outer.children.firstObject;
+            CHECK([outer.title isEqual:@"Nested"]); CHECK([inner.identifier isEqual:@"native"]); CHECK(inner.options==UIMenuOptionsDisplayInline);
+            CHECK(inner.children.count == ((mask&2) ? 1 : 0) + ((mask&4) ? 1 : 0));
+            if(mask&2)CHECK(inner.children.firstObject==remove); if(mask&4)CHECK(inner.children.lastObject==edit);
+        }
+        CHECK(native.children.count==2); CHECK(nested.children.count==1);
+        CHECK([OFFilterMenu(filtered,settings) isEqual:filtered]);
+        NSMutableArray *shortcuts=[NSMutableArray array];
+        for(NSString *type in @[@"delete-app",@"rearrange-icons",@"com.level3tjg.offloader/offload",@"com.example.delete"]) {
+            OFTestShortcut *shortcut=[OFTestShortcut new]; shortcut.type=type; shortcut.localizedTitle=@"Delete App"; [shortcuts addObject:shortcut];
+        }
+        NSArray *result=OFFilterShortcuts(shortcuts,settings);
+        CHECK(result.count==1+((mask&1)?1:0)+((mask&2)?1:0)+((mask&4)?1:0)); CHECK(result.lastObject==shortcuts.lastObject); CHECK(shortcuts.count==4);
+    }
+    CHECK(OFFilterShortcuts(nil,@{})==nil); CHECK(OFFilterMenu(@[],@{}).count==0);
+    CHECK(OFKind(NSUUID.UUID.UUIDString,@"Удалить приложение",NO)==OFActionDelete);
+    CHECK(OFKind(@"com.apple.springboardhome.edit",@"任意标题",NO)==OFActionEdit);
+    OFTestView *view=[OFTestView new]; view.icon=[NSObject new]; CHECK(OFViewBundle(view)==nil);
+    SBHApplicationIcon *icon=[SBHApplicationIcon new]; icon.applicationBundleID=@"com.example.app"; view.icon=icon; CHECK([OFViewBundle(view) isEqual:icon.applicationBundleID]);
+    icon.applicationBundleID=@"../invalid"; CHECK(OFViewBundle(view)==nil);
+    printf("PASS: %u UIKit assertions; nested menus, all toggle combinations, original actions, custom action conservation and icon discrimination.\n",assertions);
+    return 0;
+} }
