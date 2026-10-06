@@ -11,6 +11,7 @@
 // /etc/hosts is used, so a broken install degrades to stock behaviour.
 
 #include <fcntl.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,9 +23,24 @@
 
 #define EH_COMPILED "/var/jb/var/mobile/Library/EtcHosts17/hosts"
 #define EH_RELOAD   "com.ratush.etchosts17.reload"
+#define EH_STATE    "com.ratush.etchosts17.state"
 
 static os_log_t gLog;
 static volatile int gServedCompiled = -1;   // -1 unknown, 0 stock file, 1 compiled
+static int gStateToken = -1;
+
+// Published state (notify_get_state on EH_STATE), readable from any process:
+//   bit 0      hook loaded in mDNSResponder
+//   bit 1      compiled hosts served on the last open of /etc/hosts
+//   bit 2      stock /etc/hosts served (compiled file missing/unreadable)
+//   bits 8-15  errno of the failed compiled open
+//   bits 16-47 pid of mDNSResponder
+static void EHPublish(uint64_t flags, int err) {
+	if (gStateToken < 0) return;
+	uint64_t v = flags | ((uint64_t)(err & 0xff) << 8) | ((uint64_t)(uint32_t)getpid() << 16);
+	notify_set_state(gStateToken, v);
+	notify_post(EH_STATE);
+}
 
 static int EHIsHostsPath(const char *path) {
 	return path && (strcmp(path, "/etc/hosts") == 0 || strcmp(path, "/private/etc/hosts") == 0);
@@ -39,11 +55,14 @@ static int EHIsHostsPath(const char *path) {
 		int fd = %orig(EH_COMPILED, flags, 0);
 		if (fd >= 0) {
 			gServedCompiled = 1;
+			EHPublish(1 | 2, 0);
 			os_log(gLog, "open(/etc/hosts) -> compiled fd=%d", fd);
 			return fd;
 		}
+		int err = errno;
 		gServedCompiled = 0;
-		os_log(gLog, "compiled hosts unavailable, using stock /etc/hosts");
+		EHPublish(1 | 4, err);
+		os_log(gLog, "compiled hosts unavailable (errno %d), using stock /etc/hosts", err);
 	}
 	return %orig(path, flags, mode);
 }
@@ -59,6 +78,8 @@ static int EHIsHostsPath(const char *path) {
 %ctor {
 	gLog = os_log_create("com.ratush.etchosts17", "mdns");
 	os_log(gLog, "EtcHosts17 loaded into mDNSResponder pid=%d", getpid());
+	notify_register_check(EH_STATE, &gStateToken);
+	EHPublish(1, 0);
 	%init;
 	// Normal edits replace the compiled file atomically; mDNSResponder's own
 	// vnode watch on the open fd sees that and re-reads it. Only when it is
