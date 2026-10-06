@@ -1,0 +1,10 @@
+Package: com.ratush.dnsprofileconfigurator
+Name: DNS Profile Configurator
+Version: 1.0.0
+Icon: file:///var/jb/Library/PreferenceBundles/DNSProfileConfiguratorPrefs.bundle/SileoIcon.png
+Architecture: iphoneos-arm64
+Description: Build encrypted DNS profiles right in Settings. Choose DoT or DoH, enter the server (custom DoH port supported), optional server IPs and optional match domains, and install the result through iOS's own profile installer. BLOCK mode routes chosen domains to a DoT server at 127.0.0.1 where nothing listens, so they stop resolving. Produces ordinary com.apple.dnsSettings.managed profiles that you manage and remove in Settings > General > VPN & Device Management. No daemons, no hooks. Same green CRT style as /etc/hosts (iOS 17.0).
+Maintainer: ratush
+Author: ratush
+Section: Tweaks
+Depends: firmware (>= 15.0), preferenceloader

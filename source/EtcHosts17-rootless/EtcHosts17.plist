@@ -7,7 +7,6 @@
 		<key>Executables</key>
 		<array>
 			<string>mDNSResponder</string>
-			<string>mDNSResponderHelper</string>
 		</array>
 	</dict>
 </dict>

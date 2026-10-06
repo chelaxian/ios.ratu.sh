@@ -1,0 +1,21 @@
+#!/var/jb/bin/sh
+restart_mdns() {
+	# launchd restarts mDNSResponder at once; this only reloads the daemon.
+	/var/jb/usr/bin/launchctl kickstart -k system/com.apple.mDNSResponder >/dev/null 2>&1 && return 0
+	for pid in $(ps -axo pid=,comm= | awk '$2 ~ /\/mDNSResponder$/ {print $1}'); do
+		kill "$pid" 2>/dev/null || true
+	done
+}
+
+case "$1" in
+	remove|purge|abort-install)
+		# The dylib is already gone; a restart brings mDNSResponder back to stock.
+		restart_mdns
+		;;
+esac
+if [ "$1" = purge ]; then
+	rm -f /var/jb/var/mobile/Library/EtcHosts17/hosts /var/jb/var/mobile/Library/EtcHosts17/.hosts.tmp
+	rmdir /var/jb/var/mobile/Library/EtcHosts17 2>/dev/null || true
+	rm -f /var/mobile/Library/Preferences/com.ratush.etchosts17.plist
+fi
+exit 0

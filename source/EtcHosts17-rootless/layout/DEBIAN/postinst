@@ -1,0 +1,24 @@
+#!/var/jb/bin/sh
+# EtcHosts17 1.x: only a dylib in mDNSResponder and a Settings pane.
+DIR=/var/jb/var/mobile/Library/EtcHosts17
+restart_mdns() {
+	# launchd restarts mDNSResponder at once; this only reloads the daemon.
+	/var/jb/usr/bin/launchctl kickstart -k system/com.apple.mDNSResponder >/dev/null 2>&1 && return 0
+	for pid in $(ps -axo pid=,comm= | awk '$2 ~ /\/mDNSResponder$/ {print $1}'); do
+		kill "$pid" 2>/dev/null || true
+	done
+}
+
+mkdir -p "$DIR"
+chown mobile:mobile "$DIR" 2>/dev/null || true
+chmod 0755 "$DIR"
+
+# Retire the 0.x resolver redirect and daemons if anything is still loaded.
+[ -x /var/jb/usr/libexec/etchosts17resolv ] && /var/jb/usr/libexec/etchosts17resolv clear >/dev/null 2>&1
+for job in com.ratush.etchosts17resolv com.ratush.etchosts17d; do
+	/var/jb/usr/bin/launchctl bootout "system/$job" >/dev/null 2>&1 || true
+done
+
+# Load the hook. Until a hosts file is applied in Settings the engine stays off.
+restart_mdns
+exit 0

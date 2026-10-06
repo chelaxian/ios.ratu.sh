@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>EtcHosts17Prefs</string>
+	<string>DNSProfileConfiguratorPrefs</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ratush.etchosts17.preferences</string>
+	<string>com.ratush.dnsprofileconfigurator.preferences</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>/etc/hosts (iOS 17.0)</string>
+	<string>DNS Profile Configurator</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -19,6 +19,6 @@
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
 	<key>NSPrincipalClass</key>
-	<string>EtcHosts17RootListController</string>
+	<string>DPCRootListController</string>
 </dict>
 </plist>
