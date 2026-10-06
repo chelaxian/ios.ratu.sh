@@ -26,7 +26,7 @@ The package depends on Adytum 1.1. It has no preferences panel: repair is automa
 - On the physical iPhone15,3 / iOS 17.0 (21A329), Dopamine 3.0.10, a temporary Settings-only check passed **1006 assertions**. It converts valid stack blocks into the same unsigned-isa state, repairs them, verifies the signature exactly matches the compiler's signature, copies and invokes them, and passes them to `UIAction` and both animation methods.
 - The check also verified object lifetimes and rejection of nil, nonblock, already signed, heap, and unrelated-origin inputs.
 - The production helper is installed, its log confirms all three hooks, and SpringBoard survives with Adytum's menu setting enabled.
-- Actual icon long press and execution of Adytum menu actions require the owner's confirmation; a loaded helper alone does not prove those actions work.
+- The owner confirmed long press on several app icons and execution of an Adytum menu action work. The helper recorded eight repaired Adytum blocks; the same SpringBoard process remained alive, and no new SpringBoard crash appeared.
 
 Bounded runtime log: `/var/mobile/Library/Logs/AdytumFix.log`. The temporary test module is removed after validation and is not in the DEB.
 
