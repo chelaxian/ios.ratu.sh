@@ -2,7 +2,7 @@
 
 Settings pane that builds standard encrypted-DNS profiles
 (`com.apple.dnsSettings.managed`) in the same green CRT style as
-/etc/hosts (iOS 17.0).
+/etc/hosts.
 
 - **DoT**: `ServerName` + optional `ServerAddresses`. iOS always uses port 853
   for DoT; the profile format has no port key.

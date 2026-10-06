@@ -1,10 +1,10 @@
-# /etc/hosts (iOS 17.0) — EtcHosts17 1.x
+# /etc/hosts — EtcHosts17 1.x
 
-Real hosts-file behaviour for Dopamine rootless iOS 17.0.
+Real hosts-file behaviour for Dopamine rootless jailbreaks (tested on iOS 17.0).
 
 ## How it works
 
-iOS 17 `mDNSResponder` contains Apple's complete `/etc/hosts` engine
+iOS `mDNSResponder` contains Apple's complete `/etc/hosts` engine
 (`mDNSMacOSXUpdateEtcHosts`, vnode watch, local auth records), but `main()`
 only starts it on Apple internal builds. Retail builds register just
 `localhost`/`broadcasthost`.

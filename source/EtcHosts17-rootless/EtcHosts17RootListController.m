@@ -64,8 +64,8 @@ static NSString *EHL(NSString *key) {
 		  @"sw_enable": @{@"en": @"Enable hosts entries", @"ru": @"Включить записи hosts"},
 		  @"sw_dual": @{@"en": @"Cover both IPv4 and IPv6", @"ru": @"Закрывать и IPv4, и IPv6"},
 		  @"tip_engine": @{
-		    @"en": @"iOS 17 mDNSResponder ships Apple's full /etc/hosts engine but only switches it on in internal builds. The tweak starts that engine inside mDNSResponder and points it at the file compiled here. Entries become local records that mDNSResponder answers before it asks any DNS server, so they win over Wi-Fi/cellular DNS, DoH/DoT profiles and VPN DNS.\n\nNo system setting is changed. If the tweak is removed, injection is off or the jailbreak is gone, mDNSResponder simply starts as stock.",
-		    @"ru": @"В mDNSResponder на iOS 17 есть полноценный движок /etc/hosts от Apple, но включается он только во внутренних сборках. Твик запускает этот движок внутри mDNSResponder и подсовывает ему файл, собранный здесь. Записи становятся локальными, и mDNSResponder отвечает ими раньше, чем спрашивает любой DNS-сервер, поэтому они главнее DNS Wi-Fi/сотовой сети, DoH/DoT-профилей и DNS от VPN.\n\nНикакие системные настройки не меняются. Если твик удалён, инъекция выключена или джейла нет, mDNSResponder просто стартует штатно."},
+		    @"en": @"iOS mDNSResponder ships Apple's full /etc/hosts engine but only switches it on in internal builds. The tweak starts that engine inside mDNSResponder and points it at the file compiled here. Entries become local records that mDNSResponder answers before it asks any DNS server, so they win over Wi-Fi/cellular DNS, DoH/DoT profiles and VPN DNS.\n\nNo system setting is changed. If the tweak is removed, injection is off or the jailbreak is gone, mDNSResponder simply starts as stock.",
+		    @"ru": @"В mDNSResponder на iOS есть полноценный движок /etc/hosts от Apple, но включается он только во внутренних сборках. Твик запускает этот движок внутри mDNSResponder и подсовывает ему файл, собранный здесь. Записи становятся локальными, и mDNSResponder отвечает ими раньше, чем спрашивает любой DNS-сервер, поэтому они главнее DNS Wi-Fi/сотовой сети, DoH/DoT-профилей и DNS от VPN.\n\nНикакие системные настройки не меняются. Если твик удалён, инъекция выключена или джейла нет, mDNSResponder просто стартует штатно."},
 		  @"tip_enable": @{
 		    @"en": @"ON: the hosts engine starts inside mDNSResponder and your entries are live within about a second.\nOFF: mDNSResponder restarts once (about a second) and then runs fully stock: no hooks, no engine. Your text and presets stay saved.",
 		    @"ru": @"ВКЛ: внутри mDNSResponder запускается hosts-движок, записи активны примерно через секунду.\nВЫКЛ: mDNSResponder один раз перезапускается (около секунды) и дальше работает полностью штатно: без перехватов и без движка. Текст и пресеты сохраняются."},
@@ -266,7 +266,7 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.title = @"/etc/hosts (iOS 17.0)";
+	self.title = @"/etc/hosts";
 	self.view.backgroundColor = CRTBackground();
 	self.view.tintColor = CRTGreen();
 	self.table.backgroundColor = CRTBackground();
@@ -332,7 +332,7 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 	self.separators = [NSMutableArray array];
 
 	self.titleLabel = CRTMakeLabel(19, YES, CRTGreen());
-	self.titleLabel.text = @"/etc/hosts (iOS 17.0)";
+	self.titleLabel.text = @"/etc/hosts";
 	[h addSubview:self.titleLabel];
 	self.subtitleLabel = CRTMakeLabel(10.5, NO, CRTDimGreen());
 	[h addSubview:self.subtitleLabel];

@@ -1,9 +1,9 @@
 Package: com.ratush.etchosts17
-Name: /etc/hosts (iOS 17.0)
-Version: 1.0.2
+Name: /etc/hosts
+Version: 1.0.3
 Icon: file:///var/jb/Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Architecture: iphoneos-arm64
-Description: Real /etc/hosts for rootless iOS 17. Switches on mDNSResponder's own built-in hosts engine (present in iOS 17 but enabled only in Apple internal builds) and feeds it a hosts file you edit in Settings. Entries are answered by mDNSResponder as local records before any DNS server is asked, so they win over Wi-Fi/cellular DNS, DoH/DoT profiles and VPN DNS, like hosts on Windows or Linux. No DNS profiles, no custom DNS servers, no daemons, no system settings: remove the tweak or lose the jailbreak and mDNSResponder starts stock. Green CRT editor with presets, IPv4/IPv6 and automatic A/AAAA counterparts.
+Description: Real /etc/hosts for rootless jailbreaks (Dopamine). Switches on mDNSResponder's own built-in hosts engine (present in iOS but enabled only in Apple internal builds; tested on iOS 17.0, stays stock if the engine is missing) and feeds it a hosts file you edit in Settings. Entries are answered by mDNSResponder as local records before any DNS server is asked, so they win over Wi-Fi/cellular DNS, DoH/DoT profiles and VPN DNS, like hosts on Windows or Linux. No DNS profiles, no custom DNS servers, no daemons, no system settings: remove the tweak or lose the jailbreak and mDNSResponder starts stock. Green CRT editor with presets, IPv4/IPv6 and automatic A/AAAA counterparts.
 Maintainer: ratush
 Author: ratush
 Section: Tweaks
