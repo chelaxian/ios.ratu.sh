@@ -1,0 +1,46 @@
+name: Build Adytum Fix rootless
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/AdytumFix/**'
+      - '.github/workflows/build-adytum-fix.yml'
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: source/AdytumFix
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/adytum-sdks
+          cd /tmp/adytum-sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/adytum-sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build package and device regression check
+        run: |
+          cd source/AdytumFix
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" make clean package FINALPACKAGE=1
+          mkdir artifacts
+          cp packages/*.deb artifacts/
+          sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang -arch arm64e -miphoneos-version-min=17.0 -isysroot "$sdk" -fno-objc-arc -fblocks -framework Foundation -framework UIKit tests/DeviceCheck.m -o artifacts/AdytumBlockCheck
+          ldid -S artifacts/AdytumBlockCheck
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          dpkg-deb -x "$deb" "$tmp"
+          dylib="$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AdytumFix.dylib"
+          lipo "$dylib" -verify_arch arm64 arm64e
+          lipo -thin arm64e "$dylib" -output "$tmp/arm64e"
+          test "$(xxd -p -s 8 -l 4 "$tmp/arm64e")" = 02000080
+          test "$(xxd -p -s 8 -l 4 artifacts/AdytumBlockCheck)" = 02000080
+          otool -L "$dylib"
+          test -e "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AdytumFix.plist"
+          sha256sum artifacts/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adytum-fix-rootless
+          path: source/AdytumFix/artifacts/*
+          if-no-files-found: error
