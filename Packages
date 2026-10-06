@@ -296,11 +296,11 @@ Version: 2.6.9
 Architecture: iphoneos-arm64
 Maintainer: 搬运工
 Depends: firmware (>= 11.0), mobilesubstrate, preferenceloader
-Filename: debs/com.netskao.appdata_2.6.9_iphoneos-arm64.deb
-Size: 1711648
-MD5sum: 74c8b166bc4949c4c0f013a12d767f8e
-SHA1: 34496578d41687f5e8f72cc433a553ee3695ec71
-SHA256: 8e7632dae31bffaca60f29602b7f205f62fa353db0babfb3f1c413303950394b
+Filename: debs/com.netskao.appdata_2.6.9+rootless2_iphoneos-arm64.deb
+Size: 2076930
+MD5sum: 961e537eb4c33ce68a7adbbb7c54febc
+SHA1: 339ba1c9df8d45c13a68883310acf8c2c9dc6d61
+SHA256: 825093790c02a092ad8d9ba7b8707a99215e518c26864b1472298a0b3e75a550
 Section: Tweaks
 Description: AppData rootless package repacked from the installed Dopamine payload.
 Author: Fouad Raheb
@@ -331,11 +331,11 @@ Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: NoisyFlake
 Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.libsandy, com.opa334.ccsupport
-Filename: debs/com.noisyflake.albummanager_1.0.2_iphoneos-arm64.deb
-Size: 55320
-MD5sum: b31f529457b8098fb6f568de09752669
-SHA1: 5377d82aec3918115838f7ead1023cdfd786b47a
-SHA256: 9d7bb938248451e183bbdb22f3ecfb91f191715006e5d2bce70e8848e9ee6886
+Filename: debs/com.noisyflake.albummanager_1.0.2+rootless2_iphoneos-arm64.deb
+Size: 102758
+MD5sum: 2ee5eed400a92b13d3e38d6745f586e0
+SHA1: 9f9a6bfe2eb7fb3c6b2fbf4532f468a75b2cda37
+SHA256: 178e57a69c011fcb65a7bd3a8469d9fd4918c1f4ae42da9c39a0dd2e640c44c6
 Section: Tweaks
 Description: Organize and protect photo albums (Dopamine rootless repack from installed device payload).
 Author: NoisyFlake
@@ -1345,6 +1345,22 @@ Description: RootHide-native foreground app bridge for starting and stopping the
 Author: chelaxian
 Name: Aut0VPN (fix)
 
+Package: com.ratush.vpnappbridge
+Version: 1.0.7
+Architecture: iphoneos-arm64
+Maintainer: chelaxian <chelaxian@users.noreply.github.com>
+Installed-Size: 512
+Depends: com.snail.autovpn.global (>= 1.0.8), firmware (>= 15.0)
+Filename: debs/com.ratush.vpnappbridge_1.0.7_iphoneos-arm64.deb
+Size: 23968
+MD5sum: 2d466d81af1683c334706a66fa4ffb68
+SHA1: fb1e5730c2bbe2d73ddbcc1e27de6247b6bef090
+SHA256: 66c28cc16e3897569b9ae30835453930eda11d024cf73340504958a347ce1f06
+Section: Tweaks
+Description: Dopamine rootless foreground app bridge for starting and stopping the active system VPN.
+Author: chelaxian
+Name: Aut0VPN (fix)
+
 Package: com.roothide.patcher
 Version: 2.1.4-1
 Architecture: iphoneos-arm64e
@@ -1401,11 +1417,11 @@ Version: 1.0.8
 Architecture: iphoneos-arm64
 Maintainer: Snail <mu514983786@gmail.com>
 Depends: mobilesubstrate (>= 0.9.5000), preferenceloader, com.opa334.altlist
-Filename: debs/com.snail.autovpn.global_1.0.8_iphoneos-arm64.deb
-Size: 266296
-MD5sum: f6a7c69d3e61191c53c5476eaea5016d
-SHA1: 6ee6c101dd21d0f12563c08158b7d1dcaf4e2bf0
-SHA256: afcfebfdd74cd60543992e70ab78f60f6c6c8ce3bfb62a7e4124d45f6616766f
+Filename: debs/com.snail.autovpn.global_1.0.8+rootless2_iphoneos-arm64.deb
+Size: 358318
+MD5sum: 5c9fe3ee5146d115c1e9cbd5cbbbab1e
+SHA1: 6b8cdae5a717a6d89e04efc335941d0a373c33aa
+SHA256: 7a2f906d82b93223d216e82b62355f7fce374beca7c63d1bb51e6e4424388fa8
 Section: Tweaks
 Description: Automatically enable or disable the VPN according to the situation (Dopamine rootless repack from installed device payload).
 Author: Snail <mu514983786@gmail.com>
@@ -4666,21 +4682,6 @@ Description: tool to make (or reverse) a hex dump
 
 Package: xyz.cypwn.cr4shed
 Version: 4.3.1-2
-Architecture: iphoneos-arm64
-Maintainer: CyPwn
-Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
-Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+device1_iphoneos-arm64.deb
-Size: 203528
-MD5sum: 1782de2b4d46719fc6c56094a2966815
-SHA1: a44ef0e22619ef5724bb0e3b479203c0a8fe8836
-SHA256: 43f62bb3d5dbc70724f902ca6da0b0846df993b3864bfd1b82b0f31a7305aa74
-Section: Tweaks
-Description: A modern crash reporter for iOS (Dopamine rootless repack from installed device payload).
-Author: Muirey03
-Name: Cr4shed
-
-Package: xyz.cypwn.cr4shed
-Version: 4.3.1-2
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
 Pre-Depends: rootless-compat(>= 0.9)
@@ -4697,6 +4698,21 @@ Depiction: https://repo.cypwn.xyz/depiction/2532
 Icon: https://repo.cypwn.xyz/packages/Cr4shed-Rootless/icon.png
 Name: Cr4shed
 Sileodepiction: https://repo.cypwn.xyz/sileo_depiction/2532
+
+Package: xyz.cypwn.cr4shed
+Version: 4.3.1-2
+Architecture: iphoneos-arm64
+Maintainer: CyPwn
+Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.11), xyz.cypwn.crossoveripc, xyz.cypwn.libnotifications
+Filename: debs/xyz.cypwn.cr4shed_4.3.1-2+rootless2_iphoneos-arm64.deb
+Size: 461938
+MD5sum: 4c3f776a491f8aedffccbcc3d178bd06
+SHA1: c6d483d7e3399bd6280234db8ae06c69d1375272
+SHA256: 1bddb41fc974153f486eb0fdde70428d8e913cf9bcfc1dd9bc7f26965ce4050c
+Section: Tweaks
+Description: A modern crash reporter for iOS (Dopamine rootless repack from installed device payload).
+Author: Muirey03
+Name: Cr4shed
 
 Package: xyz.cypwn.crossoveripc
 Version: 1.2-1
