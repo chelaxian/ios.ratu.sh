@@ -34,7 +34,7 @@ static NSString *const EHKeyEditorHeight = @"EditorHeight";
 static const char *EHReloadNotification = "com.ratush.etchosts17.reload";
 static const char *EHStateNotification = "com.ratush.etchosts17.state";
 
-enum { EHLoaded = 1, EHEngineOn = 2, EHNoFile = 4, EHNoSymbol = 8 };
+enum { EHLoaded = 1, EHEngineOn = 2, EHNoFile = 4, EHNoSymbol = 8, EHDisabled = 16, EHRestarting = 32 };
 
 #pragma mark - Localization
 
@@ -55,7 +55,9 @@ static NSString *EHL(NSString *key) {
 		  @"nano": @{@"en": @"root@iphone:~# nano /etc/hosts", @"ru": @"root@iphone:~# nano /etc/hosts"},
 		  @"engine": @{@"en": @"ENGINE", @"ru": @"ДВИЖОК"},
 		  @"eng_on": @{@"en": @"active · mDNSResponder pid %d", @"ru": @"активен · mDNSResponder pid %d"},
-		  @"eng_idle": @{@"en": @"loaded · waiting for hosts file", @"ru": @"загружен · ждёт файл hosts"},
+		  @"eng_idle": @{@"en": @"off · nothing applied yet · stock mDNSResponder", @"ru": @"выкл · ещё ничего не применено · штатный mDNSResponder"},
+		  @"eng_disabled": @{@"en": @"off · stock mDNSResponder (pid %d)", @"ru": @"выкл · штатный mDNSResponder (pid %d)"},
+		  @"eng_restarting": @{@"en": @"restarting mDNSResponder as stock...", @"ru": @"перезапуск mDNSResponder в штатном режиме..."},
 		  @"eng_nosym": @{@"en": @"unsupported mDNSResponder build · stock DNS", @"ru": @"неподдерживаемая сборка mDNSResponder · штатный DNS"},
 		  @"eng_off": @{@"en": @"not loaded · stock DNS (reboot/rejailbreak?)", @"ru": @"не загружен · штатный DNS (перезагрузка/джейл?)"},
 		  @"sw_enable": @{@"en": @"Enable hosts entries", @"ru": @"Включить записи hosts"},
@@ -64,8 +66,8 @@ static NSString *EHL(NSString *key) {
 		    @"en": @"iOS 17 mDNSResponder ships Apple's full /etc/hosts engine but only switches it on in internal builds. The tweak starts that engine inside mDNSResponder and points it at the file compiled here. Entries become local records that mDNSResponder answers before it asks any DNS server, so they win over Wi-Fi/cellular DNS, DoH/DoT profiles and VPN DNS.\n\nNo system setting is changed. If the tweak is removed, injection is off or the jailbreak is gone, mDNSResponder simply starts as stock.",
 		    @"ru": @"В mDNSResponder на iOS 17 есть полноценный движок /etc/hosts от Apple, но включается он только во внутренних сборках. Твик запускает этот движок внутри mDNSResponder и подсовывает ему файл, собранный здесь. Записи становятся локальными, и mDNSResponder отвечает ими раньше, чем спрашивает любой DNS-сервер, поэтому они главнее DNS Wi-Fi/сотовой сети, DoH/DoT-профилей и DNS от VPN.\n\nНикакие системные настройки не меняются. Если твик удалён, инъекция выключена или джейла нет, mDNSResponder просто стартует штатно."},
 		  @"tip_enable": @{
-		    @"en": @"ON: your entries are active (applied within about a second).\nOFF: the compiled file keeps only the stock localhost lines, so every name resolves through normal DNS again. Your text and presets stay saved.",
-		    @"ru": @"ВКЛ: ваши записи активны (применяются примерно за секунду).\nВЫКЛ: в собранном файле остаются только штатные строки localhost, и все имена снова резолвятся обычным DNS. Текст и пресеты сохраняются."},
+		    @"en": @"ON: the hosts engine starts inside mDNSResponder and your entries are live within about a second.\nOFF: mDNSResponder restarts once (about a second) and then runs fully stock: no hooks, no engine. Your text and presets stay saved.",
+		    @"ru": @"ВКЛ: внутри mDNSResponder запускается hosts-движок, записи активны примерно через секунду.\nВЫКЛ: mDNSResponder один раз перезапускается (около секунды) и дальше работает полностью штатно: без перехватов и без движка. Текст и пресеты сохраняются."},
 		  @"tip_dual": @{
 		    @"en": @"Like hosts on Windows: a listed name is fully owned by your entry. For an IPv4-only entry the tweak adds the matching IPv6 record (::ffff:IP, or :: for 0.0.0.0) so the real AAAA answer cannot leak through, and for an IPv6-only entry it adds 0.0.0.0. Turn OFF for classic Unix behaviour where only the listed address family is overridden.",
 		    @"ru": @"Как hosts в Windows: имя из списка полностью принадлежит вашей записи. Для записи только с IPv4 твик добавляет парную IPv6-запись (::ffff:IP, или :: для 0.0.0.0), чтобы настоящий AAAA-ответ не просочился, а для записи только с IPv6 добавляет 0.0.0.0. Выключите для классического Unix-поведения, где подменяется только указанное семейство адресов."},
@@ -73,6 +75,13 @@ static NSString *EHL(NSString *key) {
 		    @"en": @"IPv4/IPv6, several names per line, # comments. Apps that run their own DNS (Chrome Secure DNS, c-ares tools like curl) bypass the system resolver, as on a PC.",
 		    @"ru": @"IPv4/IPv6, несколько имён в строке, # комментарии. Приложения со своим DNS (Chrome «Безопасный DNS», утилиты на c-ares вроде curl) обходят системный резолвер, как и на ПК."},
 		  @"apply_btn": @{@"en": @"Apply", @"ru": @"Применить"},
+		  @"done_on_title": @{@"en": @"Applied", @"ru": @"Применено"},
+		  @"done_on_msg": @{@"en": @"hosts entries are live: %lu names.\nmDNSResponder pid %d answers them before DoH, DoT and VPN DNS.", @"ru": @"Записи hosts активны: имён %lu.\nmDNSResponder (pid %d) отвечает по ним раньше DoH, DoT и DNS из VPN."},
+		  @"done_off_title": @{@"en": @"Disabled", @"ru": @"Выключено"},
+		  @"done_off_msg": @{@"en": @"mDNSResponder runs as stock (pid %d). All names use normal DNS.", @"ru": @"mDNSResponder работает штатно (pid %d). Все имена резолвятся обычным DNS."},
+		  @"done_wait_title": @{@"en": @"Saved, not confirmed", @"ru": @"Сохранено, но не подтверждено"},
+		  @"done_wait_msg": @{@"en": @"The file was written, but mDNSResponder did not confirm within 6 s.\nEngine: %@", @"ru": @"Файл записан, но mDNSResponder не подтвердил применение за 6 с.\nДвижок: %@"},
+		  @"done_noload_msg": @{@"en": @"The file was written, but the tweak is not loaded in mDNSResponder, so DNS stays stock. Re-jailbreak or reinstall the package.", @"ru": @"Файл записан, но твик не загружен в mDNSResponder, поэтому DNS работает штатно. Перезапустите джейл или переустановите пакет."},
 		  @"show_btn": @{@"en": @"Show compiled hosts", @"ru": @"Показать собранный hosts"},
 		  @"preset_prefix": @{@"en": @"PRESET: ", @"ru": @"ПРЕСЕТ: "},
 		  @"preset_menu_title": @{@"en": @"Hosts presets", @"ru": @"Пресеты hosts"},
@@ -92,7 +101,7 @@ static NSString *EHL(NSString *key) {
 		  @"cantdelete_msg": @{@"en": @"Keep at least one preset.", @"ru": @"Оставьте хотя бы один пресет."},
 		  @"st_ready": @{@"en": @"> edit, then tap Apply", @"ru": @"> отредактируйте и нажмите «Применить»"},
 		  @"st_applied": @{@"en": @"> applied: %lu names live", @"ru": @"> применено: активно имён %lu"},
-		  @"st_disabled": @{@"en": @"> disabled: normal DNS for every name", @"ru": @"> выключено: обычный DNS для всех имён"},
+		  @"st_disabled": @{@"en": @"> disabled: mDNSResponder back to stock", @"ru": @"> выключено: mDNSResponder возвращается к штатному"},
 		  @"st_invalid": @{@"en": @"> invalid syntax; nothing applied", @"ru": @"> ошибка синтаксиса; ничего не применено"},
 		  @"st_preset_loaded": @{@"en": @"> preset loaded; tap Apply to activate", @"ru": @"> пресет загружен; нажмите «Применить»"},
 		  @"st_preset_saved": @{@"en": @"> preset saved; tap Apply to activate", @"ru": @"> пресет сохранён; нажмите «Применить»"},
@@ -496,7 +505,7 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 
 #pragma mark Engine status
 
-- (void)refreshEngineStatus {
+static uint64_t EHReadEngineState(pid_t *outPid, BOOL *outAlive) {
 	int token = -1;
 	uint64_t state = 0;
 	if (notify_register_check(EHStateNotification, &token) == NOTIFY_STATUS_OK) {
@@ -504,7 +513,15 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 		notify_cancel(token);
 	}
 	pid_t pid = (pid_t)((state >> 16) & 0xffffffffULL);
-	BOOL alive = pid > 0 && (kill(pid, 0) == 0 || errno == EPERM);
+	if (outPid) *outPid = pid;
+	if (outAlive) *outAlive = pid > 0 && (kill(pid, 0) == 0 || errno == EPERM);
+	return state;
+}
+
+- (void)refreshEngineStatus {
+	pid_t pid = 0;
+	BOOL alive = NO;
+	uint64_t state = EHReadEngineState(&pid, &alive);
 	UIColor *color;
 	NSString *text;
 	if (!(state & EHLoaded) || !alive) {
@@ -513,6 +530,10 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 		color = CRTRed(); text = EHL(@"eng_nosym");
 	} else if (state & EHEngineOn) {
 		color = CRTGreen(); text = [NSString stringWithFormat:EHL(@"eng_on"), pid];
+	} else if (state & EHRestarting) {
+		color = CRTAmber(); text = EHL(@"eng_restarting");
+	} else if (state & EHDisabled) {
+		color = CRTDimGreen(); text = [NSString stringWithFormat:EHL(@"eng_disabled"), pid];
 	} else {
 		color = CRTAmber(); text = EHL(@"eng_idle");
 	}
@@ -748,7 +769,7 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 	NSError *error = nil;
 	if (![self writeCompiled:compiled error:&error]) {
 		self.statusLabel.text = EHL(@"st_write_failed");
-		if (showErrors) [self alert:EHL(@"write_title") message:error.localizedDescription ?: EHCompiledPath];
+		[self alert:EHL(@"write_title") message:error.localizedDescription ?: EHCompiledPath];
 		return;
 	}
 	// Starts the engine if mDNSResponder came up before the file existed.
@@ -756,6 +777,38 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 	self.statusLabel.text = enabled ? [NSString stringWithFormat:EHL(@"st_applied"), (unsigned long)names] : EHL(@"st_disabled");
 	__weak typeof(self) weakSelf = self;
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [weakSelf refreshEngineStatus]; });
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [weakSelf refreshEngineStatus]; });
+	if (showErrors) [self confirmApplied:enabled names:names attempt:0];
+}
+
+// Polls the state word published by the hook until mDNSResponder reports the
+// requested mode, then tells the user what actually happened.
+- (void)confirmApplied:(BOOL)enabled names:(NSUInteger)names attempt:(int)attempt {
+	pid_t pid = 0;
+	BOOL alive = NO;
+	uint64_t state = EHReadEngineState(&pid, &alive);
+	BOOL loaded = alive && (state & EHLoaded);
+	BOOL settled = loaded && !(state & EHRestarting);
+	if (settled && enabled && (state & EHEngineOn)) {
+		[self refreshEngineStatus];
+		[self alert:EHL(@"done_on_title") message:[NSString stringWithFormat:EHL(@"done_on_msg"), (unsigned long)names, pid]];
+		return;
+	}
+	if (settled && !enabled && !(state & EHEngineOn) && (state & (EHDisabled | EHNoFile))) {
+		[self refreshEngineStatus];
+		[self alert:EHL(@"done_off_title") message:[NSString stringWithFormat:EHL(@"done_off_msg"), pid]];
+		return;
+	}
+	if (attempt >= 20) {
+		[self refreshEngineStatus];
+		if (!loaded) [self alert:EHL(@"done_wait_title") message:EHL(@"done_noload_msg")];
+		else [self alert:EHL(@"done_wait_title") message:[NSString stringWithFormat:EHL(@"done_wait_msg"), self.engineLabel.text ?: @"?"]];
+		return;
+	}
+	__weak typeof(self) weakSelf = self;
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(300 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+		[weakSelf confirmApplied:enabled names:names attempt:attempt + 1];
+	});
 }
 
 - (void)applyChanges {
@@ -771,8 +824,8 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 	[self writePrefs:p];
 	[self layoutHeader];
 	// Turning off must always work, even with a half-edited invalid text.
-	if (!self.enabledSwitch.on) { [self applyEnabled:NO showErrors:YES]; return; }
-	if ([self saveEditorShowingError:YES]) [self applyEnabled:YES showErrors:YES];
+	if (!self.enabledSwitch.on) { [self applyEnabled:NO showErrors:NO]; return; }
+	if ([self saveEditorShowingError:YES]) [self applyEnabled:YES showErrors:NO];
 }
 
 - (void)showCompiled {
@@ -917,4 +970,3 @@ static NSString *EHCompile(NSString *text, BOOL enabled, BOOL dualStack, NSUInte
 }
 
 @end
-
