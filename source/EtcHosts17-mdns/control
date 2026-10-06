@@ -1,0 +1,11 @@
+Package: com.ratush.etchosts17
+Name: /etc/hosts (iOS 17.0)
+Version: 1.0.0~test1
+Architecture: iphoneos-arm64
+Description: /etc/hosts parity for Dopamine rootless iOS 17 (mDNSResponder hosts engine).
+Maintainer: ratush
+Author: ratush
+Section: Tweaks
+Depends: firmware (>= 17.0), ellekit
+Conflicts: com.ratush.ratuhosts
+Replaces: com.ratush.ratuhosts
