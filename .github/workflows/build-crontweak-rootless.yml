@@ -28,7 +28,9 @@ jobs:
           tmp="$(mktemp -d)"; dpkg-deb -x packages/rootless.deb "$tmp"
           lipo -thin arm64e "$tmp/var/jb/Library/PreferenceBundles/CronTweakPrefs.bundle/CronTweakPrefs" -output "$tmp/check.arm64e"
           test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = "02000080"
-          mkdir artifacts && cp packages/rootless.deb artifacts/com.ratush.crontweak_1.2.0+rootless1_iphoneos-arm64.deb
+          python3 -m unittest discover -s tests -v
+          version="$(dpkg-deb -f packages/rootless.deb Version)"
+          mkdir artifacts && cp packages/rootless.deb "artifacts/com.ratush.crontweak_${version}_iphoneos-arm64.deb"
       - uses: actions/upload-artifact@v4
         with:
           name: crontweak-rootless-deb

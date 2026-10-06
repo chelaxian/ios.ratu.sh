@@ -19,6 +19,8 @@ import subprocess
 import sys
 import time
 import traceback
+import re
+import stat
 
 LABEL_PREFIX = "com.ratush.crontweak.job"
 LAUNCHDAEMONS_DIR = "/var/jb/Library/LaunchDaemons"
@@ -30,6 +32,7 @@ CONTROL_HOST = "127.0.0.1"
 CONTROL_PORT = 53536
 MAX_EXPANSION = 1000
 MAX_JOBS = 200
+MAX_REQUEST_BYTES = 1024 * 1024
 
 
 def log(msg):
@@ -120,6 +123,15 @@ def parse_cron_line(line):
 
 def expand_calendar_intervals(fields):
     """Cross-product of the restricted (non-None) fields into StartCalendarInterval dicts."""
+    # Cron combines restricted day-of-month and day-of-week with OR.
+    # A launchd dictionary combines its keys with AND, so use two branches.
+    if fields["Day"] is not None and fields["Weekday"] is not None:
+        by_day = dict(fields, Weekday=None)
+        by_weekday = dict(fields, Day=None)
+        intervals = expand_calendar_intervals(by_day) + expand_calendar_intervals(by_weekday)
+        if len(intervals) > MAX_EXPANSION:
+            raise ValueError("schedule expands to too many trigger points")
+        return intervals
     keys = [k for k, v in fields.items() if v is not None]
     if not keys:
         return [{}]  # every minute of every day
@@ -169,8 +181,13 @@ def write_plist(path, label, command, intervals):
     log_path = os.path.join(LOG_DIR, "%s.log" % label)
     plist = {
         "Label": label,
-        "ProgramArguments": ["/bin/sh", "-c", command],
+        "ProgramArguments": ["/var/jb/bin/sh", "-c", command],
         "UserName": "mobile",
+        "WorkingDirectory": "/var/mobile",
+        "EnvironmentVariables": {
+            "HOME": "/var/mobile",
+            "PATH": "/var/jb/usr/bin:/var/jb/bin:/var/jb/usr/sbin:/var/jb/sbin:/usr/bin:/bin:/usr/sbin:/sbin",
+        },
         "StartCalendarInterval": intervals,
         "StandardOutPath": log_path,
         "StandardErrorPath": log_path,
@@ -204,7 +221,11 @@ def bootstrap_plist(path):
 def load_manifest():
     try:
         with open(MANIFEST_PATH) as f:
-            return json.load(f)
+            labels = json.load(f)
+            if not isinstance(labels, list):
+                return []
+            return [label for label in labels
+                    if isinstance(label, str) and re.fullmatch(re.escape(LABEL_PREFIX) + r"\d+", label)]
     except Exception:
         return []
 
@@ -225,8 +246,15 @@ def apply_crontab_text(text):
     if errors:
         return False, errors, 0
 
-    # 1. Full-replace: tear down every previously generated job first.
-    for label in load_manifest():
+    # Snapshot the previous set before replacing it. A failed bootstrap must
+    # restore the previous schedule instead of silently leaving a partial one.
+    old_labels = load_manifest()
+    old_plists = {}
+    for label in old_labels:
+        path = os.path.join(LAUNCHDAEMONS_DIR, "%s.plist" % label)
+        with open(path, "rb") as f:
+            old_plists[label] = f.read()
+    for label in old_labels:
         bootout_label(label)
         old_path = os.path.join(LAUNCHDAEMONS_DIR, "%s.plist" % label)
         try:
@@ -236,25 +264,49 @@ def apply_crontab_text(text):
 
     # 2. Write + bootstrap the fresh set.
     new_labels = []
+    attempted_labels = []
     bootstrap_errors = []
     for idx, (line_no, command, intervals) in enumerate(jobs):
         label = job_label(idx)
         path = os.path.join(LAUNCHDAEMONS_DIR, "%s.plist" % label)
+        attempted_labels.append(label)
         try:
             write_plist(path, label, command, intervals)
+            rc, out, err = launchctl("enable", "system/%s" % label)
+            if rc != 0:
+                raise RuntimeError("launchctl enable failed (%s)" % (err or out))
             rc, out, err = bootstrap_plist(path)
             if rc != 0:
                 bootstrap_errors.append("line %d: launchctl bootstrap failed (%s)" % (line_no, err or out))
-                continue
-            launchctl("enable", "system/%s" % label)
+                break
             new_labels.append(label)
         except Exception as e:
             bootstrap_errors.append("line %d: %s" % (line_no, e))
-
-    save_manifest(new_labels)
+            break
 
     if bootstrap_errors:
-        return False, bootstrap_errors, len(new_labels)
+        for label in attempted_labels:
+            bootout_label(label)
+            try:
+                os.remove(os.path.join(LAUNCHDAEMONS_DIR, "%s.plist" % label))
+            except FileNotFoundError:
+                pass
+        restored = []
+        for label, data in old_plists.items():
+            path = os.path.join(LAUNCHDAEMONS_DIR, "%s.plist" % label)
+            with open(path, "wb") as f:
+                f.write(data)
+            os.chmod(path, 0o644)
+            os.chown(path, 0, 0)
+            launchctl("enable", "system/%s" % label)
+            rc, out, err = bootstrap_plist(path)
+            if rc == 0:
+                restored.append(label)
+            else:
+                bootstrap_errors.append("restore %s failed (%s)" % (label, err or out))
+        save_manifest(restored)
+        return False, bootstrap_errors, len(restored)
+    save_manifest(new_labels)
     return True, [], len(new_labels)
 
 
@@ -275,7 +327,7 @@ def purge_all():
 
 # ------------------------------------------------------- prefs (daemon side)
 
-def write_result_to_prefs(ok, errors, count):
+def write_result_to_prefs(ok, errors, count, text=None):
     for path in (PREFS_PATH,):
         try:
             d = {}
@@ -288,36 +340,109 @@ def write_result_to_prefs(ok, errors, count):
             d["LastAppliedCount"] = count
             d["LastAppliedErrors"] = errors
             d["LastAppliedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            if text is not None:
+                d["CronText"] = text
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "wb") as f:
+            temporary = path + ".tmp"
+            with open(temporary, "wb") as f:
                 plistlib.dump(d, f)
-            os.chown(path, 501, 501)
-            os.chmod(path, 0o644)
+            os.chown(temporary, 501, 501)
+            os.chmod(temporary, 0o644)
+            os.replace(temporary, path)
         except Exception as e:
             log("prefs mirror failed for %s: %s" % (path, e))
 
 
 # -------------------------------------------------------------- control API
 
+def normalize_rootless_commands(text):
+    """Migrate only a missing leading jailbreak executable with an existing counterpart."""
+    lines = []
+    for raw in text.splitlines():
+        parts = raw.split(None, 5)
+        if raw.lstrip().startswith("#") or len(parts) != 6:
+            lines.append(raw)
+            continue
+        command = parts[5]
+        match = re.match(r"^(/(?:usr/(?:bin|sbin)|bin|sbin)/[A-Za-z0-9_.+-]+)(?=\s|$)", command)
+        if match:
+            old = match.group(1)
+            new = "/var/jb" + old
+            if not os.path.exists(old) and os.path.isfile(new) and os.access(new, os.X_OK):
+                command = new + command[len(old):]
+                raw = " ".join(parts[:5]) + " " + command
+        lines.append(raw)
+    return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+
+def clear_logs():
+    """Truncate our logs in place, preserving launchd's open descriptors."""
+    cleared = 0
+    os.makedirs(LOG_DIR, exist_ok=True)
+    for name in os.listdir(LOG_DIR):
+        if name != "daemon.log" and not re.fullmatch(re.escape(LABEL_PREFIX) + r"\d+\.log", name):
+            continue
+        path = os.path.join(LOG_DIR, name)
+        if not stat.S_ISREG(os.lstat(path).st_mode):
+            continue
+        fd = os.open(path, os.O_WRONLY | os.O_NONBLOCK | os.O_NOFOLLOW)
+        try:
+            if stat.S_ISREG(os.fstat(fd).st_mode):
+                os.ftruncate(fd, 0)
+                cleared += 1
+        finally:
+            os.close(fd)
+    # The footer is the apply history, not the editable schedule.
+    try:
+        with open(PREFS_PATH, "rb") as f:
+            prefs = plistlib.load(f)
+        for key in ("LastAppliedOK", "LastAppliedCount", "LastAppliedErrors", "LastAppliedAt"):
+            prefs.pop(key, None)
+        temporary = PREFS_PATH + ".tmp"
+        with open(temporary, "wb") as f:
+            plistlib.dump(prefs, f)
+        os.chown(temporary, 501, 501)
+        os.chmod(temporary, 0o644)
+        os.replace(temporary, PREFS_PATH)
+    except FileNotFoundError:
+        pass
+    return cleared
+
 def handle_conn(conn):
     conn.settimeout(10)
     chunks = []
+    total = 0
     try:
         while True:
             data = conn.recv(65536)
             if not data:
                 break
             chunks.append(data)
+            total += len(data)
+            if total > MAX_REQUEST_BYTES:
+                conn.sendall(b"ERR Request is too large\n")
+                conn.close()
+                return
     except socket.timeout:
-        pass
+        conn.sendall(b"ERR Request timed out\n")
+        conn.close()
+        return
     text = b"".join(chunks).decode("utf-8", errors="replace")
+    if text.strip() == '{"action":"clear_logs"}':
+        try:
+            reply = "OK Cleared %d log file(s).\n" % clear_logs()
+        except Exception as e:
+            reply = "ERR Could not clear logs: %s\n" % e
+        conn.sendall(reply.encode("utf-8"))
+        conn.close()
+        return
+    text = normalize_rootless_commands(text)
     log("APPLY request, %d bytes" % len(text))
     try:
         ok, errors, count = apply_crontab_text(text)
     except Exception as e:
         log("apply_crontab_text crashed: " + traceback.format_exc())
         ok, errors, count = False, ["internal error: %s" % e], 0
-    write_result_to_prefs(ok, errors, count)
+    write_result_to_prefs(ok, errors, count, text)
     reply = ("OK %d\n" % count) if ok else ("ERR " + " | ".join(errors) + "\n")
     try:
         conn.sendall(reply.encode("utf-8"))

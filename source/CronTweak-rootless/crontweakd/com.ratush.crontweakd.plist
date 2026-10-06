@@ -6,8 +6,8 @@
 	<string>com.ratush.crontweakd</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/bin/python3</string>
-		<string>/usr/libexec/crontweakd.py</string>
+		<string>/var/jb/usr/bin/python3</string>
+		<string>/var/jb/usr/libexec/crontweakd.py</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>

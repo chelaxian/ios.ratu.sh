@@ -26,6 +26,11 @@
 			target:self set:NULL get:NULL detail:Nil cell:PSGroupCell edit:Nil];
 		[statusGroup setProperty:[self statusFooterText] forKey:@"footerText"];
 		[specs addObject:statusGroup];
+		[specs addObject:[PSSpecifier emptyGroupSpecifier]];
+		PSSpecifier *clear = [PSSpecifier preferenceSpecifierNamed:@"Clear Logs"
+			target:self set:NULL get:NULL detail:Nil cell:PSButtonCell edit:Nil];
+		clear.buttonAction = @selector(clearLogsTapped:);
+		[specs addObject:clear];
 		_specifiers = specs;
 	}
 	return _specifiers;
@@ -36,7 +41,7 @@
 	NSString *at = prefs[@"LastAppliedAt"];
 	if (!at) {
 		return @"One job per line: minute hour day month weekday command\n"
-		        "Example: */15 * * * * echo hi >> /var/mobile/hi.log\n"
+		        "Example: */5 * * * * /var/jb/usr/bin/uiopen --bundleid com.apple.Preferences\n"
 		        "Jobs run as `mobile` (same user as SSH) via native launchd -- "
 		        "not a background loop, real LaunchDaemons.";
 	}
@@ -354,6 +359,7 @@
 				[strongSelf showAlertTitle:@"Daemon rejected the schedule" message:reply];
 			}
 			[strongSelf reloadSpecifiers];
+			strongSelf.editorView.attributedText = [strongSelf highlightedCronText:[strongSelf currentCronText]];
 		});
 	});
 }
@@ -366,6 +372,8 @@
 	tv.tv_sec = 8; tv.tv_usec = 0;
 	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 	setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+	int noSigPipe = 1;
+	setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, &noSigPipe, sizeof(noSigPipe));
 
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
@@ -379,7 +387,13 @@
 	}
 
 	NSData *payload = [text dataUsingEncoding:NSUTF8StringEncoding];
-	write(sock, payload.bytes, payload.length);
+	const uint8_t *bytes = payload.bytes;
+	NSUInteger sent = 0;
+	while (sent < payload.length) {
+		ssize_t n = write(sock, bytes + sent, payload.length - sent);
+		if (n <= 0) { close(sock); return nil; }
+		sent += (NSUInteger)n;
+	}
 	shutdown(sock, SHUT_WR);
 
 	NSMutableData *response = [NSMutableData data];
@@ -399,6 +413,21 @@
 		message:message preferredStyle:UIAlertControllerStyleAlert];
 	[ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
 	[self presentViewController:ac animated:YES completion:nil];
+}
+
+- (void)clearLogsTapped:(id)sender {
+	[self.editorView resignFirstResponder];
+	__weak typeof(self) weakSelf = self;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		NSString *reply = [weakSelf sendApplyToDaemon:@"{\"action\":\"clear_logs\"}"];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			__strong typeof(weakSelf) strongSelf = weakSelf;
+			if (!strongSelf) return;
+			[strongSelf showAlertTitle:[reply hasPrefix:@"OK"] ? @"Logs Cleared" : @"Could Not Clear Logs"
+				message:reply ?: @"Could not reach the CronTweak daemon."];
+			[strongSelf reloadSpecifiers];
+		});
+	});
 }
 
 @end
