@@ -97,8 +97,37 @@ static BOOL OFProtected(NSString *identifier) { return OFValidID(identifier) && 
 static NSError *OFError(NSInteger code, NSString *message) {
     return [NSError errorWithDomain:@"com.ratush.offloader" code:code userInfo:@{NSLocalizedDescriptionKey:message ?: @"Offload failed"}];
 }
+// Interface language: "en", "ru", or absent for the system language.
+// Cached per process and refreshed when the settings change notification arrives.
+static NSString *OFLanguageFromValue(id value) {
+    if ([value isEqual:@"en"] || [value isEqual:@"ru"]) return value;
+    return [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"] ? @"ru" : @"en";
+}
+static NSString *OFLanguageCached;
+static NSObject *OFLanguageLock(void) {
+    static NSObject *lock; static dispatch_once_t once;
+    dispatch_once(&once,^{
+        lock = [NSObject new];
+        int token = 0;
+        notify_register_dispatch(OFChanged,&token,dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^(__unused int t){
+            @synchronized (lock) { OFLanguageCached = nil; }
+        });
+    });
+    return lock;
+}
+static NSString *OFLanguage(void) {
+    NSObject *lock = OFLanguageLock();
+    @synchronized (lock) {
+        if (!OFLanguageCached) {
+            CFPreferencesSynchronize((__bridge CFStringRef)OFDomain,kCFPreferencesCurrentUser,kCFPreferencesAnyHost);
+            id value = CFBridgingRelease(CFPreferencesCopyValue(CFSTR("appLanguage"),(__bridge CFStringRef)OFDomain,kCFPreferencesCurrentUser,kCFPreferencesAnyHost));
+            OFLanguageCached = OFLanguageFromValue(value);
+        }
+        return OFLanguageCached;
+    }
+}
 static NSString *OFText(NSString *english, NSString *russian) {
-    return [NSLocale.preferredLanguages.firstObject hasPrefix:@"ru"] ? russian : english;
+    return [OFLanguage() isEqual:@"ru"] ? russian : english;
 }
 typedef NS_ENUM(NSInteger, OFActionKind) { OFActionOther, OFActionOffload, OFActionDelete, OFActionEdit, OFActionRestartStore };
 static OFActionKind OFKind(NSString *identifier, NSString *title, BOOL nativeDelete) {

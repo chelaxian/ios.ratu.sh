@@ -39,6 +39,11 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
 - (NSArray *)specifiers {
     if (_specifiers) return _specifiers;
     NSMutableArray *items = [NSMutableArray array];
+    PSSpecifier *general = [PSSpecifier groupSpecifierWithName:nil];
+    [items addObject:general];
+    PSSpecifier *language = [PSSpecifier preferenceSpecifierNamed:OFText(@"Language",@"Язык") target:self set:NULL get:NULL detail:nil cell:PSButtonCell edit:nil];
+    [language setProperty:@"language" forKey:@"action"]; language.buttonAction = @selector(showLanguageMenu);
+    [items addObject:language];
     PSSpecifier *group = [PSSpecifier groupSpecifierWithName:OFText(@"Home Screen Menu",@"Меню экрана Домой")];
     [group setProperty:OFText(@"Changes apply when you next open an app's menu. Delete and Edit use the standard iOS actions.",@"Изменения действуют при следующем открытии меню приложения. Удаление и редактирование используют штатные действия iOS.") forKey:@"footerText"];
     [items addObject:group];
@@ -50,7 +55,7 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
     [store setProperty:OFText(@"Use this when an app download or reinstall from the cloud icon stops progressing. It restarts the system App Store service (appstored); downloads continue on their own. The same action is in the menu of a downloading or offloaded app icon.",@"Используйте, если загрузка или повторная установка приложения через значок облака перестала двигаться. Кнопка перезапускает системную службу App Store (appstored), загрузки продолжаются сами. То же действие есть в меню значка загружаемого или выгруженного приложения.") forKey:@"footerText"];
     [items addObject:store];
     PSSpecifier *restart = [PSSpecifier preferenceSpecifierNamed:OFText(@"Restart App Store Service (appstored)",@"Перезапустить службу App Store (appstored)") target:self set:NULL get:NULL detail:nil cell:PSButtonCell edit:nil];
-    restart.buttonAction = @selector(restartAppStore:);
+    [restart setProperty:@"restartStore" forKey:@"action"]; restart.buttonAction = @selector(restartAppStore:);
     [items addObject:restart];
     PSSpecifier *protection = [PSSpecifier groupSpecifierWithName:OFText(@"Protection",@"Защита")];
     [protection setProperty:OFText(@"Selected apps cannot be offloaded manually or automatically. This does not block deleting an app. Documents and data remain when an app is offloaded.",@"Выбранные приложения защищены от ручной и автоматической выгрузки. Защита не запрещает удаление приложения. При выгрузке документы и данные сохраняются.") forKey:@"footerText"];
@@ -64,6 +69,32 @@ static void OFPreferencesAlert(UIViewController *controller, NSString *message) 
         OFPreferencesAlert(self,OFText(@"Could not save this setting.",@"Не удалось сохранить настройку.")); [self reloadSpecifiers]; return;
     }
     notify_post(OFChanged);
+}
+- (void)showLanguageMenu {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:OFText(@"Language",@"Язык") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    __weak typeof(self) weakSelf = self;
+    for (NSString *code in @[@"en",@"ru"]) {
+        NSString *title = [code isEqual:@"ru"] ? @"Русский" : @"English";
+        if ([OFLanguage() isEqual:code]) title = [title stringByAppendingString:@" ✓"];
+        [alert addAction:[UIAlertAction actionWithTitle:title style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action){
+            typeof(self) controller = weakSelf; if (!controller) return;
+            if (!OFWrite(OFDomain,@"appLanguage",code)) { OFPreferencesAlert(controller,OFText(@"Could not save this setting.",@"Не удалось сохранить настройку.")); return; }
+            @synchronized (OFLanguageLock()) { OFLanguageCached = nil; }
+            notify_post(OFChanged);
+            controller->_specifiers = nil; [controller reloadSpecifiers];
+        }]];
+    }
+    [alert addAction:[UIAlertAction actionWithTitle:OFText(@"Cancel",@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
+    alert.popoverPresentationController.sourceView = self.view;
+    alert.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(self.view.bounds),CGRectGetMidY(self.view.bounds),1,1);
+    [self presentViewController:alert animated:YES completion:nil];
+}
+- (void)tableView:(UITableView *)table didSelectRowAtIndexPath:(NSIndexPath *)path {
+    PSSpecifier *specifier = [self specifierAtIndexPath:path];
+    NSString *action = [specifier propertyForKey:@"action"];
+    if ([action isEqual:@"language"]) { [table deselectRowAtIndexPath:path animated:YES]; [self showLanguageMenu]; }
+    else if ([action isEqual:@"restartStore"]) { [table deselectRowAtIndexPath:path animated:YES]; [self restartAppStore:specifier]; }
+    else [super tableView:table didSelectRowAtIndexPath:path];
 }
 - (void)restartAppStore:(PSSpecifier *)specifier {
     if (self.storeRequest) return;

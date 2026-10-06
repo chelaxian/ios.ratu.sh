@@ -80,6 +80,9 @@ int main(void) { @autoreleasepool {
     CHECK(OFKind(@"com.apple.springboard.remove-app",nil,NO)==OFActionDelete);
     CHECK(OFKind(@"com.level3tjg.offloader/offload",nil,NO)==OFActionOffload);
     CHECK(OFKind(@"com.level3tjg.offloader/restart-appstored",nil,NO)==OFActionRestartStore);
+    CHECK([OFLanguageFromValue(@"en") isEqual:@"en"]); CHECK([OFLanguageFromValue(@"ru") isEqual:@"ru"]);
+    CHECK([@[@"en",@"ru"] containsObject:OFLanguageFromValue(nil)]); CHECK([@[@"en",@"ru"] containsObject:OFLanguageFromValue(@"de")]);
+    CHECK([@[@"en",@"ru"] containsObject:OFLanguage()]);
     CHECK(OFShowKind(OFActionRestartStore,@{})); CHECK(!OFShowKind(OFActionRestartStore,@{@"3drestartstore":@NO}));
     CHECK(OFKind(@"unrelated",nil,YES)==OFActionDelete);
     for(unsigned mask=0;mask<8;++mask) {
