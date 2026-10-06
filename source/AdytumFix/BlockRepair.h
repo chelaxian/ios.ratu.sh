@@ -31,7 +31,7 @@ static bool AFRepairBlock(void *candidate, AFOriginCheck allowed) {
     // Matches __ptrauth_objc_isa_pointer in the Apple Blocks runtime:
     // DA, address diversity, discriminator ptrauth_string_discriminator("isa").
     block->isa = (uintptr_t)ptrauth_sign_unauthenticated((void *)rawClass,
-        ptrauth_key_process_dependent_data,ptrauth_blend_discriminator(&block->isa,0x6ae1));
+        ptrauth_key_process_independent_data,ptrauth_blend_discriminator(&block->isa,0x6ae1));
     return true;
 #else
     (void)candidate; (void)allowed;
