@@ -135,11 +135,12 @@ static void EHStartEngineIfReady(void) {
 }
 
 %ctor {
-	const char *exe = _dyld_get_image_name(0);
-	if (!exe || strcmp(exe, "/usr/sbin/mDNSResponder") != 0) return;
 	gLog = os_log_create("com.ratush.etchosts17", "mdns");
 	notify_register_check(EH_STATE, &gStateToken);
 	gFlags = EHLoaded;
+	EHPublish();
+	const char *exe = getprogname();
+	if (!exe || strcmp(exe, "mDNSResponder") != 0) return;
 
 	void *fn = EHFindLocalSymbol("_mDNSMacOSXUpdateEtcHosts");
 	if (!fn) {
