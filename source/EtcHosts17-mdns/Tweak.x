@@ -70,10 +70,16 @@ static int EHIsHostsPath(const char *path) {
 	return path && (strcmp(path, "/etc/hosts") == 0 || strcmp(path, "/private/etc/hosts") == 0);
 }
 
-// Look up a (possibly local) symbol in the main executable's LC_SYMTAB.
+// Look up a (possibly local) symbol in the main executable's LC_SYMTAB. The
+// executable is located by MH_EXECUTE because jailbreak-inserted libraries can
+// precede it in dyld's image list.
 static void *EHFindLocalSymbol(const char *wanted) {
-	const struct mach_header_64 *mh = (const struct mach_header_64 *)_dyld_get_image_header(0);
-	intptr_t slide = _dyld_get_image_vmaddr_slide(0);
+	const struct mach_header_64 *mh = NULL;
+	intptr_t slide = 0;
+	for (uint32_t i = 0; i < _dyld_image_count(); i++) {
+		const struct mach_header_64 *h = (const struct mach_header_64 *)_dyld_get_image_header(i);
+		if (h && h->magic == MH_MAGIC_64 && h->filetype == MH_EXECUTE) { mh = h; slide = _dyld_get_image_vmaddr_slide(i); break; }
+	}
 	if (!mh || mh->magic != MH_MAGIC_64) return NULL;
 	const struct load_command *lc = (const struct load_command *)(mh + 1);
 	const struct symtab_command *symtab = NULL;
