@@ -11,6 +11,7 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
 #import <notify.h>
+#import <dns_sd.h>
 #import <arpa/inet.h>
 #import <errno.h>
 #import <signal.h>
@@ -80,7 +81,8 @@ static NSString *EHL(NSString *key) {
 		  @"done_off_title": @{@"en": @"Disabled", @"ru": @"Выключено"},
 		  @"done_off_msg": @{@"en": @"mDNSResponder runs as stock (pid %d). All names use normal DNS.", @"ru": @"mDNSResponder работает штатно (pid %d). Все имена резолвятся обычным DNS."},
 		  @"done_wait_title": @{@"en": @"Saved, not confirmed", @"ru": @"Сохранено, но не подтверждено"},
-		  @"done_wait_msg": @{@"en": @"The file was written, but mDNSResponder did not confirm within 6 s.\nEngine: %@", @"ru": @"Файл записан, но mDNSResponder не подтвердил применение за 6 с.\nДвижок: %@"},
+		  @"done_wait_msg": @{@"en": @"The file was written, but mDNSResponder did not confirm within 20 s.\nEngine: %@", @"ru": @"Файл записан, но mDNSResponder не подтвердил применение за 20 с.\nДвижок: %@"},
+		  @"st_applying": @{@"en": @"> applying: restarting mDNSResponder...", @"ru": @"> применение: перезапуск mDNSResponder..."},
 		  @"done_noload_msg": @{@"en": @"The file was written, but the tweak is not loaded in mDNSResponder, so DNS stays stock. Re-jailbreak or reinstall the package.", @"ru": @"Файл записан, но твик не загружен в mDNSResponder, поэтому DNS работает штатно. Перезапустите джейл или переустановите пакет."},
 		  @"show_btn": @{@"en": @"Show compiled hosts", @"ru": @"Показать собранный hosts"},
 		  @"preset_prefix": @{@"en": @"PRESET: ", @"ru": @"ПРЕСЕТ: "},
@@ -778,36 +780,61 @@ static uint64_t EHReadEngineState(pid_t *outPid, BOOL *outAlive) {
 	__weak typeof(self) weakSelf = self;
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [weakSelf refreshEngineStatus]; });
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [weakSelf refreshEngineStatus]; });
-	if (showErrors) [self confirmApplied:enabled names:names attempt:0];
+	if (showErrors) [self confirmApplied:enabled names:names hash:EHHash16(compiled) attempt:0];
+}
+
+// Same fold of FNV-1a over the file bytes as the hook publishes in bits 48-63.
+static uint16_t EHHash16(NSString *compiled) {
+	NSData *d = [compiled dataUsingEncoding:NSUTF8StringEncoding];
+	const uint8_t *p = d.bytes;
+	uint32_t h = 2166136261u;
+	for (NSUInteger i = 0; i < d.length; i++) { h ^= p[i]; h *= 16777619u; }
+	return (uint16_t)((h >> 16) ^ h);
+}
+
+// mDNSResponder is launched on demand; opening a dns_sd connection starts it.
+static void EHWakeResponder(void) {
+	dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+		DNSServiceRef ref = NULL;
+		if (DNSServiceCreateConnection(&ref) == kDNSServiceErr_NoError && ref) DNSServiceRefDeallocate(ref);
+	});
 }
 
 // Polls the state word published by the hook until mDNSResponder reports the
-// requested mode, then tells the user what actually happened.
-- (void)confirmApplied:(BOOL)enabled names:(NSUInteger)names attempt:(int)attempt {
+// requested mode (and, when enabled, has loaded exactly this file), then tells
+// the user what actually happened.
+- (void)confirmApplied:(BOOL)enabled names:(NSUInteger)names hash:(uint16_t)hash attempt:(int)attempt {
 	pid_t pid = 0;
 	BOOL alive = NO;
 	uint64_t state = EHReadEngineState(&pid, &alive);
 	BOOL loaded = alive && (state & EHLoaded);
 	BOOL settled = loaded && !(state & EHRestarting);
-	if (settled && enabled && (state & EHEngineOn)) {
+	if (settled && enabled && (state & EHEngineOn) && (uint16_t)(state >> 48) == hash) {
 		[self refreshEngineStatus];
+		self.statusLabel.text = [NSString stringWithFormat:EHL(@"st_applied"), (unsigned long)names];
 		[self alert:EHL(@"done_on_title") message:[NSString stringWithFormat:EHL(@"done_on_msg"), (unsigned long)names, pid]];
 		return;
 	}
 	if (settled && !enabled && !(state & EHEngineOn) && (state & (EHDisabled | EHNoFile))) {
 		[self refreshEngineStatus];
+		self.statusLabel.text = EHL(@"st_disabled");
 		[self alert:EHL(@"done_off_title") message:[NSString stringWithFormat:EHL(@"done_off_msg"), pid]];
 		return;
 	}
-	if (attempt >= 20) {
+	if (attempt >= 66) {
 		[self refreshEngineStatus];
 		if (!loaded) [self alert:EHL(@"done_wait_title") message:EHL(@"done_noload_msg")];
 		else [self alert:EHL(@"done_wait_title") message:[NSString stringWithFormat:EHL(@"done_wait_msg"), self.engineLabel.text ?: @"?"]];
 		return;
 	}
+	if (!alive || (state & EHRestarting)) {
+		self.statusLabel.text = EHL(@"st_applying");
+		[self refreshEngineStatus];
+	}
+	if (!alive && attempt % 3 == 0) EHWakeResponder();
 	__weak typeof(self) weakSelf = self;
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(300 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-		[weakSelf confirmApplied:enabled names:names attempt:attempt + 1];
+		[weakSelf confirmApplied:enabled names:names hash:hash attempt:attempt + 1];
 	});
 }
 

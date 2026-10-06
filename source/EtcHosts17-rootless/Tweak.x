@@ -10,14 +10,17 @@
 // Behaviour by compiled-file state (written by the Settings pane):
 //   enabled  - read-only open()/fopen() of /etc/hosts are redirected to the
 //              compiled file and mDNSResponder's own locked entry point
-//              mDNSMacOSXUpdateEtcHosts() is called once. From then on the
-//              daemon watches the file and reloads it on every atomic replace.
+//              mDNSMacOSXUpdateEtcHosts() is called once, for the initial
+//              load of the file.
 //   disabled / missing - nothing is hooked and the engine is never started:
 //              mDNSResponder runs exactly as stock with this dylib dormant.
-// Switching from enabled to disabled while the engine runs makes
-// mDNSResponder exit normally (SIGTERM, its own clean shutdown); launchd starts
-// it again at once and the new instance stays dormant. The engine cannot be
-// unregistered any other way.
+// Any change while the engine runs (new entries or disabling) makes
+// mDNSResponder exit normally (SIGTERM, its own clean shutdown). launchd
+// starts it again on the next DNS request and the new instance does a fresh
+// initial load (or stays dormant). The engine's incremental reload is not
+// relied upon: on iOS 17 it can drop a re-added entry (A -> B -> A loses A once
+// the name was cached from unicast DNS), and it cannot unregister itself.
+// The restart also flushes the DNS cache, like re-reading hosts on a PC.
 //
 // The internal-build flag is not touched. Nothing is written to system
 // configuration. Without this dylib mDNSResponder behaves exactly as stock.
@@ -30,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <notify.h>
 #include <os/log.h>
@@ -55,8 +59,11 @@
 //   bit 5  restarting mDNSResponder to return to stock
 //   bits 8-15 errno of the last failed compiled open
 //   bits 16-47 mDNSResponder pid
+//   bits 48-63 16-bit FNV-1a fold of the compiled file the engine loaded
 enum { EHLoaded = 1, EHEngineOn = 2, EHNoFile = 4, EHNoSymbol = 8, EHDisabled = 16, EHRestarting = 32 };
 enum { EHFileMissing = 0, EHFileDisabled = 1, EHFileEnabled = 2 };
+#define EH_MAX_FILE (4u << 20)
+#define EH_MIN_UPTIME_NS (11ull * NSEC_PER_SEC)   // launchd throttles respawn of jobs that ran <10 s
 
 static os_log_t gLog;
 static int gStateToken = -1;
@@ -64,12 +71,17 @@ static uint64_t gFlags = 0;
 static int gLastErr = 0;
 static int gHooksInstalled = 0;         // main queue only
 static int gEngineStarted = 0;          // main queue only
+static int gRestartQueued = 0;          // main queue only
+static uint16_t gLoadedHash = 0;
+static uint32_t gLoadedFull = 0;
+static size_t gLoadedLen = 0;
+static uint64_t gStartNs = 0;
 typedef void (*EHUpdateFn)(void);
 static EHUpdateFn gUpdateEtcHosts = NULL;
 
 static void EHPublish(void) {
 	if (gStateToken < 0) return;
-	uint64_t v = gFlags | ((uint64_t)(gLastErr & 0xff) << 8) | ((uint64_t)(uint32_t)getpid() << 16);
+	uint64_t v = gFlags | ((uint64_t)(gLastErr & 0xff) << 8) | ((uint64_t)(uint32_t)getpid() << 16) | ((uint64_t)gLoadedHash << 48);
 	notify_set_state(gStateToken, v);
 	notify_post(EH_STATE);
 }
@@ -78,17 +90,42 @@ static int EHIsHostsPath(const char *path) {
 	return path && (strcmp(path, "/etc/hosts") == 0 || strcmp(path, "/private/etc/hosts") == 0);
 }
 
-// Reads the head of the compiled file directly (not through /etc/hosts, so the
-// hooks are irrelevant here).
-static int EHCompiledFileState(void) {
+static uint32_t EHHash32(const char *p, size_t n) {
+	uint32_t h = 2166136261u;
+	for (size_t i = 0; i < n; i++) { h ^= (uint8_t)p[i]; h *= 16777619u; }
+	return h;
+}
+
+// Reads the compiled file directly (not through /etc/hosts, so the hooks are
+// irrelevant here) and reports its state plus a content hash.
+static int EHCompiledFileState(uint32_t *outHash, size_t *outLen) {
 	int fd = open(EH_COMPILED, O_RDONLY | O_CLOEXEC);
 	if (fd < 0) { gLastErr = errno; return EHFileMissing; }
-	char buf[4096];
-	ssize_t n = read(fd, buf, sizeof(buf) - 1);
+	size_t cap = 64 * 1024, len = 0;
+	char *buf = malloc(cap + 1);
+	if (!buf) { close(fd); gLastErr = ENOMEM; return EHFileMissing; }
+	for (;;) {
+		if (len == cap) {
+			if (cap >= EH_MAX_FILE) break;
+			char *nb = realloc(buf, cap * 2 + 1);
+			if (!nb) break;
+			buf = nb; cap *= 2;
+		}
+		ssize_t n = read(fd, buf + len, cap - len);
+		if (n < 0) { if (errno == EINTR) continue; gLastErr = errno; close(fd); free(buf); return EHFileMissing; }
+		if (n == 0) break;
+		len += (size_t)n;
+	}
 	close(fd);
-	if (n < 0) { gLastErr = errno; return EHFileMissing; }
-	buf[n] = 0;
-	return strstr(buf, EH_DISABLED_MARK) ? EHFileDisabled : EHFileEnabled;
+	buf[len] = 0;
+	if (outHash) *outHash = EHHash32(buf, len);
+	if (outLen) *outLen = len;
+	size_t head = len < 4096 ? len : 4096;
+	char saved = buf[head]; buf[head] = 0;
+	int st = strstr(buf, EH_DISABLED_MARK) ? EHFileDisabled : EHFileEnabled;
+	buf[head] = saved;
+	free(buf);
+	return st;
 }
 
 // Look up a (possibly local) symbol in the main executable's LC_SYMTAB. The
@@ -144,39 +181,56 @@ static void *EHFindLocalSymbol(const char *wanted) {
 	return %orig(path, fmode);
 }
 
+// Main queue only. Exits cleanly so launchd starts a fresh instance. Waits
+// until the process is old enough for launchd to respawn it without throttling.
+static void EHRestart(const char *why) {
+	gFlags |= EHRestarting;
+	EHPublish();
+	if (gRestartQueued) return;
+	gRestartQueued = 1;
+	uint64_t up = clock_gettime_nsec_np(CLOCK_MONOTONIC) - gStartNs;
+	uint64_t delay = 300 * NSEC_PER_MSEC;
+	if (up + delay < EH_MIN_UPTIME_NS) delay = EH_MIN_UPTIME_NS - up;
+	os_log(gLog, "%{public}s; restarting mDNSResponder in %llu ms", why, (unsigned long long)(delay / NSEC_PER_MSEC));
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)delay), dispatch_get_main_queue(), ^{
+		kill(getpid(), SIGTERM);
+	});
+}
+
 // Main queue only. Brings mDNSResponder to the state the compiled file asks for.
 static void EHSync(void) {
-	if (!gUpdateEtcHosts) return;
-	int st = EHCompiledFileState();
-	gFlags &= ~(uint64_t)(EHNoFile | EHDisabled);
+	if (!gUpdateEtcHosts || gRestartQueued) return;
+	uint32_t hash = 0;
+	size_t len = 0;
+	int st = EHCompiledFileState(&hash, &len);
 
 	if (st == EHFileEnabled) {
-		if (!gHooksInstalled) {
-			gHooksInstalled = 1;
-			%init;
-		}
 		if (!gEngineStarted) {
+			if (!gHooksInstalled) {
+				gHooksInstalled = 1;
+				%init;
+			}
 			gEngineStarted = 1;
+			gLoadedFull = hash;
+			gLoadedLen = len;
+			gLoadedHash = (uint16_t)((hash >> 16) ^ hash);
 			os_log(gLog, "starting mDNSResponder /etc/hosts engine on compiled file");
 			gUpdateEtcHosts();
+			gFlags = (gFlags & ~(uint64_t)(EHNoFile | EHDisabled)) | EHEngineOn;
+			EHPublish();
+			return;
 		}
-		gFlags |= EHEngineOn;
-		EHPublish();
+		if (hash == gLoadedFull && len == gLoadedLen) { EHPublish(); return; }
+		EHRestart("hosts entries changed");
 		return;
 	}
 
-	gFlags |= (st == EHFileMissing) ? EHNoFile : EHDisabled;
 	if (gEngineStarted) {
-		// The engine holds its records until the process ends. Exit cleanly;
-		// launchd restarts mDNSResponder and the new instance stays dormant.
-		gFlags = (gFlags & ~(uint64_t)EHEngineOn) | EHRestarting;
-		EHPublish();
-		os_log(gLog, "hosts disabled; restarting mDNSResponder to return to stock");
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(300 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-			kill(getpid(), SIGTERM);
-		});
+		// The engine holds its records until the process ends.
+		EHRestart("hosts disabled");
 		return;
 	}
+	gFlags = (gFlags & ~(uint64_t)(EHNoFile | EHDisabled | EHEngineOn)) | ((st == EHFileMissing) ? EHNoFile : EHDisabled);
 	EHPublish();
 }
 
@@ -185,6 +239,7 @@ static void EHSync(void) {
 	notify_register_check(EH_STATE, &gStateToken);
 	const char *exe = getprogname();
 	if (!exe || strcmp(exe, "mDNSResponder") != 0) return;
+	gStartNs = clock_gettime_nsec_np(CLOCK_MONOTONIC);
 	gFlags = EHLoaded;
 
 	void *fn = EHFindLocalSymbol("_mDNSMacOSXUpdateEtcHosts");
@@ -211,4 +266,3 @@ static void EHSync(void) {
 		EHSync();
 	});
 }
-
