@@ -5,6 +5,7 @@
 #import <dlfcn.h>
 #import <mach-o/loader.h>
 #import <stdatomic.h>
+#import <stdio.h>
 #import "BlockRepair.h"
 
 // UUID of the inspected Adytum 1.1 arm64e slice. Unknown future builds are skipped.
@@ -29,10 +30,15 @@ static bool AFAdytumInvokeAllowed(void *invoke) {
     return match;
 }
 static atomic_uint AFRepairs;
+static FILE *AFDiagnostics;
+static void AFRecord(NSString *message) {
+    NSLog(@"[AdytumFix] %@",message);
+    if (AFDiagnostics) { fprintf(AFDiagnostics,"%s\n",message.UTF8String); fflush(AFDiagnostics); }
+}
 static void AFRepair(void *block) {
     if (AFRepairBlock(block,AFAdytumInvokeAllowed)) {
         unsigned count = atomic_fetch_add(&AFRepairs,1)+1;
-        if (count<=8) NSLog(@"[AdytumFix] repaired Adytum stack block (%u)",count);
+        if (count<=8) AFRecord([NSString stringWithFormat:@"repaired Adytum stack block (%u)",count]);
     }
 }
 static id (*AFActionOriginal)(id,SEL,id,id,id,void *);
@@ -62,10 +68,11 @@ __attribute__((constructor)) static void AFStart(void) {
     @autoreleasepool {
         if (![NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]) return;
 #if __has_feature(ptrauth_calls)
+        AFDiagnostics = fopen("/var/mobile/Library/Logs/AdytumFix.log","w");
         bool action = AFHook(UIAction.class,"actionWithTitle:image:identifier:handler:",(IMP)AFAction,(IMP *)&AFActionOriginal,6);
         bool spring = AFHook(UIView.class,"animateWithDuration:delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:",(IMP)AFSpring,(IMP *)&AFSpringOriginal,9);
         bool animation = AFHook(UIView.class,"animateWithDuration:delay:options:animations:completion:",(IMP)AFAnimation,(IMP *)&AFAnimationOriginal,7);
-        NSLog(@"[AdytumFix] ready: UIAction=%d spring=%d animation=%d; Adytum 1.1 only",action,spring,animation);
+        AFRecord([NSString stringWithFormat:@"ready: UIAction=%d spring=%d animation=%d; Adytum 1.1 only",action,spring,animation]);
 #else
         NSLog(@"[AdytumFix] arm64 process: no repair needed");
 #endif

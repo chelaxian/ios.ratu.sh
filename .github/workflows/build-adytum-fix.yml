@@ -38,7 +38,7 @@ jobs:
           test "$(xxd -p -s 8 -l 4 artifacts/AdytumBlockCheck)" = 02000080
           otool -L "$dylib"
           test -e "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AdytumFix.plist"
-          sha256sum artifacts/*
+          shasum -a 256 artifacts/*
       - uses: actions/upload-artifact@v4
         with:
           name: adytum-fix-rootless
