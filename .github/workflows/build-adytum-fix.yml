@@ -26,8 +26,8 @@ jobs:
           mkdir artifacts
           cp packages/*.deb artifacts/
           sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
-          xcrun --sdk iphoneos clang -arch arm64e -miphoneos-version-min=17.0 -isysroot "$sdk" -fno-objc-arc -fblocks -framework Foundation -framework UIKit tests/DeviceCheck.m -o artifacts/AdytumBlockCheck
-          ldid -S artifacts/AdytumBlockCheck
+          xcrun --sdk iphoneos clang -arch arm64e -miphoneos-version-min=17.0 -isysroot "$sdk" -dynamiclib -fno-objc-arc -fblocks -framework Foundation -framework UIKit tests/CheckHost.m -o artifacts/AdytumFixCheck.dylib
+          ldid -S artifacts/AdytumFixCheck.dylib
           deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
           test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
           dpkg-deb -x "$deb" "$tmp"
@@ -35,7 +35,7 @@ jobs:
           lipo "$dylib" -verify_arch arm64 arm64e
           lipo -thin arm64e "$dylib" -output "$tmp/arm64e"
           test "$(xxd -p -s 8 -l 4 "$tmp/arm64e")" = 02000080
-          test "$(xxd -p -s 8 -l 4 artifacts/AdytumBlockCheck)" = 02000080
+          test "$(xxd -p -s 8 -l 4 artifacts/AdytumFixCheck.dylib)" = 02000080
           otool -L "$dylib"
           test -e "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/AdytumFix.plist"
           shasum -a 256 artifacts/*
