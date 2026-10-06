@@ -1,0 +1,46 @@
+name: Build VPNAppBridge rootless
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/VPNAppBridge-rootless/**'
+      - '.github/workflows/build-vpnappbridge-rootless.yml'
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: source/VPNAppBridge-rootless
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/sdks
+          cd /tmp/sdks && git sparse-checkout set --no-cone iPhoneOS16.5.sdk && git checkout --quiet
+          mkdir -p "$HOME/theos/sdks" && cp -a /tmp/sdks/iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Build rootless package and inspect it
+        run: |
+          cd source/VPNAppBridge-rootless
+          cp control.rootless control
+          chmod 755 layout/DEBIAN/postinst layout/DEBIAN/postrm
+          THEOS="$HOME/theos" THEOS_PLATFORM_SDK_ROOT="$HOME/theos/sdks/iPhoneOS16.5.sdk" THEOS_PACKAGE_SCHEME=rootless make clean package FINALPACKAGE=1
+          deb="$(echo packages/*.deb)"; tmp="$(mktemp -d)"
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          dpkg-deb -x "$deb" "$tmp"
+          # every payload file must live under /var/jb
+          test -z "$(cd "$tmp" && find . -mindepth 1 -maxdepth 1 ! -name var)"
+          if find "$tmp" -name '*.roothidepatch' | grep .; then exit 1; fi
+          for binary in "$tmp/var/jb/Library/MobileSubstrate/DynamicLibraries/RatuVPNBridge.dylib" "$tmp/var/jb/usr/bin/ratuvpnd" "$tmp/var/jb/usr/bin/ratuvpnctl"; do
+            lipo "$binary" -verify_arch arm64 arm64e
+            lipo -thin arm64e "$binary" -output "$tmp/check.arm64e"
+            test "$(xxd -p -s 8 -l 4 "$tmp/check.arm64e")" = 02000080
+            if otool -L "$binary" | grep -E 'libroothide'; then exit 1; fi
+          done
+          dpkg-deb -I "$deb"
+          mkdir artifacts && cp "$deb" artifacts/com.ratush.vpnappbridge_1.0.7_iphoneos-arm64.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vpnappbridge-rootless-deb
+          path: source/VPNAppBridge-rootless/artifacts/*.deb
+          if-no-files-found: error

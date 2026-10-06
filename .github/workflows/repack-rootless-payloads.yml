@@ -1,0 +1,35 @@
+name: Repack payload-only packages to rootless layout
+# AppData, AlbumManager, AutoVPN and Cr4shed were published as "iphoneos-arm64"
+# debs whose payload sat at /Library, /usr, /Applications instead of /var/jb.
+# Dopamine's dpkg would write into the read-only rootfs. This job moves the
+# payload under /var/jb without touching the signed Mach-O files.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/rootless-repack.sh'
+      - '.github/workflows/repack-rootless-payloads.yml'
+jobs:
+  repack:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts
+            debs/com.netskao.appdata_2.6.9_iphoneos-arm64.deb
+            debs/com.noisyflake.albummanager_1.0.2_iphoneos-arm64.deb
+            debs/com.snail.autovpn.global_1.0.8_iphoneos-arm64.deb
+            debs/xyz.cypwn.cr4shed_4.3.1-2+device1_iphoneos-arm64.deb
+          sparse-checkout-cone-mode: false
+      - run: brew install dpkg
+      - name: Repack and verify
+        run: |
+          mkdir out
+          for deb in debs/*.deb; do bash scripts/rootless-repack.sh "$deb" out; done
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rootless-repacked-debs
+          path: out/*.deb
+          if-no-files-found: error
