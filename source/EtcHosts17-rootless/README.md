@@ -32,6 +32,16 @@ other family cannot leak through.
 
 ## Safety
 
+## Apps with their own network policy
+
+Per-app VPN rules, App Split VPN and MDM policies make mDNSResponder scope an
+app's DNS questions to one interface (en0, utun...). Stock mDNSResponder then
+ignores /etc/hosts records for that app. While the engine runs, EtcHosts17
+lets records loaded from the hosts file answer such scoped questions as well;
+the app's traffic routing is untouched. The needed field offsets are read from
+the running mDNSResponder; if they cannot be verified, this extension stays off
+and only unscoped questions use the hosts entries.
+
 - No daemons, no DNS profiles, no SCDynamicStore keys, no custom DNS servers.
 - The only file written is the compiled hosts file under `/var/jb`.
 - Tweak removed, injection disabled, jailbreak gone, or unknown mDNSResponder

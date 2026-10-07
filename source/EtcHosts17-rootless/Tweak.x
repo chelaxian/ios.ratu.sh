@@ -22,6 +22,15 @@
 // the name was cached from unicast DNS), and it cannot unregister itself.
 // The restart also flushes the DNS cache, like re-reading hosts on a PC.
 //
+// Scoped questions: when a NECP policy (per-app VPN, App Split VPN, MDM)
+// scopes an app's DNS to one interface, mDNSPlatformGetDNSRoutePolicy() stores
+// that interface in q->InterfaceID and LocalOnlyRecordAnswersQuestion() then
+// rejects every /etc/hosts record (they are registered on LocalOnly). While the
+// engine runs, that function is wrapped: a record owned by the hosts engine
+// (RecordCallback == FreeEtcHosts) that was rejected for a scoped question is
+// re-checked as if the question were unscoped. Field offsets are read from the
+// instructions of this very build; on any mismatch the wrapper is not installed.
+//
 // The internal-build flag is not touched. Nothing is written to system
 // configuration. Without this dylib mDNSResponder behaves exactly as stock.
 
@@ -41,6 +50,7 @@
 #include <mach-o/dyld.h>
 #include <mach-o/loader.h>
 #include <mach-o/nlist.h>
+#include <substrate.h>
 #if __has_feature(ptrauth_calls)
 #include <ptrauth.h>
 #endif
@@ -57,10 +67,11 @@
 //   bit 3  engine entry point not found on this build (stock)
 //   bit 4  disabled in Settings (dormant, stock)
 //   bit 5  restarting mDNSResponder to return to stock
+//   bit 6  hosts entries also answer interface-scoped (per-app policy) questions
 //   bits 8-15 errno of the last failed compiled open
 //   bits 16-47 mDNSResponder pid
 //   bits 48-63 16-bit FNV-1a fold of the compiled file the engine loaded
-enum { EHLoaded = 1, EHEngineOn = 2, EHNoFile = 4, EHNoSymbol = 8, EHDisabled = 16, EHRestarting = 32 };
+enum { EHLoaded = 1, EHEngineOn = 2, EHNoFile = 4, EHNoSymbol = 8, EHDisabled = 16, EHRestarting = 32, EHScoped = 64 };
 enum { EHFileMissing = 0, EHFileDisabled = 1, EHFileEnabled = 2 };
 #define EH_MAX_FILE (4u << 20)
 #define EH_MIN_UPTIME_NS (11ull * NSEC_PER_SEC)   // launchd throttles respawn of jobs that ran <10 s
@@ -181,6 +192,93 @@ static void *EHFindLocalSymbol(const char *wanted) {
 	return %orig(path, fmode);
 }
 
+#pragma mark Scoped questions
+
+static uintptr_t EHStrip(const void *p) {
+#if __has_feature(ptrauth_calls)
+	return (uintptr_t)ptrauth_strip(p, ptrauth_key_asia);
+#else
+	return (uintptr_t)p;
+#endif
+}
+
+static size_t gQIfOff = 0, gRRIfOff = 0, gCbOff = 0;
+static uintptr_t gFreeEtcHosts = 0;
+typedef unsigned char (*EHLORAQFn)(void *ar, void *q);
+static EHLORAQFn gOrigLORAQ = NULL;
+static void *gLORAQ = NULL;
+
+static unsigned char EHLocalOnlyRecordAnswersQuestion(void *ar, void *q) {
+	unsigned char r = gOrigLORAQ(ar, q);
+	if (r || !ar || !q) return r;
+	intptr_t *qif = (intptr_t *)((char *)q + gQIfOff);
+	intptr_t saved = *qif;
+	// Only real interface scopes (positive index). Any (0), LocalOnly, P2P,
+	// BLE and the internal marks are negative or zero and stay untouched.
+	if (saved <= 0) return r;
+	if (EHStrip(*(void **)((char *)ar + gCbOff)) != gFreeEtcHosts) return r;
+	*qif = 0;
+	r = gOrigLORAQ(ar, q);
+	*qif = saved;
+	return r;
+}
+
+// Reads the q->InterfaceID / rr->InterfaceID offsets from the function's own
+// RRAny/interface check and RecordCallback from EtcHostsDeleteOldEntries'
+// "rr->RecordCallback == FreeEtcHosts" comparison. All must match.
+static int EHPrepareScoped(void) {
+	void *lor = EHFindLocalSymbol("_LocalOnlyRecordAnswersQuestion");
+	void *freeEH = EHFindLocalSymbol("_FreeEtcHosts");
+	void *del = EHFindLocalSymbol("_EtcHostsDeleteOldEntries");
+	if (!lor || !freeEH || !del) return 0;
+	const uint32_t *ins = (const uint32_t *)EHStrip(lor);
+	long rrIf = -1, qIf = -1;
+	unsigned arReg = 99, qReg = 99;
+	// prologue: mov x19, x0 ... mov x20, x1 (registers vary; find the moves)
+	for (int i = 0; i < 24; i++) {
+		uint32_t w = ins[i];
+		if ((w & 0xFFE0FFE0u) == 0xAA0003E0u) {          // mov xd, xm
+			unsigned rm = (w >> 16) & 31, rd = w & 31;
+			if (rm == 0 && arReg == 99) arReg = rd;
+			if (rm == 1 && qReg == 99) qReg = rd;
+		}
+	}
+	if (arReg == 99 || qReg == 99) return 0;
+	// "if (rr->InterfaceID && q->InterfaceID != mDNSInterface_LocalOnly ...":
+	//   ldr xA, [ar, #rrIf] ; cbz xA      and   ldr xB, [q, #qIf] ; cmn xB, #2
+	for (int i = 0; i < 40 && (rrIf < 0 || qIf < 0); i++) {
+		uint32_t w = ins[i], nx = ins[i + 1];
+		if ((w & 0xFFC00000u) != 0xF9400000u) continue;
+		unsigned rn = (w >> 5) & 31, rt = w & 31;
+		long off = (long)(((w >> 10) & 0xFFF) * 8);
+		if (rn == arReg && rrIf < 0 && (nx & 0xFF00001Fu) == (0xB4000000u | rt)) rrIf = off;
+		else if (rn == qReg && qIf < 0 && (nx & 0xFFFFFFFFu) == (0xB100081Fu | (rt << 5))) qIf = off;
+	}
+	if (rrIf < 0 || qIf < 0) return 0;
+	uintptr_t freeAddr = EHStrip(freeEH);
+	const uint32_t *d = (const uint32_t *)EHStrip(del);
+	long cb = -1;
+	for (int i = 2; i < 512 && cb < 0; i++) {
+		uint32_t w = d[i];
+		if ((w & 0x9F000000u) != 0x10000000u) continue;  // ADR
+		int64_t imm = ((int64_t)((w >> 5) & 0x7FFFF) << 2) | ((w >> 29) & 3);
+		if (imm & (1 << 20)) imm -= (1 << 21);
+		if ((uintptr_t)((intptr_t)&d[i] + imm) != freeAddr) continue;
+		for (int k = 1; k <= 3 && cb < 0; k++) {
+			uint32_t p = d[i - k];
+			if ((p & 0xFFC00000u) == 0xF9400000u) {
+				long off = (long)(((p >> 10) & 0xFFF) * 8);
+				if (off >= 0x40 && off <= 0x100) cb = off;
+			}
+		}
+	}
+	if (cb < 0) return 0;
+	gRRIfOff = (size_t)rrIf; gQIfOff = (size_t)qIf; gCbOff = (size_t)cb; gFreeEtcHosts = freeAddr;
+	gLORAQ = lor;
+	os_log(gLog, "scoped hosts answers: rr.if=+0x%zx q.if=+0x%zx cb=+0x%zx", gRRIfOff, gQIfOff, gCbOff);
+	return 1;
+}
+
 // Main queue only. Exits cleanly so launchd starts a fresh instance. Waits
 // until the process is old enough for launchd to respawn it without throttling.
 static void EHRestart(const char *why) {
@@ -209,6 +307,10 @@ static void EHSync(void) {
 			if (!gHooksInstalled) {
 				gHooksInstalled = 1;
 				%init;
+				if (gLORAQ) {
+					MSHookFunction(gLORAQ, (void *)EHLocalOnlyRecordAnswersQuestion, (void **)&gOrigLORAQ);
+					if (gOrigLORAQ) gFlags |= EHScoped;
+				}
 			}
 			gEngineStarted = 1;
 			gLoadedFull = hash;
@@ -253,6 +355,14 @@ static void EHSync(void) {
 	fn = ptrauth_sign_unauthenticated(ptrauth_strip(fn, ptrauth_key_asia), ptrauth_key_function_pointer, 0);
 #endif
 	gUpdateEtcHosts = (EHUpdateFn)fn;
+	if (EHPrepareScoped()) {
+#if __has_feature(ptrauth_calls)
+		gLORAQ = ptrauth_sign_unauthenticated(ptrauth_strip(gLORAQ, ptrauth_key_asia), ptrauth_key_function_pointer, 0);
+#endif
+	} else {
+		gLORAQ = NULL;
+		os_log(gLog, "scoped hosts answers unavailable on this build; unscoped questions only");
+	}
 	EHPublish();
 
 	// main() runs CFRunLoopRun() on the main thread after mDNS_Init, so this
