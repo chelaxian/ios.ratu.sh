@@ -1301,6 +1301,23 @@ Description: Memory-manager daemon for Dopamine rootless. Removes SpringBoard's 
 Author: ratush
 Name: JetsamFix
 
+Package: com.ratush.ratutether
+Version: 0.1.0
+Architecture: iphoneos-arm64
+Maintainer: Ratush
+Installed-Size: 440
+Depends: firmware (>= 17.0), ellekit, preferenceloader
+Conflicts: org.toilettrauma.vpnshare
+Filename: debs/com.ratush.ratutether_0.1.0~alpha1_iphoneos-arm64.deb
+Size: 21528
+MD5sum: f998dceb5a379616bf602c13c91b016c
+SHA1: 7f2ba63d6914862a986193fe76c13ac997ff1bfc
+SHA256: 9383dd54aba907602195b7c9c442dc744f6a0a8a93eb8e610bdb5111fc8e08d0
+Section: Networking
+Description: Experimental iOS 17 VPN hotspot routing; disabled by default. Live behavior NOT TESTED.
+Author: Ratush
+Name: Ratu Tether
+
 Package: com.ratush.safeguard
 Version: 1.2.1
 Architecture: iphoneos-arm64e
