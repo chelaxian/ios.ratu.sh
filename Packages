@@ -1302,17 +1302,17 @@ Author: ratush
 Name: JetsamFix
 
 Package: com.ratush.ratutether
-Version: 0.3.6
+Version: 0.3.7
 Architecture: iphoneos-arm64
 Maintainer: Ratush
 Installed-Size: 608
 Depends: firmware (>= 15.0), firmware (<= 26.0.1), ellekit, preferenceloader, network-cmds, libcurl4 (>= 8.7.1)
 Conflicts: org.toilettrauma.vpnshare
-Filename: debs/com.ratush.ratutether_0.3.6~alpha1_iphoneos-arm64.deb
-Size: 86548
-MD5sum: 1257da184464033bfbaf39c4b35805a4
-SHA1: c44ce84abf325dd6ce4f469b97f950159eff4af1
-SHA256: 6958b088c20cc860291ea64abc85f8ddbc942c5a1669b30898393a39baf2cf0d
+Filename: debs/com.ratush.ratutether_0.3.7~alpha1_iphoneos-arm64.deb
+Size: 86808
+MD5sum: 05a3a2d0b8bcd46162e64cbff8477fae
+SHA1: 50930b0dd042785005cc7e81f996ad861c27843d
+SHA256: bd091ef5987d6967bbb919e73d394a34f572d97637f0abb5e7a7ac4645a96354
 Section: Networking
 Description: Experimental rootless VPN and direct hotspot routing with optional kill-switch, DNS and TTL controls.
 Author: Ratush
