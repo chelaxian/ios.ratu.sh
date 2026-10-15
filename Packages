@@ -1302,19 +1302,19 @@ Author: ratush
 Name: JetsamFix
 
 Package: com.ratush.ratutether
-Version: 0.3.3
+Version: 0.3.4
 Architecture: iphoneos-arm64
 Maintainer: Ratush
-Installed-Size: 592
+Installed-Size: 596
 Depends: firmware (>= 17.0), firmware (<< 17.1), ellekit, preferenceloader, network-cmds, libcurl4 (>= 8.7.1)
 Conflicts: org.toilettrauma.vpnshare
-Filename: debs/com.ratush.ratutether_0.3.3~alpha1_iphoneos-arm64.deb
-Size: 81176
-MD5sum: a20f4f64f798b5f28b513a60ded3d6b3
-SHA1: cef0005af9b72b952b10e43f828e64252826dbdb
-SHA256: ac43bc1c83f53f13fa118aa77a2e8acf65b66d4970929729d906b5653533539c
+Filename: debs/com.ratush.ratutether_0.3.4~alpha1_iphoneos-arm64.deb
+Size: 83416
+MD5sum: eb99646c93bbfac96161a859e8f8e7f0
+SHA1: cef0a718542dbab091737c3130501d5dae5323cc
+SHA256: ded5dc73d8be493e4191b3efcbdf51309656ac976dcdd3328f6d9a6dfd6e0047
 Section: Networking
-Description: Experimental iOS 17 VPN hotspot routing; disabled by default. Live behavior NOT TESTED.
+Description: Experimental iOS 17 VPN hotspot routing with gateway DNS and TTL controls.
 Author: Ratush
 Name: Ratu Tether
 
