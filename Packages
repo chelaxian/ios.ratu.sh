@@ -357,22 +357,6 @@ Description: Live Home Screen folder selection and verified icon moves for AddTo
 Author: chelaxian
 Name: AddToFolder Fix
 
-Package: com.ratush.adytumfix
-Version: 1.0.0
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 168
-Depends: firmware (>= 17.0), ellekit, com.kernelrw.adytum (= 1.1)
-Filename: debs/com.ratush.adytumfix_1.0.0_iphoneos-arm64.deb
-Size: 5054
-MD5sum: 39686a9762f82cce8d470a4ab5c50d59
-SHA1: 8a46afa12cdabbd1932dab653a13754e98ebfa38
-SHA256: e1229079f975c4b9876b6475c83c3e0db1cd9e353d16a6ce894a170144a9b840
-Section: Tweaks
-Description: Repairs Adytum 1.1 arm64e stack blocks in icon menus and UIKit animations on iOS 17.
-Author: chelaxian
-Name: Adytum Fix
-
 Package: com.ratush.appabetical
 Version: 1.0.16
 Architecture: iphoneos-arm64e
@@ -1096,38 +1080,6 @@ Description: Real /etc/hosts for rootless jailbreaks (Dopamine). Switches on mDN
 Author: ratush
 Icon: https://ios.ratu.sh/icons/com.ratush.etchosts17.png
 Name: /etc/hosts
-
-Package: com.ratush.iggridfeed
-Version: 0.2.0
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 88
-Depends: firmware (>= 15.0), ellekit
-Filename: debs/com.ratush.iggridfeed_0.2.0_iphoneos-arm64e.deb
-Size: 4334
-MD5sum: ec1daf58f763cd38780e1d8204a782a0
-SHA1: f559222776615b8196eb0c702055902f75778542
-SHA256: a9d5bc90777e10673543fd95d5a69e2cff2e950a040da1d85c91f28cb6d8537d
-Section: Tweaks
-Description: Forces Instagram Home Feed to open in the compact 3-column Rocket grid layout, matching the Profile-style grid.
-Author: chelaxian
-Name: Instagram 3x3 Grid Feed
-
-Package: com.ratush.iggridfeed
-Version: 0.5.2
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 88
-Depends: firmware (>= 15.0), ellekit
-Filename: debs/com.ratush.iggridfeed_0.5.2_iphoneos-arm64.deb
-Size: 7142
-MD5sum: 234f5c1bbf90b8c150423169f4a2329c
-SHA1: 0590c1a0ab3098bfdeb7d7c03f5f7c1085cc0548
-SHA256: 85e4d5717f8ffbb8b92ea6cae8a77b2afc5f1a41bfabe4dbb52b2b9657347188
-Section: Tweaks
-Description: Turns the Instagram Home/Feed tab into a Profile-style 3x3 thumbnail grid.
-Author: chelaxian
-Name: Instagram 3x3 Grid Feed
 
 Package: com.ratush.igotblind17
 Version: 0.1.1
