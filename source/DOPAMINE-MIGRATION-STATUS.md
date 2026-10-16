@@ -4,7 +4,6 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 
 ## Published
 
-- `com.ratush.iggridfeed` `0.5.2`
 - `com.ratush.appabetical` `1.0.16`
 - `com.ratush.ccgapcloser` `0.4.7`
 - `com.ratush.jetsamfix` `1.0.1`
