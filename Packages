@@ -1217,11 +1217,11 @@ Maintainer: Ratush
 Installed-Size: 776
 Depends: firmware (>= 15.0), firmware (<= 26.0.1), ellekit, preferenceloader, network-cmds, libcurl4 (>= 8.7.1)
 Conflicts: org.toilettrauma.vpnshare
-Filename: debs/com.ratush.ratutether_0.3.8~alpha1_iphoneos-arm64.deb
-Size: 91520
-MD5sum: de7550c65a1dbc10f1151eace71ad7e2
-SHA1: d4f3da183526d126c42507771c1950816e03ef24
-SHA256: 57e6cb177c3d0b10d7fa67b7a907aab889a0e0d39973b06f45cd38739c900f49
+Filename: debs/com.ratush.ratutether_0.3.8_iphoneos-arm64.deb
+Size: 91404
+MD5sum: b785f7f6d83c2fe32cf7f8ad24153223
+SHA1: 687afa73722246cd4912fa37dcac8eb02fe5c5a9
+SHA256: 182c4b50b5e64161235eff53ff6b64a5d50a9d87bba20c4d958576f12e30da33
 Section: Networking
 Description: Experimental rootless VPN and direct hotspot routing with optional kill-switch, DNS and TTL controls.
 Author: Ratush
