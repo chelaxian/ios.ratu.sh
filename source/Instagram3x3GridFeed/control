@@ -1,9 +1,0 @@
-Package: com.ratush.iggridfeed
-Name: Instagram 3x3 Grid Feed
-Version: 0.2.0
-Architecture: iphoneos-arm64e
-Description: Forces Instagram Home Feed to open in the compact 3-column Rocket grid layout, matching the Profile-style grid.
-Maintainer: chelaxian
-Author: chelaxian
-Section: Tweaks
-Depends: firmware (>= 15.0), ellekit
