@@ -33,9 +33,10 @@ jobs:
           export THEOS="$HOME/theos"
           export THEOS_PLATFORM_SDK_ROOT="$THEOS/sdks/iPhoneOS16.5.sdk"
           mkdir -p artifacts
+          failed=""
           for name in CCGapCloser CCOpenSSH CCVPNOnOffAuto CatMCPCC CCFRIDA; do
             cd "$GITHUB_WORKSPACE/source/$name-rootless"
-            make clean package FINALPACKAGE=1
+            make clean package FINALPACKAGE=1 || { failed="$failed $name"; continue; }
             deb=$(find packages -name '*.deb' -type f | head -1)
             test -n "$deb"
             test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
@@ -59,6 +60,7 @@ jobs:
           done
           cd "$GITHUB_WORKSPACE"
           shasum -a 256 artifacts/*.deb > artifacts/SHA256SUMS
+          if [ -n "$failed" ]; then echo "Failed: $failed"; exit 1; fi
       - uses: actions/upload-artifact@v4
         with:
           name: dopamine-cc-suite

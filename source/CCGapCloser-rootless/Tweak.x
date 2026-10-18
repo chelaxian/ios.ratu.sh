@@ -34,6 +34,7 @@ static void CCGRestore(void) {
     if (gApplying) return; gApplying=YES;
     for (UIView *view in gSaved.keyEnumerator) { NSDictionary *d=[gSaved objectForKey:view];
         view.hidden=[d[@"hidden"] boolValue];view.alpha=[d[@"alpha"] doubleValue];
+        if ([NSStringFromClass(view.class) containsString:@"STUIStatusBar_Wrapper"]) view.frame=[d[@"frame"] CGRectValue];
         if (d[@"level"]) ((UIWindow *)view).windowLevel=[d[@"level"] doubleValue];
         if (d[@"inset"]) {UIScrollView *scroll=(id)view;scroll.contentInset=[d[@"inset"] UIEdgeInsetsValue];scroll.scrollIndicatorInsets=[d[@"indicator"] UIEdgeInsetsValue];scroll.contentOffset=[d[@"offset"] CGPointValue];}
     }
@@ -180,11 +181,6 @@ static UIScrollView *CCGScrollAncestorForView(UIView *view) {
     return nil;
 }
 
-static void CCGResetModuleTransforms(NSArray<UIView *> *modules) {
-    for (UIView *module in modules) {
-        module.transform = CGAffineTransformIdentity;
-    }
-}
 
 static CGFloat CCGAbsoluteY(UIView *view, UIView *root) {
     if (!view || !root) return CGFLOAT_MAX;
@@ -229,9 +225,7 @@ static void CCGApplyStatusBarWindowPolicy(void) {
         NSString *name = NSStringFromClass(window.class);
         if ([name rangeOfString:@"SBStatusBarWindow" options:NSCaseInsensitiveSearch].location == NSNotFound) continue;
 
-        if (gOriginalStatusBarWindowLevel == CGFLOAT_MIN) {
-            gOriginalStatusBarWindowLevel = window.windowLevel;
-        }
+        CCGSave(window);
 
         // Always raise the status-bar window above CC while the tweak is on;
         // the toggle only hides the wrapper content, not the window itself.
@@ -286,9 +280,9 @@ static void CCGApplyToRootView(UIView *root) {
         CCGSave(scroll);
         UIEdgeInsets inset = scroll.contentInset;
         inset.top = desiredInsetTop;
-        scroll.contentInset = inset;
-        scroll.scrollIndicatorInsets = inset;
-        scroll.contentOffset = CGPointMake(scroll.contentOffset.x, desiredOffsetY);
+        if (!UIEdgeInsetsEqualToEdgeInsets(scroll.contentInset, inset)) scroll.contentInset = inset;
+        if (!UIEdgeInsetsEqualToEdgeInsets(scroll.scrollIndicatorInsets, inset)) scroll.scrollIndicatorInsets = inset;
+        if (fabs(scroll.contentOffset.y - desiredOffsetY) > .5) scroll.contentOffset = CGPointMake(scroll.contentOffset.x, desiredOffsetY);
     }
 
     gApplying = NO;
@@ -305,8 +299,12 @@ static void CCGApplyToAllControlCenterWindows(void) {
 
 static void CCGApplySoon(UIView *view) {
     if (!view || !CCGEnabled() || gApplying) return;
+    static char pendingKey;
+    if ([objc_getAssociatedObject(view, &pendingKey) boolValue]) return;
+    objc_setAssociatedObject(view, &pendingKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     dispatch_async(dispatch_get_main_queue(), ^{
-        CCGApplyToRootView(view);
+        objc_setAssociatedObject(view, &pendingKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        if (CCGControlCenterIsActive()) CCGApplyToRootView(view);
     });
 }
 

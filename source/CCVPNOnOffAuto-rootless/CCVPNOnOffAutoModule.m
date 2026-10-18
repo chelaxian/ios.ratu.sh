@@ -212,6 +212,9 @@ static void CCStateCallback(CFNotificationCenterRef center, void *observer,
         _longPressAt = CACurrentMediaTime();
         CCLog(@"long-press -> AUTO toggle");
         CCPost(CMD_LONG);
+    } else if (g.state == UIGestureRecognizerStateEnded || g.state == UIGestureRecognizerStateCancelled) {
+        _longPressAt = CACurrentMediaTime();
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(), ^{ self->_didLongPress = NO; });
     }
 }
 
