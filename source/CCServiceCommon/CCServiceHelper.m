@@ -13,6 +13,7 @@
 #import <unistd.h>
 #import <errno.h>
 #import <limits.h>
+#import <pwd.h>
 extern int proc_listallpids(void *, int);
 extern int proc_pidpath(int, void *, uint32_t);
 extern char **environ;
@@ -23,6 +24,7 @@ static char *safeEnv[] = {"PATH=/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin", "HOM
 static NSString *Label(void) { return @SERVICE_LABEL; }
 static NSString *JobPath(void) { return [prefix stringByAppendingFormat:@"/Library/LaunchDaemons/%@.plist", Label()]; }
 static NSString *Marker(void) { return [stateDir stringByAppendingFormat:@"/%@.off", Label()]; }
+static NSString *MobilePrefs(void) { struct passwd *user=getpwuid(501);NSString *home=user && user->pw_dir?@(user->pw_dir):@"/var/mobile";return [home stringByAppendingString:@"/Library/Preferences/com.catmcp.server.plist"]; }
 static BOOL Exists(NSString *p) { return [[NSFileManager defaultManager] fileExistsAtPath:p]; }
 static int Run(NSString *exe, NSArray<NSString *> *args) {
     char *argv[32] = {0}; argv[0] = (char *)exe.fileSystemRepresentation;
@@ -78,7 +80,7 @@ static NSArray<NSNumber *> *Ports(void) {
 #elif SERVICE_KIND == 2
     return @[@27042];
 #else
-    NSDictionary *p=[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.catmcp.server.plist"];
+    NSDictionary *p=[NSDictionary dictionaryWithContentsOfFile:MobilePrefs()];
     int port=[p[@"port"] intValue];return @[@(port>0 && port<65536?port:9000)];
 #endif
 }
@@ -121,7 +123,7 @@ static BOOL RestrictSSH(void){
 }
 static BOOL SetEnabled(BOOL enabled){
 #if SERVICE_KIND == 3
-    NSString *prefs=@"/var/mobile/Library/Preferences/com.catmcp.server.plist";
+    NSString *prefs=MobilePrefs();
     NSMutableDictionary *values=[[NSDictionary dictionaryWithContentsOfFile:prefs] mutableCopy] ?: [NSMutableDictionary dictionary];
     values[@"enabled"]=@(enabled);
     if(![values writeToFile:prefs atomically:YES])return NO;
