@@ -139,7 +139,7 @@ static BOOL SetEnabled(BOOL enabled){
         else{Launch(@[@"disable",target]);Launch(@[@"bootout",target]);}
     }
     if(!enabled){Processes(SIGTERM);usleep(300000);Processes(SIGKILL);}
-    for(int i=0;i<30;i++){BOOL listening=Listening();int processes=Processes(0);
+    for(int i=0;i<75;i++){BOOL listening=Listening();int processes=Processes(0);
         if(enabled?listening:(!listening && processes==0))return YES;usleep(200000);}
     if(!enabled && RestrictSSH())return YES;
     return NO;

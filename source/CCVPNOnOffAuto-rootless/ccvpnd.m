@@ -22,6 +22,9 @@ static NSString *gLastID;
 static NSMutableArray<NSString *> *gCommands;
 static NSMutableDictionary<NSNumber *,NSDictionary *> *gProtected;
 static NSTimer *gTimer;
+static dispatch_source_t gQuit;
+static NSMutableDictionary *gOriginalDemand;
+static void RestorePriorities(void);
 static BOOL Up(NEVPNManager *m){return m.connection.status==NEVPNStatusConnected || m.connection.status==NEVPNStatusConnecting || m.connection.status==NEVPNStatusReasserting;}
 static NSString *ManagerID(NEVPNManager *manager){
     for(id object in @[manager,manager.connection]) { SEL selector=NSSelectorFromString(@"identifier");if([object respondsToSelector:selector]){id value=((id(*)(id,SEL))objc_msgSend)(object,selector);if([value respondsToSelector:@selector(UUIDString)])return [value UUIDString];if([value isKindOfClass:NSString.class])return value;}}
@@ -33,7 +36,7 @@ static void Publish(void){
     int mode=gAuto?2:(gTarget.connection.status==NEVPNStatusConnected?1:0);
     const char *names[]={"com.ratush.ccvpnonoffauto.state.off","com.ratush.ccvpnonoffauto.state.vpn","com.ratush.ccvpnonoffauto.state.auto"};
     notify_post(names[mode]);
-    NSDictionary *state=@{@"auto":@(gAuto),@"lastID":gLastID?:@"",@"connected":@(gTarget.connection.status==NEVPNStatusConnected),@"status":@(gTarget.connection.status),@"busy":@(gBusy)};
+    NSDictionary *state=@{@"auto":@(gAuto),@"lastID":gLastID?:@"",@"connected":@(gTarget.connection.status==NEVPNStatusConnected),@"status":@(gTarget.connection.status),@"busy":@(gBusy),@"originalDemand":gOriginalDemand?:@{}};
     [state writeToFile:StatePath atomically:YES];
 }
 static NEVPNManager *Pick(void){
@@ -84,7 +87,7 @@ static void Reload(void(^done)(NSError *)){
             NEVPNManager *personal=NEVPNManager.sharedManager;
             [personal loadFromPreferencesWithCompletionHandler:^(NSError *personalError){dispatch_async(dispatch_get_main_queue(),^{
                 NSMutableArray *all=[managers mutableCopy]?:[NSMutableArray array];if(!personalError && personal.protocolConfiguration)[all addObject:personal];
-                gManagers=all;gTarget=Pick();if(gTarget)gLastID=ManagerID(gTarget);done(nil);
+                gManagers=all;gTarget=Pick();if(gTarget){NSString *newID=ManagerID(gTarget);if(gLastID.length && ![newID isEqual:gLastID])RestorePriorities();gLastID=newID;}done(nil);
             });}];
         });
     }];
@@ -98,7 +101,7 @@ static void Execute(NSString *command){
         if(request!=gRequest)return;
         if(error || !gTarget){fprintf(stderr,"no usable VPN profile: %s\n",error.description.UTF8String?:"none");Finish();return;}
         BOOL start=NO;
-        if([command isEqual:@"long"]){gAuto=!gAuto;if(!gAuto){RestorePriorities();Finish();return;}start=YES;}
+        if([command isEqual:@"long"]){gAuto=!gAuto;if(!gAuto){RestorePriorities();NSNumber *previous=gOriginalDemand[ManagerID(gTarget)];if(previous){gTarget.onDemandEnabled=previous.boolValue;[gTarget saveToPreferencesWithCompletionHandler:^(NSError *e){dispatch_async(dispatch_get_main_queue(),^{if(request==gRequest)Finish();});}];}else Finish();return;}gOriginalDemand[ManagerID(gTarget)]=@(gTarget.onDemandEnabled);start=YES;}
         else if([command isEqual:@"tap"]){start=!Up(gTarget) && !gAuto;gAuto=NO;RestorePriorities();}
         else if([command isEqual:@"reconnect"]){if(!gAuto || Up(gTarget)){Finish();return;}start=YES;}
         else{Finish();return;}
@@ -111,7 +114,7 @@ static void Execute(NSString *command){
             if(saveError){fprintf(stderr,"save VPN failed: %s\n",saveError.description.UTF8String);Finish();return;}
             [target loadFromPreferencesWithCompletionHandler:^(NSError *loadError){dispatch_async(dispatch_get_main_queue(),^{
                 if(request!=gRequest)return;
-                if(!loadError){if(start){NSError *startError=nil;BOOL ok=[target.connection startVPNTunnelAndReturnError:&startError];fprintf(stderr,"start VPN ok=%d error=%s\n",ok,startError.description.UTF8String?:"none");}else [target.connection stopVPNTunnel];}
+                if(!loadError){if(start && !Up(target)){NSError *startError=nil;BOOL ok=[target.connection startVPNTunnelAndReturnError:&startError];fprintf(stderr,"start VPN ok=%d error=%s\n",ok,startError.description.UTF8String?:"none");}else if(!start) [target.connection stopVPNTunnel];}
                 gNextAttempt=[NSDate dateWithTimeIntervalSinceNow:15];ProtectProvider();Finish();
             });}];
         });}];
@@ -128,12 +131,14 @@ int main(void){@autoreleasepool{
     if(geteuid()!=0)return 77;
     [[NSFileManager defaultManager] createDirectoryAtPath:StatePath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0755} error:NULL];
     NSDictionary *saved=[NSDictionary dictionaryWithContentsOfFile:StatePath];gAuto=[saved[@"auto"] boolValue];gLastID=saved[@"lastID"];
-    gCommands=[NSMutableArray array];gProtected=[NSMutableDictionary dictionary];
+    gCommands=[NSMutableArray array];gProtected=[NSMutableDictionary dictionary];gOriginalDemand=[saved[@"originalDemand"] mutableCopy]?:[NSMutableDictionary dictionary];
+    signal(SIGTERM,SIG_IGN);gQuit=dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL,SIGTERM,0,dispatch_get_main_queue());dispatch_source_set_event_handler(gQuit,^{RestorePriorities();exit(0);});dispatch_resume(gQuit);
     CFNotificationCenterRef center=CFNotificationCenterGetDarwinNotifyCenter();
     for(NSString *suffix in @[@"tap",@"longpress",@"query"])CFNotificationCenterAddObserver(center,NULL,OnCommand,(__bridge CFStringRef)[@"com.ratush.ccvpnonoffauto.cmd." stringByAppendingString:suffix],NULL,CFNotificationSuspensionBehaviorDeliverImmediately);
     Reload(^(NSError *error){fprintf(stderr,"loaded VPN profiles=%lu error=%s\n",(unsigned long)gManagers.count,error.description.UTF8String?:"none");Publish();});
     gTimer=[NSTimer scheduledTimerWithTimeInterval:5 repeats:YES block:^(__unused NSTimer *timer){
         if(gBusy)return;
+        static int ticks=0;if(++ticks%4==0){Execute(@"refresh");return;}
         if(gAuto){ProtectProvider();if(!Up(gTarget) && (!gNextAttempt || [gNextAttempt timeIntervalSinceNow]<=0)){gNextAttempt=[NSDate dateWithTimeIntervalSinceNow:15];Execute(@"reconnect");return;}}
         Publish();
     }];

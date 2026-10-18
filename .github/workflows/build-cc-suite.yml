@@ -36,6 +36,7 @@ jobs:
           failed=""
           for name in CCGapCloser CCOpenSSH CCVPNOnOffAuto CatMCPCC CCFRIDA; do
             cd "$GITHUB_WORKSPACE/source/$name-rootless"
+            if [ -d layout/DEBIAN ]; then chmod 755 layout/DEBIAN/*; fi
             make clean package FINALPACKAGE=1 || { failed="$failed $name"; continue; }
             deb=$(find packages -name '*.deb' -type f | head -1)
             test -n "$deb"
