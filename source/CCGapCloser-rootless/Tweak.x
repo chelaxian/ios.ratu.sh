@@ -277,12 +277,15 @@ static void CCGApplyToRootView(UIView *root) {
         CGFloat desiredOffsetY = collectionFrame.origin.y - targetTop;
         CGFloat desiredInsetTop = MAX(0.0, targetTop - collectionFrame.origin.y);
 
+        BOOL firstApply = ![gSaved objectForKey:scroll];
+        BOOL atTop = scroll.contentOffset.y <= -scroll.contentInset.top + .5;
         CCGSave(scroll);
         UIEdgeInsets inset = scroll.contentInset;
+        BOOL topChanged = fabs(inset.top - desiredInsetTop) > .5;
         inset.top = desiredInsetTop;
         if (!UIEdgeInsetsEqualToEdgeInsets(scroll.contentInset, inset)) scroll.contentInset = inset;
         if (!UIEdgeInsetsEqualToEdgeInsets(scroll.scrollIndicatorInsets, inset)) scroll.scrollIndicatorInsets = inset;
-        if (fabs(scroll.contentOffset.y - desiredOffsetY) > .5) scroll.contentOffset = CGPointMake(scroll.contentOffset.x, desiredOffsetY);
+        if ((firstApply || (topChanged && atTop)) && fabs(scroll.contentOffset.y - desiredOffsetY) > .5) scroll.contentOffset = CGPointMake(scroll.contentOffset.x, desiredOffsetY);
     }
 
     gApplying = NO;
