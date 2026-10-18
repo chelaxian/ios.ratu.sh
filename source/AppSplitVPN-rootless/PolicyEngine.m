@@ -1,5 +1,5 @@
 #import "PolicyEngine.h"
-#import "ASVBundleIdentity.h"
+#import "ASVApplicationIdentity.h"
 @implementation ASVPolicyEngine {
     NEPolicySession *_session;
     NSUInteger _count;
@@ -36,21 +36,10 @@
         if(![candidate addPolicy:p]){if(error)*error=@"Supervisor exception rejected";return NO;}count++;
     }
     for(NSString *identifier in matrix) {
-        NSMutableOrderedSet *identities=[NSMutableOrderedSet orderedSet];
-        for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:identifier uid:501])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
-        id proxy=[NSClassFromString(@"LSApplicationProxy") applicationProxyForIdentifier:identifier];
-        NSURL *url=[proxy respondsToSelector:@selector(bundleURL)]?[proxy bundleURL]:nil;
-        NSString *executable=ASVExecutableForBundleURL(url);
-        if(!identities.count && executable.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:executable])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
+        NSArray *identities=ASVApplicationIdentities(identifier);
         if(!identities.count){
             [unresolved addObject:identifier];
-            if(executable.length){if(error)*error=@"Could not resolve a selected MATRIX application's identity";return NO;}
             continue;
-        }
-        if([proxy respondsToSelector:@selector(plugInKitPlugins)])for(id plugin in [proxy plugInKitPlugins]) {
-            NSURL *pluginURL=[plugin respondsToSelector:@selector(bundleURL)]?[plugin bundleURL]:nil;
-            NSString *path=ASVExecutableForBundleURL(pluginURL);
-            if(path.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
         }
         NSString *interface=interfaces[matrix[identifier]];
         // Native NEVPNApp rules select the assigned session. A hand-written
@@ -77,40 +66,14 @@
     NSMutableArray *unresolved = [NSMutableArray array];
     [NSClassFromString(@"NEProcessInfo") clearUUIDCache];
     for (NSString *identifier in apps) {
-        NSArray *resolved = [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:identifier uid:501];
-        id proxy = [NSClassFromString(@"LSApplicationProxy") applicationProxyForIdentifier:identifier];
-        NSURL *bundleURL = [proxy respondsToSelector:@selector(bundleURL)] ? [proxy bundleURL] : nil;
-        if (!resolved.count && bundleURL) {
-            NSString *path=ASVExecutableForBundleURL(bundleURL);
-            if (path.length) resolved=[NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path];
-        }
+        NSArray *resolved = ASVApplicationIdentities(identifier);
         if (!resolved.count) {
             [unresolved addObject:identifier];
-            // A deleted/offloaded app cannot launch traffic. Keep its selection
-            // for a later reinstall, but do not let it block unrelated rules.
-            // An installed app whose identity cannot be resolved is different:
-            // TUNNEL ONLY must fail closed rather than leak that app directly.
-            BOOL installedExecutable = ASVExecutableForBundleURL(bundleURL).length > 0;
-            if (installedExecutable && [mode isEqualToString:@"tunnelOnly"]) {
-                _unresolved = [unresolved copy];
-                if (error) *error=@"Could not resolve a selected VPN application's identity";
-                return NO;
-            }
+            // Keep the user's selection for reinstall/update; skip only this
+            // app. Unresolved apps follow the mode's ordinary default route.
             continue;
         }
         for (id uuid in resolved) if ([uuid isKindOfClass:NSUUID.class]) [uuids addObject:uuid];
-        // Include extensions even if a later iOS implementation stops including
-        // them in copyUUIDsForBundleID. WebKit's effective identity remains the host.
-        if ([proxy respondsToSelector:@selector(plugInKitPlugins)]) {
-            for (id plugin in [proxy plugInKitPlugins]) {
-                if (![plugin respondsToSelector:@selector(bundleURL)]) continue;
-                NSURL *url = [plugin bundleURL];
-                NSString *executable = ASVExecutableForBundleURL(url);
-                if (!executable.length) continue;
-                for (id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:executable])
-                    if ([uuid isKindOfClass:NSUUID.class]) [uuids addObject:uuid];
-            }
-        }
     }
     if (uuids.count > 4096) {
         if (error) *error = @"Application rule limit exceeded";

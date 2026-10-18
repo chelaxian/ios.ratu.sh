@@ -1,4 +1,5 @@
 #import "ASVMulti.h"
+#import "ASVApplicationIdentity.h"
 #import "Shared.h"
 #import "ASVProfiles.h"
 #import "ASVIPProbe.h"
@@ -51,6 +52,8 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     NSString *_status,*_error,*_names;
     NSDictionary *_matrix,*_requested;
     NSDictionary *_publishedInterfaces;
+    NSDictionary *_identitySnapshot;
+    double _lastIdentityScan;
     NSArray *_originals,*_activeBefore,*_providers;
     NSMutableDictionary *_connections,*_statuses;
     double _lastPoll,_started,_retry;
@@ -227,8 +230,10 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     Set(app,@"setProtocol:",[Get(old,@"protocol") copy]);((void(*)(id,SEL,BOOL))objc_msgSend)(app,NSSelectorFromString(@"setEnabled:"),YES);((void(*)(id,SEL,BOOL))objc_msgSend)(app,NSSelectorFromString(@"setNoRestriction:"),YES);((void(*)(id,SEL,NSInteger))objc_msgSend)(app,NSSelectorFromString(@"setTunnelType:"),1);
     if([app respondsToSelector:NSSelectorFromString(@"setOnDemandEnabled:")])((void(*)(id,SEL,BOOL))objc_msgSend)(app,NSSelectorFromString(@"setOnDemandEnabled:"),NO);
     NSMutableArray *rules=[NSMutableArray array];for(NSString *bundle in _matrix)if([_matrix[bundle] isEqual:uuid]){
-        NSArray *ids=[NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:bundle uid:501];if(!ids.count)continue;
-        id rule=((id(*)(id,SEL,id))objc_msgSend)([NSClassFromString(@"NEAppRule") alloc],NSSelectorFromString(@"initWithSigningIdentifier:"),bundle);Set(rule,@"setCachedMachOUUIDs:",ids);((void(*)(id,SEL,BOOL))objc_msgSend)(rule,NSSelectorFromString(@"setNoRestriction:"),YES);[rules addObject:rule];
+        NSArray *ids=ASVApplicationIdentities(bundle);if(!ids.count)continue;
+        @try {
+        id rule=((id(*)(id,SEL,id))objc_msgSend)([NSClassFromString(@"NEAppRule") alloc],NSSelectorFromString(@"initWithSigningIdentifier:"),bundle);Set(rule,@"setCachedMachOUUIDs:",ids);((void(*)(id,SEL,BOOL))objc_msgSend)(rule,NSSelectorFromString(@"setNoRestriction:"),YES);if(rule)[rules addObject:rule];
+        } @catch(NSException *exception) { NSLog(@"AppSplitVPN: skipped MATRIX rule %@ (%@)",bundle,exception.name); }
     }
     Set(app,@"setAppRules:",rules);Set(c,@"setVPN:",nil);Set(c,@"setAppVPN:",app);
     [self save:c reply:^(BOOL ok){if(!ok){self->_busy=NO;[self fail:@"Cannot save per-app VPN; restore required"];self->_wanted=NO;return;}if(!self->_wanted || generation!=self->_generation){self->_busy=NO;return;}
@@ -247,6 +252,20 @@ static BOOL Manifest(NSArray *ids){NSData *data=[NSPropertyListSerialization dat
     if(_busy)return;
     if(_ownsProfiles && (!enabled || ![_matrix isEqual:matrix] || [_status isEqual:@"error"])){[self restoreWithCompletion:^(__unused BOOL ok){}];return;}
     if(!enabled)return;
+    // Native per-app VPN rules cache Mach-O UUIDs too. Rebuild their owned
+    // configurations after an app update/reinstall, not just the NECP layer.
+    // Scan only selected apps, at most once per minute; leave other VPNs alone.
+    if(!_identitySnapshot || Clock()-_lastIdentityScan>=60){
+        _lastIdentityScan=Clock();[NSClassFromString(@"NEProcessInfo") clearUUIDCache];
+        NSMutableDictionary *snapshot=[NSMutableDictionary dictionary];
+        for(NSString *bundle in matrix)snapshot[bundle]=ASVApplicationIdentities(bundle);
+        BOOL changed=_identitySnapshot && ![_identitySnapshot isEqual:snapshot];
+        _identitySnapshot=[snapshot copy];
+        if(changed && _ownsProfiles){
+            NSLog(@"AppSplitVPN: application identities changed; refreshing owned MATRIX rules");
+            [self restoreWithCompletion:^(__unused BOOL ok){}];return;
+        }
+    }
     if(!_ownsProfiles){
         if(![_matrix isEqual:matrix]){NSString *error=nil;if(![_engine replaceMatrix:matrix interfaces:@{} providerIDs:@[] error:&error]){[self fail:error];return;}_matrix=[matrix copy];}
         if(Clock()>=_retry)[self begin:matrix];return;

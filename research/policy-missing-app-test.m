@@ -1,6 +1,7 @@
 #import "../source/AppSplitVPN-rootless/PolicyEngine.h"
 #import "../source/AppSplitVPN-rootless/ASVBundleIdentity.h"
 #include <stdlib.h>
+static BOOL Reinstalled=NO;
 
 // Exercise the actual PolicyEngine with private API test doubles. No kernel
 // policies or real LaunchServices are accessed by this macOS regression test.
@@ -27,7 +28,9 @@
 + (void)clearUUIDCache {}
 + (NSArray *)copyUUIDsForBundleID:(NSString *)identifier uid:(unsigned)uid {
     (void)uid;
-    return [identifier isEqual:@"installed"]?@[[[NSUUID alloc] initWithUUIDString:@"12345678-1234-1234-1234-123456789ABC"]]:@[];
+    if([identifier isEqual:@"throws"])[NSException raise:NSInvalidArgumentException format:@"Simulated updating record"];
+    if([identifier isEqual:@"malformed"])return (id)@"not an array";
+    return ([identifier isEqual:@"installed"] || (Reinstalled && [identifier isEqual:@"offloaded"]))?@[[[NSUUID alloc] initWithUUIDString:@"12345678-1234-1234-1234-123456789ABC"],@"invalid UUID"]:@[];
 }
 + (NSArray *)copyUUIDsForExecutable:(NSString *)executable { (void)executable;return @[]; }
 @end
@@ -37,7 +40,7 @@
 @implementation LSApplicationProxy
 + (instancetype)applicationProxyForIdentifier:(NSString *)identifier {
     if([identifier isEqual:@"deleted"])return nil;
-    ASVTestProxy *proxy=[ASVTestProxy new];proxy.unavailable=![identifier isEqual:@"installed"];return proxy;
+    ASVTestProxy *proxy=[ASVTestProxy new];proxy.unavailable=!([@[@"installed",@"throws",@"malformed",@"unresolved"] containsObject:identifier] || (Reinstalled && [identifier isEqual:@"offloaded"]));return proxy;
 }
 - (NSArray *)plugInKitPlugins { return @[]; }
 - (NSURL *)bundleURL { return nil; }
@@ -54,13 +57,16 @@ int main(void) { @autoreleasepool {
     Check(ASVExecutableForBundleURL(NSBundle.mainBundle.bundleURL).length>0,@"installed executable retained");
     for(NSString *mode in @[@"bypass",@"tunnelOnly"]) {
         ASVPolicyEngine *engine=[ASVPolicyEngine new];NSString *error=nil;
-        Check([engine replaceMode:mode applications:@[@"installed",@"deleted",@"offloaded"] error:&error],mode);
-        Check([engine.unresolved isEqual:@[@"deleted",@"offloaded"]],@"missing selections retained as unresolved");
+        Check([engine replaceMode:mode applications:@[@"installed",@"deleted",@"offloaded",@"throws",@"malformed",@"unresolved",@123] error:&error],mode);
+        Check(engine.unresolved.count==6,@"bad/missing selections isolated");
         Check(engine.count==([mode isEqual:@"bypass"]?1:2),@"working application's policies preserved");
         Check([engine clear] && engine.count==0,@"owned policies cleaned");
+        Reinstalled=YES;
+        Check([engine replaceMode:mode applications:@[@"offloaded"] error:&error] && engine.unresolved.count==0,@"reinstalled selection resolves without editing preferences");
+        Reinstalled=NO;
     }
     ASVPolicyEngine *matrix=[ASVPolicyEngine new];NSString *error=nil;
-    Check([matrix replaceMatrix:@{@"installed":@"profile",@"deleted":@"profile",@"offloaded":@"profile"} interfaces:@{@"profile":@"utun4"} providerIDs:@[] error:&error],@"MATRIX missing app/extension URL");
-    Check(matrix.unresolved.count==2 && matrix.count==2,@"MATRIX retains valid assignment and fallback");
+    Check([matrix replaceMatrix:@{@"installed":@"profile",@"deleted":@"profile",@"offloaded":@"profile",@"throws":@"profile",@"malformed":@"profile",@"unresolved":@"profile"} interfaces:@{@"profile":@"utun4"} providerIDs:@[] error:&error],@"MATRIX missing app/extension URL");
+    Check(matrix.unresolved.count==5 && matrix.count==2,@"MATRIX retains valid assignment and fallback");
     NSLog(@"PASS: missing/deleted/offloaded apps and missing extension URLs in BYPASS, TUNNEL ONLY and MATRIX");
 }return 0;}

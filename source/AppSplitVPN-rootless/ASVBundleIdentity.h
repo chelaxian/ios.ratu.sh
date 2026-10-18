@@ -6,5 +6,6 @@
 // otherwise valid routing transaction.
 static inline NSString *ASVExecutableForBundleURL(id url) {
     if (![url isKindOfClass:NSURL.class] || ![url isFileURL]) return nil;
-    return [NSBundle bundleWithURL:url].executablePath;
+    @try { return [NSBundle bundleWithURL:url].executablePath; }
+    @catch (__unused NSException *exception) { return nil; }
 }
