@@ -137,7 +137,7 @@ static void CCStateCallback(CFNotificationCenterRef center, void *observer,
 
 - (instancetype)init {
     self = [super init];
-    if (self) { sCurrent = self; }
+    if (self) { sCurrent = self; CCPost(CMD_QUERY); dispatch_async(dispatch_get_main_queue(), ^{ [self cc_ensureLongPress]; }); }
     return self;
 }
 

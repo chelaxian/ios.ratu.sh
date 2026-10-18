@@ -17,7 +17,7 @@ static NSInteger const kCCGValueEditorButtonTag = 74031;
 @implementation CCGRootListController
 
 - (NSString *)title {
-    return @"CCGapCloser";
+    return @"FuGapCC";
 }
 
 - (PSSpecifier *)switchWithKey:(NSString *)key title:(NSString *)title defaultValue:(BOOL)defaultValue {

@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+chown 0:0 /var/jb/usr/bin/catmcpcchelper
+chmod 4755 /var/jb/usr/bin/catmcpcchelper
+exit 0

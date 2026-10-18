@@ -13,7 +13,7 @@
 	<key>CFBundleName</key>
 	<string>CCVPNOnOffAuto</string>
 	<key>CFBundleDisplayName</key>
-	<string>CCVPN-ON-OFF-AUTO</string>
+	<string>CCVPN (on/off/auto)</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>

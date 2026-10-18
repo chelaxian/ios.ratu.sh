@@ -4,6 +4,7 @@
 #import <objc/message.h>
 #import <notify.h>
 #import <unistd.h>
+#import <math.h>
 
 static NSString *const kCCGDomain = @"com.ratush.ccgapcloser";
 static NSString *const kCCGReloadNotification = @"com.ratush.ccgapcloser.reload";
@@ -20,7 +21,24 @@ static BOOL gApplying;
 static int gNotifyToken = 0;
 static int gApplyToken = 0;
 static int gRespringToken = 0;
-static CGFloat gOriginalStatusBarWindowLevel = CGFLOAT_MIN;
+static NSMapTable<UIView *, NSDictionary *> *gSaved;
+static void CCGSave(UIView *view) {
+    if (!gSaved) gSaved = [NSMapTable weakToStrongObjectsMapTable];
+    if ([gSaved objectForKey:view]) return;
+    NSMutableDictionary *d=[@{@"hidden":@(view.hidden),@"alpha":@(view.alpha),@"frame":[NSValue valueWithCGRect:view.frame]} mutableCopy];
+    if ([view isKindOfClass:UIWindow.class]) d[@"level"]=@(((UIWindow *)view).windowLevel);
+    if ([view isKindOfClass:UIScrollView.class]) { UIScrollView *scroll=(id)view;d[@"inset"]=[NSValue valueWithUIEdgeInsets:scroll.contentInset];d[@"indicator"]=[NSValue valueWithUIEdgeInsets:scroll.scrollIndicatorInsets];d[@"offset"]=[NSValue valueWithCGPoint:scroll.contentOffset]; }
+    [gSaved setObject:d forKey:view];
+}
+static void CCGRestore(void) {
+    if (gApplying) return; gApplying=YES;
+    for (UIView *view in gSaved.keyEnumerator) { NSDictionary *d=[gSaved objectForKey:view];
+        view.hidden=[d[@"hidden"] boolValue];view.alpha=[d[@"alpha"] doubleValue];
+        if (d[@"level"]) ((UIWindow *)view).windowLevel=[d[@"level"] doubleValue];
+        if (d[@"inset"]) {UIScrollView *scroll=(id)view;scroll.contentInset=[d[@"inset"] UIEdgeInsetsValue];scroll.scrollIndicatorInsets=[d[@"indicator"] UIEdgeInsetsValue];scroll.contentOffset=[d[@"offset"] CGPointValue];}
+    }
+    [gSaved removeAllObjects];gApplying=NO;
+}
 
 static NSDictionary *CCGReadPrefs(void) {
     NSMutableDictionary *cfPrefs = [NSMutableDictionary dictionary];
@@ -115,7 +133,8 @@ static CGFloat CCGTargetTopForView(UIView *view) {
     BOOL landscape = CCGIsLandscapeForView(view);
     CGFloat def = landscape ? 0.0 : 80.0;
     CGFloat value = CCGFloat(landscape ? kKeyLandscapeTop : kKeyPortraitTop, def);
-    return MAX(0.0, value);
+    if (!isfinite(value)) return def;
+    return MIN(landscape ? 140.0 : 240.0, MAX(0.0, value));
 }
 
 static BOOL CCGClassNameContains(UIView *view, NSArray<NSString *> *needles) {
@@ -182,6 +201,7 @@ static void CCGApplyHeaderPolicy(UIView *root, NSArray<UIView *> *headers, NSArr
     BOOL hideStatusBar = CCGShouldHideStatusBar();
 
     for (UIView *header in headers) {
+        CCGSave(header);
         header.hidden = YES;
         header.alpha = 0.0;
     }
@@ -189,6 +209,7 @@ static void CCGApplyHeaderPolicy(UIView *root, NSArray<UIView *> *headers, NSArr
     // Always show the top status-bar wrapper when not hidden; the window-level
     // raise in CCGApplyStatusBarWindowPolicy is what actually brings it above CC.
     for (UIView *wrapper in statusWrappers) {
+        CCGSave(wrapper);
         CGFloat y = CCGAbsoluteY(wrapper, root);
         if (y < 50.0) {
             wrapper.hidden = hideStatusBar;
@@ -221,6 +242,7 @@ static void CCGApplyStatusBarWindowPolicy(void) {
         for (UIView *subview in window.subviews) {
             NSString *subName = NSStringFromClass(subview.class);
             if ([subName rangeOfString:@"STUIStatusBar_Wrapper" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                CCGSave(subview);
                 subview.hidden = hideStatusBar;
                 subview.alpha = hideStatusBar ? 0.0 : 1.0;
                 if (!hideStatusBar) {
@@ -234,7 +256,7 @@ static void CCGApplyStatusBarWindowPolicy(void) {
 }
 
 static BOOL CCGRequestedStatusBarHidden(BOOL requestedHidden) {
-    if (!CCGEnabled()) return requestedHidden;
+    if (!CCGEnabled() || !CCGControlCenterIsActive()) return requestedHidden;
     return CCGShouldHideStatusBar() ? YES : NO;
 }
 
@@ -252,7 +274,7 @@ static void CCGApplyToRootView(UIView *root) {
     CGFloat targetTop = CCGTargetTopForView(root);
     CCGApplyHeaderPolicy(root, headers, statusWrappers);
     CCGApplyStatusBarWindowPolicy();
-    CCGResetModuleTransforms(modules);
+    // Preserve transforms owned by the system or other tweaks.
 
     UIView *collection = collections.firstObject;
     UIScrollView *scroll = collection ? CCGScrollAncestorForView(collection) : (UIScrollView *)scrolls.firstObject;
@@ -261,6 +283,7 @@ static void CCGApplyToRootView(UIView *root) {
         CGFloat desiredOffsetY = collectionFrame.origin.y - targetTop;
         CGFloat desiredInsetTop = MAX(0.0, targetTop - collectionFrame.origin.y);
 
+        CCGSave(scroll);
         UIEdgeInsets inset = scroll.contentInset;
         inset.top = desiredInsetTop;
         scroll.contentInset = inset;
@@ -281,7 +304,7 @@ static void CCGApplyToAllControlCenterWindows(void) {
 }
 
 static void CCGApplySoon(UIView *view) {
-    if (!view || !CCGEnabled()) return;
+    if (!view || !CCGEnabled() || gApplying) return;
     dispatch_async(dispatch_get_main_queue(), ^{
         CCGApplyToRootView(view);
     });
@@ -302,6 +325,9 @@ static void CCGRespring(void) {
 %group ControlCenterHooks
 
 %hook CCUIModularControlCenterOverlayViewController
+- (void)viewDidDisappear:(BOOL)animated {
+    %orig; CCGRestore();
+}
 - (void)viewDidAppear:(BOOL)animated {
     %orig;
     CCGApplySoon(((UIViewController *)self).view);
@@ -341,7 +367,7 @@ static void CCGRespring(void) {
 
 %hook SBControlCenterController
 - (BOOL)_isStatusBarHiddenIgnoringControlCenter {
-    if (CCGEnabled() && !CCGShouldHideStatusBar()) return NO;
+    if (CCGShouldForceStatusBarVisible()) return NO;
     return %orig;
 }
 
@@ -356,7 +382,7 @@ static void CCGRespring(void) {
 }
 
 - (void)setHideStatusBarAssertion:(id)assertion {
-    %orig(CCGShouldHideStatusBar() ? assertion : nil);
+    %orig(CCGShouldForceStatusBarVisible() ? nil : assertion);
     CCGApplyStatusBarWindowPolicy();
 }
 %end
@@ -427,6 +453,7 @@ static void CCGRespring(void) {
         CCGLoadPrefs();
         notify_register_dispatch([kCCGReloadNotification UTF8String], &gNotifyToken, dispatch_get_main_queue(), ^(int token) {
             CCGLoadPrefs();
+            if (!CCGEnabled()) CCGRestore();
         });
         notify_register_dispatch([kCCGApplyNotification UTF8String], &gApplyToken, dispatch_get_main_queue(), ^(int token) {
             CCGLoadPrefs();

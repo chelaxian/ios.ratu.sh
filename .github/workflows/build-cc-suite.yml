@@ -1,0 +1,66 @@
+name: Build Dopamine Control Center suite
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    paths:
+      - 'source/CCServiceCommon/**'
+      - 'source/CCFRIDA-rootless/**'
+      - 'source/CCGapCloser-rootless/**'
+      - 'source/CCOpenSSH-rootless/**'
+      - 'source/CCVPNOnOffAuto-rootless/**'
+      - 'source/CatMCPCC-rootless/**'
+      - '.github/workflows/build-cc-suite.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos and SDK
+        run: |
+          brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
+          git clone --quiet --depth=1 --recursive https://github.com/theos/theos.git "$HOME/theos"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git /tmp/cc-sdks
+          cd /tmp/cc-sdks
+          git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+          git checkout --quiet
+          mkdir -p "$HOME/theos/sdks"
+          cp -a iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+      - name: Compile and inspect every Mach-O
+        run: |
+          export THEOS="$HOME/theos"
+          export THEOS_PLATFORM_SDK_ROOT="$THEOS/sdks/iPhoneOS16.5.sdk"
+          mkdir -p artifacts
+          for name in CCGapCloser CCOpenSSH CCVPNOnOffAuto CatMCPCC CCFRIDA; do
+            cd "$GITHUB_WORKSPACE/source/$name-rootless"
+            make clean package FINALPACKAGE=1
+            deb=$(find packages -name '*.deb' -type f | head -1)
+            test -n "$deb"
+            test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+            tmp=$(mktemp -d)
+            dpkg-deb -x "$deb" "$tmp"
+            dpkg-deb -e "$deb" "$tmp/DEBIAN"
+            if [ -d layout/DEBIAN ]; then cp layout/DEBIAN/* "$tmp/DEBIAN/"; find "$tmp/DEBIAN" -type f ! -name control -exec chmod 755 {} +; fi
+            find "$tmp" -type f -print0 | while IFS= read -r -d '' binary; do
+              if file "$binary" | grep -q 'Mach-O'; then
+                lipo -thin arm64e "$binary" -output "$tmp.arm64e"
+                test "$(xxd -p -s 8 -l 4 "$tmp.arm64e")" = 02000080
+                rm "$tmp.arm64e"
+                if otool -L "$binary" | grep -E 'libroothide|/rootfs/'; then exit 1; fi
+                ldid -e "$binary" >/dev/null
+              fi
+            done
+            id=$(dpkg-deb -f "$deb" Package)
+            ver=$(dpkg-deb -f "$deb" Version)
+            dpkg-deb -Zgzip --root-owner-group -b "$tmp" "$GITHUB_WORKSPACE/artifacts/"$id"_"$ver"_iphoneos-arm64.deb"
+            rm -rf "$tmp"
+          done
+          cd "$GITHUB_WORKSPACE"
+          shasum -a 256 artifacts/*.deb > artifacts/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dopamine-cc-suite
+          path: artifacts/*
+          if-no-files-found: error

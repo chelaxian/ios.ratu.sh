@@ -1,0 +1,3 @@
+#!/bin/sh
+/var/jb/bin/launchctl bootout user/501/com.ratush.ccvpnd 2>/dev/null || true
+exit 0

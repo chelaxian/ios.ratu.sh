@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+L=/var/jb/bin/launchctl
+P=/var/jb/Library/LaunchDaemons/com.ratush.ccvpnd.plist
+$L bootout user/501/com.ratush.ccvpnd 2>/dev/null || true
+$L enable user/501/com.ratush.ccvpnd
+$L bootstrap user/501 "$P"
+exit 0
