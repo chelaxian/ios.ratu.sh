@@ -85,7 +85,7 @@ static NSArray<NSNumber *> *Ports(void) {
 static BOOL Listening(void){for(NSNumber *p in Ports())if(PortOpen(p.intValue))return YES;return NO;}
 static NSInteger State(void){
 #if SERVICE_KIND == 1
-    if(Exists([stateDir stringByAppendingString:@"/sshd_config.original"]) && Listening())return 2;
+    if(Exists([stateDir stringByAppendingString:@"/sshd.local-active"]) && Listening())return 2;
     return Listening()?1:0;
 #else
     return Listening() && Processes(0)>0?1:0;
@@ -96,7 +96,7 @@ static BOOL WriteMarker(BOOL off){if(off)return [@"off\n" writeToFile:Marker() a
 static BOOL RestoreSSH(void){
 #if SERVICE_KIND == 1
     NSString *backup=[stateDir stringByAppendingString:@"/sshd_config.original"];
-    if(Exists(backup)){NSData *data=[NSData dataWithContentsOfFile:backup];if(!data || ![data writeToFile:@"/var/jb/etc/ssh/sshd_config" options:NSDataWritingAtomic error:NULL])return NO;[[NSFileManager defaultManager] removeItemAtPath:backup error:NULL];}
+    if(Exists(backup)){NSData *data=[NSData dataWithContentsOfFile:backup];if(!data || ![data writeToFile:@"/var/jb/etc/ssh/sshd_config" options:NSDataWritingAtomic error:NULL])return NO;[[NSFileManager defaultManager] removeItemAtPath:backup error:NULL];[[NSFileManager defaultManager] removeItemAtPath:[stateDir stringByAppendingString:@"/sshd.local-active"] error:NULL];}
 #endif
     return YES;
 }
@@ -114,7 +114,7 @@ static BOOL RestrictSSH(void){
     if(![[NSData dataWithContentsOfFile:candidate] writeToFile:config options:NSDataWritingAtomic error:NULL])return NO;
     // Socket-activated sshd reads this file for every new connection.
     Processes(SIGTERM);usleep(300000);
-    return YES;
+    return [@"local\n" writeToFile:[stateDir stringByAppendingString:@"/sshd.local-active"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 #else
     return NO;
 #endif
