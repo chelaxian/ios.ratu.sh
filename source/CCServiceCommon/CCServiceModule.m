@@ -52,7 +52,8 @@ extern char **environ;
 - (UIImage *)selectedIconGlyph { return [self iconGlyph]; }
 - (void)updateLabel {
     if (![NSThread isMainThread]) { dispatch_async(dispatch_get_main_queue(), ^{ [self updateLabel]; }); return; }
-    UIViewController *vc = self.contentViewController;
+    UIViewController *vc = nil;
+    @try { id value = [self valueForKey:@"contentViewController"]; if ([value isKindOfClass:UIViewController.class]) vc = value; } @catch (__unused NSException *error) {}
     UIView *view = vc.view;
     if (!view) return;
     if (_label.superview != view) {

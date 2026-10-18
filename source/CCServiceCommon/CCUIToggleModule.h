@@ -9,5 +9,5 @@
 - (void)setSelected:(BOOL)selected;
 - (void)refreshState;
 - (void)reconfigureView;
-@property (nonatomic, readonly) UIViewController *contentViewController;
+- (UIViewController *)contentViewControllerForContext:(id)context;
 @end
