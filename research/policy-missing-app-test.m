@@ -1,5 +1,7 @@
+#define LSApplicationProxy ASVMockApplicationProxy
 #import "../source/AppSplitVPN-rootless/PolicyEngine.h"
 #import "../source/AppSplitVPN-rootless/ASVBundleIdentity.h"
+#import <objc/runtime.h>
 #include <stdlib.h>
 static BOOL Reinstalled=NO;
 
@@ -51,6 +53,12 @@ static BOOL Reinstalled=NO;
 @end
 static void Check(BOOL ok,NSString *message) { if(!ok){NSLog(@"FAIL: %@",message);exit(1);} }
 int main(void) { @autoreleasepool {
+    // macOS itself loads LSApplicationProxy. Do not define a duplicate class:
+    // replace only its factory in this disposable test process with our mock.
+    Class live=NSClassFromString(@"LSApplicationProxy");
+    Method factory=class_getClassMethod(ASVMockApplicationProxy.class,@selector(applicationProxyForIdentifier:));
+    if(live)class_replaceMethod(object_getClass(live),@selector(applicationProxyForIdentifier:),method_getImplementation(factory),method_getTypeEncoding(factory));
+    else objc_registerClassPair(objc_allocateClassPair(ASVMockApplicationProxy.class,"LSApplicationProxy",0));
     Check(ASVExecutableForBundleURL(nil)==nil,@"nil URL safely rejected");
     Check(ASVExecutableForBundleURL((id)@"invalid")==nil,@"wrong URL type safely rejected");
     Check(ASVExecutableForBundleURL([NSURL URLWithString:@"https://example.com"] )==nil,@"non-file URL rejected");
