@@ -1358,6 +1358,23 @@ Description: Automatically enable or disable the VPN according to the situation 
 Author: Snail <mu514983786@gmail.com>
 Name: AutoVPN
 
+Package: com.thatmarcel.tweaks.neverheardofvpns
+Version: 1.1.0
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Installed-Size: 220
+Depends: mobilesubstrate, firmware (>= 17.0), firmware (<= 26.0.1)
+Filename: debs/com.thatmarcel.tweaks.neverheardofvpns_1.1.0_iphoneos-arm64.deb
+Size: 25630
+MD5sum: 9c7dae18a763f45f5c771300da93950c
+SHA1: 022a356bbe15a0fbceab1c1a0476053695e242f4
+SHA256: 21292d4cc71a0fd906fc0b47cafd9a1ad96a23ede2ef7d8793e72fef9a691194
+Section: Tweaks
+Homepage: https://github.com/chelaxian/never-heard-of-vpns
+Description: Скрытие распространённых локальных признаков VPN без переключения маршрута. Rootless iOS 17.0–26.0.1; iOS 26 не проверена. Внешний IP не скрывается.
+Author: thatmarcel
+Name: NeverHeardOfVPNs Ratu
+
 Package: coreutils
 Version: 9.3-1
 Architecture: iphoneos-arm64e
