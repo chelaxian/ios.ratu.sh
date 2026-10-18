@@ -36,3 +36,7 @@ Published rootless packages are built on macOS/Xcode and pass the PTRAUTH arm64e
 ## Remaining owned-source migrations
 
 EtcHosts17 and CCHPPE are already published as Dopamine rootless builds. Remaining work is audit/follow-up for the packages listed in [`DOPAMINE-ROOTLESS-AUDIT.md`](DOPAMINE-ROOTLESS-AUDIT.md), plus any future owned-source integrations whose runtime dependencies are verified.
+
+## 2026-10-19 — Control Center suite
+
+FuGapCC 0.5.0, CCSSH 1.1.0, CCVPN (on/off/auto) 1.1.0, CCMCP 1.1.0 and CCFRIDA 1.0.0 replace the four older owned CC builds and add Frida control. All five final macOS artifacts were installed and exercised on iOS 17.0 / Dopamine 3.0.10. See the [per-layer validation and limits](CCServiceCommon/VALIDATION.md); the earlier blanket statement about no device installation does not apply to this suite.
