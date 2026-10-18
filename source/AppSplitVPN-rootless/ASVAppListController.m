@@ -1,5 +1,6 @@
 #import "ASVAppListController.h"
 #import "Shared.h"
+#import "ASVBundleIdentity.h"
 #import "ASVProfileListController.h"
 #import <notify.h>
 
@@ -51,7 +52,7 @@ static NSArray<NSDictionary *> *ASVCatalog(void) {
             NSString *category=[proxy respondsToSelector:@selector(genre)] ? [proxy genre] : nil;
             NSString *type=[proxy respondsToSelector:@selector(applicationType)] ? [proxy applicationType] : nil;
             NSURL *url=[proxy respondsToSelector:@selector(bundleURL)] ? [proxy bundleURL] : nil;
-            BOOL installed=url && [NSBundle bundleWithURL:url].executablePath.length>0;
+            BOOL installed=ASVExecutableForBundleURL(url).length>0;
             BOOL expired=NO;
             if (installed && [type isEqualToString:@"User"]) {
                 NSString *profile=[[url path] stringByAppendingPathComponent:@"embedded.mobileprovision"];

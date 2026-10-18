@@ -99,7 +99,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.3"};
+@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.4"};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -154,7 +154,8 @@ static void Reconcile(BOOL force) {
         }
         if (!ok) lastRefresh = now-55; // bounded retry after five seconds, not a busy loop
     } @catch (NSException *exception) {
-        [engine clear]; State(@"error",exception.name); initialized=NO;
+        fprintf(stderr,"AppSplitVPN exception=%s reason=%s\n",exception.name.UTF8String,(exception.reason ?: @"").UTF8String);
+        [engine clear]; State(@"error",[NSString stringWithFormat:@"%@: %@",exception.name,exception.reason ?: @"Unknown reason"]); initialized=NO;
     } }
 }
 static void SetEnabled(BOOL enabled) {

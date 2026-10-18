@@ -14,6 +14,8 @@ jobs:
           /tmp/asv-recovery-test
           clang -fobjc-arc -framework Foundation research/settings-transfer-test.m -o /tmp/asv-settings-transfer-test
           /tmp/asv-settings-transfer-test
+          clang -fobjc-arc -framework Foundation research/policy-missing-app-test.m source/AppSplitVPN-rootless/PolicyEngine.m -o /tmp/asv-policy-missing-app-test
+          /tmp/asv-policy-missing-app-test
       - name: Install toolchain
         run: |
           brew install ldid dpkg

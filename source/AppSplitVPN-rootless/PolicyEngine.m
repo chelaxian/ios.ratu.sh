@@ -1,4 +1,5 @@
 #import "PolicyEngine.h"
+#import "ASVBundleIdentity.h"
 @implementation ASVPolicyEngine {
     NEPolicySession *_session;
     NSUInteger _count;
@@ -39,7 +40,7 @@
         for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForBundleID:identifier uid:501])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
         id proxy=[NSClassFromString(@"LSApplicationProxy") applicationProxyForIdentifier:identifier];
         NSURL *url=[proxy respondsToSelector:@selector(bundleURL)]?[proxy bundleURL]:nil;
-        NSString *executable=[NSBundle bundleWithURL:url].executablePath;
+        NSString *executable=ASVExecutableForBundleURL(url);
         if(!identities.count && executable.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:executable])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
         if(!identities.count){
             [unresolved addObject:identifier];
@@ -48,7 +49,7 @@
         }
         if([proxy respondsToSelector:@selector(plugInKitPlugins)])for(id plugin in [proxy plugInKitPlugins]) {
             NSURL *pluginURL=[plugin respondsToSelector:@selector(bundleURL)]?[plugin bundleURL]:nil;
-            NSString *path=[NSBundle bundleWithURL:pluginURL].executablePath;
+            NSString *path=ASVExecutableForBundleURL(pluginURL);
             if(path.length)for(id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path])if([uuid isKindOfClass:NSUUID.class])[identities addObject:uuid];
         }
         NSString *interface=interfaces[matrix[identifier]];
@@ -80,7 +81,7 @@
         id proxy = [NSClassFromString(@"LSApplicationProxy") applicationProxyForIdentifier:identifier];
         NSURL *bundleURL = [proxy respondsToSelector:@selector(bundleURL)] ? [proxy bundleURL] : nil;
         if (!resolved.count && bundleURL) {
-            NSString *path=[NSBundle bundleWithURL:bundleURL].executablePath;
+            NSString *path=ASVExecutableForBundleURL(bundleURL);
             if (path.length) resolved=[NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:path];
         }
         if (!resolved.count) {
@@ -89,7 +90,7 @@
             // for a later reinstall, but do not let it block unrelated rules.
             // An installed app whose identity cannot be resolved is different:
             // TUNNEL ONLY must fail closed rather than leak that app directly.
-            BOOL installedExecutable = [NSBundle bundleWithURL:bundleURL].executablePath.length > 0;
+            BOOL installedExecutable = ASVExecutableForBundleURL(bundleURL).length > 0;
             if (installedExecutable && [mode isEqualToString:@"tunnelOnly"]) {
                 _unresolved = [unresolved copy];
                 if (error) *error=@"Could not resolve a selected VPN application's identity";
@@ -104,7 +105,7 @@
             for (id plugin in [proxy plugInKitPlugins]) {
                 if (![plugin respondsToSelector:@selector(bundleURL)]) continue;
                 NSURL *url = [plugin bundleURL];
-                NSString *executable = [NSBundle bundleWithURL:url].executablePath;
+                NSString *executable = ASVExecutableForBundleURL(url);
                 if (!executable.length) continue;
                 for (id uuid in [NSClassFromString(@"NEProcessInfo") copyUUIDsForExecutable:executable])
                     if ([uuid isKindOfClass:NSUUID.class]) [uuids addObject:uuid];
