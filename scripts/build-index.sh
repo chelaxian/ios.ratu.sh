@@ -22,6 +22,22 @@ def clean(m):
     numeric = re.match(r'([0-9]+(?:\.[0-9]+)*(?:-[0-9]+)?)', value)
     return 'Version: ' + (numeric.group(1) if numeric else value)
 s = re.sub(r'(?m)^Version: ([^\r\n]+)$', clean, s)
+
+# Repository categories are independent of upstream control metadata.
+tweak_packages = {
+    'com.thatmarcel.tweaks.neverheardofvpns',
+    'me.jjolano.shadow',
+}
+blocks = []
+for block in s.split('\n\n'):
+    package = re.search(r'(?m)^Package: ([^\r\n]+)$', block)
+    if package and package.group(1) in tweak_packages:
+        if re.search(r'(?m)^Section:', block):
+            block = re.sub(r'(?m)^Section: [^\r\n]*$', 'Section: Tweaks', block)
+        else:
+            block += '\nSection: Tweaks'
+    blocks.append(block)
+s = '\n\n'.join(blocks)
 p.write_text(s, encoding='utf-8')
 PY
 

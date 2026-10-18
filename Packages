@@ -3546,7 +3546,7 @@ Size: 285812
 MD5sum: 48112cccb3650469916deccf5ee71f03
 SHA1: 708b5433f095cabcee7789f7bc1542b947bceaaa
 SHA256: 6bfb80b751bc61fced4ebf016d486cb72f813701af010fbe5ed7c6915c7ce625
-Section: System
+Section: Tweaks
 Description: A modern jailbreak detection bypass.
 Author: jjolano
 Name: Shadow
