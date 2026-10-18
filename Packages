@@ -680,21 +680,38 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
+Version: 1.1.0
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Installed-Size: 336
+Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon
+Filename: debs/com.ratush.catmcpcc_1.1.0_iphoneos-arm64.deb
+Size: 29698
+MD5sum: b4d5819808a262c10fcccf8ffb2eefd9
+SHA1: 63eb0938d860be85f0ed50cad35a3f65dc061294
+SHA256: ee89f78cc59967790417b9507dd2d7114ebba3325ecc6dd8f58354c321919f4c
+Section: Tweaks
+Homepage: https://ios.ratu.sh
+Description: Включение и полная остановка службы CatMCP на Dopamine.
+Author: ratu.sh
+Name: CCMCP
+
+Package: com.ratush.ccfrida
 Version: 1.0.0
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 304
-Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon, com.ratush.catmcp-rootless-fix
-Filename: debs/com.ratush.catmcpcc_1.0.0+ratu10_iphoneos-arm64.deb
-Size: 29914
-MD5sum: b7a6e94abe1ad0a519a2aafb0b68f34c
-SHA1: 3a36d32909c48813cf1d59ff6a671c652085f3f1
-SHA256: 588b677b4b1519e730929455a46f71feb12691c5f819a962ac56ab0d91c47ae2
+Installed-Size: 336
+Depends: firmware (>= 15.0), com.opa334.ccsupport, re.frida.server
+Filename: debs/com.ratush.ccfrida_1.0.0_iphoneos-arm64.deb
+Size: 28074
+MD5sum: 4f4c1f91cf96ecf99e5265c8168200a5
+SHA1: 873df6c80d496487cfb75ca65890990199e2daec
+SHA256: a42df8205d35823c0b5f59adff46055acdb39d5395064d410fcf57ece0f0c74b
 Section: Tweaks
-Description: Control Center toggle for the CatMCP server on Dopamine rootless. The tile flips the `enabled` key in com.catmcp.server.plist and kickstarts com.ratush.catmcp-autoinjectd so the change applies immediately.
+Homepage: https://ios.ratu.sh
+Description: Включение Frida и полная остановка frida-server без фонового наблюдателя.
 Author: ratu.sh
-Icon: https://ios.ratu.sh/icons/catmcpcc.png
-Name: CatMCP CC Toggle
+Name: CCFRIDA
 
 Package: com.ratush.ccgapcloser
 Version: 0.4.7
@@ -713,20 +730,20 @@ Author: chelaxian
 Name: CCGapCloser
 
 Package: com.ratush.ccgapcloser
-Version: 0.4.7
+Version: 0.5.0
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
-Installed-Size: 360
+Installed-Size: 392
 Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.ccgapcloser_0.4.7_iphoneos-arm64.deb
-Size: 20520
-MD5sum: f2aabd3815646ba3af87c244397494b5
-SHA1: 90470d7733915c88dd6b1ec8362494d436fa2d44
-SHA256: ee791b11b72b3e31856f7e68288976dcc7f2f09c155485675b41856b005185a1
+Filename: debs/com.ratush.ccgapcloser_0.5.0_iphoneos-arm64.deb
+Size: 41672
+MD5sum: 18d28bc318e7a2d345054b2bfa562ead
+SHA1: a578ec3b30e03d51c3e68da2926914a18bd53630
+SHA256: 34dd13264e2bf6c07e533606ab42f59cf7d65929e6bcc0a7dcd083971a9407c2
 Section: Tweaks
 Description: Move iOS Control Center modules upward and tune portrait/landscape top offsets.
 Author: chelaxian
-Name: CCGapCloser
+Name: FuGapCC
 
 Package: com.ratush.ccopenssh
 Version: 1.0.10
@@ -746,21 +763,21 @@ Icon: https://ios.ratu.sh/icons/ccopenssh.png
 Name: CCOPENSSH
 
 Package: com.ratush.ccopenssh
-Version: 1.0.10
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 508
-Depends: firmware (>= 15.0), com.opa334.ccsupport, preferenceloader, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.0.10_iphoneos-arm64.deb
-Size: 51302
-MD5sum: 8c493179101e81820fd4d4db65147469
-SHA1: a9fa2342d8ba15db28bdd1643f0d7d6ffaf263ca
-SHA256: c92c72a26ee02617f4134d070b108a5e0f61e582baf74c29a690a53891f6892e
+Installed-Size: 336
+Depends: firmware (>= 15.0), com.opa334.ccsupport, openssh-server
+Filename: debs/com.ratush.ccopenssh_1.1.0_iphoneos-arm64.deb
+Size: 30694
+MD5sum: 0609b00b78ff55778ebc869f0f5a9a24
+SHA1: 0e983a3a25d7317d63b187c338dad2a80206d365
+SHA256: ae8aca6fdee976cad26c30225ec0a81f4937b802dd850f44938fa6233d2022f3
 Section: Tweaks
-Description: Control Center and Settings controller for Dopamine rootless OpenSSH. The tile reports the configured TCP listener and the helper applies launchd socket/config/auth settings.
+Homepage: https://ios.ratu.sh
+Description: Переключатель SSH для Dopamine: остановка службы, запасной доступ только через localhost.
 Author: ratu.sh
-Icon: https://ios.ratu.sh/icons/ccopenssh.png
-Name: CCOPENSSH
+Name: CCSSH
 
 Package: com.ratush.ccvpnonoffauto
 Version: 1.0.1
@@ -780,21 +797,21 @@ Author: ratu.sh
 Name: CCVPN-ON-OFF-AUTO
 
 Package: com.ratush.ccvpnonoffauto
-Version: 1.0.1
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
-Installed-Size: 372
+Installed-Size: 388
 Depends: firmware (>=14.0), com.opa334.ccsupport
-Filename: debs/com.ratush.ccvpnonoffauto_1.0.1_iphoneos-arm64.deb
-Size: 23824
-MD5sum: 9f932ed96f211b1930e05ca34d090676
-SHA1: e976c86af97294b9f5ef0853a3f1d09315857e17
-SHA256: 6841e16b28c517a09d40ef2d7e72f732636734131b059f2dfb7d1928be393357
+Filename: debs/com.ratush.ccvpnonoffauto_1.1.0_iphoneos-arm64.deb
+Size: 42896
+MD5sum: da75d65de089b9f5376d5f99aa2eb91a
+SHA1: 37dddc3b14353cb5a29ea3362579151fa1a03ab0
+SHA256: f8e53ea85ddd1e808a99089c7eaebaf2e6b4ebd1a86af014ba14f0d29d7a4e0e
 Section: Tweaks (CCSupport)
 Homepage: https://ios.ratu.sh
 Description: Control Center VPN toggle. Short tap toggles the last-active system VPN on/off; long-press enables AUTO always-on mode (raises VPN memory priority + auto-reconnect watchdog).
 Author: ratu.sh
-Name: CCVPN-ON-OFF-AUTO
+Name: CCVPN (on/off/auto)
 
 Package: com.ratush.choicy
 Version: 1.12.0-1
