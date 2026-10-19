@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+printf '%s\n' 'lockdown: changes apply to newly launched WebContent processes. Close and reopen browsers/web-view apps.'
+exit 0

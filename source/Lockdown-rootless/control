@@ -1,0 +1,11 @@
+Package: com.ratush.lockdown
+Name: lockdown (Dopamine)
+Version: 2.0+rootless1
+Architecture: iphoneos-arm64
+Description: JavaScriptCore hardening for WebContent on iOS 17.0. Dopamine rootless port; enabled by default. Runtime compatibility must be verified.
+Maintainer: chelaxian
+Author: roothide, chelaxian (Dopamine port)
+Section: Tweaks
+Depends: ellekit, firmware (>= 17.0), firmware (<< 17.1)
+Conflicts: com.roothide.lockdown
+Homepage: https://github.com/roothide/lockdown

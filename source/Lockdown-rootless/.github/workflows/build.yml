@@ -1,0 +1,58 @@
+name: Build Dopamine rootless
+on:
+  push:
+    branches: [dopamine-rootless]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install pinned Theos and signing tools
+        run: |
+          brew install ldid dpkg
+          git clone --quiet https://github.com/theos/theos.git "$HOME/theos"
+          git -C "$HOME/theos" checkout 304e0799973e8145f32e4ca2de6c747a84b758ce
+          git -C "$HOME/theos" submodule update --init --recursive --depth=1
+      - name: Build release candidate
+        run: |
+          mkdir -p artifacts
+          {
+            echo "source=$GITHUB_SHA"
+            sw_vers
+            xcodebuild -version
+            xcrun clang --version
+            xcrun --sdk iphoneos --show-sdk-version
+            git -C "$HOME/theos" rev-parse HEAD
+            git -C "$HOME/theos" submodule status --recursive
+          } > artifacts/build-environment.txt
+          THEOS="$HOME/theos" make clean package FINALPACKAGE=1
+          cp packages/com.ratush.lockdown_2.0+rootless1_iphoneos-arm64.deb artifacts/
+      - name: Validate the final package
+        run: |
+          set -euo pipefail
+          deb=artifacts/com.ratush.lockdown_2.0+rootless1_iphoneos-arm64.deb
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          test "$(dpkg-deb -f "$deb" Package)" = com.ratush.lockdown
+          test "$(dpkg-deb -f "$deb" Version)" = 2.0+rootless1
+          tmp="$(mktemp -d)"
+          dpkg-deb -x "$deb" "$tmp"
+          dpkg-deb -e "$deb" "$tmp/DEBIAN"
+          python3 scripts/verify_deb.py "$tmp" | tee artifacts/inspection.txt
+          {
+            dpkg-deb -I "$deb"
+            dpkg-deb -c "$deb"
+            find "$tmp/var/jb" -type f -name '*.dylib' -print -exec otool -L {} \; -exec otool -l {} \; -exec ldid -h {} \; -exec ldid -e {} \;
+          } >> artifacts/inspection.txt
+          shasum -a 256 "$deb" > artifacts/SHA256SUMS
+      - name: Save private build assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "build-${GITHUB_RUN_ID}" artifacts/* \
+            --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
+            --title 'lockdown Dopamine rootless build' \
+            --notes-file artifacts/build-environment.txt

@@ -21,7 +21,13 @@ def clean(m):
     value = m.group(1)
     numeric = re.match(r'([0-9]+(?:\.[0-9]+)*(?:-[0-9]+)?)', value)
     return 'Version: ' + (numeric.group(1) if numeric else value)
-s = re.sub(r'(?m)^Version: ([^\r\n]+)$', clean, s)
+# lockdown's Debian revision is part of its rootless release identity.
+# Keep this package's version identical to the distributed DEB.
+s = '\n\n'.join(
+    block if re.search(r'(?m)^Package: com\.ratush\.lockdown$', block)
+    else re.sub(r'(?m)^Version: ([^\r\n]+)$', clean, block)
+    for block in s.split('\n\n')
+)
 
 # Repository categories are independent of upstream control metadata.
 tweak_packages = {
