@@ -177,6 +177,11 @@
         const key = item.Package;
         if (!grouped.has(key)) grouped.set(key, { ...item, architectures: new Set(), versions: new Set(), variants: [] });
         const group = grouped.get(key);
+        // Rootless metadata is current; legacy RootHide variants keep their own downloads.
+        if (item.Architecture === 'iphoneos-arm64') {
+          if (item.Name) group.Name = item.Name;
+          if (item.Description) group.Description = item.Description;
+        }
         group.architectures.add(item.Architecture || 'all');
         group.versions.add(item.Version || '');
         group.variants.push({ version: item.Version || '', architecture: item.Architecture || 'all', filename: item.Filename || '', size: Number(item.Size || 0) });
