@@ -1,12 +1,16 @@
 # Модули Control Center для Dopamine
 
 - FuGapCC 0.5.0: com.ratush.ccgapcloser.
-- CCSSH 1.1.0: com.ratush.ccopenssh.
+- CCSSH 1.1.1: com.ratush.ccopenssh.
 - CCVPN (on/off/auto) 1.1.0: com.ratush.ccvpnonoffauto.
-- CCMCP 1.1.0: com.ratush.catmcpcc.
-- CCFRIDA 1.0.0: com.ratush.ccfrida.
+- CCMCP 1.1.1: com.ratush.catmcpcc.
+- CCFRIDA 1.0.1: com.ratush.ccfrida.
 
 Идентификаторы старых пакетов сохранены для обновления через APT. Имена bundle/фильтров также сохранены для существующей конфигурации CCSupport.
+
+## Цвета плиток
+
+В выключенном состоянии SSH, MCP и FRIDA показывают белый текст без приглушения. Включённая плитка имеет белый фон: SSH — оранжевая надпись, MCP — синяя, FRIDA — красная. Цвет пересчитывается после каждого обновления состояния. VPN в этом исправлении не менялся.
 
 ## Служебные переключатели
 
