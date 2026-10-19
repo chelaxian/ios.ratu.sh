@@ -8,6 +8,8 @@ Release text eol=lf
 README.md text eol=lf
 index.html text eol=lf
 *.sh text eol=lf
+source/isdig-rootless/layout/usr/bin/isdig text eol=lf
+source/isdig-rootless/layout/DEBIAN/control text eol=lf
 
 # Debian packages and repo assets are binary artifacts.
 *.deb binary

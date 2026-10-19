@@ -1,0 +1,38 @@
+name: Build and test isdig rootless
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'source/isdig-rootless/**'
+      - '.github/workflows/build-isdig-rootless.yml'
+  pull_request:
+    paths:
+      - 'source/isdig-rootless/**'
+      - '.github/workflows/build-isdig-rootless.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Protocol regressions
+        run: python3 source/isdig-rootless/test_isdig.py
+      - name: Build rootless archive
+        run: bash source/isdig-rootless/build.sh
+      - name: Validate install paths and architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          deb=source/isdig-rootless/packages/com.ratush.isdig_1.1.0_iphoneos-arm64.deb
+          test "$(dpkg-deb -f "$deb" Architecture)" = iphoneos-arm64
+          dpkg-deb -x "$deb" extracted
+          test -x extracted/var/jb/usr/bin/isdig
+          test ! -e extracted/usr
+          test "$(find extracted -type f | wc -l)" -eq 1
+          head -1 extracted/var/jb/usr/bin/isdig | grep -Fx '#!/var/jb/usr/bin/python3'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: isdig-rootless
+          path: source/isdig-rootless/packages/*.deb
+          if-no-files-found: error

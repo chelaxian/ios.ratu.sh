@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/var/jb/usr/bin/python3
 """isdig — a standalone `dig`-like DNS lookup tool for jailbroken iOS.
 
 No external dependencies (pure stdlib: socket, ssl, struct, base64). Works on
@@ -7,10 +7,10 @@ the device's bundled python3, so it runs without trust-cache/signing hassles.
 Supports:
   UDP, TCP, DNS-over-TLS (DoT), DNS-over-HTTPS (DoH)
   A, AAAA, NS, MX, TXT, CNAME, SOA, SRV, CAA, PTR, ANY
-  +trace, +short, +json, reverse lookups
+  +short, +json, reverse lookups; +trace is explicitly unsupported
 
 Usage:
-  isdig example.com                      # A record, system resolver
+  isdig example.com                      # A record, Procursus resolv.conf
   isdig @1.1.1.1 example.com             # specific UDP server
   isdig @tls://1.1.1.1 example.com       # DoT (Cloudflare)
   isdig @https://dns.google/dns-query example.com   # DoH (Google)
@@ -19,11 +19,14 @@ Usage:
   isdig +short example.com
   isdig +json example.com
 
-Place at /usr/bin/isdig (or /var/jb/usr/bin/isdig). Pure python3, no compile.
+Dopamine executable: /var/jb/usr/bin/isdig. Pure python3, no compile.
+Default DNS comes from Procursus resolv.conf, not the iOS scoped resolver.
 """
 import argparse
-import base64
 import json
+import ipaddress
+import secrets
+from urllib.parse import urlsplit
 import socket
 import ssl
 import struct
@@ -41,12 +44,16 @@ RTYPE_A, RTYPE_AAAA, RTYPE_CNAME, RTYPE_NS, RTYPE_SOA = 1, 28, 5, 2, 6
 RTYPE_PTR, RTYPE_MX, RTYPE_TXT, RTYPE_SRV, RTYPE_CAA = 12, 15, 16, 33, 257
 
 
-def build_query(name, qtype, qclass=QCLASS_IN, txid=0x1234):
+def build_query(name, qtype, qclass=QCLASS_IN, txid=None):
     if name.endswith("."):
         name = name[:-1]
+    if txid is None:
+        txid = secrets.randbits(16)
     packet = struct.pack("!HHHHHH", txid, 0x0100, 1, 0, 0, 0)  # RD
-    for label in name.split("."):
-        lb = label.encode("ascii")
+    labels = name.encode("idna").split(b".") if name else []
+    if any(not lb or len(lb) > 63 for lb in labels) or sum(len(lb) + 1 for lb in labels) + 1 > 255:
+        raise ValueError("invalid DNS name length")
+    for lb in labels:
         packet += struct.pack("!B", len(lb)) + lb
     packet += b"\x00"
     packet += struct.pack("!HH", qtype, qclass)
@@ -54,37 +61,32 @@ def build_query(name, qtype, qclass=QCLASS_IN, txid=0x1234):
 
 
 def parse_name(packet, offset):
-    labels = []
-    jumped = False
-    original = offset
-    hops = 0
+    labels, seen, next_offset = [], set(), None
     while True:
-        if offset >= len(packet):
-            break
+        if offset >= len(packet) or offset in seen:
+            raise ValueError("truncated name or compression loop")
+        seen.add(offset)
         length = packet[offset]
         if length == 0:
-            offset += 1
-            break
+            return ".".join(labels), next_offset if next_offset is not None else offset + 1
         if length & 0xC0 == 0xC0:
             if offset + 1 >= len(packet):
-                break
-            pointer = ((length & 0x3F) << 8) | packet[offset + 1]
-            if not jumped:
-                original = offset + 2
-            offset = pointer
-            jumped = True
-            hops += 1
-            if hops > 20:
-                break
+                raise ValueError("truncated compression pointer")
+            if next_offset is None:
+                next_offset = offset + 2
+            offset = ((length & 0x3F) << 8) | packet[offset + 1]
             continue
+        if length & 0xC0 or offset + 1 + length > len(packet):
+            raise ValueError("invalid DNS label")
         offset += 1
         labels.append(packet[offset:offset + length].decode("ascii", "replace"))
         offset += length
-    return ".".join(labels), (original if jumped else offset)
 
 
 def parse_rdata(packet, offset, rtype, rdlen):
     end = offset + rdlen
+    if end > len(packet):
+        raise ValueError("truncated record data")
     if rtype in (RTYPE_A, RTYPE_AAAA):
         size = 4 if rtype == RTYPE_A else 16
         if end - offset >= size:
@@ -98,12 +100,18 @@ def parse_rdata(packet, offset, rtype, rdlen):
             pref = struct.unpack("!H", packet[offset:offset + 2])[0]
             name, _ = parse_name(packet, offset + 2)
             return "%d %s" % (pref, name)
+    if rtype == RTYPE_SRV and rdlen >= 7:
+        priority, weight, port = struct.unpack("!HHH", packet[offset:offset + 6])
+        target, _ = parse_name(packet, offset + 6)
+        return "%d %d %d %s" % (priority, weight, port, target)
     if rtype == RTYPE_TXT:
         out = []
         p = offset
         while p < end:
             tlen = packet[p]
             p += 1
+            if p + tlen > end:
+                raise ValueError("truncated TXT string")
             out.append(packet[p:p + tlen].decode("utf-8", "replace"))
             p += tlen
         return "".join(out)
@@ -123,20 +131,24 @@ def parse_rdata(packet, offset, rtype, rdlen):
     return packet[offset:end].hex()
 
 
-def parse_response(packet):
-    if len(packet) < 12:
-        return None
+def parse_response(packet, expected_txid=None):
+    if not packet or len(packet) < 12:
+        raise ValueError("truncated DNS header")
     txid, flags, qd, an, ns, ar = struct.unpack("!HHHHHH", packet[:12])
+    if not flags & 0x8000 or (expected_txid is not None and txid != expected_txid):
+        raise ValueError("not a response or transaction ID mismatch")
     rcode = flags & 0xF
     offset = 12
     answers = []
     for _ in range(qd):
         _, offset = parse_name(packet, offset)
         offset += 4
+        if offset > len(packet):
+            raise ValueError("truncated question")
     for _ in range(an + ns + ar):
         name, offset = parse_name(packet, offset)
         if offset + 10 > len(packet):
-            break
+            raise ValueError("truncated record header")
         rtype, rclass, ttl, rdlen = struct.unpack("!HHIH", packet[offset:offset + 10])
         offset += 10
         rdata = parse_rdata(packet, offset, rtype, rdlen)
@@ -242,19 +254,42 @@ def parse_server(spec):
     if not spec.startswith("@"):
         return ("system", None, 53, None)
     spec = spec[1:]
-    if spec.startswith("tls://"):
-        host = spec[6:]
-        return ("dot", host, 853, host)
     if spec.startswith("https://"):
-        return ("doh", spec, 443, None)
-    if spec.startswith("tcp://"):
-        return ("tcp", spec[6:], 53, None)
-    # plain @host
-    return ("udp", spec, 53, None)
+        parsed = urlsplit(spec)
+        if not parsed.hostname:
+            raise ValueError("missing DoH hostname")
+        return ("doh", spec, parsed.port or 443, None)
+    scheme = "tls" if spec.startswith("tls://") else "tcp" if spec.startswith("tcp://") else "udp"
+    target = spec.split("://", 1)[1] if "://" in spec else spec
+    # Unbracketed IPv6 literals use the default port; bracket them for a custom port.
+    try:
+        ipaddress.ip_address(target)
+        host, port = target, 853 if scheme == "tls" else 53
+    except ValueError:
+        parsed = urlsplit(scheme + "://" + target)
+        host, port = parsed.hostname, parsed.port or (853 if scheme == "tls" else 53)
+    if not host or not 1 <= port <= 65535:
+        raise ValueError("invalid DNS server")
+    return ("dot" if scheme == "tls" else scheme, host, port, host if scheme == "tls" else None)
+
+
+def default_server():
+    for path in ("/var/jb/etc/resolv.conf", "/etc/resolv.conf"):
+        try:
+            with open(path) as config:
+                for line in config:
+                    fields = line.split()
+                    if len(fields) >= 2 and fields[0] == "nameserver":
+                        return fields[1]
+        except OSError:
+            continue
+    raise ValueError("no resolv.conf nameserver; specify @server explicitly")
 
 
 def main():
     ap = argparse.ArgumentParser(prog="isdig", description="dig-like DNS lookup for iOS (pure python)")
+    ap.add_argument("--version", action="version", version="isdig 1.1.0")
+    ap.add_argument("--timeout", type=float, default=5.0, help="network timeout in seconds")
     ap.add_argument("args", nargs="+", help="name and optional @server (udp), @tls://, @https://, @tcp://")
     ap.add_argument("-t", "--type", default="A", help="record type (A, AAAA, MX, ...)")
     ap.add_argument("-x", "--reverse", action="store_true", help="reverse lookup")
@@ -271,11 +306,15 @@ def main():
             plus_flags["trace"] = True
         else:
             kept.append(tok)
-    ns, extras = ap.parse_known_args(kept)
+    ns = ap.parse_intermixed_args(kept)
+    if ns.timeout <= 0:
+        ap.error("--timeout must be positive")
 
     short = plus_flags["short"]
     as_json = plus_flags["json"]
     trace = plus_flags["trace"]
+    if trace:
+        ap.error("+trace is not implemented; use explicit @server queries")
 
     # Split positional args into @server and the lookup name (dig-style: server first if present).
     server = None
@@ -285,6 +324,10 @@ def main():
             server = tok
         elif name is None:
             name = tok
+        elif tok.upper() in QTYPE_IDS:
+            ns.type = tok.upper()
+        else:
+            ap.error("unexpected argument: " + tok)
     args = ns
     args.short = short
     args.as_json = as_json
@@ -297,54 +340,41 @@ def main():
             return 2
         # build in-addr.arpa / ip6.arpa
         try:
-            if ":" in name:
-                exploded = socket.inet_pton(socket.AF_INET6, name)
-                nibbles = "".join("%x" % (b >> 4) for b in exploded) + "".join("%x" % (b & 0xF) for b in reversed(exploded))
-                # simpler: reverse hex nibbles
-                full = socket.inet_ntop(socket.AF_INET6, exploded).replace(":", "")
-                # fall back
-                parts = []
-                for byte in exploded:
-                    parts.append("%x" % (byte & 0xF))
-                    parts.append("%x" % (byte >> 4))
-                name = ".".join(reversed(parts)) + ".ip6.arpa"
-            else:
-                packed = socket.inet_aton(name)
-                name = ".".join(str(b) for b in reversed(packed)) + ".in-addr.arpa"
-        except OSError:
-            print("isdig: invalid address for -x", file=sys.stderr)
-            return 2
+            name = ipaddress.ip_address(name).reverse_pointer
+        except ValueError:
+            ap.error("invalid address for -x")
         qtype_name = "PTR"
     else:
         qtype_name = args.type.upper()
 
-    qtype = QTYPE_IDS.get(qtype_name, 1)
+    if qtype_name not in QTYPE_IDS:
+        ap.error("unsupported record type: " + qtype_name)
+    qtype = QTYPE_IDS[qtype_name]
     if not name:
         ap.print_help()
         return 2
 
-    transport, host, port, extra = parse_server(server or "@system")
-    packet = build_query(name, qtype)
-
-    if transport == "system":
-        # On iOS the system resolver may be an unreachable DoH/loopback target;
-        # fall back to a known public UDP resolver so isdig always works.
-        transport = "udp"
-        host = "1.1.1.1"
+    try:
+        transport, host, port, extra = parse_server(server or "@system")
+        packet = build_query(name, qtype)
+        if transport == "system":
+            transport, host = "udp", default_server()
+    except (ValueError, UnicodeError) as e:
+        ap.error(str(e))
 
     try:
         if transport == "udp":
             try:
-                reply = query_udp(host, port, packet)
+                reply = query_udp(host, port, packet, timeout=args.timeout)
             except OSError:
                 ip = resolve_server(host, port)
-                reply = query_udp(ip, port, packet)
+                reply = query_udp(ip, port, packet, timeout=args.timeout)
         elif transport == "tcp":
-            reply = query_tcp(host, port, packet)
+            reply = query_tcp(host, port, packet, timeout=args.timeout)
         elif transport == "dot":
-            reply = query_dot(host, port, packet, server_name=extra)
+            reply = query_dot(host, port, packet, timeout=args.timeout, server_name=extra)
         elif transport == "doh":
-            reply = query_doh(host, packet)
+            reply = query_doh(host, packet, timeout=args.timeout)
         else:
             print("isdig: unknown transport", file=sys.stderr)
             return 2
@@ -352,7 +382,20 @@ def main():
         print("isdig: query failed: %s" % e, file=sys.stderr)
         return 1
 
-    parsed = parse_response(reply)
+    try:
+        expected_txid = struct.unpack("!H", packet[:2])[0]
+        if reply and len(reply) >= 12 and transport == "udp" and struct.unpack("!H", reply[2:4])[0] & 0x0200:
+            if struct.unpack("!H", reply[:2])[0] != expected_txid:
+                raise ValueError("transaction ID mismatch")
+            reply = query_tcp(host, port, packet, timeout=args.timeout)
+            transport = "tcp"
+        parsed = parse_response(reply, expected_txid)
+        if parsed["flags"] & 0x0200:
+            raise ValueError("truncated DNS reply")
+    except (ValueError, OSError, struct.error) as e:
+        print("isdig: invalid response: %s" % e, file=sys.stderr)
+        return 1
+    parsed.update(server=host, port=port, transport=transport)
     if not parsed:
         print("isdig: malformed response", file=sys.stderr)
         return 1
@@ -368,6 +411,7 @@ def main():
         return 0
 
     # dig-like output
+    print(";; SERVER: %s#%s (%s; resolv.conf is not the iOS scoped resolver)" % (host, port, transport))
     print(";; <<>> isdig %s %s" % (name, qtype_name))
     print(";; ->>HEADER<<- opcode: QUERY; status: %s; id: %d" % (parsed["rcode_name"], parsed["txid"]))
     print(";; flags: 0x%x; QUERY: 1, ANSWER: %d" % (parsed["flags"],
