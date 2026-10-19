@@ -40,7 +40,7 @@ extern char **environ;
 }
 - (void)dealloc { [_timer invalidate]; if (_token != NOTIFY_TOKEN_INVALID) notify_cancel(_token); }
 - (BOOL)isSelected { return _state == 1; }
-- (UIColor *)selectedColor { return SERVICE_COLOR; }
+- (UIColor *)selectedColor { return UIColor.whiteColor; }
 - (UIImage *)iconGlyph {
     [self updateLabel];
     static UIImage *blank; static dispatch_once_t once;
@@ -69,8 +69,8 @@ extern char **environ;
     }
     _label.frame = view.bounds;
     _label.text = _state == 3 ? @"!" SERVICE_TEXT : (_state == 2 ? SERVICE_TEXT @"·L" : SERVICE_TEXT);
-    _label.textColor = SERVICE_TEXT_COLOR;
-    _label.alpha = _state == 0 ? .65 : 1;
+    _label.textColor = [self isSelected] ? SERVICE_ACTIVE_TEXT_COLOR : UIColor.whiteColor;
+    _label.alpha = 1;
     [view bringSubviewToFront:_label];
     view.accessibilityLabel = SERVICE_NAME;
     view.accessibilityValue = _state == 1 ? @"Включено" : (_state == 2 ? @"Только localhost" : (_state == 3 ? @"Ошибка" : @"Выключено"));
