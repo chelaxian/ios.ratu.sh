@@ -531,16 +531,16 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.1.0
+Version: 1.1.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon
-Filename: debs/com.ratush.catmcpcc_1.1.0_iphoneos-arm64.deb
-Size: 29698
-MD5sum: b4d5819808a262c10fcccf8ffb2eefd9
-SHA1: 63eb0938d860be85f0ed50cad35a3f65dc061294
-SHA256: ee89f78cc59967790417b9507dd2d7114ebba3325ecc6dd8f58354c321919f4c
+Filename: debs/com.ratush.catmcpcc_1.1.1_iphoneos-arm64.deb
+Size: 29614
+MD5sum: 4a34d3ce195619f60daa3f8ab748b474
+SHA1: 9a69c03eb99ae462beef90280765c9b11f9bdf19
+SHA256: ee35e567a877f928822801cbfbf60ae0f01cd0918cfeb8f82d2e64009f57147a
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Включение и полная остановка службы CatMCP на Dopamine.
@@ -548,16 +548,16 @@ Author: ratu.sh
 Name: CCMCP
 
 Package: com.ratush.ccfrida
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, re.frida.server
-Filename: debs/com.ratush.ccfrida_1.0.0_iphoneos-arm64.deb
-Size: 28074
-MD5sum: 4f4c1f91cf96ecf99e5265c8168200a5
-SHA1: 873df6c80d496487cfb75ca65890990199e2daec
-SHA256: a42df8205d35823c0b5f59adff46055acdb39d5395064d410fcf57ece0f0c74b
+Filename: debs/com.ratush.ccfrida_1.0.1_iphoneos-arm64.deb
+Size: 28034
+MD5sum: abc7495361c42bd38f1225c69de32aed
+SHA1: d39b53e61c065e2d1c76448e918b0a49b5badd5b
+SHA256: eaf1492a7b537c6c334afb23f989e0803d1b3eb95f9e5af92889a55e64ef2b73
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Включение Frida и полная остановка frida-server без фонового наблюдателя.
@@ -614,16 +614,16 @@ Icon: https://ios.ratu.sh/icons/ccopenssh.png
 Name: CCOPENSSH
 
 Package: com.ratush.ccopenssh
-Version: 1.1.0
+Version: 1.1.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.1.0_iphoneos-arm64.deb
-Size: 30694
-MD5sum: 0609b00b78ff55778ebc869f0f5a9a24
-SHA1: 0e983a3a25d7317d63b187c338dad2a80206d365
-SHA256: ae8aca6fdee976cad26c30225ec0a81f4937b802dd850f44938fa6233d2022f3
+Filename: debs/com.ratush.ccopenssh_1.1.1_iphoneos-arm64.deb
+Size: 30626
+MD5sum: 1b9ed793c01f6553d9acb2e7335889c5
+SHA1: 59811e78742024a5e5d7123bb401e28b6baa0320
+SHA256: 85f8b10aa661cc54ae3edae77f79f5285fd5fcd10fe35f950e5120f83c9fceb0
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Переключатель SSH для Dopamine: остановка службы, запасной доступ только через localhost.
