@@ -9,7 +9,7 @@ if ! command -v dpkg-scanpackages >/dev/null 2>&1; then
   exit 1
 fi
 
-dpkg-scanpackages -m debs /dev/null > Packages
+dpkg-scanpackages -m debs scripts/overrides > Packages
 
 # Normalize all repository display versions to their numeric portion.
 python3 - <<'PY'
