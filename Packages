@@ -16,23 +16,6 @@ Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
 Name: Offloader
 
 Package: com.level3tjg.offloader
-Version: 0.0.6
-Architecture: iphoneos-arm64
-Maintainer: level3tjg
-Installed-Size: 332
-Depends: ellekit, firmware (>= 11.0), com.muirey03.libmryipc, com.opa334.altlist, preferenceloader
-Filename: debs/com.level3tjg.offloader_0.0.6_iphoneos-arm64.deb
-Size: 38460
-MD5sum: a39a5406564da9087d59c470b7107062
-SHA1: 3415d488e908160265f4b93b7cab7c840fc6fcc1
-SHA256: 13411e6223d8a576f2480d776d405f0dc390e37d1ceba7e304bbfaa6d1af8602
-Section: Tweaks
-Description: Offload apps from the 3D touch menu and more (rootless)
-Author: level3tjg
-Depiction: https://level3tjg.me/repo/depictions/?p=com.level3tjg.offloader
-Name: Offloader
-
-Package: com.level3tjg.offloader
 Version: 1.0.5
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
@@ -138,38 +121,6 @@ Author: Avangelista & sourcelocation (Appabetical, GPLv3) - RootHide port by che
 Name: Appabetical
 
 Package: com.ratush.appabetical
-Version: 1.0.16
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 460
-Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.appabetical_1.0.16_iphoneos-arm64.deb
-Size: 39914
-MD5sum: ac2d4ef88993cee81d09aa7f4f5f188f
-SHA1: a908780f8b6680f3c309716265458f402125ff84
-SHA256: 6c6818a23e75cf526418d79449b5bb63cfa2559eeea9cf712bce5c3713fa2ec5
-Section: Tweaks
-Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). Dopamine rootless adaptation of Avangelista/Appabetical.
-Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine rootless adaptation by chelaxian
-Name: Appabetical
-
-Package: com.ratush.appabetical
-Version: 2.0.0
-Architecture: iphoneos-arm64
-Maintainer: chelaxian
-Installed-Size: 428
-Depends: ellekit, preferenceloader (>= 2.2)
-Filename: debs/com.ratush.appabetical_2.0.0_iphoneos-arm64.deb
-Size: 40248
-MD5sum: b8bf219628892fc08c1804144104c88f
-SHA1: b269bd294aa7a7d0f36e740364d7d9c1c567a657
-SHA256: a8dde82f7c38da75c0aa201405d5561fbec1d3f3b72ff6648e58f4600528d9da
-Section: Tweaks
-Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). Dopamine rootless implementation with live SpringBoard sorting and verified layout presets.
-Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine implementation by chelaxian
-Name: Appabetical
-
-Package: com.ratush.appabetical
 Version: 2.0.1
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
@@ -184,193 +135,6 @@ Section: Tweaks
 Description: Alphabetically sort Home Screen icons and folder contents. Latin A-Z, then Cyrillic A-ya, then others; offloaded apps can be moved to the end. Layout presets can also snapshot and restore the Control Center layout (toggle order and enabled state). Dopamine rootless implementation with live SpringBoard sorting and verified layout presets.
 Author: Avangelista & sourcelocation (Appabetical, GPLv3) - Dopamine implementation by chelaxian
 Name: Appabetical
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.4
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.4_iphoneos-arm64.deb
-Size: 75076
-MD5sum: 5b7bc7252b2f2c15e07b0c64bab634b5
-SHA1: 5b44bbd7ab72b9fffc1fc375d71c812df6b941bc
-SHA256: e17f40f608bb6f5c7889f4a86fed67ac06baf30340bb36cb24693ace13d092b5
-Section: Tweaks
-Description: Per-application routing through the active system VPN or directly.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.5
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.5_iphoneos-arm64.deb
-Size: 76926
-MD5sum: bc534a95824622b5c8f849e64d87c6b1
-SHA1: 9e48865317ccecf46bae21579f2b55c06b79b533
-SHA256: d6b6c6c68df5ad77c13283a7b87e4a4ce94fdf09d070c6c59164a56b7161f520
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing. Target: iOS 15.0-17.3.1 with Dopamine; verified on iOS 17.0. Status badge shows red BYPASS or green TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.6
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.6_iphoneos-arm64.deb
-Size: 77804
-MD5sum: 730e40403137bae177aadfef2e2fa30f
-SHA1: a880e7c1a11345cdbcdd51d9aac4e3b510b39d2a
-SHA256: 4bc2663156cf1690a83b242c1561d09f17943bef4b16bf2af1b1992289473e9b
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing through the active system VPN. Supported iOS: 15.0 - 17.3.1 (Dopamine rootless). Tested on iOS 17.0. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.7
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.7_iphoneos-arm64.deb
-Size: 79024
-MD5sum: fd9f9079b309ee2e2fbbcf0892ab99d0
-SHA1: a2cdfbfb1dfa8f3c2bb767c21c5c313e6ca082d3
-SHA256: 49b3b058bfa4e4fd84c5763982337c3bb06c02bf4fc4a0beb5e9fffcc608e167
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing through the active system VPN. Supported iOS: 15.0 - 17.3.1 (Dopamine rootless). Tested on iOS 17.0. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.8
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), firmware (<= 17.3.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.8_iphoneos-arm64.deb
-Size: 79036
-MD5sum: b76a7ca01c369bd01a69958740afe29f
-SHA1: 485c3a454d2421987e12b52722f2748e1ec8edac
-SHA256: 4e17a6a78970dde1a14c58a4b055396358024bb05db57c819a08b3b559f2a081
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing through the active system VPN. Supported iOS: 15.0 - 17.3.1 (Dopamine rootless). Tested on iOS 17.0. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.2.9
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 852
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.2.9_iphoneos-arm64.deb
-Size: 79092
-MD5sum: 25b68f7e5c9b131289ef82fa18216313
-SHA1: d048ee0e910244bf904b14c99269e443cc15bfb8
-SHA256: 21c2c9f73d5aa4b42a53eb8e98eb1d0732817af1e1defaf543a1f88783c71acf
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing through the active system VPN. Package install range: iOS 15.0 - 26.0.1 (Dopamine rootless); runtime verified on iOS 17.0 only. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.3.0
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1004
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.3.0_iphoneos-arm64.deb
-Size: 112026
-MD5sum: ab9b10f42c9286cef6e11e0ad5475d33
-SHA1: 7aa5b5f89de85ba17b31c22ba9f73dd5b5a0b9dd
-SHA256: dd3393ef2a01f42fc86c4405158e4feba06c45e159cedb41afc6120a11fe2210
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing through the active system VPN. Extra: disconnect VPN on lock screen, Always ON VPN, VPN health check, public IP with country flag. Package install range: iOS 15.0 - 26.0.1 (Dopamine rootless); runtime verified on iOS 17.0 only. Status bar badge: red = BYPASS, green = TUNNEL ONLY.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.4.0
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1464
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.4.0_iphoneos-arm64.deb
-Size: 160406
-MD5sum: 748cbaa931f07e20188aba3e6373bb41
-SHA1: 3b0493cc0d3c0ee42fc36159e04ad65c9538f8a1
-SHA256: c3eb9efe1adc85882ae9e2f054c9e23e2eba1bc8baaca75ffcdcfd2768dad38f
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.4.1
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1496
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.4.1_iphoneos-arm64.deb
-Size: 167798
-MD5sum: ffeef41b287b0a2ffc5acddb7d3359f8
-SHA1: 09f23ef1e87366ea2be66e3904b9640e3f7d9e43
-SHA256: 10a41b6609c668b34d51860c462c93dba2067d66246d5fba40e951f29428356c
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.4.2
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1496
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.4.2_iphoneos-arm64.deb
-Size: 168100
-MD5sum: 542a18b9c9474a1dcabbb987f6ae640e
-SHA1: 11d541853feeecd10bf19baa74683b6a0db4aa78
-SHA256: 1a988e65b8e9d12c7d7686e46ce126209ffe65ebd0ab2aa38a37bbed5719db04
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
-
-Package: com.ratush.appsplitvpn
-Version: 0.4.3
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1496
-Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
-Filename: debs/com.ratush.appsplitvpn_0.4.3_iphoneos-arm64.deb
-Size: 170192
-MD5sum: 8b4700da74df0a932a7561fa56b58098
-SHA1: 86db4ab9e0bfa888081806626d44bc54a8e3866d
-SHA256: 15c04227439f61ac34c1c5ea9e5c9d061b3dc93ad491020118a39b7e3a1c42d2
-Section: Tweaks
-Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
-Author: ratush
-Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
-Name: App Split VPN
 
 Package: com.ratush.appsplitvpn
 Version: 0.4.4
@@ -563,120 +327,6 @@ Author: opa334 <opa334@protonmail.com>
 Name: Choicy (Ratu.sh fork)
 
 Package: com.ratush.claude-code-ios
-Version: 2.1.112-5
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, openssh
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-5_iphoneos-arm64e.deb
-Size: 46108030
-MD5sum: 9494cbccdaa45e01b39565ba17af02d0
-SHA1: 2ca8c6987e5fb7f1d53c3c9149fe04025be4ba79
-SHA256: 97f1379cca3bd9414face456cd2671974a684de584307d600af51093e621bf56
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for RootHide. Launches NewTerm 3 through its supported ssh:// scheme instead of the broken newterm3:// URL, so tapping the home-screen app starts Claude Code. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; NewTerm ssh launcher by ratu.sh
-Name: Claude Code iOS (NewTerm launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-5
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, openssh
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-5_iphoneos-arm64.deb
-Size: 46107946
-MD5sum: 713d9e3fbaa9c23efe2d5ebdd8284383
-SHA1: 57db6514e550dc2e7f42a50197f27ba0de5f970e
-SHA256: a08dc3591197e03ded959c64a45dddab84cb71e735a3e7a8beb49f9bbf0c5fcb
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Launches NewTerm 3 through its supported ssh:// scheme instead of the broken newterm3:// URL, so tapping the home-screen app starts Claude Code. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; NewTerm ssh launcher by ratu.sh
-Name: Claude Code iOS (NewTerm launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-6
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-6_iphoneos-arm64.deb
-Size: 46105112
-MD5sum: 92ae262c3c589a18bc1ea326fe8136ee
-SHA1: 3fc3641da7e692d7ccf8a615a5d185055ee40e62
-SHA256: 520db3531db7f2f247faae50a8e9323dcc5c7a3bc3ccd9745513f667d6a5920a
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-6
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-6_iphoneos-arm64e.deb
-Size: 46105102
-MD5sum: 3be57b37381f2b25408153c823ec2124
-SHA1: 494247a4c9f2970982fed5f40a555a5e4596bf2e
-SHA256: 287570806b692f07fc1a022cb7241ba874fecc2b048a3e9d8d9cde20f264f9d1
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-7
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64.deb
-Size: 46106390
-MD5sum: b1034220f6f6f9bc6293b34407b45910
-SHA1: 44c20dbf004b6530c5fdd7ecf344a58b6c87ccd3
-SHA256: de742eefd7591cafe0bb4b41aade96e74402e65854f4b0eb014f9939ad7c193a
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-7
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.5)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-7_iphoneos-arm64e.deb
-Size: 46106986
-MD5sum: 74acb09fbf099dc177f996a1e88f85e3
-SHA1: 2f0fa3120d321ca1c5f6f2eabcd4bc729ca64d68
-SHA256: f34f1712f56e7106ba8e6a6fb9418d83c29c40adb2e633032ec8393f8b418601
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
 Version: 2.1.112-8
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
@@ -804,26 +454,6 @@ Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
 Name: /etc/hosts (iOS 17.0)
 
 Package: com.ratush.etchosts17
-Version: 0.8.1
-Architecture: iphoneos-arm64
-Maintainer: ratush
-Installed-Size: 1012
-Depends: firmware (>= 17.0), preferenceloader, python3, sqlite3
-Conflicts: com.ratush.ratuhosts
-Replaces: com.ratush.ratuhosts
-Filename: debs/com.ratush.etchosts17_0.8.1_iphoneos-arm64.deb
-Size: 197902
-MD5sum: bb0b115efde5b82e802476a1b8847b0e
-SHA1: 5864eed83d9961ad69e30c1b0e8e90a6a77961c8
-SHA256: c5aed69d2ed6245c0505cfe3f73c07acf49c93f5e42a6bc476108992aa58c744
-Section: Tweaks
-Description: Editable /etc/hosts-style DNS overrides for Dopamine rootless iOS 17.
- Terminal-styled Settings editor (matrix/CRT theme with block cursor and scanlines) for hosts entries with IPv4/IPv6 addresses, multiple hostnames per line, and inline comments; persistent preset profiles that survive respring/reinstall. On this sealed iOS 17 device /etc/hosts is unwritable and mDNSResponder is a non-injectable platform binary, so the PRIMARY override mechanism is a scoped managed-DNS profile (com.apple.dnsSettings.managed) generated by the bundled daemon and installed via the Settings bundle. Its SupplementalMatchDomains list exactly the overridden hosts, so iOS routes ONLY those names to the local daemon over an encrypted transport (DNS-over-TLS :853 by default, or DNS-over-HTTPS :8443 if a network middleboxes :853), winning over an active managed DoH/DoT resolver (ControlD/NextDNS/AdGuard) AND VPN DNS for the listed hosts, while everything else keeps its normal path through the primary resolver -- true desktop /etc/hosts behaviour where the hosts file is the absolute winner. Two profile modes: Block answers matched hosts from the editor map (0.0.0.0 etc.); Upstream forwards matched hosts to a chosen real DoT server (e.g. dns.google) so the host is still routed to us (we win for it) but resolved through that upstream instead of a static address. The per-device CA is bundled as a trusted root so iOS trusts the daemon's certificate without a manual Full Trust step. The user enables the profile ONCE in Settings > General > VPN & Device Management > DNS (saveToPreferences cannot enable it silently -- this is an Apple gate). The SECONDARY mechanism, kept for plain-DNS networks and full-tunnel VPN DNS, is the system-resolver redirect (SCDynamicStore) that points ONLY State:/Network/Global/DNS at 127.0.0.1; the per-service DNS keys are deliberately never touched (they come from the DHCP/PDP lease and configd will not recompute them), so clearing the override always restores fully working stock DNS. Reversibility is guaranteed on every path: the redirect helper snapshots the real global resolver before overriding it and restores it on disable / unhealthy daemon / VPN cede / SIGTERM, a prerm restores stock DNS before the package files are removed, the scoped profile is removed via the entitled NEDNSSettings helper, State: keys are ephemeral (gone after reboot), and it never applies the redirect until the local daemon has actually answered once (so a slow or jetsam-killed daemon never leaves DNS pointing at a dead 127.0.0.1). Under a VPN the helper captures the tunnel's own DNS servers and the daemon forwards non-listed names to them, so everything else keeps resolving through the VPN. If the tweak is disabled or the local daemon stops answering, the redirect clears automatically and DNS falls back to the system; if the jailbreak is lost, the installed profile becomes inert (no listener to talk to) and DNS simply falls back to the primary resolver. The DoT (:853), DoH (:8443) and profile-HTTP (:53580) listeners start unconditionally at daemon boot so enabling the profile in Settings works immediately without a daemon restart. The resolver daemon also serves UDP and TCP on :53, handles queries on a worker pool and forwards misses to all captured upstreams in parallel (so a slow or dead upstream never stalls system DNS); OpenSSL is imported once when the DoT listener first starts (off the UDP :53 hot path). In scoped mode, adding/removing a hostname needs a one-tap profile re-install (editing an IP or switching mode is live). Preferences are owned solely by the Settings bundle so presets, toggles, transport, mode and upstream persist; the daemon is read-only with respect to them.
-Author: ratush
-Icon: file:///Library/PreferenceBundles/EtcHosts17Prefs.bundle/SileoIcon.png
-Name: /etc/hosts (iOS 17.0)
-
-Package: com.ratush.etchosts17
 Version: 1.0.4
 Architecture: iphoneos-arm64
 Maintainer: ratush
@@ -924,7 +554,8 @@ Size: 91404
 MD5sum: b785f7f6d83c2fe32cf7f8ad24153223
 SHA1: 687afa73722246cd4912fa37dcac8eb02fe5c5a9
 SHA256: 182c4b50b5e64161235eff53ff6b64a5d50a9d87bba20c4d958576f12e30da33
-Section: Networking
+Section: Tweaks
+Priority: optional
 Description: Experimental rootless VPN and direct hotspot routing with optional kill-switch, DNS and TTL controls.
 Author: Ratush
 Name: TetherYou
@@ -1037,6 +668,24 @@ Description: Observe and reprogram running programs.
 Author: Frida Developers <oleavr@nowsecure.com>
 Name: Frida
 
+Package: re.frida.server
+Version: 17.24.3
+Architecture: iphoneos-arm64
+Maintainer: Ole André Vadla Ravnås <oleavr@nowsecure.com>
+Installed-Size: 78416
+Conflicts: re.frida.server64
+Filename: debs/re.frida.server_17.24.3_iphoneos-arm64.deb
+Size: 23504004
+MD5sum: 96bb3646de0e4ece017c58097a060947
+SHA1: d200c8f44113728b1b5cc02abff5f76048486a7b
+SHA256: 233a0133b027f41a24c7dddfa6e88bc49cf1f14a5066bc32c2523953f59d9e6d
+Section: Development
+Priority: optional
+Homepage: https://frida.re/
+Description: Observe and reprogram running programs.
+Author: Frida Developers <oleavr@nowsecure.com>
+Name: Frida
+
 Package: ru.danpashin.twackup
 Version: 2.0.27
 Architecture: iphoneos-arm64
@@ -1110,106 +759,6 @@ License: GPL-3.0-only
 Name: Twackup (GUI)
 
 Package: wiki.qaq.ighostty
-Version: 0.2.4
-Architecture: iphoneos-arm64e
-Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Installed-Size: 18760
-Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.4_iphoneos-arm64e.deb
-Size: 8197876
-MD5sum: 1eb76b61dc5f1fe2a70f8773f13fda5b
-SHA1: 5c1a2454ace6d240e535a3062ef472f60e2d1a59
-SHA256: a716556c63c0e11892eccd14a200622e2c10e60b4a8f37e5645cc48236f1ae16
-Section: Utilities
-Priority: optional
-Description: Ghostty-powered terminal for jailbroken iOS
- Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
- .
- Shells are spawned by the bundled ighosttyd daemon and survive app
- relaunches; SSH transport is planned on the same transport interface.
-Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Name: iGhostty
-
-Package: wiki.qaq.ighostty
-Version: 0.2.4
-Architecture: iphoneos-arm64
-Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Installed-Size: 18760
-Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.4_iphoneos-arm64.deb
-Size: 8199442
-MD5sum: 9b80bce78123dce37f145414074ff931
-SHA1: b9aa6cfeaaa783bb32be0603cb1a84922046bba0
-SHA256: 5c94a7962dd91ceece5847c76718b8855fce69235b4a0420593a9addaf8564b4
-Section: Utilities
-Priority: optional
-Description: Ghostty-powered terminal for jailbroken iOS
- Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
- .
- Shells are spawned by the bundled ighosttyd daemon and survive app
- relaunches; SSH transport is planned on the same transport interface.
-Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Name: iGhostty
-
-Package: wiki.qaq.ighostty
-Version: 0.2.5
-Architecture: iphoneos-arm64e
-Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Installed-Size: 18808
-Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64e.deb
-Size: 8220806
-MD5sum: b3f1c3e9cd350754d252de75891b4d36
-SHA1: 49dbe6dd1a13ecc6470ef8ec7b66763b4db7118d
-SHA256: c4a9cdbab8a11697e252f9d44ccb16b09e39bbea39ac9bc7810807e7f9b43e7f
-Section: Utilities
-Priority: optional
-Description: Ghostty-powered terminal for jailbroken iOS
- Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
- .
- Shells are spawned by the bundled ighosttyd daemon and survive app
- relaunches; SSH transport is planned on the same transport interface.
- .
- Supports the fixed ighostty://claude handoff used by Claude Code iOS.
- The handoff starts only its predefined Claude shell and accepts no
- arbitrary command or arguments.
-Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Name: iGhostty
-
-Package: wiki.qaq.ighostty
-Version: 0.2.5
-Architecture: iphoneos-arm64
-Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Installed-Size: 18808
-Depends: firmware (>= 15.0), uikittools
-Filename: debs/wiki.qaq.ighostty_0.2.5_iphoneos-arm64.deb
-Size: 8222964
-MD5sum: d9511d511eb1cb11799513add9847c8f
-SHA1: a38d8d310014342eef7835cf79bfb557bf468156
-SHA256: fd9859fc1f4d7c036b5c792108ce14397550ebbfb42ad10204a192ee147c0d4b
-Section: Utilities
-Priority: optional
-Description: Ghostty-powered terminal for jailbroken iOS
- Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
- .
- Shells are spawned by the bundled ighosttyd daemon and survive app
- relaunches; SSH transport is planned on the same transport interface.
- .
- Supports the fixed ighostty://claude handoff used by Claude Code iOS.
- The handoff starts only its predefined Claude shell and accepts no
- arbitrary command or arguments.
-Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
-Name: iGhostty
-
-Package: wiki.qaq.ighostty
 Version: 0.2.6
 Architecture: iphoneos-arm64
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
@@ -1220,7 +769,7 @@ Size: 8222628
 MD5sum: 4e2300ca4dabdf0315c033640fac097c
 SHA1: ddc7b62594ea16f87a3d603a509aa0a82dbffc16
 SHA256: 1d627054be9a986fc09d878ceba659d615120360748c68002edb844e794535c6
-Section: Utilities
+Section: Tweaks
 Priority: optional
 Description: Ghostty-powered terminal for jailbroken iOS
  Terminal emulator built on libghostty's terminal core with a host-managed
@@ -1247,7 +796,7 @@ Size: 8224580
 MD5sum: 33dcdba1ff11fcf4dedb94f3f6766599
 SHA1: e2b3011bb55bc4c72e6ef1b3f86c75ee1b2f3e91
 SHA256: 2756acaeffc92743b5ef36ed080686463b9b16d2c7e0f831a84339dd76c443d8
-Section: Utilities
+Section: Tweaks
 Priority: optional
 Description: Ghostty-powered terminal for jailbroken iOS
  Terminal emulator built on libghostty's terminal core with a host-managed
