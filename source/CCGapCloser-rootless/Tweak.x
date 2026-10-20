@@ -397,18 +397,18 @@ static void CCGRespring(void) {
 %hook STUIStatusBar_Wrapper
 - (void)setAlpha:(CGFloat)alpha {
     UIView *view=(UIView *)self;
-    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
+    BOOL force=!gApplying && CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
     %orig(force ? 1.0 : alpha);
 }
 - (void)setHidden:(BOOL)hidden {
     UIView *view=(UIView *)self;
-    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
+    BOOL force=!gApplying && CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
     %orig(force ? NO : hidden);
 }
 %end
 %hook SBStatusBarWindow
 - (void)setHidden:(BOOL)hidden {
-    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive();
+    BOOL force=!gApplying && CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive();
     %orig(force ? NO : hidden);
 }
 %end
