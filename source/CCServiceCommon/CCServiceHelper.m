@@ -183,7 +183,11 @@ static BOOL SetEnabled(BOOL enabled){
             }
             if(Launch(@[@"print",target])==0){Launch(@[@"kickstart",target]);break;}
         } else {
-            Launch(@[@"disable",target]);Processes(SIGTERM);Launch(@[@"bootout",target]);
+            Launch(@[@"disable",target]);Processes(SIGTERM);
+            // Disable respawn before termination; do not wait seconds inside
+            // bootout for a server that ignores SIGTERM or has live clients.
+            if(Processes(0)>0){usleep(20000);Processes(SIGKILL);}
+            Launch(@[@"bootout",target]);
             // No need to issue more launchctl commands once the actual
             // listeners and processes have disappeared in this domain.
             if(!Listening() && Processes(0)==0)break;
