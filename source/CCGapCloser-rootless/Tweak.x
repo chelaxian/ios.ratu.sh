@@ -301,7 +301,6 @@ static void CCGApplyToAllControlCenterWindows(void) {
 static void CCGApplySoon(UIView *view) {
     static BOOL pending;
     if (!view || !CCGEnabled() || gApplying || pending) return;
-    __weak UIView *root=view.window ?: view;
     pending=YES;
     dispatch_async(dispatch_get_main_queue(), ^{
         pending=NO;
