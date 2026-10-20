@@ -47,6 +47,27 @@ s = '\n\n'.join(blocks)
 p.write_text(s, encoding='utf-8')
 PY
 
+# Publish English Name/Description in Packages (Sileo, Zebra). Russian texts live in
+# i18n.json and are shown by the website when the RU language is selected.
+python3 - <<'PY'
+from pathlib import Path
+import json, re
+i18n = json.loads(Path('i18n.json').read_text(encoding='utf-8')).get('packages', {})
+p = Path('Packages')
+blocks = p.read_text(encoding='utf-8').split('\n\n')
+def patch(block):
+    m = re.search(r'(?m)^Package: (.+)$', block)
+    en = i18n.get(m.group(1), {}).get('en') if m else None
+    if not en:
+        return block
+    for field, value in en.items():
+        pattern = r'(?m)^' + field + r': .*(?:\n[ \t].*)*'
+        if re.search(pattern, block):
+            block = re.sub(pattern, lambda _: field + ': ' + value, block, count=1)
+    return block
+p.write_text('\n\n'.join(patch(b) for b in blocks), encoding='utf-8')
+PY
+
 bzip2 -c9 Packages > Packages.bz2
 gzip -c9n Packages > Packages.gz
 

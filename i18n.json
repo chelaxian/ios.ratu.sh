@@ -1,0 +1,46 @@
+{
+  "packages": {
+    "com.ratush.catmcpcc": {
+      "en": {
+        "Description": "Turns the CatMCP service on and fully stops it on Dopamine."
+      },
+      "ru": {
+        "Description": "Включение и полная остановка службы CatMCP на Dopamine."
+      }
+    },
+    "com.ratush.ccfrida": {
+      "en": {
+        "Description": "Turns Frida on and fully stops frida-server, with no background watcher."
+      },
+      "ru": {
+        "Description": "Включение Frida и полная остановка frida-server без фонового наблюдателя."
+      }
+    },
+    "com.ratush.ccopenssh": {
+      "en": {
+        "Description": "SSH toggle for Dopamine: stops the service; fallback access only through localhost."
+      },
+      "ru": {
+        "Description": "Переключатель SSH для Dopamine: остановка службы, запасной доступ только через localhost."
+      }
+    },
+    "com.ratush.daemonpresets": {
+      "en": {
+        "Name": "iOS Daemons",
+        "Description": "Real control of iOS services with presets, recovery, and a Control Center toggle."
+      },
+      "ru": {
+        "Name": "Демоны iOS",
+        "Description": "Реальное управление службами iOS с пресетами, восстановлением и переключателем пункта управления."
+      }
+    },
+    "com.thatmarcel.tweaks.neverheardofvpns": {
+      "en": {
+        "Description": "Hides common local signs of a VPN without switching the route. Rootless, iOS 17.0-26.0.1; iOS 26 untested. The external IP is not hidden."
+      },
+      "ru": {
+        "Description": "Скрытие распространённых локальных признаков VPN без переключения маршрута. Rootless iOS 17.0–26.0.1; iOS 26 не проверена. Внешний IP не скрывается."
+      }
+    }
+  }
+}

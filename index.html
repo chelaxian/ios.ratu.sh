@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,6 +29,9 @@
       padding: 0 16px; border-radius: 7px; background: #2ea9b7; color: #071315;
       text-decoration: none; font-weight: 750; white-space: nowrap;
     }
+    .lang-switch { display: inline-flex; gap: 2px; padding: 3px; border-radius: 7px; background: #23272d; flex: 0 0 auto; }
+    .lang-switch button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: #aeb4bd; cursor: pointer; font-weight: 650; }
+    .lang-switch button[aria-pressed="true"] { background: #424852; color: #fff; }
     main { padding: 24px 0 44px; }
     .toolbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
     .search-wrap { position: relative; }
@@ -89,6 +92,7 @@
     @media (max-width: 720px) {
       .header-inner { align-items: flex-start; flex-wrap: wrap; }
       .add-button { width: 100%; }
+      .lang-switch { order: 2; }
       .toolbar { grid-template-columns: 1fr; }
       .segments { display: grid; grid-template-columns: repeat(3, 1fr); }
       .segments button { padding: 0 4px; font-size: 11px; }
@@ -104,9 +108,13 @@
       <img class="repo-icon" src="/CydiaIcon.png" alt="">
       <div class="brand">
         <h1>ios.ratu.sh</h1>
-        <p class="subtitle">Пакеты для RootHide Bootstrap и современных rootless-джейлбрейков</p>
+        <p class="subtitle" data-i18n="subtitle"></p>
       </div>
-      <a class="add-button" href="sileo://source/https://ios.ratu.sh/">Добавить в Sileo</a>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <a class="add-button" href="sileo://source/https://ios.ratu.sh/" data-i18n="add"></a>
     </div>
   </header>
 
@@ -114,19 +122,19 @@
     <div class="toolbar">
       <label class="search-wrap">
         <span aria-hidden="true">⌕</span>
-        <input id="search" type="search" placeholder="Поиск по пакетам" autocomplete="off">
+        <input id="search" type="search" data-i18n-ph="search" autocomplete="off">
       </label>
-      <div class="segments" role="tablist" aria-label="Категория пакетов">
-        <button type="button" role="tab" data-filter="all" aria-selected="true">Все</button>
-        <button type="button" role="tab" data-filter="tweaks" aria-selected="false">Твики</button>
-        <button type="button" role="tab" data-filter="tools" aria-selected="false">Инструменты</button>
-        <button type="button" role="tab" data-filter="libraries" aria-selected="false">Библиотеки</button>
+      <div class="segments" role="tablist" data-i18n-aria="category">
+        <button type="button" role="tab" data-filter="all" aria-selected="true" data-i18n="tab_all"></button>
+        <button type="button" role="tab" data-filter="tweaks" aria-selected="false" data-i18n="tab_tweaks"></button>
+        <button type="button" role="tab" data-filter="tools" aria-selected="false" data-i18n="tab_tools"></button>
+        <button type="button" role="tab" data-filter="libraries" aria-selected="false" data-i18n="tab_libraries"></button>
         <button type="button" role="tab" data-filter="dylibs" aria-selected="false">Dylibs</button>
-        <button type="button" role="tab" data-filter="archive" aria-selected="false">Архив</button>
+        <button type="button" role="tab" data-filter="archive" aria-selected="false" data-i18n="tab_archive"></button>
       </div>
     </div>
-    <div class="summary"><span id="package-count">Загрузка индекса…</span><span>iOS 15–17</span></div>
-    <div id="catalog" class="loading">Читаю Packages…</div>
+    <div class="summary"><span id="package-count"></span><span>iOS 15–17</span></div>
+    <div id="catalog" class="loading"></div>
   </main>
 
   <footer>
@@ -135,8 +143,55 @@
   </footer>
 
   <script>
+    const I18N = {
+      en: {
+        subtitle: 'Packages for RootHide Bootstrap and modern rootless jailbreaks',
+        add: 'Add to Sileo', search: 'Search packages', category: 'Package category',
+        tab_all: 'All', tab_tweaks: 'Tweaks', tab_tools: 'Tools', tab_libraries: 'Libraries', tab_archive: 'Archive',
+        loading_index: 'Loading index…', reading: 'Reading Packages…',
+        group_tweaks: 'Tweaks', group_tools: 'Tools', group_libraries: 'System components and libraries', group_archive: 'Archive',
+        group_dylibs: 'Dylibs — for injection via Sideloadly / TrollFools',
+        count_of: (a, b) => a + ' of ' + b, count_dylib: n => n + ' dylib',
+        none: 'Nothing found',
+        no_dylibs: 'No .dylib files yet. Put a file into <code>sideload/</code> and add an entry to <code>dylibs.json</code>.',
+        download_deb: label => 'Download .deb (' + label + ')', download_dylib: 'Download .dylib',
+        injection: 'Injection via Sideloadly / TrollFools.',
+        index_unavailable: 'Index unavailable', load_failed: msg => 'Failed to load Packages: ' + msg
+      },
+      ru: {
+        subtitle: 'Пакеты для RootHide Bootstrap и современных rootless-джейлбрейков',
+        add: 'Добавить в Sileo', search: 'Поиск по пакетам', category: 'Категория пакетов',
+        tab_all: 'Все', tab_tweaks: 'Твики', tab_tools: 'Инструменты', tab_libraries: 'Библиотеки', tab_archive: 'Архив',
+        loading_index: 'Загрузка индекса…', reading: 'Читаю Packages…',
+        group_tweaks: 'Твики', group_tools: 'Инструменты', group_libraries: 'Системные компоненты и библиотеки', group_archive: 'Архив',
+        group_dylibs: 'Dylibs — для инъекции через Sideloadly / TrollFools',
+        count_of: (a, b) => a + ' из ' + b, count_dylib: n => n + ' dylib',
+        none: 'Ничего не найдено',
+        no_dylibs: 'Пока нет ни одной .dylib. Положи файл в <code>sideload/</code> и добавь запись в <code>dylibs.json</code>.',
+        download_deb: label => 'Скачать .deb (' + label + ')', download_dylib: 'Скачать .dylib',
+        injection: 'Инъекция через Sideloadly / TrollFools.',
+        index_unavailable: 'Индекс недоступен', load_failed: msg => 'Не удалось загрузить Packages: ' + msg
+      }
+    };
+    let lang = 'en';
+    try {
+      const fromUrl = new URLSearchParams(location.search).get('lang');
+      const saved = localStorage.getItem('lang');
+      lang = [fromUrl, saved].find(v => v === 'en' || v === 'ru') || ((navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'en');
+    } catch (e) {}
+    const t = (key, ...args) => { const v = I18N[lang][key]; return typeof v === 'function' ? v(...args) : v; };
+    let pkgI18n = {};
+    // Package text: English comes from Packages; Russian overrides come from i18n.json.
+    function pkgText(item, field) {
+      const ru = lang === 'ru' && pkgI18n[item.Package] && pkgI18n[item.Package].ru;
+      return (ru && ru[field]) || item[field] || '';
+    }
+    const dylibText = item => (lang === 'ru' && item.description_ru) || item.description || '';
+
     const catalog = document.querySelector('#catalog');
     const countLabel = document.querySelector('#package-count');
+    let loadState = 'loading';
+    let loadError = '';
     const search = document.querySelector('#search');
     const tabs = [...document.querySelectorAll('[data-filter]')];
     let packages = [];
@@ -206,7 +261,7 @@
       return (bytes / 1024 / 1024).toFixed(1) + ' MB';
     }
 
-    // Ссылка на .deb первого варианта (по умолчанию — для клика по названию).
+    // Link to the first variant's .deb (default target when clicking the name).
     function debHref(item) {
       const f = item.variants && item.variants[0] && item.variants[0].filename;
       return f ? `/${f}` : null;
@@ -219,7 +274,7 @@
         const cls = arch === 'iphoneos-arm64e' ? 'roothide' : arch === 'iphoneos-arm64' ? 'rootless' : '';
         const label = arch === 'iphoneos-arm64e' ? 'RootHide' : arch === 'iphoneos-arm64' ? 'Rootless' : arch;
         if (!v.filename) return `<span class="tag ${cls}">${escapeHtml(label)}</span>`;
-        return `<a class="tag ${cls}" href="/${escapeAttr(v.filename)}" download title="Скачать .deb (${escapeAttr(label)})">${escapeHtml(label)}</a>`;
+        return `<a class="tag ${cls}" href="/${escapeAttr(v.filename)}" download title="${escapeAttr(t('download_deb', label))}">${escapeHtml(label)}</a>`;
       }).join('');
     }
 
@@ -228,7 +283,7 @@
     }
 
     function dylibTags(item) {
-      return (item.tags || []).map(tag => `<a class="tag ${escapeAttr(tag)}" href="${escapeAttr(item.filename || '#')}" download title="Скачать .dylib">${escapeHtml(tag)}</a>`).join('');
+      return (item.tags || []).map(tag => `<a class="tag ${escapeAttr(tag)}" href="${escapeAttr(item.filename || '#')}" download title="${escapeAttr(t('download_dylib'))}">${escapeHtml(tag)}</a>`).join('');
     }
 
     function escapeHtml(value = '') {
@@ -236,9 +291,9 @@
     }
     function escapeAttr(value = '') { return escapeHtml(value); }
 
-    // Оборачивает название пакета в прямую ссылку на .deb, если доступен filename.
+    // Wraps the package name in a direct .deb link when a filename is available.
     function nameHtml(item) {
-      const name = escapeHtml(item.Name || item.Package);
+      const name = escapeHtml(pkgText(item, 'Name') || item.Package);
       const href = debHref(item);
       return href ? `<a href="${escapeAttr(href)}" download>${name}</a>` : name;
     }
@@ -256,48 +311,63 @@
             <div>
               <h3 class="package-name">${nameLink}</h3>
               <div class="package-id">${escapeHtml(item.package || '')}${item.author ? ' · ' + escapeHtml(item.author) : ''}</div>
-              <p class="package-description">${escapeHtml(item.description || '')}</p>
-              <div class="package-id muted">Инъекция через Sideloadly / TrollFools. ${escapeHtml(meta)}</div>
+              <p class="package-description">${escapeHtml(dylibText(item))}</p>
+              <div class="package-id muted">${escapeHtml(t('injection'))} ${escapeHtml(meta)}</div>
             </div>
             <div class="package-meta">${dylibTags(item)}</div>
           </li>`;
       }).join('');
-      return `<section class="package-group"><h2 class="group-heading"><span>Dylibs — для инъекции через Sideloadly / TrollFools</span><span class="group-count">${visible.length}</span></h2><ul class="package-list">${rows}</ul></section>`;
+      return `<section class="package-group"><h2 class="group-heading"><span>${escapeHtml(t('group_dylibs'))}</span><span class="group-count">${visible.length}</span></h2><ul class="package-list">${rows}</ul></section>`;
+    }
+
+    function applyStatic() {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+      document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+      document.querySelectorAll('[data-lang]').forEach(el => el.setAttribute('aria-pressed', String(el.dataset.lang === lang)));
     }
 
     function render() {
-      const query = search.value.trim().toLocaleLowerCase('ru');
+      if (loadState === 'error') {
+        countLabel.textContent = t('index_unavailable');
+        catalog.className = 'empty error';
+        catalog.textContent = t('load_failed', loadError);
+        return;
+      }
+      if (loadState === 'loading') {
+        countLabel.textContent = t('loading_index');
+        catalog.className = 'loading';
+        catalog.textContent = t('reading');
+        return;
+      }
+      const query = search.value.trim().toLocaleLowerCase(lang);
 
       if (activeFilter === 'dylibs') {
         const visible = dylibs.filter(item => {
-          const haystack = [item.name, item.package, item.description].join(' ').toLocaleLowerCase('ru');
+          const haystack = [item.name, item.package, dylibText(item)].join(' ').toLocaleLowerCase(lang);
           return !query || haystack.includes(query);
         });
-        countLabel.textContent = `${visible.length} dylib`;
+        countLabel.textContent = t('count_dylib', visible.length);
         catalog.className = '';
         catalog.innerHTML = visible.length
           ? renderDylibs(visible)
-          : '<div class="empty">Пока нет ни одной .dylib. Положи файл в <code>sideload/</code> и добавь запись в <code>dylibs.json</code>.</div>';
+          : '<div class="empty">' + t('no_dylibs') + '</div>';
         return;
       }
 
       const visible = packages.filter(item => {
         const kind = kindOf(item);
-        const haystack = [item.Name, item.Package, item.Description, item.Section].join(' ').toLocaleLowerCase('ru');
+        const haystack = [pkgText(item, 'Name'), item.Package, pkgText(item, 'Description'), item.Section].join(' ').toLocaleLowerCase(lang);
         return (activeFilter === 'all' || kind === activeFilter) && (!query || haystack.includes(query));
       });
       const totalDylibs = dylibs.length;
       const totalCount = packages.length + totalDylibs;
       const visibleCount = activeFilter === 'all' ? visible.length + totalDylibs : visible.length;
-      countLabel.textContent = `${visibleCount} из ${totalCount}`;
-      if (!visible.length && !(activeFilter === 'all' && totalDylibs)) { catalog.className = 'empty'; catalog.textContent = 'Ничего не найдено'; return; }
+      countLabel.textContent = t('count_of', visibleCount, totalCount);
+      if (!visible.length && !(activeFilter === 'all' && totalDylibs)) { catalog.className = 'empty'; catalog.textContent = t('none'); return; }
 
-      const groups = [
-        ['tweaks', 'Твики'],
-        ['tools', 'Инструменты'],
-        ['libraries', 'Системные компоненты и библиотеки'],
-        ['archive', 'Архив']
-      ];
+      const groups = ['tweaks', 'tools', 'libraries', 'archive'].map(kind => [kind, t('group_' + kind)]);
       catalog.className = '';
       const aptHtml = groups.map(([kind, title]) => {
         const items = visible.filter(item => kindOf(item) === kind);
@@ -310,7 +380,7 @@
             <div>
               <h3 class="package-name">${nameHtml(item)}</h3>
               <div class="package-id">${escapeHtml(item.Package)}</div>
-              <p class="package-description">${escapeHtml(item.Description || '')}</p>
+              <p class="package-description">${escapeHtml(pkgText(item, 'Description'))}</p>
             </div>
             <div class="package-meta">${versionTags(item)}${archTags(item)}</div>
           </li>`;
@@ -328,7 +398,7 @@
     }));
     search.addEventListener('input', render);
 
-    // Сначала подтягиваем dylibs (они не зависят от APT-индекса).
+    // Load dylibs first (they do not depend on the APT index).
     fetch('/dylibs.json', { cache: 'no-store' })
       .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
       .then(data => { dylibs = (data && data.dylibs) || []; })
@@ -337,12 +407,21 @@
 
     fetch('/Packages', { cache: 'no-store' })
       .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })
-      .then(text => { packages = parseIndex(text); render(); })
-      .catch(error => {
-        countLabel.textContent = 'Индекс недоступен';
-        catalog.className = 'empty error';
-        catalog.textContent = `Не удалось загрузить Packages: ${error.message}`;
-      });
+      .then(text => { packages = parseIndex(text); loadState = 'ready'; render(); })
+      .catch(error => { loadState = 'error'; loadError = error.message; render(); });
+
+    fetch('/i18n.json', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : {})
+      .then(data => { pkgI18n = (data && data.packages) || {}; if (loadState === 'ready') render(); })
+      .catch(() => {});
+
+    document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => {
+      lang = button.dataset.lang;
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+      applyStatic();
+      render();
+    }));
+    applyStatic();
   </script>
 </body>
 </html>
