@@ -32,13 +32,16 @@ static void CCGSave(UIView *view) {
 }
 static void CCGRestore(void) {
     if (gApplying) return; gApplying=YES;
-    for (UIView *view in gSaved.keyEnumerator) { NSDictionary *d=[gSaved objectForKey:view];
+    @try {
+    for (UIView *view in gSaved.keyEnumerator.allObjects) { NSDictionary *d=[gSaved objectForKey:view];
         view.hidden=[d[@"hidden"] boolValue];view.alpha=[d[@"alpha"] doubleValue];
         if ([NSStringFromClass(view.class) containsString:@"STUIStatusBar_Wrapper"]) view.frame=[d[@"frame"] CGRectValue];
         if (d[@"level"]) ((UIWindow *)view).windowLevel=[d[@"level"] doubleValue];
         if (d[@"inset"]) {UIScrollView *scroll=(id)view;scroll.contentInset=[d[@"inset"] UIEdgeInsetsValue];scroll.scrollIndicatorInsets=[d[@"indicator"] UIEdgeInsetsValue];scroll.contentOffset=[d[@"offset"] CGPointValue];}
     }
-    [gSaved removeAllObjects];gApplying=NO;
+    [gSaved removeAllObjects];
+    } @catch (NSException *error) { NSLog(@"[FuGapCC] Restore skipped: %@",error.name); }
+    @finally { gApplying=NO; }
 }
 
 static NSDictionary *CCGReadPrefs(void) {
@@ -69,12 +72,12 @@ static void CCGLoadPrefs(void) {
 
 static BOOL CCGBool(NSString *key, BOOL def) {
     id value = gPrefs[key];
-    return value ? [value boolValue] : def;
+    return [value respondsToSelector:@selector(boolValue)] ? [value boolValue] : def;
 }
 
 static CGFloat CCGFloat(NSString *key, CGFloat def) {
     id value = gPrefs[key];
-    return value ? [value doubleValue] : def;
+    return [value respondsToSelector:@selector(doubleValue)] ? [value doubleValue] : def;
 }
 
 static BOOL CCGEnabled(void) {
@@ -118,10 +121,6 @@ static BOOL CCGControlCenterIsActive(void) {
     } @catch (__unused id e) {
         return NO;
     }
-}
-
-static BOOL CCGShouldForceStatusBarVisible(void) {
-    return CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive();
 }
 
 static BOOL CCGIsLandscapeForView(UIView *view) {
@@ -169,7 +168,7 @@ static void CCGCollectViews(UIView *root,
     if ([name rangeOfString:@"STUIStatusBar_Wrapper" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         [statusWrappers addObject:root];
     }
-    for (UIView *subview in root.subviews) CCGCollectViews(subview, scrolls, collections, modules, headers, statusWrappers);
+    for (UIView *subview in [root.subviews copy]) CCGCollectViews(subview, scrolls, collections, modules, headers, statusWrappers);
 }
 
 static UIScrollView *CCGScrollAncestorForView(UIView *view) {
@@ -218,7 +217,7 @@ static void CCGApplyHeaderPolicy(UIView *root, NSArray<UIView *> *headers, NSArr
 }
 
 static void CCGApplyStatusBarWindowPolicy(void) {
-    if (!CCGEnabled()) return;
+    if (!CCGEnabled() || !CCGControlCenterIsActive()) return;
     BOOL hideStatusBar = CCGShouldHideStatusBar();
 
     for (UIWindow *window in UIApplication.sharedApplication.windows) {
@@ -229,35 +228,31 @@ static void CCGApplyStatusBarWindowPolicy(void) {
 
         // Always raise the status-bar window above CC while the tweak is on;
         // the toggle only hides the wrapper content, not the window itself.
-        window.hidden = NO;
-        window.alpha = 1.0;
-        window.windowLevel = 1100.0;
+        if (window.hidden) window.hidden = NO;
+        if (window.alpha != 1.0) window.alpha = 1.0;
+        if (window.windowLevel != 1100.0) window.windowLevel = 1100.0;
 
         for (UIView *subview in window.subviews) {
             NSString *subName = NSStringFromClass(subview.class);
             if ([subName rangeOfString:@"STUIStatusBar_Wrapper" options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 CCGSave(subview);
-                subview.hidden = hideStatusBar;
-                subview.alpha = hideStatusBar ? 0.0 : 1.0;
+                if (subview.hidden != hideStatusBar) subview.hidden = hideStatusBar;
+                CGFloat alpha = hideStatusBar ? 0.0 : 1.0;
+                if (subview.alpha != alpha) subview.alpha = alpha;
                 if (!hideStatusBar) {
                     CGRect frame = subview.frame;
                     frame.origin.y = 0.0;
-                    subview.frame = frame;
+                    if (!CGRectEqualToRect(subview.frame,frame)) subview.frame = frame;
                 }
             }
         }
     }
 }
 
-static BOOL CCGRequestedStatusBarHidden(BOOL requestedHidden) {
-    if (!CCGEnabled() || !CCGControlCenterIsActive()) return requestedHidden;
-    return CCGShouldHideStatusBar() ? YES : NO;
-}
-
 static void CCGApplyToRootView(UIView *root) {
-    if (gApplying || !root || !CCGEnabled()) return;
+    if (gApplying || !root || !CCGEnabled() || !CCGControlCenterIsActive()) return;
     gApplying = YES;
-
+    @try {
     NSMutableArray<UIView *> *scrolls = [NSMutableArray array];
     NSMutableArray<UIView *> *collections = [NSMutableArray array];
     NSMutableArray<UIView *> *modules = [NSMutableArray array];
@@ -288,7 +283,8 @@ static void CCGApplyToRootView(UIView *root) {
         if ((firstApply || (topChanged && atTop)) && fabs(scroll.contentOffset.y - desiredOffsetY) > .5) scroll.contentOffset = CGPointMake(scroll.contentOffset.x, desiredOffsetY);
     }
 
-    gApplying = NO;
+    } @catch (NSException *error) { NSLog(@"[FuGapCC] Unsupported layout: %@",error.name); }
+    @finally { gApplying = NO; }
 }
 
 static void CCGApplyToAllControlCenterWindows(void) {
@@ -300,14 +296,16 @@ static void CCGApplyToAllControlCenterWindows(void) {
     }
 }
 
+// Coalesce the many CC layout callbacks into one window-level pass.
+// UIKit setters below must never recursively invoke the policy synchronously.
 static void CCGApplySoon(UIView *view) {
-    if (!view || !CCGEnabled() || gApplying) return;
-    static char pendingKey;
-    if ([objc_getAssociatedObject(view, &pendingKey) boolValue]) return;
-    objc_setAssociatedObject(view, &pendingKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    static BOOL pending;
+    if (!view || !CCGEnabled() || gApplying || pending) return;
+    __weak UIView *root=view.window ?: view;
+    pending=YES;
     dispatch_async(dispatch_get_main_queue(), ^{
-        objc_setAssociatedObject(view, &pendingKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        if (CCGControlCenterIsActive()) CCGApplyToRootView(view);
+        pending=NO;
+        if (CCGControlCenterIsActive()) CCGApplyToAllControlCenterWindows();
     });
 }
 
@@ -340,58 +338,12 @@ static void CCGRespring(void) {
 }
 %end
 
+// Do not hook status-bar setters or replace private assertion objects.
+// Their contracts differ between iOS 16/17 and setters can re-enter layout.
 %hook SBStatusBarWindow
 - (void)layoutSubviews {
     %orig;
-    CCGApplyStatusBarWindowPolicy();
-}
-%end
-
-%hook STUIStatusBar_Wrapper
-- (void)setAlpha:(CGFloat)alpha {
-    %orig(CCGShouldForceStatusBarVisible() ? 1.0 : alpha);
-}
-
-- (void)setHidden:(BOOL)hidden {
-    %orig(CCGShouldForceStatusBarVisible() ? NO : hidden);
-}
-
-- (void)didMoveToWindow {
-    %orig;
-    if (CCGShouldForceStatusBarVisible()) {
-        UIView *view = (UIView *)self;
-        view.hidden = NO;
-        view.alpha = 1.0;
-    }
-}
-%end
-
-%hook SBControlCenterController
-- (BOOL)_isStatusBarHiddenIgnoringControlCenter {
-    if (CCGShouldForceStatusBarVisible()) return NO;
-    return %orig;
-}
-
-- (void)_setStatusBarHidden:(BOOL)hidden {
-    %orig(CCGRequestedStatusBarHidden(hidden));
-    CCGApplyStatusBarWindowPolicy();
-}
-
-- (void)controlCenterViewController:(id)viewController wantsHostStatusBarHidden:(BOOL)hidden {
-    %orig(viewController, CCGRequestedStatusBarHidden(hidden));
-    CCGApplyStatusBarWindowPolicy();
-}
-
-- (void)setHideStatusBarAssertion:(id)assertion {
-    %orig(CCGShouldForceStatusBarVisible() ? nil : assertion);
-    CCGApplyStatusBarWindowPolicy();
-}
-%end
-
-%hook CCUIModularControlCenterOverlayViewController
-- (void)setOverlayStatusBarHidden:(BOOL)hidden {
-    %orig(CCGRequestedStatusBarHidden(hidden));
-    CCGApplyStatusBarWindowPolicy();
+    if (CCGControlCenterIsActive()) CCGApplySoon((UIView *)self);
 }
 %end
 
@@ -406,14 +358,6 @@ static void CCGRespring(void) {
 - (void)viewDidLayoutSubviews {
     %orig;
     CCGApplySoon(((UIViewController *)self).view);
-}
-%end
-
-%hook CCUIContentModuleContainerView
-- (void)layoutSubviews {
-    %orig;
-    UIView *view = (UIView *)self;
-    CCGApplySoon(view.superview ?: view);
 }
 %end
 

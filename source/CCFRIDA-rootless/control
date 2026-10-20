@@ -1,6 +1,6 @@
 Package: com.ratush.ccfrida
 Name: CCFRIDA
-Version: 1.0.1
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Description: Включение Frida и полная остановка frida-server без фонового наблюдателя.
 Maintainer: ratu.sh

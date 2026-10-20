@@ -37,8 +37,15 @@ static int Run(NSString *exe, NSArray<NSString *> *args) {
     int rc = posix_spawn(&pid, argv[0], &actions, NULL, argv, safeEnv);
     posix_spawn_file_actions_destroy(&actions);
     if (rc) return rc;
-    pid_t result; do { result=waitpid(pid,&status,0); } while (result<0 && errno==EINTR);
-    return result>0 && WIFEXITED(status) ? WEXITSTATUS(status) : 126;
+    CFTimeInterval deadline=NSProcessInfo.processInfo.systemUptime+2;
+    while(NSProcessInfo.processInfo.systemUptime<deadline){
+        pid_t result=waitpid(pid,&status,WNOHANG);
+        if(result==pid)return WIFEXITED(status)?WEXITSTATUS(status):126;
+        if(result<0 && errno!=EINTR)return 126;
+        usleep(10000);
+    }
+    kill(pid,SIGKILL);while(waitpid(pid,&status,0)<0 && errno==EINTR){}
+    return 124;
 }
 static int Launch(NSArray<NSString *> *args) { return Run(@"/var/jb/bin/launchctl",args); }
 static BOOL PortOpen(int port) {
@@ -51,20 +58,22 @@ static BOOL PortOpen(int port) {
     close(fd);return r==0;
 }
 static BOOL ServiceProcess(NSString *exe) {
-    NSString *physical=[exe stringByResolvingSymlinksInPath];
-    NSString *jb=[prefix stringByResolvingSymlinksInPath];
-    if(![physical hasPrefix:[jb stringByAppendingString:@"/"]])return NO;
-    NSString *name=physical.lastPathComponent;
+    NSString *name=exe.lastPathComponent;
+    BOOL matches=NO;
 #if SERVICE_KIND == 1
-    return [@[@"sshd",@"sshd-session",@"sshd-auth"] containsObject:name];
+    matches=[@[@"sshd",@"sshd-session",@"sshd-auth"] containsObject:name];
 #elif SERVICE_KIND == 2
-    return [@[@"frida-server",@"frida-server-wrapper"] containsObject:name];
+    matches=[@[@"frida-server",@"frida-server-wrapper"] containsObject:name];
 #else
-    return [@[@"catmcp",@"catmcp-launcher"] containsObject:name];
+    matches=[@[@"catmcp",@"catmcp-launcher"] containsObject:name];
 #endif
+    if(!matches)return NO;
+    NSString *physical=exe.stringByResolvingSymlinksInPath;
+    NSString *jb=prefix.stringByResolvingSymlinksInPath;
+    return [physical hasPrefix:[jb stringByAppendingString:@"/"]];
 }
 static int Processes(int sig) {
-    int count=proc_listallpids(NULL,0);if(count<=0)return 0;
+    int count=proc_listallpids(NULL,0);if(count<=0)return -1;
     size_t bytes=(size_t)(count+64)*sizeof(pid_t);pid_t *pids=calloc(1,bytes);if(!pids)return -1;
     int got=proc_listallpids(pids,(int)bytes);int found=0;
     for(int i=0;i<got && i<(int)(bytes/sizeof(pid_t));i++){char path[4096]={0};
@@ -90,10 +99,18 @@ static NSInteger State(void){
     if(Exists([stateDir stringByAppendingString:@"/sshd.local-active"]) && Listening())return 2;
     return Listening()?1:0;
 #else
-    return Listening() && Processes(0)>0?1:0;
+    int processes=Processes(0);
+    if(processes<0)return -1;
+    return processes>0 && Listening()?1:0;
 #endif
 }
-static void Publish(NSInteger value){int token=NOTIFY_TOKEN_INVALID;if(notify_register_check(SERVICE_NOTIFICATION,&token)==NOTIFY_STATUS_OK){notify_set_state(token,value);notify_post(SERVICE_NOTIFICATION);notify_cancel(token);}printf("%s\n",value==1?"on":value==2?"local":value==3?"error":"off");}
+static void Publish(NSInteger value,BOOL changed){
+    // Unknown/error is not OFF. Status polls must never change the service or
+    // create a notification feedback loop in the module.
+    if(value<0){puts("unknown");return;}
+    if(changed){int token=NOTIFY_TOKEN_INVALID;if(notify_register_check(SERVICE_NOTIFICATION,&token)==NOTIFY_STATUS_OK){notify_set_state(token,value);notify_post(SERVICE_NOTIFICATION);notify_cancel(token);}}
+    puts(value==1?"on":value==2?"local":"off");
+}
 static BOOL WriteMarker(BOOL off){if(off)return [@"off\n" writeToFile:Marker() atomically:YES encoding:NSUTF8StringEncoding error:NULL];return !Exists(Marker()) || [[NSFileManager defaultManager] removeItemAtPath:Marker() error:NULL];}
 static BOOL RestoreSSH(void){
 #if SERVICE_KIND == 1
@@ -138,11 +155,11 @@ static BOOL SetEnabled(BOOL enabled){
         NSString *domain=@(domains[i]);NSString *target=[domain stringByAppendingFormat:@"/%@",Label()];
         if(enabled){Launch(@[@"enable",target]);if(Launch(@[@"print",target])==0){Launch(@[@"kickstart",target]);break;}
             if(Launch(@[@"bootstrap",domain,JobPath()])==0){Launch(@[@"kickstart",target]);break;}}
-        else{Launch(@[@"disable",target]);Launch(@[@"bootout",target]);}
+        else{Launch(@[@"disable",target]);Processes(SIGTERM);Launch(@[@"bootout",target]);}
     }
-    if(!enabled){Processes(SIGTERM);usleep(300000);Processes(SIGKILL);}
-    for(int i=0;i<75;i++){BOOL listening=Listening();int processes=Processes(0);
-        if(enabled?listening:(!listening && processes==0))return YES;usleep(200000);}
+    if(!enabled && Processes(0)>0){usleep(50000);Processes(SIGKILL);}
+    for(int i=0;i<100;i++){BOOL listening=Listening();int processes=Processes(0);
+        if(enabled?listening:(!listening && processes==0))return YES;usleep(50000);}
     if(!enabled && RestrictSSH())return YES;
     return NO;
 }
@@ -154,8 +171,12 @@ int main(int argc,char **argv){@autoreleasepool{
     if(![[NSFileManager defaultManager] createDirectoryAtPath:stateDir withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0755} error:NULL])return 73;
     struct stat st;if(lstat(stateDir.fileSystemRepresentation,&st)!=0 || !S_ISDIR(st.st_mode) || st.st_uid!=0 || (st.st_mode&0022))return 77;
     NSString *lock=[stateDir stringByAppendingFormat:@"/%@.lock",Label()];int fd=open(lock.fileSystemRepresentation,O_CREAT|O_RDWR|O_NOFOLLOW,0600);
-    if(fd<0 || flock(fd,LOCK_EX|LOCK_NB)!=0){if(fd>=0)close(fd);return 75;}
+    if(fd<0)return 75;
+    BOOL locked=NO;CFTimeInterval lockDeadline=NSProcessInfo.processInfo.systemUptime+([@(argv[1]) isEqual:@"status"]?0:5);
+    do {if(flock(fd,LOCK_EX|LOCK_NB)==0){locked=YES;break;}if(errno!=EWOULDBLOCK)break;usleep(10000);}while(NSProcessInfo.processInfo.systemUptime<lockDeadline);
+    if(!locked){close(fd);return 75;}
     NSInteger before=State();BOOL ok=YES;NSString *command=@(argv[1]);
+    if(before<0){Publish(-1,NO);flock(fd,LOCK_UN);close(fd);return 1;}
     if(![command isEqual:@"status"]){BOOL enabled=[command isEqual:@"on"] || ([command isEqual:@"toggle"] && before!=1);ok=SetEnabled(enabled);}
-    NSInteger after=State();Publish(ok?after:3);flock(fd,LOCK_UN);close(fd);return ok?0:1;
+    NSInteger after=State();Publish(after,![command isEqual:@"status"]);flock(fd,LOCK_UN);close(fd);return ok?0:1;
 }}

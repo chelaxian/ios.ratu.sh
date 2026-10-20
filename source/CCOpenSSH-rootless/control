@@ -1,6 +1,6 @@
 Package: com.ratush.ccopenssh
 Name: CCSSH
-Version: 1.1.1
+Version: 1.2.0
 Architecture: iphoneos-arm64
 Description: Переключатель SSH для Dopamine: остановка службы, запасной доступ только через localhost.
 Maintainer: ratu.sh

@@ -2,7 +2,11 @@
 #import <notify.h>
 #import <spawn.h>
 #import <sys/wait.h>
+#import <signal.h>
+#import <fcntl.h>
 #import <unistd.h>
+#import <errno.h>
+#import <string.h>
 #import "CCUIToggleModule.h"
 extern char **environ;
 
@@ -12,28 +16,30 @@ extern char **environ;
     NSTimer *_timer;
     UILabel *_label;
     BOOL _busy;
-    CFTimeInterval _lastTap;
+    NSMutableArray<NSString *> *_commands;
+    CFTimeInterval _lastPoll;
 }
 @end
 @implementation SERVICE_CLASS
 - (instancetype)init {
     if ((self = [super init])) {
+        _commands = [NSMutableArray array];
         _token = NOTIFY_TOKEN_INVALID;
         __weak typeof(self) weak = self;
-        notify_register_dispatch(SERVICE_NOTIFICATION, &_token, dispatch_get_main_queue(), ^(int token) {
-            uint64_t value = 0;
-            if (notify_get_state(token, &value) == NOTIFY_STATUS_OK) {
-                typeof(self) me = weak;
-                if (!me) return;
-                me->_state = value;
-                [me updateLabel];
-                [me refreshState];
-                if ([me respondsToSelector:@selector(reconfigureView)]) [me reconfigureView];
-            }
-        });
-        _timer = [NSTimer scheduledTimerWithTimeInterval:5 repeats:YES block:^(__unused NSTimer *timer) {
+        // A notification is only a wakeup. Its global value can be stale;
+        // the helper's own response is the authoritative status snapshot.
+        notify_register_dispatch(SERVICE_NOTIFICATION, &_token, dispatch_get_main_queue(), ^(__unused int token) {
             [weak runCommand:@"status"];
+        });
+        _timer = [NSTimer timerWithTimeInterval:.5 repeats:YES block:^(__unused NSTimer *timer) {
+            typeof(self) me = weak;
+            if (!me) return;
+            UIView *view = me->_label;
+            BOOL visible = view.window && !view.window.hidden && view.window.alpha > .01;
+            CFTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+            if (now - me->_lastPoll >= (visible ? .5 : 10)) [me runCommand:@"status"];
         }];
+        [[NSRunLoop mainRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
         dispatch_async(dispatch_get_main_queue(), ^{ [weak updateLabel]; [weak runCommand:@"status"]; });
     }
     return self;
@@ -68,34 +74,94 @@ extern char **environ;
         [view addSubview:_label];
     }
     _label.frame = view.bounds;
-    _label.text = _state == 3 ? @"!" SERVICE_TEXT : (_state == 2 ? SERVICE_TEXT @"·L" : SERVICE_TEXT);
+    _label.text = SERVICE_TEXT;
     _label.textColor = [self isSelected] ? SERVICE_ACTIVE_TEXT_COLOR : UIColor.whiteColor;
     _label.alpha = 1;
     [view bringSubviewToFront:_label];
     view.accessibilityLabel = SERVICE_NAME;
-    view.accessibilityValue = _state == 1 ? @"Включено" : (_state == 2 ? @"Только localhost" : (_state == 3 ? @"Ошибка" : @"Выключено"));
+    view.accessibilityValue = _state == 1 ? @"Включено" : (_state == 2 ? @"Только localhost" : @"Выключено");
 }
-- (void)runCommand:(NSString *)command {
-    if (_busy) return;
+- (void)startNextCommand {
+    if (_busy || !_commands.count) return;
+    NSString *command = _commands.firstObject;
+    [_commands removeObjectAtIndex:0];
     _busy = YES;
+    _lastPoll = NSProcessInfo.processInfo.systemUptime;
     __weak typeof(self) weak = self;
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         const char *path = SERVICE_HELPER;
         char *args[] = {(char *)path, (char *)command.UTF8String, NULL};
+        int pipeFD[2] = {-1,-1};
+        int rc = pipe(pipeFD);
         pid_t pid = 0; int status = 0;
-        int rc = posix_spawn(&pid, path, NULL, NULL, args, environ);
-        if (!rc) { while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {} }
+        if (!rc) {
+            posix_spawn_file_actions_t actions;
+            posix_spawn_file_actions_init(&actions);
+            posix_spawn_file_actions_adddup2(&actions, pipeFD[1], STDOUT_FILENO);
+            posix_spawn_file_actions_addclose(&actions, pipeFD[0]);
+            posix_spawn_file_actions_addclose(&actions, pipeFD[1]);
+            // iOS may transiently return EBADEXEC during concurrent AMFI checks.
+            // Retry only a failed spawn: the action has not run yet.
+            for (int attempt=0; attempt<4; attempt++) {
+                rc = posix_spawn(&pid, path, &actions, NULL, args, environ);
+                if (rc != EBADEXEC) break;
+                usleep(20000);
+            }
+            posix_spawn_file_actions_destroy(&actions);
+            close(pipeFD[1]);
+        }
+        BOOL finished = NO;
+        if (!rc) {
+            CFTimeInterval deadline = NSProcessInfo.processInfo.systemUptime + 25;
+            while (NSProcessInfo.processInfo.systemUptime < deadline) {
+                pid_t result = waitpid(pid, &status, WNOHANG);
+                if (result == pid) { finished = YES; break; }
+                if (result < 0 && errno != EINTR) break;
+                usleep(10000);
+            }
+            if (!finished) { kill(pid, SIGKILL); while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {} }
+        }
+        char output[32] = {0};
+        if (pipeFD[0] >= 0) {
+            fcntl(pipeFD[0], F_SETFL, O_NONBLOCK);
+            read(pipeFD[0], output, sizeof(output)-1);
+            close(pipeFD[0]);
+        }
+        // An action may fail while the service remains ON. Never paint an
+        // execution error as OFF; retain the last observation if none arrived.
+        NSInteger observed = -1;
+        if (!rc && finished) {
+            if (!strcmp(output,"on\n")) observed = 1;
+            else if (!strcmp(output,"off\n")) observed = 0;
+            else if (!strcmp(output,"local\n")) observed = 2;
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             typeof(self) me = weak;
-            if (me) { me->_busy = NO; if (rc) { me->_state = 3; [me refreshState]; [me updateLabel]; } }
+            if (!me) return;
+            me->_busy = NO;
+            if (observed >= 0 && me->_state != observed) {
+                me->_state = observed;
+                [me refreshState];
+                if ([me respondsToSelector:@selector(reconfigureView)]) [me reconfigureView];
+            }
+            [me updateLabel];
+            [me startNextCommand];
         });
     });
 }
+- (void)runCommand:(NSString *)command {
+    if (![NSThread isMainThread]) { dispatch_async(dispatch_get_main_queue(), ^{ [self runCommand:command]; }); return; }
+    if ([command isEqualToString:@"status"]) {
+        if (_busy || _commands.count) return;
+    } else {
+        // Every tap is an action, even while a previous poll/action is running.
+        [_commands removeObject:@"status"];
+    }
+    [_commands addObject:command];
+    [self startNextCommand];
+}
 - (void)setSelected:(BOOL)selected {
     (void)selected;
-    CFTimeInterval now = [NSProcessInfo processInfo].systemUptime;
-    if (now - _lastTap < .6 || _busy) return;
-    _lastTap = now;
     [self runCommand:@"toggle"];
 }
 @end
