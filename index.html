@@ -101,20 +101,20 @@
       .package-meta { grid-column: 2; justify-content: flex-start; max-width: none; }
     }
   </style>
-</head>
+<script>window.addEventListener("error",function(e){var c=document.getElementById("catalog");if(c){c.className="empty error";c.textContent="Script error: "+e.message+" ("+(e.lineno||0)+")";}});</script></head>
 <body>
   <header>
     <div class="header-inner">
       <img class="repo-icon" src="/CydiaIcon.png" alt="">
       <div class="brand">
         <h1>ios.ratu.sh</h1>
-        <p class="subtitle" data-i18n="subtitle"></p>
+        <p class="subtitle" data-i18n="subtitle">Packages for RootHide Bootstrap and modern rootless jailbreaks</p>
       </div>
       <div class="lang-switch" role="group" aria-label="Language">
         <button type="button" data-lang="en" aria-pressed="true">EN</button>
         <button type="button" data-lang="ru" aria-pressed="false">RU</button>
       </div>
-      <a class="add-button" href="sileo://source/https://ios.ratu.sh/" data-i18n="add"></a>
+      <a class="add-button" href="sileo://source/https://ios.ratu.sh/" data-i18n="add">Add to Sileo</a>
     </div>
   </header>
 
@@ -122,19 +122,19 @@
     <div class="toolbar">
       <label class="search-wrap">
         <span aria-hidden="true">⌕</span>
-        <input id="search" type="search" data-i18n-ph="search" autocomplete="off">
+        <input id="search" type="search" placeholder="Search packages" data-i18n-ph="search" autocomplete="off">
       </label>
       <div class="segments" role="tablist" data-i18n-aria="category">
-        <button type="button" role="tab" data-filter="all" aria-selected="true" data-i18n="tab_all"></button>
-        <button type="button" role="tab" data-filter="tweaks" aria-selected="false" data-i18n="tab_tweaks"></button>
-        <button type="button" role="tab" data-filter="tools" aria-selected="false" data-i18n="tab_tools"></button>
-        <button type="button" role="tab" data-filter="libraries" aria-selected="false" data-i18n="tab_libraries"></button>
+        <button type="button" role="tab" data-filter="all" aria-selected="true" data-i18n="tab_all">All</button>
+        <button type="button" role="tab" data-filter="tweaks" aria-selected="false" data-i18n="tab_tweaks">Tweaks</button>
+        <button type="button" role="tab" data-filter="tools" aria-selected="false" data-i18n="tab_tools">Tools</button>
+        <button type="button" role="tab" data-filter="libraries" aria-selected="false" data-i18n="tab_libraries">Libraries</button>
         <button type="button" role="tab" data-filter="dylibs" aria-selected="false">Dylibs</button>
-        <button type="button" role="tab" data-filter="archive" aria-selected="false" data-i18n="tab_archive"></button>
+        <button type="button" role="tab" data-filter="archive" aria-selected="false" data-i18n="tab_archive">Archive</button>
       </div>
     </div>
-    <div class="summary"><span id="package-count"></span><span>iOS 15–17</span></div>
-    <div id="catalog" class="loading"></div>
+    <div class="summary"><span id="package-count">…</span><span>iOS 15–17</span></div>
+    <div id="catalog" class="loading">Loading…</div>
   </main>
 
   <footer>
