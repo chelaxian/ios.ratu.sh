@@ -390,6 +390,30 @@ static void CCGRespring(void) {
 
 %end
 
+// Public UIView setters are safe across OS versions. Scope the override to
+// the real status-bar window; never alter assertion objects or call a setter
+// from its own hook. The original implementation is invoked exactly once.
+%group StatusBarVisibilityHooks
+%hook STUIStatusBar_Wrapper
+- (void)setAlpha:(CGFloat)alpha {
+    UIView *view=(UIView *)self;
+    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
+    %orig(force ? 1.0 : alpha);
+}
+- (void)setHidden:(BOOL)hidden {
+    UIView *view=(UIView *)self;
+    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive() && [NSStringFromClass(view.window.class) containsString:@"SBStatusBarWindow"];
+    %orig(force ? NO : hidden);
+}
+%end
+%hook SBStatusBarWindow
+- (void)setHidden:(BOOL)hidden {
+    BOOL force=CCGEnabled() && !CCGShouldHideStatusBar() && CCGControlCenterIsActive();
+    %orig(force ? NO : hidden);
+}
+%end
+%end
+
 %ctor {
     @autoreleasepool {
         NSString *bundleID = NSBundle.mainBundle.bundleIdentifier ?: @"";
@@ -407,5 +431,10 @@ static void CCGRespring(void) {
             CCGRespring();
         });
         %init(ControlCenterHooks);
+        Class wrapper=NSClassFromString(@"STUIStatusBar_Wrapper");
+        Class statusWindow=NSClassFromString(@"SBStatusBarWindow");
+        if ([wrapper isSubclassOfClass:UIView.class] && [statusWindow isSubclassOfClass:UIWindow.class]) {
+            %init(StatusBarVisibilityHooks);
+        }
     }
 }
