@@ -14,6 +14,8 @@
 #import <errno.h>
 #import <limits.h>
 #import <pwd.h>
+#import <sys/sysctl.h>
+#import <string.h>
 extern int proc_listallpids(void *, int);
 extern int proc_pidpath(int, void *, uint32_t);
 extern char **environ;
@@ -72,13 +74,31 @@ static BOOL ServiceProcess(NSString *exe) {
     NSString *jb=prefix.stringByResolvingSymlinksInPath;
     return [physical hasPrefix:[jb stringByAppendingString:@"/"]];
 }
+static BOOL ServiceName(const char *name) {
+#if SERVICE_KIND == 1
+    return !strcmp(name,"sshd") || !strcmp(name,"sshd-session") || !strcmp(name,"sshd-auth");
+#elif SERVICE_KIND == 2
+    return !strcmp(name,"frida-server") || !strcmp(name,"frida-server-wr");
+#else
+    return !strcmp(name,"catmcp") || !strncmp(name,"catmcp-launcher",14);
+#endif
+}
 static int Processes(int sig) {
-    int count=proc_listallpids(NULL,0);if(count<=0)return -1;
-    size_t bytes=(size_t)(count+64)*sizeof(pid_t);pid_t *pids=calloc(1,bytes);if(!pids)return -1;
-    int got=proc_listallpids(pids,(int)bytes);int found=0;
-    for(int i=0;i<got && i<(int)(bytes/sizeof(pid_t));i++){char path[4096]={0};
-        if(pids[i]>1 && pids[i]!=getpid() && proc_pidpath(pids[i],path,sizeof(path))>0 && ServiceProcess(@(path))){found++;if(sig)kill(pids[i],sig);}}
-    free(pids);return found;
+    // One kernel snapshot, then resolve paths only for matching executables.
+    // proc_pidpath for every process made each visible-tile poll expensive.
+    int mib[]={CTL_KERN,KERN_PROC,KERN_PROC_ALL,0};size_t size=0;
+    if(sysctl(mib,4,NULL,&size,NULL,0)!=0)return -1;
+    size+=32*sizeof(struct kinfo_proc);
+    struct kinfo_proc *list=calloc(1,size);if(!list)return -1;
+    if(sysctl(mib,4,list,&size,NULL,0)!=0){free(list);return -1;}
+    int found=0;
+    for(size_t i=0;i<size/sizeof(*list);i++){
+        pid_t pid=list[i].kp_proc.p_pid;
+        if(pid<=1 || pid==getpid() || !ServiceName(list[i].kp_proc.p_comm))continue;
+        char path[4096]={0};
+        if(proc_pidpath(pid,path,sizeof(path))>0 && ServiceProcess(@(path))){found++;if(sig)kill(pid,sig);}
+    }
+    free(list);return found;
 }
 static NSArray<NSNumber *> *Ports(void) {
 #if SERVICE_KIND == 1
@@ -151,11 +171,23 @@ static BOOL SetEnabled(BOOL enabled){
     if(!Exists(JobPath())){fprintf(stderr,"service plist missing\n");return NO;}
     if(enabled && !RestoreSSH())return NO;
     if(!WriteMarker(!enabled))return NO;
+    NSDictionary *job=[NSDictionary dictionaryWithContentsOfFile:JobPath()];
+    BOOL startsOnLoad=[job[@"RunAtLoad"] boolValue] || job[@"KeepAlive"]!=nil || job[@"Sockets"]!=nil;
     for(int i=0;i<2;i++){
         NSString *domain=@(domains[i]);NSString *target=[domain stringByAppendingFormat:@"/%@",Label()];
-        if(enabled){Launch(@[@"enable",target]);if(Launch(@[@"print",target])==0){Launch(@[@"kickstart",target]);break;}
-            if(Launch(@[@"bootstrap",domain,JobPath()])==0){Launch(@[@"kickstart",target]);break;}}
-        else{Launch(@[@"disable",target]);Processes(SIGTERM);Launch(@[@"bootout",target]);}
+        if(enabled){
+            Launch(@[@"enable",target]);
+            if(Launch(@[@"bootstrap",domain,JobPath()])==0){
+                if(!startsOnLoad)Launch(@[@"kickstart",target]);
+                break;
+            }
+            if(Launch(@[@"print",target])==0){Launch(@[@"kickstart",target]);break;}
+        } else {
+            Launch(@[@"disable",target]);Processes(SIGTERM);Launch(@[@"bootout",target]);
+            // No need to issue more launchctl commands once the actual
+            // listeners and processes have disappeared in this domain.
+            if(!Listening() && Processes(0)==0)break;
+        }
     }
     if(!enabled && Processes(0)>0){usleep(50000);Processes(SIGKILL);}
     for(int i=0;i<100;i++){BOOL listening=Listening();int processes=Processes(0);
@@ -178,5 +210,5 @@ int main(int argc,char **argv){@autoreleasepool{
     NSInteger before=State();BOOL ok=YES;NSString *command=@(argv[1]);
     if(before<0){Publish(-1,NO);flock(fd,LOCK_UN);close(fd);return 1;}
     if(![command isEqual:@"status"]){BOOL enabled=[command isEqual:@"on"] || ([command isEqual:@"toggle"] && before!=1);ok=SetEnabled(enabled);}
-    NSInteger after=State();Publish(after,![command isEqual:@"status"]);flock(fd,LOCK_UN);close(fd);return ok?0:1;
+    NSInteger after=[command isEqual:@"status"]?before:State();Publish(after,![command isEqual:@"status"]);flock(fd,LOCK_UN);close(fd);return ok?0:1;
 }}
