@@ -1,58 +1,11 @@
-//
-//  CCVPNOnOffAutoModule.m
-//  CCVPN-ON-OFF-AUTO — Control Center tile (NO entitlement). Does NOT touch
-//  NetworkExtension directly (the CC host is sandboxed and lacks the NE
-//  entitlement, so nesessionmanager would reject it). Instead it forwards
-//  short-tap / long-press to the privileged root daemon `ccvpnd` over Darwin
-//  notifications, and mirrors the daemon's broadcast state:
-//      off  -> dark tile, grey "VPN" glyph            (isSelected = NO)
-//      vpn  -> green tile, white "VPN" glyph          (isSelected = YES)
-//      auto -> blue tile, white "AUTO" glyph          (isSelected = YES) watchdog
-//
-//  Rendering: we override BOTH iconGlyph (off) and selectedIconGlyph (on/auto).
-//  Glyphs are drawn in their final colour as AlwaysOriginal images, so the look
-//  is identical regardless of how ControlCenterUIKit chooses to tint them.
-//
-
+// The CC host only transports commands and displays the daemon's atomic snapshot.
 #import "CCUIToggleModule.h"
 #import <UIKit/UIKit.h>
-#import <QuartzCore/QuartzCore.h>
-
-#define CMD_TAP    @"com.ratush.ccvpnonoffauto.cmd.tap"
-#define CMD_LONG   @"com.ratush.ccvpnonoffauto.cmd.longpress"
-#define CMD_QUERY  @"com.ratush.ccvpnonoffauto.cmd.query"
-#define ST_OFF     @"com.ratush.ccvpnonoffauto.state.off"
-#define ST_VPN     @"com.ratush.ccvpnonoffauto.state.vpn"
-#define ST_AUTO    @"com.ratush.ccvpnonoffauto.state.auto"
-
-#define kSuite     @"com.ratush.ccvpnonoffauto"
-#define kLogKey    @"log"
-
-#pragma mark - Darwin notifications
-
-static void CCPost(NSString *name) {
-    CFNotificationCenterPostNotification(
-        CFNotificationCenterGetDarwinNotifyCenter(),
-        (__bridge CFStringRef)name, NULL, NULL, YES);
-}
-
-NS_FORMAT_FUNCTION(1, 2)
-static void CCLog(NSString *fmt, ...) {
-    @try {
-        va_list args; va_start(args, fmt);
-        NSString *body = [[NSString alloc] initWithFormat:fmt arguments:args];
-        va_end(args);
-        NSUserDefaults *ud = [[NSUserDefaults alloc] initWithSuiteName:kSuite];
-        NSMutableArray *a = [NSMutableArray arrayWithArray:[ud arrayForKey:kLogKey]];
-        [a addObject:[NSString stringWithFormat:@"%@ %@", [NSDate date], body]];
-        if (a.count > 80) [a removeObjectsInRange:NSMakeRange(0, a.count - 80)];
-        [ud setObject:a forKey:kLogKey];
-        [ud synchronize];
-    } @catch (__unused id e) {}
-}
-
-#pragma mark - Glyph
-
+#import <notify.h>
+static const char *StateName="com.ratush.ccvpnonoffauto.state.v2";
+static const char *TapName="com.ratush.ccvpnonoffauto.cmd.tap.v2";
+static const char *AutoName="com.ratush.ccvpnonoffauto.cmd.auto.v2";
+static void Query(void){notify_post("com.ratush.ccvpnonoffauto.cmd.query");}
 static UIColor *OnGreen(void)  { return [UIColor colorWithRed:0.20 green:0.78 blue:0.35 alpha:1.0]; }
 static UIColor *AutoBlue(void) { return [UIColor colorWithRed:0.13 green:0.51 blue:0.96 alpha:1.0]; }
 
@@ -89,133 +42,77 @@ static UIImage *AutoImage(void) {
     return aImg;
 }
 
-#pragma mark - Module
-
 @interface CCVPNOnOffAutoModule : CCUIToggleModule {
-    int _mode;               // 0 = off, 1 = vpn, 2 = auto
-    BOOL _attached;          // long-press gesture already on the tile view
-    BOOL _didLongPress;      // swallow the synthetic tap that follows a hold
-    CFTimeInterval _longPressAt;
-    int _lpTries;            // retry counter for lazy view creation
+    BOOL _connected, _autoMode, _holding;
+    int _stateToken, _tapToken, _autoToken;
+    uint64_t _snapshot;
+    __weak UIView *_gestureView;
+    UILongPressGestureRecognizer *_hold;
+    NSTimer *_pollTimer;
+    NSUInteger _attachAttempts;
 }
+- (void)cc_readState;
 - (void)cc_ensureLongPress;
-- (void)cc_onLongPress:(UILongPressGestureRecognizer *)g;
+- (void)cc_onLongPress:(UILongPressGestureRecognizer *)gesture;
 @end
-
-static __weak CCVPNOnOffAutoModule *sCurrent = nil;
-
 @implementation CCVPNOnOffAutoModule
-
-static void CCStateCallback(CFNotificationCenterRef center, void *observer,
-                            CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-    NSString *n = (__bridge NSString *)name;
-    int mode = 0;
-    if ([n hasSuffix:@".state.auto"]) mode = 2;
-    else if ([n hasSuffix:@".state.vpn"]) mode = 1;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        CCVPNOnOffAutoModule *m = sCurrent;
-        if (!m) return;
-        m->_mode = mode;
-        // Re-evaluate isSelected / selectedColor / glyphs and force the tile
-        // to repaint. reconfigureView additionally makes the host re-poll.
-        @try { [m refreshState]; } @catch (__unused id e) {}
-        @try { if ([m respondsToSelector:@selector(reconfigureView)]) [m reconfigureView]; } @catch (__unused id e) {}
-    });
-}
-
-+ (void)load {
-    NSArray *states = @[ST_OFF, ST_VPN, ST_AUTO];
-    for (NSString *s in states) {
-        CFNotificationCenterAddObserver(
-            CFNotificationCenterGetDarwinNotifyCenter(), NULL, CCStateCallback,
-            (__bridge CFStringRef)s, NULL,
-            CFNotificationSuspensionBehaviorDeliverImmediately);
-    }
-    CCLog(@"+load: observers registered, posting query");
-    CCPost(CMD_QUERY);
-}
-
 - (instancetype)init {
-    self = [super init];
-    if (self) { sCurrent = self; CCPost(CMD_QUERY); dispatch_async(dispatch_get_main_queue(), ^{ [self cc_ensureLongPress]; }); }
-    return self;
+    self=[super init]; if(self){
+        _stateToken=_tapToken=_autoToken=-1;_snapshot=UINT64_MAX;
+        __weak typeof(self) weakSelf=self;
+        notify_register_check(TapName,&_tapToken);
+        notify_register_check(AutoName,&_autoToken);
+        notify_register_dispatch(StateName,&_stateToken,dispatch_get_main_queue(),^(__unused int token){[weakSelf cc_readState];});
+        dispatch_async(dispatch_get_main_queue(),^{[weakSelf cc_readState];[weakSelf cc_ensureLongPress];Query();});
+        _pollTimer=[NSTimer scheduledTimerWithTimeInterval:1 repeats:YES block:^(__unused NSTimer *timer){[weakSelf cc_readState];}];
+    }return self;
 }
-
-// Glyph shown when NOT selected (off): white "VPN" on the dark tile.
+- (void)dealloc {
+    [_pollTimer invalidate];
+    for(NSNumber *token in @[@(_stateToken),@(_tapToken),@(_autoToken)])if(token.intValue>=0)notify_cancel(token.intValue);
+}
+- (void)cc_readState {
+    uint64_t value=0;
+    if(_stateToken<0 || notify_get_state(_stateToken,&value)!=NOTIFY_STATUS_OK || value==_snapshot)return;
+    _snapshot=value;_connected=(value&1)!=0;_autoMode=(value&2)!=0;
+    [self refreshState];
+    if([self respondsToSelector:@selector(reconfigureView)])[self reconfigureView];
+}
+- (void)cc_send:(BOOL)autoCommand {
+    int token=autoCommand?_autoToken:_tapToken;uint64_t count=0;
+    if(token<0 || notify_get_state(token,&count)!=NOTIFY_STATUS_OK)return;
+    if(notify_set_state(token,count+1)==NOTIFY_STATUS_OK)notify_post(autoCommand?AutoName:TapName);
+}
 - (UIImage *)iconGlyph {
-    sCurrent = self;
-    dispatch_async(dispatch_get_main_queue(), ^{ [self cc_ensureLongPress]; });
-    if (_mode == 2) return AutoImage();
-    return VPNImage();
+    dispatch_async(dispatch_get_main_queue(),^{[self cc_ensureLongPress];});
+    return _autoMode?AutoImage():VPNImage();
 }
-
-// Glyph shown when SELECTED (on/auto): white "VPN" / white "AUTO".
-- (UIImage *)selectedIconGlyph {
-    sCurrent = self;
-    return (_mode == 2) ? AutoImage() : VPNImage();
-}
-
-- (UIColor *)selectedColor {
-    return (_mode == 2) ? AutoBlue() : OnGreen();
-}
-
-- (BOOL)isSelected { return _mode != 0; }
-
+- (UIImage *)selectedIconGlyph {return _autoMode?AutoImage():VPNImage();}
+- (UIColor *)selectedColor {return _autoMode?AutoBlue():OnGreen();}
+- (BOOL)isSelected {return _connected;}
 - (void)setSelected:(BOOL)selected {
-    sCurrent = self;
-    // A long-press ends in a touch-up that the host turns into a tap; swallow
-    // it so holding the tile only toggles AUTO and never also flips the VPN.
-    CFTimeInterval now = CACurrentMediaTime();
-    if (_didLongPress || (now - _longPressAt) < 0.6) {
-        _didLongPress = NO;
-        CCLog(@"setSelected:%d swallowed (after long-press)", selected);
-        return;
-    }
-    CCLog(@"setSelected:%d -> tap", selected);
-    CCPost(CMD_TAP);
-    dispatch_async(dispatch_get_main_queue(), ^{ [self cc_ensureLongPress]; });
+    if(_holding)return;
+    [self cc_send:NO];
+    [self cc_ensureLongPress];
 }
-
-#pragma mark - Long press -> AUTO
-
 - (void)cc_ensureLongPress {
-    if (_attached) return;
-    UIViewController *vc = nil;
-    @try {
-        id o = [self valueForKey:@"contentViewController"];
-        if ([o isKindOfClass:[UIViewController class]]) vc = o;
-    } @catch (__unused id e) {}
-    UIView *v = vc.view;
-    if (![v isKindOfClass:[UIView class]]) {
-        // The content view controller's view is created lazily; retry briefly.
-        if (_lpTries++ < 20) {
-            __weak typeof(self) ws = self;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)),
-                           dispatch_get_main_queue(), ^{ [ws cc_ensureLongPress]; });
-        }
-        return;
-    }
-    UILongPressGestureRecognizer *g =
-        [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cc_onLongPress:)];
-    g.minimumPressDuration = 0.4;
-    g.allowableMovement = 40.0;
-    g.cancelsTouchesInView = NO;           // keep the normal tap working
-    g.delaysTouchesBegan = NO;
-    [v addGestureRecognizer:g];
-    _attached = YES;
-    CCLog(@"long-press gesture attached to contentViewController.view");
+    UIViewController *controller=nil;
+    @try {id object=[self valueForKey:@"contentViewController"];if([object isKindOfClass:UIViewController.class])controller=object;}@catch(__unused id exception){}
+    UIView *view=controller.view;
+    if(!view){if(_attachAttempts++<20){__weak typeof(self) weakSelf=self;dispatch_after(dispatch_time(DISPATCH_TIME_NOW,300*NSEC_PER_MSEC),dispatch_get_main_queue(),^{[weakSelf cc_ensureLongPress];});}return;}
+    if(view==_gestureView)return;
+    if(_hold)[_gestureView removeGestureRecognizer:_hold];
+    _hold=[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cc_onLongPress:)];
+    _hold.minimumPressDuration=.4;_hold.allowableMovement=40;
+    _hold.cancelsTouchesInView=YES;_hold.delaysTouchesBegan=NO;
+    [view addGestureRecognizer:_hold];_gestureView=view;_attachAttempts=0;
 }
-
-- (void)cc_onLongPress:(UILongPressGestureRecognizer *)g {
-    if (g.state == UIGestureRecognizerStateBegan) {
-        _didLongPress = YES;
-        _longPressAt = CACurrentMediaTime();
-        CCLog(@"long-press -> AUTO toggle");
-        CCPost(CMD_LONG);
-    } else if (g.state == UIGestureRecognizerStateEnded || g.state == UIGestureRecognizerStateCancelled) {
-        _longPressAt = CACurrentMediaTime();
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC), dispatch_get_main_queue(), ^{ self->_didLongPress = NO; });
+- (void)cc_onLongPress:(UILongPressGestureRecognizer *)gesture {
+    if(gesture.state==UIGestureRecognizerStateBegan){_holding=YES;[self cc_send:YES];}
+    else if(gesture.state==UIGestureRecognizerStateEnded || gesture.state==UIGestureRecognizerStateCancelled || gesture.state==UIGestureRecognizerStateFailed){
+        // Cancellation prevents the host's touch-up action; only suppress within
+        // this gesture's event, never a subsequent deliberate tap.
+        dispatch_async(dispatch_get_main_queue(),^{self->_holding=NO;});
     }
 }
-
 @end
