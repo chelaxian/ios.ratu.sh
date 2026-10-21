@@ -2,7 +2,7 @@
 
 // Settings only: never export VPN credentials or configuration objects.
 static inline NSDictionary *ASVSettingsDefaults(void) {
- return @{@"enabled":@NO,@"mode":@"bypass",@"language":@"system",@"badgeColor":@YES,
+ return @{@"enabled":@NO,@"mode":@"bypass",@"language":@"system",@"badgeColor":@YES,@"preserveSystemDNS":@NO,
  ASV_VPN:@[],ASV_DIRECT:@[],ASV_MATRIX:@{},ASV_LS_DISCONNECT:@NO,ASV_LS_MEDIA:@NO,
  ASV_ALWAYS_ON:@NO,ASV_HEALTH:@NO,ASV_REDUNDANCY:@NO,ASV_RESERVES:@[],ASV_PRIMARY:@"",
  ASV_RED_ALGORITHM:@"roundRobin",ASV_RED_CYCLES:@1,ASV_LS_DELAY:@5,ASV_HC_METHOD:@"https",
@@ -34,7 +34,7 @@ static inline NSMutableDictionary *ASVImportSettings(NSDictionary *payload,NSDic
  }
  NSString *(^profile)(id)=^NSString *(id value){if(![value isKindOfClass:NSString.class])return nil;return known[value]?value:mapping[value];};
  NSUInteger ignored=0;
- NSArray *bools=@[@"enabled",@"badgeColor",ASV_LS_DISCONNECT,ASV_LS_MEDIA,ASV_ALWAYS_ON,ASV_HEALTH,ASV_REDUNDANCY];
+ NSArray *bools=@[@"enabled",@"badgeColor",@"preserveSystemDNS",ASV_LS_DISCONNECT,ASV_LS_MEDIA,ASV_ALWAYS_ON,ASV_HEALTH,ASV_REDUNDANCY];
  NSDictionary *choices=@{@"mode":@[@"bypass",@"tunnelOnly",@"multiVPN"],@"language":@[@"system",@"ru",@"en"],ASV_HC_METHOD:@[@"https",@"http",@"tcp",@"ping"],ASV_RED_ALGORITHM:@[@"roundRobin",@"random"]};
  NSDictionary *ranges=@{ASV_LS_DELAY:@[@0,@600],ASV_RED_CYCLES:@[@1,@10],ASV_HC_FAILURES:@[@1,@10],ASV_HC_INTERVAL:@[@10,@3600],ASV_HC_TIMEOUT:@[@1,@120],ASV_HC_PORT:@[@0,@65535]};
  for(NSString *key in ASVSettingsDefaults()){

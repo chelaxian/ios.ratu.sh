@@ -288,7 +288,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
 }
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier {
     NSString *key=[specifier propertyForKey:@"key"];
-    if (![@[@"enabled",@"mode",@"language",@"badgeColor",ASV_VPN,ASV_DIRECT] containsObject:key]) return;
+    if (![@[@"enabled",@"mode",@"language",@"badgeColor",@"preserveSystemDNS",ASV_VPN,ASV_DIRECT] containsObject:key]) return;
     NSMutableDictionary *prefs=[[self prefs] mutableCopy];
     prefs[key]=value;
     if (![prefs writeToFile:ASV_PREFS atomically:YES]) {
@@ -349,6 +349,15 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
         }
     }else line(L(@"Public IP:",@"Белый IP:"),[ip stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet],_ip.count?UIColor.whiteColor:gray);
     if ([code isEqual:@"error"] || [code isEqual:@"unsupported"]) line(L(@"Error:",@"Ошибка:"),[state[@"error"] length]?state[@"error"]:code,red);
+    if(!tunnel && !multi && [[self prefs][@"preserveSystemDNS"] boolValue] && [state[@"dnsWarning"] length]) {
+        NSDictionary *messages=@{
+            @"System encrypted DNS API unavailable":L(@"System DNS API unavailable",@"API системного DNS недоступен"),
+            @"Some DNS profiles have unsupported conditions":L(@"Conditional DNS profiles skipped",@"Условные DNS-профили пропущены"),
+            @"No supported enabled DoH/DoT profile":L(@"No enabled supported profile",@"Нет включённого поддерживаемого профиля"),
+            @"Encrypted DNS resolver registration failed":L(@"DNS registration failed",@"Не удалось зарегистрировать DNS"),
+            @"System DNS profile lookup timed out":L(@"DNS profile lookup timed out",@"Таймаут чтения DNS-профилей")};
+        line(@"DNS:",messages[state[@"dnsWarning"]] ?: L(@"Profile unavailable",@"Профиль недоступен"),UIColor.systemOrangeColor);
+    }
     return text;
 }
 - (NSArray *)specifiers {
@@ -363,7 +372,7 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     else [mode setProperty:@NO forKey:@"enabled"];
     [mode setProperty:@YES forKey:@"asvMode"];
     [items addObject:mode];
-    [items addObject:[self setting:L(@"Colored VPN badge",@"Цветной значок VPN") key:@"badgeColor" type:PSSwitchCell fallback:@YES detail:nil]];
+    [items addObject:[self setting:L(@"Colored [VPN1/2] badge",@"Цветной значок [VPN1/2]") key:@"badgeColor" type:PSSwitchCell fallback:@YES detail:nil]];
     PSSpecifier *language=[self setting:L(@"Language",@"Язык") key:@"language" type:PSLinkListCell fallback:@"system" detail:NSClassFromString(@"PSListItemsController")];
     if ([language respondsToSelector:@selector(setValues:titles:)]) [language setValues:@[@"system",@"ru",@"en"] titles:@[L(@"System (RU/EN)",@"Системный (RU/EN)"),@"Русский",@"English"]];
     [items addObject:language];
@@ -386,6 +395,12 @@ static UIImage *ASVVPNIcon(NSString *identifier) {
     PSSpecifier *direct=[self button:@"DIRECT" action:@selector(openDirectList)];
     [direct setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_DIRECT],(unsigned long)total] forKey:@"asvCount"];
     [direct setProperty:@"red" forKey:@"asvColor"];if(![[self prefs][@"mode"] isEqual:@"tunnelOnly"] && ![[self prefs][@"mode"] isEqual:@"multiVPN"])[items addObject:direct];
+    NSString *shownMode=[self prefs][@"mode"] ?: @"bypass";
+    if([shownMode isEqual:@"bypass"]){
+        [items addObject:[self setting:L(@"Preserve DoT/DoH",@"Не обходить DOT/DOH") key:@"preserveSystemDNS" type:PSSwitchCell fallback:@NO detail:nil]];
+        NSArray *info=headers.lastObject;
+        headers[headers.count-1]=@[info[0],[info[1] stringByAppendingString:L(@"\n\nPreserve DoT/DoH: DIRECT apps bypass only the VPN and use enabled system encrypted DNS profiles and their domain rules. Off by default; BYPASS only. Conditional on-demand DNS profiles are not overridden. Built-in app DNS is not changed. Reopen the app after toggling.\n\nColored [VPN1/2] badge off: keep the native VPN indicator, without custom text, tint or extra badges.",@"\n\nНе обходить DOT/DOH: приложения DIRECT обходят только VPN, сохраняя включённые системные профили шифрованного DNS и их правила доменов. По умолчанию выключено; только BYPASS. DNS-профили с условными правилами подключения не переопределяются. Собственный DNS приложения не меняется. После переключения переоткройте приложение.\n\nЦветной значок [VPN1/2] выключен: штатный индикатор VPN без нашего текста, цвета и дополнительных значков.")]];
+    }
     if([[self prefs][@"mode"] isEqual:@"multiVPN"]) {
         PSSpecifier *matrix=[self button:@"VPN MATRIX" action:@selector(openMatrix)];[matrix setProperty:@"blue" forKey:@"asvColor"];
         [matrix setProperty:[NSString stringWithFormat:@"%lu/%lu",(unsigned long)[self countFor:ASV_MATRIX],(unsigned long)total] forKey:@"asvCount"];[items addObject:matrix];

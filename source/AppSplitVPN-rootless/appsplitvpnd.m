@@ -2,6 +2,7 @@
 #import "ASVSupervisor.h"
 #import "ASVMulti.h"
 #import "ASVMemoryBudget.h"
+#import "ASVSystemDNS.h"
 #import "Shared.h"
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
@@ -81,6 +82,7 @@ static NSDictionary *ReadPreferences(void) {
         validated[key] = apps.array;
     }
     validated[@"badgeColor"] = @(raw[@"badgeColor"] == nil || [raw[@"badgeColor"] boolValue]);
+    validated[@"preserveSystemDNS"] = @([raw[@"preserveSystemDNS"] isKindOfClass:NSNumber.class] && [raw[@"preserveSystemDNS"] boolValue]);
     NSMutableDictionary *matrix=[NSMutableDictionary dictionary];
     if([raw[ASV_MATRIX] isKindOfClass:NSDictionary.class] && [raw[ASV_MATRIX] count]<=2048){
         for(id bundle in raw[ASV_MATRIX]){id profile=raw[ASV_MATRIX][bundle];
@@ -92,14 +94,14 @@ static NSDictionary *ReadPreferences(void) {
 }
 static void State(NSString *status, NSString *error) {
     NSArray *profiles=ASVIsMultiMode(@{@"mode":currentMode ?: @""})?multi.activeProfiles:@[];
-    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@|%d|%@",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @"",badgeColor,profiles];
+    NSString *fingerprint = [NSString stringWithFormat:@"%@|%@|%lu|%@|%@|%@|%d|%@|%@",status,error ?: @"",(unsigned long)engine.count,engine.unresolved,vpnName ?: @"",currentMode ?: @"",badgeColor,profiles,ASVSystemDNSWarning()];
     NSTimeInterval now=[NSDate date].timeIntervalSince1970;
     BOOL changed=![lastState isEqual:fingerprint];
     if (!changed && now-lastStateWrite<30) return;
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.4"};
+@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.5", @"dnsWarning":ASVSystemDNSWarning()};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -121,6 +123,9 @@ static void Reconcile(BOOL force) {
         NSDictionary *prefs = ReadPreferences();
         currentMode=prefs[@"mode"];
         badgeColor=[prefs[@"badgeColor"] boolValue];
+        BOOL dnsEnabled=[prefs[@"enabled"] boolValue] && [currentMode isEqual:@"bypass"] && [prefs[@"preserveSystemDNS"] boolValue];
+        ASVSystemDNSTick(dnsEnabled,^{initialized=NO;});
+        engine.directDNSRules=dnsEnabled?ASVSystemDNSRules():@[];
         ASVSupervisorSetEnabled([prefs[@"enabled"] boolValue]);
         BOOL multiMode=ASVIsMultiMode(prefs);
         [multi tickMatrix:prefs[ASV_MATRIX] enabled:multiMode && [prefs[@"enabled"] boolValue]];

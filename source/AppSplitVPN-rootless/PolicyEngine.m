@@ -4,6 +4,7 @@
     NEPolicySession *_session;
     NSUInteger _count;
     NSArray *_unresolved;
+    NSArray *_installedDNSRules;
 }
 - (NSUInteger)count { return _count; }
 - (NSArray *)unresolved { return _unresolved ?: @[]; }
@@ -17,6 +18,8 @@
     }
     _count = 0;
     _unresolved = @[];
+    _installedDNSRules=nil;
+    self.directDNSRules=nil;
     return result;
 }
 - (void)dealloc { [self clear]; }
@@ -55,7 +58,7 @@
     id fallback=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:1000 result:[result scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
     if(![candidate addPolicy:fallback] || ![candidate apply]){if(error)*error=@"Matrix policies could not be applied";return NO;}
     NEPolicySession *previous=_session;_session=candidate;_count=count+1;_unresolved=unresolved;
-    [previous removeAllPolicies];[previous apply];return YES;
+    [previous removeAllPolicies];[previous apply];_installedDNSRules=nil;return YES;
 }
 - (BOOL)replaceMode:(NSString *)mode applications:(NSArray<NSString *> *)apps error:(NSString **)error {
     if (![@[@"tunnelOnly", @"bypass"] containsObject:mode]) {
@@ -83,9 +86,15 @@
     if (!candidate) { if (error) *error = @"NECP session unavailable"; return NO; }
     candidate.priority = 1; // control, ahead of ordinary tunnel policies; verified live.
     BOOL tunnelOnly = [mode isEqualToString:@"tunnelOnly"];
+    NSArray *dnsRules=tunnelOnly?@[]:(self.directDNSRules ?: @[]);
+    BOOL preserveDNS=dnsRules.count>0 && uuids.count>0;
+    if (preserveDNS && uuids.count+dnsRules.count+2>4096) {
+        if(error)*error=@"DNS/application rule limit exceeded";
+        return NO;
+    }
     id selectedResult = tunnelOnly
         ? [NSClassFromString(@"NEPolicyResult") skipWithOrder:0]
-        : [NSClassFromString(@"NEPolicyResult") scopeToDirectInterface];
+        : (preserveDNS?[NSClassFromString(@"NEPolicyResult") skipWithOrder:200]:[NSClassFromString(@"NEPolicyResult") scopeToDirectInterface]);
     NSUInteger count = 0;
     for (NSUUID *uuid in uuids) {
         NSArray *conditions = @[[NSClassFromString(@"NEPolicyCondition") effectiveApplication:uuid],
@@ -96,6 +105,23 @@
             return NO;
         }
         count++;
+    }
+    if (preserveDNS) {
+        // Only selected apps jump past this guard. Everyone else leaves this
+        // owned session and keeps Apple's VPN and DNS policy unchanged.
+        id guard=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:150 result:[NSClassFromString(@"NEPolicyResult") skipWithOrder:0] conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+        if(![candidate addPolicy:guard]){if(error)*error=@"DNS application guard rejected";return NO;}count++;
+        unsigned order=200;
+        for(NSDictionary *entry in dnsRules) {
+            id agent=entry[@"agent"];NSString *domain=entry[@"domain"];
+            if(![agent isKindOfClass:NSUUID.class] || ![domain isKindOfClass:NSString.class]){if(error)*error=@"Invalid DNS rule";return NO;}
+            NSMutableArray *conditions=[NSMutableArray arrayWithObject:[NSClassFromString(@"NEPolicyCondition") allInterfaces]];
+            if(domain.length)[conditions addObject:[NSClassFromString(@"NEPolicyCondition") domain:domain]];
+            id policy=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:order++ result:[NSClassFromString(@"NEPolicyResult") netAgentUUID:agent] conditions:conditions];
+            if(![candidate addPolicy:policy]){if(error)*error=@"Encrypted DNS policy rejected";return NO;}count++;
+        }
+        id direct=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:100000 result:[NSClassFromString(@"NEPolicyResult") scopeToDirectInterface] conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces]]];
+        if(![candidate addPolicy:direct]){if(error)*error=@"DNS-preserving DIRECT policy rejected";return NO;}count++;
     }
     if (tunnelOnly) {
         for (id uuid in self.selfUUIDs) {
@@ -119,6 +145,8 @@
     _unresolved = [unresolved copy];
     [previous removeAllPolicies];
     [previous apply];
+    // Keep published native resolvers alive until their old policy session closes.
+    _installedDNSRules=dnsRules;
     return YES;
 }
 @end

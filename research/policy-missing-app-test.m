@@ -16,12 +16,14 @@ static BOOL Reinstalled=NO;
 + (instancetype)effectiveApplication:(NSUUID *)uuid { return uuid?[self new]:nil; }
 + (instancetype)realApplication:(NSUUID *)uuid { return uuid?[self new]:nil; }
 + (instancetype)allInterfaces { return [self new]; }
++ (instancetype)domain:(NSString *)domain { return domain.length?[self new]:nil; }
 @end
 @implementation NEPolicyResult
 + (instancetype)scopeToDirectInterface { return [self new]; }
 + (instancetype)skipWithOrder:(unsigned)order { (void)order;return [self new]; }
 + (instancetype)tunnelIPToInterfaceName:(NSString *)name secondaryResultType:(NSInteger)type { (void)name;(void)type;return [self new]; }
 + (instancetype)drop { return [self new]; }
++ (instancetype)netAgentUUID:(NSUUID *)uuid { return uuid?[self new]:nil; }
 @end
 @implementation NEPolicy
 - (instancetype)initWithOrder:(unsigned)order result:(id)result conditions:(NSArray *)conditions { (void)order;return result && conditions.count?[super init]:nil; }
@@ -74,6 +76,11 @@ int main(void) { @autoreleasepool {
         Reinstalled=NO;
     }
     ASVPolicyEngine *matrix=[ASVPolicyEngine new];NSString *error=nil;
+    ASVPolicyEngine *dns=[ASVPolicyEngine new];
+    dns.directDNSRules=@[@{@"agent":NSUUID.UUID,@"domain":@"chatgpt.com"},@{@"agent":NSUUID.UUID,@"domain":@""}];
+    Check([dns replaceMode:@"bypass" applications:@[@"installed",@"deleted"] error:&error] && dns.count==5,@"DNS gate, domain resolvers and direct fallback staged");
+    Check([dns replaceMode:@"tunnelOnly" applications:@[@"installed"] error:&error] && dns.count==2,@"DNS option cannot alter TUNNEL ONLY");
+    Check([dns clear] && !dns.directDNSRules.count,@"master clear releases DNS rules");
     Check([matrix replaceMatrix:@{@"installed":@"profile",@"deleted":@"profile",@"offloaded":@"profile",@"throws":@"profile",@"malformed":@"profile",@"unresolved":@"profile"} interfaces:@{@"profile":@"utun4"} providerIDs:@[] error:&error],@"MATRIX missing app/extension URL");
     Check(matrix.unresolved.count==5 && matrix.count==2,@"MATRIX retains valid assignment and fallback");
     NSLog(@"PASS: missing/deleted/offloaded apps and missing extension URLs in BYPASS, TUNNEL ONLY and MATRIX");

@@ -21,7 +21,7 @@ static BOOL ASVApplyingColor;
 static BOOL ASVIsVPNText(NSString *text) {
     return [text isEqualToString:@"VPN"] || [text isEqualToString:ASVBadgeText] || [text hasPrefix:@"VPN:"];
 }
-static NSString *ASVCurrentText(void){return splitMode==3?[NSString stringWithFormat:@"VPN:%lu",(unsigned long)activeCount]:ASVBadgeText;}
+static NSString *ASVCurrentText(void){return colorOff?@"VPN":(splitMode==3?[NSString stringWithFormat:@"VPN:%lu",(unsigned long)activeCount]:ASVBadgeText);}
 
 // Color the badge should have now; nil keeps whatever the system asked for.
 static UIColor *ASVWantedColor(UILabel *label) {
@@ -64,7 +64,7 @@ static NSString *ASVBadge(UILabel *label, NSString *text) {
         return text;
     }
     [badges addObject:label];
-    return splitMode ? ASVCurrentText() : @"VPN";
+    return splitMode && !colorOff ? ASVCurrentText() : @"VPN";
 }
 
 static UIView *ASVFindAnchor(UIView *view, Class wanted) {
@@ -118,7 +118,7 @@ static void ASVPlaceTunnelBadge(UIView *statusBar) {
     UIView *foreground=ASVFindAnchor(statusBar,foregroundClass);
     if (!foreground) return;
     UILabel *badge=(UILabel *)[foreground viewWithTag:ASVTunnelBadgeTag];
-    if (splitMode!=2 && splitMode!=3) { [badge removeFromSuperview];return; }
+    if (colorOff || (splitMode!=2 && splitMode!=3)) { [badge removeFromSuperview];return; }
     // Never add a second indicator when the system is already rendering one.
     if(ASVNativeVPNEnabled(statusBar) || ASVHasNativeBadge(statusBar)){[badge removeFromSuperview];return;}
     Class wifiClass=NSClassFromString(@"STUIStatusBarWifiSignalView");

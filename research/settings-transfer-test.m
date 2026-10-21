@@ -15,5 +15,7 @@ int main(void){@autoreleasepool{
  NSDictionary *off=@{@"enabled":@NO,@"mode":@"bypass",ASV_ALWAYS_ON:@YES};assert(!ASVExtraOptionActive(off,ASV_ALWAYS_ON));assert(ASVExtraOptionConfigured(off,ASV_ALWAYS_ON));
  assert(ASVExtraOptionActive(@{@"enabled":@YES,@"mode":@"bypass",ASV_ALWAYS_ON:@YES},ASV_ALWAYS_ON));
  assert(!ASVExtraOptionActive(@{@"enabled":@YES,@"mode":@"multiVPN",ASV_ALWAYS_ON:@YES},ASV_ALWAYS_ON));
+ NSDictionary *dnsPrefs=ASVImportSettings(ASVExportSettings(@{@"preserveSystemDNS":@YES},@[]),@{},[NSSet set],@[],nil,NULL);
+ assert([dnsPrefs[@"preserveSystemDNS"] boolValue]);
  puts("settings transfer and global gate: PASS");
 }return 0;}
