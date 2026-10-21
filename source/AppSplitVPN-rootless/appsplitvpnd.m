@@ -101,7 +101,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.5", @"dnsWarning":ASVSystemDNSWarning()};
+@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.6", @"dnsWarning":ASVSystemDNSWarning()};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -200,6 +200,20 @@ int main(int argc,char **argv) { @autoreleasepool {
     notify_register_dispatch(ASV_CMD_TOGGLE,&toggleToken,dispatch_get_main_queue(),^(int t){
         (void)t;
         SetEnabled(![[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS][@"enabled"] boolValue]);
+    });
+    int modeToken;
+    notify_register_dispatch(ASV_CMD_MODE_NEXT,&modeToken,dispatch_get_main_queue(),^(__unused int t){
+        NSMutableDictionary *prefs=[[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS] mutableCopy] ?: [NSMutableDictionary dictionary];
+        NSArray *order=@[@"tunnelOnly",@"bypass",@"multiVPN"];
+        NSUInteger index=[order indexOfObject:prefs[@"mode"]];
+        // An unknown stored value is treated as BYPASS, the default used by ReadPreferences.
+        if(index==NSNotFound)index=1;
+        prefs[@"mode"]=order[(index+1)%order.count];
+        if([prefs writeToFile:ASV_PREFS atomically:YES]){
+            chown(ASV_PREFS.fileSystemRepresentation,501,501);
+            chmod(ASV_PREFS.fileSystemRepresentation,0644);
+        }
+        Reconcile(YES);
     });
     int setToken;
     notify_register_dispatch(ASV_CMD_SET,&setToken,dispatch_get_main_queue(),^(int t){

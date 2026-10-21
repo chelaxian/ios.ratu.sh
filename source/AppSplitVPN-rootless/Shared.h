@@ -10,6 +10,8 @@
 // Explicit enable/disable from Control Center: notify state 1 = on, 2 = off.
 // Unlike a toggle, repeated or coalesced posts cannot flip the switch twice.
 #define ASV_CMD_SET "com.ratush.appsplitvpn.set"
+// Control Center long press: advance TUNNEL ONLY -> BYPASS -> MULTI VPN -> TUNNEL ONLY.
+#define ASV_CMD_MODE_NEXT "com.ratush.appsplitvpn.mode-next"
 #define ASV_STATE_NOTIFY "com.ratush.appsplitvpn.state.changed"
 // The two selection arrays persist independently. Only the current mode is evaluated.
 #define ASV_VPN @"vpnApps"
