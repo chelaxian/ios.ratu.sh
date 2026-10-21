@@ -73,6 +73,7 @@ static NSArray *Describe(NSArray *managers, NSUInteger *skipped) {
         if (!Number(m,@"isEnabled")) continue;
         id dns=Get(m,@"dnsSettings");NSInteger protocol=Number(dns,@"dnsProtocol");
         if (protocol!=2 && protocol!=3) continue;
+        if (Get(dns,@"identityReference") || Get(dns,@"proxyAgentUUID")) { (*skipped)++;continue; }
         NSArray *excluded=Exclusions(m);
         if (out.count>=32 || !excluded) { (*skipped)++;continue; }
         NSArray *raw=Get(dns,@"matchDomains");
@@ -85,7 +86,7 @@ static NSArray *Describe(NSArray *managers, NSUInteger *skipped) {
         }
         if (!valid || domains.count>512) { (*skipped)++;continue; }
         if (!domains.count) [domains addObject:@""];
-        NSArray *servers=Get(dns,@"servers");
+        NSArray *servers=Get(dns,@"servers") ?: @[]; // A DoH profile may specify only its URL.
         if (![servers isKindOfClass:NSArray.class] || servers.count>32) { (*skipped)++;continue; }
         NSMutableArray *addresses=[NSMutableArray new];
         for (id s in servers) { unsigned char bytes[16];
