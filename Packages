@@ -170,6 +170,23 @@ Author: ratush
 Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
 Name: App Split VPN
 
+Package: com.ratush.appsplitvpn
+Version: 0.4.6
+Architecture: iphoneos-arm64
+Maintainer: ratush
+Installed-Size: 1520
+Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
+Filename: debs/com.ratush.appsplitvpn_0.4.6_iphoneos-arm64.deb
+Size: 178148
+MD5sum: 0c231f6ffde102431a7d939af63b52d2
+SHA1: 379332bb07e43e0c40d6bbbe865d63633a650fbb
+SHA256: 6c41228e4c21f0cc7b6babf8ecb84b09c62f38d6808139ee7c0225a062384233
+Section: Tweaks
+Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
+Author: ratush
+Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
+Name: App Split VPN
+
 Package: com.ratush.catmcpcc
 Version: 1.0.0
 Architecture: iphoneos-arm64e
@@ -741,24 +758,6 @@ Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup-gui
 Version: 2.0.27
-Architecture: iphoneos-arm64e
-Maintainer: DanP
-Installed-Size: 12083
-Depends: firmware (>= 14.0)
-Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64e.deb
-Size: 4535744
-MD5sum: 158e6c5b6ff2eec5dbfa1ca4c24f75d0
-SHA1: f54e8ca2e824d127404e5ce97690b4a1d92139c0
-SHA256: 37095f1bfeecc9e00229e9abebbd3ef998dddf670c9d9217498e9344081955bd
-Section: Tweaks
-Priority: optional
-Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
-License: GPL-3.0-only
-Name: Twackup (GUI)
-
-Package: ru.danpashin.twackup-gui
-Version: 2.0.27
 Architecture: iphoneos-arm64
 Maintainer: DanP
 Installed-Size: 12100
@@ -768,6 +767,24 @@ Size: 4535812
 MD5sum: 1f4e8c3270a0ee0ae2fcaec8a3563fe5
 SHA1: 5ba5035e0ff22ea6e347775bc3589d8c966a9194
 SHA256: bd3718577b38ef96b2ba31c23541a0b157f9c8a283c4ea57310e366c60947a60
+Section: Tweaks
+Priority: optional
+Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
+Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
+License: GPL-3.0-only
+Name: Twackup (GUI)
+
+Package: ru.danpashin.twackup-gui
+Version: 2.0.27
+Architecture: iphoneos-arm64e
+Maintainer: DanP
+Installed-Size: 12083
+Depends: firmware (>= 14.0)
+Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64e.deb
+Size: 4535744
+MD5sum: 158e6c5b6ff2eec5dbfa1ca4c24f75d0
+SHA1: f54e8ca2e824d127404e5ce97690b4a1d92139c0
+SHA256: 37095f1bfeecc9e00229e9abebbd3ef998dddf670c9d9217498e9344081955bd
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
