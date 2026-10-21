@@ -28,8 +28,10 @@ This is mechanism validation, not final package/UI validation.
 Native profile snapshots refresh every 30 seconds while the option is active.
 Published resolvers are retained until the corresponding owned policy session is
 replaced or cleared. Master-off and other modes stop refresh and release owned
-registrations. Conditional on-demand profiles are skipped with a visible warning
-rather than silently ignoring their conditions. App-embedded DNS is not changed.
+registrations. Domain-only NeverConnect exclusions followed by an unconditional
+Connect rule are preserved (the device's Control D profile has 45 exclusions).
+Other conditional on-demand profiles are skipped with a visible warning rather
+than silently ignoring their conditions. App-embedded DNS is not changed.
 
 ## Required candidate checks
 

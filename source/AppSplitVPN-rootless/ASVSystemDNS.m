@@ -41,15 +41,31 @@ static BOOL Host(NSString *name) {
     NSCharacterSet *allowed=[NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-:"];
     return [name rangeOfCharacterFromSet:allowed.invertedSet].location==NSNotFound;
 }
-static BOOL Unconditional(id manager) {
+static NSString *Domain(id value) {
+    if (![value isKindOfClass:NSString.class]) return nil;
+    NSString *domain=[value lowercaseString];
+    if([domain hasPrefix:@"*."])domain=[domain substringFromIndex:2];
+    while([domain hasPrefix:@"."])domain=[domain substringFromIndex:1];
+    return (!domain.length || Host(domain))?domain:nil;
+}
+static NSArray *Exclusions(id manager) {
     NSArray *onDemand=Get(manager,@"onDemandRules");
-    if (![onDemand isKindOfClass:NSArray.class] || !onDemand.count) return YES;
+    if (![onDemand isKindOfClass:NSArray.class] || !onDemand.count) return @[];
     // Do not silently override SSID/interface/probe/domain on-demand restrictions.
-    if (onDemand.count!=1) return NO;
-    id r=onDemand.firstObject;
-    return Number(r,@"action")==1 && Number(r,@"interfaceTypeMatch")==0 &&
-        ![Get(r,@"SSIDMatch") count] && ![Get(r,@"DNSSearchDomainMatch") count] &&
-        ![Get(r,@"DNSServerAddressMatch") count] && !Get(r,@"probeURL");
+    NSMutableOrderedSet *excluded=[NSMutableOrderedSet new];BOOL connect=NO;
+    for(id r in onDemand){
+        if(Number(r,@"interfaceTypeMatch")!=0 || [Get(r,@"SSIDMatch") count] || [Get(r,@"DNSSearchDomainMatch") count] || [Get(r,@"DNSServerAddressMatch") count] || Get(r,@"probeURL"))return nil;
+        NSInteger action=Number(r,@"action");
+        if(action==1){if(r!=onDemand.lastObject)return nil;connect=YES;continue;}
+        if(action!=3)return nil;
+        NSArray *connections=Get(r,@"connectionRules");if(![connections isKindOfClass:NSArray.class])return nil;
+        for(id c in connections){
+            if(Number(c,@"action")!=2 || [Get(c,@"useDNSServers") count] || Get(c,@"probeURL"))return nil;
+            NSArray *domains=Get(c,@"matchDomains");if(![domains isKindOfClass:NSArray.class])return nil;
+            for(id value in domains){NSString *domain=Domain(value);if(!domain || !domain.length || excluded.count>=512)return nil;[excluded addObject:domain];}
+        }
+    }
+    return connect?excluded.array:nil;
 }
 static NSArray *Describe(NSArray *managers, NSUInteger *skipped) {
     NSMutableArray *out=[NSMutableArray new];
@@ -57,15 +73,14 @@ static NSArray *Describe(NSArray *managers, NSUInteger *skipped) {
         if (!Number(m,@"isEnabled")) continue;
         id dns=Get(m,@"dnsSettings");NSInteger protocol=Number(dns,@"dnsProtocol");
         if (protocol!=2 && protocol!=3) continue;
-        if (out.count>=32 || !Unconditional(m)) { (*skipped)++;continue; }
+        NSArray *excluded=Exclusions(m);
+        if (out.count>=32 || !excluded) { (*skipped)++;continue; }
         NSArray *raw=Get(dns,@"matchDomains");
         if (raw && ![raw isKindOfClass:NSArray.class]) { (*skipped)++;continue; }
         NSMutableOrderedSet *domains=[NSMutableOrderedSet new];BOOL valid=YES;
         for (id value in raw) {
-            if (![value isKindOfClass:NSString.class]) { valid=NO;break; }
-            NSString *domain=[value lowercaseString];
-            while ([domain hasPrefix:@"."]) domain=[domain substringFromIndex:1];
-            if (domain.length && !Host(domain)) { valid=NO;break; }
+            NSString *domain=Domain(value);
+            if (!domain) { valid=NO;break; }
             [domains addObject:domain];
         }
         if (!valid || domains.count>512) { (*skipped)++;continue; }
@@ -82,7 +97,7 @@ static NSArray *Describe(NSArray *managers, NSUInteger *skipped) {
         if (protocol==3 && (![url isKindOfClass:NSURL.class] || ![url.scheme.lowercaseString isEqual:@"https"] || !url.host.length)) valid=NO;
         if (protocol==2 && !Host(name)) valid=NO;
         if (!valid) { (*skipped)++;continue; }
-        [out addObject:@{@"protocol":@(protocol),@"url":url.absoluteString ?: @"",@"name":name ?: @"",@"servers":addresses,@"domains":domains.array}];
+        [out addObject:@{@"protocol":@(protocol),@"url":url.absoluteString ?: @"",@"name":name ?: @"",@"servers":addresses,@"domains":domains.array,@"excluded":excluded}];
     } @catch (__unused NSException *e) { (*skipped)++; } }
     return out;
 }
@@ -104,7 +119,7 @@ static NSArray *Build(NSArray *source) {
         for (NSString *domain in d[@"domains"]) addDomain(config,domain.UTF8String);
         ASVDNSPublished *owner=[ASVDNSPublished new];owner.resolver=config;
         owner.published=publishConfig(config);if (!owner.published) return nil;
-        for (NSString *domain in d[@"domains"]) [out addObject:@{@"agent":agent,@"domain":domain,@"owner":owner}];
+        for (NSString *domain in d[@"domains"]) [out addObject:@{@"agent":agent,@"domain":domain,@"owner":owner,@"excluded":d[@"excluded"]}];
     }
     // Specific DNS domains precede a catch-all profile; no app x domain explosion.
     [out sortUsingComparator:^NSComparisonResult(NSDictionary *a,NSDictionary *b){

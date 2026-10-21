@@ -88,7 +88,9 @@
     BOOL tunnelOnly = [mode isEqualToString:@"tunnelOnly"];
     NSArray *dnsRules=tunnelOnly?@[]:(self.directDNSRules ?: @[]);
     BOOL preserveDNS=dnsRules.count>0 && uuids.count>0;
-    if (preserveDNS && uuids.count+dnsRules.count+2>4096) {
+    NSUInteger dnsCount=dnsRules.count;
+    for(NSDictionary *entry in dnsRules)dnsCount+=[entry[@"excluded"] count];
+    if (preserveDNS && uuids.count+dnsCount+2>4096) {
         if(error)*error=@"DNS/application rule limit exceeded";
         return NO;
     }
@@ -115,6 +117,12 @@
         for(NSDictionary *entry in dnsRules) {
             id agent=entry[@"agent"];NSString *domain=entry[@"domain"];
             if(![agent isKindOfClass:NSUUID.class] || ![domain isKindOfClass:NSString.class]){if(error)*error=@"Invalid DNS rule";return NO;}
+            NSArray *excluded=entry[@"excluded"] ?: @[];
+            unsigned next=order+(unsigned)excluded.count+1;
+            for(NSString *exception in excluded){
+                id skip=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:order++ result:[NSClassFromString(@"NEPolicyResult") skipWithOrder:next] conditions:@[[NSClassFromString(@"NEPolicyCondition") allInterfaces],[NSClassFromString(@"NEPolicyCondition") domain:exception]]];
+                if(![candidate addPolicy:skip]){if(error)*error=@"DNS exclusion rejected";return NO;}count++;
+            }
             NSMutableArray *conditions=[NSMutableArray arrayWithObject:[NSClassFromString(@"NEPolicyCondition") allInterfaces]];
             if(domain.length)[conditions addObject:[NSClassFromString(@"NEPolicyCondition") domain:domain]];
             id policy=[[NSClassFromString(@"NEPolicy") alloc] initWithOrder:order++ result:[NSClassFromString(@"NEPolicyResult") netAgentUUID:agent] conditions:conditions];
