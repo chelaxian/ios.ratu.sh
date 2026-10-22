@@ -187,6 +187,23 @@ Author: ratush
 Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
 Name: App Split VPN
 
+Package: com.ratush.appsplitvpn
+Version: 0.4.7
+Architecture: iphoneos-arm64
+Maintainer: ratush
+Installed-Size: 1520
+Depends: firmware (>= 15.0), firmware (<= 26.0.1), preferenceloader, com.opa334.ccsupport, libroot-dopamine, mobilesubstrate | ellekit
+Filename: debs/com.ratush.appsplitvpn_0.4.7_iphoneos-arm64.deb
+Size: 180082
+MD5sum: f84f3b45c686c4ab1d5a71d627f2565c
+SHA1: 364f80dbc3ce92de7bc3a9a1d846fa57cde15f9c
+SHA256: 34f2eb97d6ea86d6d51b349ce93aa94672c51e4d25dd051c86769b23353ca9f8
+Section: Tweaks
+Description: Per-app VPN/DIRECT routing, experimental MULTI VPN with app-to-profile matrix and verified public IP per tunnel. Extra: ordered VPN redundancy, health checks, Always ON and lock-screen disconnect with optional music/PiP protection. MULTI currently requires different unmanaged PacketTunnel providers; one profile per VPN app. Install range: iOS 15.0 - 26.0.1 (rootless); runtime verified on iOS 17.0 only. Red BYPASS, green TUNNEL ONLY, blue MULTI VPN:N badge follows native status-bar visibility.
+Author: ratush
+Icon: https://ios.ratu.sh/icons/com.ratush.appsplitvpn.png
+Name: App Split VPN
+
 Package: com.ratush.catmcpcc
 Version: 1.0.0
 Architecture: iphoneos-arm64e
@@ -205,16 +222,16 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.2.0
+Version: 1.2.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon
-Filename: debs/com.ratush.catmcpcc_1.2.0_iphoneos-arm64.deb
-Size: 33320
-MD5sum: 66eb875a0b852712d3ccce50fe1805e8
-SHA1: d4306e9b7d1250f1e0d66e436a1836b5f74c3e03
-SHA256: 0215036e2f0ada7f782292663b904be672ee6b82bfebcb5b171dbe96fc326d2d
+Filename: debs/com.ratush.catmcpcc_1.2.1_iphoneos-arm64.deb
+Size: 37634
+MD5sum: a3c0785028836c5071761fb42098cfa1
+SHA1: de42c4f3dc90fb3d472e9a6b8001dd95e20f3c85
+SHA256: 9db4939e908edf11c852d48cfed670752927a386200d4c8ce804045a95509fff
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Turns the CatMCP service on and fully stops it on Dopamine.
@@ -222,16 +239,16 @@ Author: ratu.sh
 Name: CCMCP
 
 Package: com.ratush.ccfrida
-Version: 1.1.0
+Version: 1.1.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, re.frida.server
-Filename: debs/com.ratush.ccfrida_1.1.0_iphoneos-arm64.deb
-Size: 31528
-MD5sum: 7443f9585892baedb141a872ea93adb7
-SHA1: 93918555004b9458b40f2c9760c41a4fc1c129fb
-SHA256: c7e3915a1eb0035ef968b2299c3217f165ba58db580d848953acad05c98d4a89
+Filename: debs/com.ratush.ccfrida_1.1.1_iphoneos-arm64.deb
+Size: 35864
+MD5sum: b7b6524f7cba9b96118524096b399f8a
+SHA1: 3aedadb23bf0a2838ef88126ffd306469ba8528e
+SHA256: 0790da7165090f0cb93732d13f63153c3a6c4a40d4d801aa934d98693d0e05e2
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Turns Frida on and fully stops frida-server, with no background watcher.
@@ -288,16 +305,16 @@ Icon: https://ios.ratu.sh/icons/ccopenssh.png
 Name: CCOPENSSH
 
 Package: com.ratush.ccopenssh
-Version: 1.2.0
+Version: 1.2.1
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, openssh-server
-Filename: debs/com.ratush.ccopenssh_1.2.0_iphoneos-arm64.deb
-Size: 33990
-MD5sum: 7baeaf403d8d3d707c58afa3af1aeada
-SHA1: 7a052317ce4db06ca9618272a3c54f6d5e2568f6
-SHA256: 0861bc648a5db94badc17d5ebf683986c72895d3ca9efb528564a34fcdcb8820
+Filename: debs/com.ratush.ccopenssh_1.2.1_iphoneos-arm64.deb
+Size: 38926
+MD5sum: e482a22810ca9f43550b52e0f9cd7c2e
+SHA1: 6e24dce93fde8ed350327ea4b9f01eec55f94785
+SHA256: dacdaded336e1cf1a7f9775070f58932bb8cfc92d50057faa11f2e1557a5d004
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: SSH toggle for Dopamine: stops the service; fallback access only through localhost.
