@@ -23,6 +23,8 @@ jobs:
         run: |
           cc -std=c11 -Wall -Wextra -Werror tests/cc-command-io-test.c -o /tmp/cc-command-io-test
           /tmp/cc-command-io-test
+          cc -std=c11 -Wall -Wextra -Werror tests/cc-local-listener-test.c -o /tmp/cc-local-listener-test
+          /tmp/cc-local-listener-test
       - name: Install Theos and SDK
         run: |
           brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }

@@ -16,6 +16,7 @@
 #import <pwd.h>
 #import <sys/sysctl.h>
 #import <string.h>
+#import "CCLocalListener.h"
 extern int proc_listallpids(void *, int);
 extern int proc_pidpath(int, void *, uint32_t);
 extern char **environ;
@@ -51,13 +52,7 @@ static int Run(NSString *exe, NSArray<NSString *> *args) {
 }
 static int Launch(NSArray<NSString *> *args) { return Run(@"/var/jb/bin/launchctl",args); }
 static BOOL PortOpen(int port) {
-    int fd=socket(AF_INET,SOCK_STREAM,0); if(fd<0)return NO;
-    fcntl(fd,F_SETFL,O_NONBLOCK);
-    struct sockaddr_in a={0};a.sin_family=AF_INET;a.sin_port=htons(port);a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
-    int r=connect(fd,(struct sockaddr *)&a,sizeof(a));
-    if(r<0 && errno==EINPROGRESS){fd_set set;FD_ZERO(&set);FD_SET(fd,&set);struct timeval tv={0,150000};
-        if(select(fd+1,NULL,&set,NULL,&tv)>0){int err=0;socklen_t len=sizeof(err);r=getsockopt(fd,SOL_SOCKET,SO_ERROR,&err,&len)==0 && !err ? 0:-1;}}
-    close(fd);return r==0;
+    return CCLocalListener(port);
 }
 static BOOL ServiceProcess(NSString *exe) {
     NSString *name=exe.lastPathComponent;
