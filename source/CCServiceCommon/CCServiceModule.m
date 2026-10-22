@@ -8,6 +8,7 @@
 #import <errno.h>
 #import <string.h>
 #import "CCUIToggleModule.h"
+#import "CCServiceCommandIO.h"
 extern char **environ;
 
 @interface SERVICE_CLASS : CCUIToggleModule {
@@ -18,6 +19,8 @@ extern char **environ;
     BOOL _busy;
     NSMutableArray<NSString *> *_commands;
     CFTimeInterval _lastPoll;
+    NSInteger _lastCommandError;
+    NSUInteger _tapCount, _completedActions;
 }
 @end
 @implementation SERVICE_CLASS
@@ -93,7 +96,7 @@ extern char **environ;
         char *args[] = {(char *)path, (char *)command.UTF8String, NULL};
         int pipeFD[2] = {-1,-1};
         int rc = pipe(pipeFD);
-        pid_t pid = 0; int status = 0;
+        pid_t pid = 0;
         if (!rc) {
             posix_spawn_file_actions_t actions;
             posix_spawn_file_actions_init(&actions);
@@ -110,27 +113,20 @@ extern char **environ;
             posix_spawn_file_actions_destroy(&actions);
             close(pipeFD[1]);
         }
-        BOOL finished = NO;
-        if (!rc) {
-            CFTimeInterval deadline = NSProcessInfo.processInfo.systemUptime + 25;
-            while (NSProcessInfo.processInfo.systemUptime < deadline) {
-                pid_t result = waitpid(pid, &status, WNOHANG);
-                if (result == pid) { finished = YES; break; }
-                if (result < 0 && errno != EINTR) break;
-                usleep(10000);
-            }
-            if (!finished) { kill(pid, SIGKILL); while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {} }
-        }
         char output[32] = {0};
-        if (pipeFD[0] >= 0) {
-            fcntl(pipeFD[0], F_SETFL, O_NONBLOCK);
-            read(pipeFD[0], output, sizeof(output)-1);
-            close(pipeFD[0]);
+        CCCommandResult result={0};
+        if (!rc) result=CCReadCommand(pid,pipeFD[0],[command isEqualToString:@"status"]?1.0:25.0,output,sizeof(output));
+        if (pipeFD[0]>=0) close(pipeFD[0]);
+        if (!rc && !result.reaped) {
+            // Reap eventual exit without blocking a worker or delaying taps.
+            __block dispatch_source_t exitSource=dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC,(uintptr_t)pid,DISPATCH_PROC_EXIT,dispatch_get_global_queue(QOS_CLASS_UTILITY,0));
+            if(exitSource){dispatch_source_set_event_handler(exitSource,^{int status;waitpid(pid,&status,WNOHANG);dispatch_source_cancel(exitSource);exitSource=nil;});dispatch_resume(exitSource);}
         }
+        NSInteger executionError=rc?rc:(result.timedOut?ETIMEDOUT:result.readError);
         // An action may fail while the service remains ON. Never paint an
         // execution error as OFF; retain the last observation if none arrived.
         NSInteger observed = -1;
-        if (!rc && finished) {
+        if (!rc && result.complete && !result.readError) {
             if (!strcmp(output,"on\n")) observed = 1;
             else if (!strcmp(output,"off\n")) observed = 0;
             else if (!strcmp(output,"local\n")) observed = 2;
@@ -139,6 +135,11 @@ extern char **environ;
             typeof(self) me = weak;
             if (!me) return;
             me->_busy = NO;
+            me->_lastCommandError=executionError?:((observed<0)?EIO:0);
+            if(![command isEqualToString:@"status"]){
+                me->_completedActions++;
+                if(me->_lastCommandError){NSLog(@"%@ helper action failed (%ld)",SERVICE_NAME,(long)me->_lastCommandError);[[UINotificationFeedbackGenerator new] notificationOccurred:UINotificationFeedbackTypeError];}
+            }
             if (observed >= 0 && me->_state != observed) {
                 me->_state = observed;
                 [me refreshState];
@@ -162,6 +163,7 @@ extern char **environ;
 }
 - (void)setSelected:(BOOL)selected {
     (void)selected;
+    _tapCount++;
     [self runCommand:@"toggle"];
 }
 @end

@@ -18,6 +18,10 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      - name: Check bounded helper completion
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror tests/cc-command-io-test.c -o /tmp/cc-command-io-test
+          /tmp/cc-command-io-test
       - name: Install Theos and SDK
         run: |
           brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }

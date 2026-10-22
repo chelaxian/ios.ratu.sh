@@ -1,6 +1,6 @@
 Package: com.ratush.catmcpcc
 Name: CCMCP
-Version: 1.2.0
+Version: 1.2.1
 Architecture: iphoneos-arm64
 Description: Включение и полная остановка службы CatMCP на Dopamine.
 Maintainer: ratu.sh
