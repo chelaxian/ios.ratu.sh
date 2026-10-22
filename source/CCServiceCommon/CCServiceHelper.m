@@ -166,14 +166,22 @@ static BOOL SetEnabled(BOOL enabled){
     if(!Exists(JobPath())){fprintf(stderr,"service plist missing\n");return NO;}
     if(enabled && !RestoreSSH())return NO;
     if(!WriteMarker(!enabled))return NO;
+#if SERVICE_KIND == 1
     NSDictionary *job=[NSDictionary dictionaryWithContentsOfFile:JobPath()];
     BOOL startsOnLoad=[job[@"RunAtLoad"] boolValue] || job[@"KeepAlive"]!=nil || job[@"Sockets"]!=nil;
+#endif
     for(int i=0;i<2;i++){
         NSString *domain=@(domains[i]);NSString *target=[domain stringByAppendingFormat:@"/%@",Label()];
         if(enabled){
             Launch(@[@"enable",target]);
             if(Launch(@[@"bootstrap",domain,JobPath()])==0){
+#if SERVICE_KIND == 1
                 if(!startsOnLoad)Launch(@[@"kickstart",target]);
+#else
+                // RunAtLoad/KeepAlive can still defer a rapid restart by the
+                // launchd throttle interval. Explicitly request the start.
+                if(!Listening())Launch(@[@"kickstart",target]);
+#endif
                 break;
             }
             if(Launch(@[@"print",target])==0){Launch(@[@"kickstart",target]);break;}
@@ -190,7 +198,7 @@ static BOOL SetEnabled(BOOL enabled){
     }
     if(!enabled && Processes(0)>0){usleep(50000);Processes(SIGKILL);}
     for(int i=0;i<100;i++){BOOL listening=Listening();int processes=Processes(0);
-        if(enabled?listening:(!listening && processes==0))return YES;usleep(50000);}
+        if(enabled?(listening && (SERVICE_KIND==1 || processes>0)):(!listening && processes==0))return YES;usleep(50000);}
     if(!enabled && RestrictSSH())return YES;
     return NO;
 }

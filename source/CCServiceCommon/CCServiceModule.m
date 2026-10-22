@@ -21,12 +21,14 @@ extern char **environ;
     CFTimeInterval _lastPoll;
     NSInteger _lastCommandError, _lastSpawnError, _lastHelperExit;
     NSUInteger _tapCount, _completedActions;
+    NSInteger _pendingTarget;
 }
 @end
 @implementation SERVICE_CLASS
 - (instancetype)init {
     if ((self = [super init])) {
         _commands = [NSMutableArray array];
+        _pendingTarget = -1;
         _token = NOTIFY_TOKEN_INVALID;
         __weak typeof(self) weak = self;
         // A notification is only a wakeup. Its global value can be stale;
@@ -148,6 +150,7 @@ extern char **environ;
                 if ([me respondsToSelector:@selector(reconfigureView)]) [me reconfigureView];
             }
             [me updateLabel];
+            if(!me->_commands.count)me->_pendingTarget=-1;
             [me startNextCommand];
         });
     });
@@ -166,6 +169,12 @@ extern char **environ;
 - (void)setSelected:(BOOL)selected {
     (void)selected;
     _tapCount++;
-    [self runCommand:@"toggle"];
+    // Retain tap parity against the last requested target, even when a start
+    // failed or the observed service has not caught up yet. Only the newest
+    // queued absolute target matters; do not restart a daemon for every tap.
+    BOOL target = _pendingTarget>=0 ? !_pendingTarget : _state!=1;
+    _pendingTarget=target;
+    [_commands removeAllObjects];
+    [self runCommand:target?@"on":@"off"];
 }
 @end
