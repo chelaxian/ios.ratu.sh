@@ -19,7 +19,7 @@ extern char **environ;
     BOOL _busy;
     NSMutableArray<NSString *> *_commands;
     CFTimeInterval _lastPoll;
-    NSInteger _lastCommandError;
+    NSInteger _lastCommandError, _lastSpawnError, _lastHelperExit;
     NSUInteger _tapCount, _completedActions;
 }
 @end
@@ -122,7 +122,8 @@ extern char **environ;
             __block dispatch_source_t exitSource=dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC,(uintptr_t)pid,DISPATCH_PROC_EXIT,dispatch_get_global_queue(QOS_CLASS_UTILITY,0));
             if(exitSource){dispatch_source_set_event_handler(exitSource,^{int status;waitpid(pid,&status,WNOHANG);dispatch_source_cancel(exitSource);exitSource=nil;});dispatch_resume(exitSource);}
         }
-        NSInteger executionError=rc?rc:(result.timedOut?ETIMEDOUT:result.readError);
+        NSInteger helperExit=result.exitKnown?(WIFEXITED(result.status)?WEXITSTATUS(result.status):128+WTERMSIG(result.status)):-1;
+        NSInteger executionError=rc?rc:(result.timedOut?ETIMEDOUT:(result.readError?:((helperExit>0)?helperExit:0)));
         // An action may fail while the service remains ON. Never paint an
         // execution error as OFF; retain the last observation if none arrived.
         NSInteger observed = -1;
@@ -135,6 +136,7 @@ extern char **environ;
             typeof(self) me = weak;
             if (!me) return;
             me->_busy = NO;
+            me->_lastSpawnError=rc;me->_lastHelperExit=helperExit;
             me->_lastCommandError=executionError?:((observed<0)?EIO:0);
             if(![command isEqualToString:@"status"]){
                 me->_completedActions++;

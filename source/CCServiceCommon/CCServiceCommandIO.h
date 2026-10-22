@@ -9,7 +9,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <stddef.h>
-typedef struct { bool complete,timedOut,reaped; int readError,status; } CCCommandResult;
+typedef struct { bool complete,timedOut,reaped,exitKnown; int readError,status; } CCCommandResult;
 static double CCCommandTime(void) { struct timespec now;clock_gettime(CLOCK_MONOTONIC,&now);return now.tv_sec+now.tv_nsec/1e9; }
 // SpringBoard may reap a child independently (or ignore SIGCHLD). Pipe EOF,
 // not ownership of its wait status, confirms that a helper has finished.
@@ -33,10 +33,11 @@ static CCCommandResult CCReadCommand(pid_t pid,int fd,double timeout,char *outpu
     if(overflow)result.readError=EOVERFLOW;
     result.timedOut=!result.complete && !result.readError;
     pid_t waited=waitpid(pid,&result.status,WNOHANG);
+    result.exitKnown=waited==pid;
     result.reaped=waited==pid || (waited<0 && errno==ECHILD);
     // A setuid helper may reject kill from mobile. Never follow that with an
     // unbounded waitpid(...,0), and never signal a PID we no longer own.
-    if(!result.complete && waited==0){kill(pid,SIGKILL);waited=waitpid(pid,&result.status,WNOHANG);result.reaped=waited==pid || (waited<0 && errno==ECHILD);}
+    if(!result.complete && waited==0){kill(pid,SIGKILL);waited=waitpid(pid,&result.status,WNOHANG);result.exitKnown=waited==pid;result.reaped=waited==pid || (waited<0 && errno==ECHILD);}
     return result;
 }
 #endif

@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'source/CCServiceCommon/**'
+      - 'tests/cc-command-io-test.c'
       - 'source/CCFRIDA-rootless/**'
       - 'source/CCGapCloser-rootless/**'
       - 'source/CCOpenSSH-rootless/**'
