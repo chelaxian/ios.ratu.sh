@@ -19,8 +19,14 @@
     __weak UIView *_gestureView;
     UILongPressGestureRecognizer *_hold;
     NSUInteger _attachAttempts;
+    int _commandToken, _ackToken;
+    uint64_t _requestSequence, _pendingValue;
+    NSTimeInterval _pendingAt, _lastSend, _lastRead;
+    NSTimer *_pollTimer;
+    NSDictionary *_observedPreferences;
 }
 - (void)asv_ensureLongPress;
+- (void)asv_readState;
 - (void)asv_onLongPress:(UILongPressGestureRecognizer *)gesture;
 @end
 
@@ -64,7 +70,18 @@ static UIImage *ASVGlyph(void) {
     if ((self=[super init])) {
         currentModule=self;
         __weak ASVCCModule *weakSelf=self;
-        dispatch_async(dispatch_get_main_queue(),^{[weakSelf asv_ensureLongPress];});
+        _commandToken=_ackToken=-1;
+        notify_register_check(ASV_CMD_SET,&_commandToken);
+        uint64_t previous=0;if(_commandToken>=0)notify_get_state(_commandToken,&previous);
+        _requestSequence=previous>>2;
+        notify_register_dispatch(ASV_CMD_SET_ACK,&_ackToken,dispatch_get_main_queue(),^(__unused int token){[weakSelf asv_readState];});
+        _pollTimer=[NSTimer timerWithTimeInterval:.25 repeats:YES block:^(__unused NSTimer *timer){
+            ASVCCModule *module=weakSelf;if(!module)return;
+            BOOL visible=module->_gestureView.window && !module->_gestureView.window.hidden;
+            if(NSProcessInfo.processInfo.systemUptime-module->_lastRead >= ((visible || module->_pendingValue) ? .25 : 5))[module asv_readState];
+        }];
+        [NSRunLoop.mainRunLoop addTimer:_pollTimer forMode:NSRunLoopCommonModes];
+        dispatch_async(dispatch_get_main_queue(),^{[weakSelf asv_ensureLongPress];[weakSelf asv_readState];});
     }
     return self;
 }
@@ -100,14 +117,42 @@ static UIImage *ASVGlyph(void) {
     // Keep it visibly on while waiting for a VPN so the next tap turns it off.
     return [prefs[@"enabled"] boolValue];
 }
+- (void)dealloc {
+    [_pollTimer invalidate];
+    if(_commandToken>=0)notify_cancel(_commandToken);
+    if(_ackToken>=0)notify_cancel(_ackToken);
+}
+- (void)asv_readState {
+    NSTimeInterval now=NSProcessInfo.processInfo.systemUptime;_lastRead=now;
+    if(_pendingValue){
+        uint64_t acknowledged=0,current=0;
+        if(_ackToken>=0)notify_get_state(_ackToken,&acknowledged);
+        if(_commandToken>=0)notify_get_state(_commandToken,&current);
+        if(acknowledged==_pendingValue || current!=_pendingValue)_pendingValue=0;
+        else if(now-_pendingAt>=8){_pendingValue=0;[[UINotificationFeedbackGenerator new] notificationOccurred:UINotificationFeedbackTypeError];}
+        else if(now-_lastSend>=.5){_lastSend=now;notify_post(ASV_CMD_SET);}
+    }
+    NSDictionary *prefs=[NSDictionary dictionaryWithContentsOfFile:ASV_PREFS];
+    NSDictionary *observed=@{@"enabled":@([prefs[@"enabled"] boolValue]),@"mode":prefs[@"mode"]?:@"bypass"};
+    if(![observed isEqual:_observedPreferences]){
+        _observedPreferences=observed;[self refreshState];
+        if([self respondsToSelector:@selector(reconfigureView)])[self reconfigureView];
+    }
+}
 - (void)setSelected:(BOOL)selected {
-    if (_holding) return;
-    if (selected==[self isSelected]) return;
-    int token=-1;
-    if (notify_register_check(ASV_CMD_SET,&token)==NOTIFY_STATUS_OK &&
-        notify_set_state(token,selected?1:2)==NOTIFY_STATUS_OK) notify_post(ASV_CMD_SET);
-    else notify_post(ASV_CMD_TOGGLE);
-    if (token>=0) notify_cancel(token);
+    if(_holding)return;
+    // Physical taps flip the pending intent, not the still-old preferences.
+    // The visible state continues to come only from the real master setting.
+    if(!_pendingValue && selected==[self isSelected])return;
+    BOOL base=_pendingValue?((_pendingValue&3)==1):[self isSelected];
+    _requestSequence=(_requestSequence+1)&(UINT64_MAX>>2);
+    if(!_requestSequence)_requestSequence=1;
+    uint64_t sequence=_requestSequence;
+    uint64_t request=(sequence<<2)|(base?2:1);
+    if(_commandToken>=0 && notify_set_state(_commandToken,request)==NOTIFY_STATUS_OK){
+        _pendingValue=request;_pendingAt=_lastSend=NSProcessInfo.processInfo.systemUptime;
+        notify_post(ASV_CMD_SET);
+    }else{_pendingValue=0;notify_post(ASV_CMD_TOGGLE);}
 }
 - (UIImage *)iconGlyph {
     dispatch_async(dispatch_get_main_queue(),^{[self asv_ensureLongPress];});

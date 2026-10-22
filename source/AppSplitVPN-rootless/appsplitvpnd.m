@@ -101,7 +101,7 @@ static void State(NSString *status, NSString *error) {
     lastState = fingerprint;
     lastStateWrite=now;
     NSDictionary *state = @{@"status": status, @"error": error ?: @"", @"rules": @(engine.count),
-@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.6", @"dnsWarning":ASVSystemDNSWarning()};
+@"unresolved": engine.unresolved, @"vpnName":vpnName ?: @"", @"activeProfiles":profiles, @"mode":currentMode ?: @"bypass", @"memoryBudgetMB":@(memoryBudget), @"updated": @([NSDate date].timeIntervalSince1970), @"version": @"0.4.7", @"dnsWarning":ASVSystemDNSWarning()};
     [state writeToFile:ASV_STATE atomically:YES];
     chmod(ASV_STATE.fileSystemRepresentation,0644);
     static int splitToken = -1;
@@ -215,11 +215,19 @@ int main(int argc,char **argv) { @autoreleasepool {
         }
         Reconcile(YES);
     });
-    int setToken;
+    int setToken,ackToken=-1;
+    notify_register_check(ASV_CMD_SET_ACK,&ackToken);
+    __block uint64_t lastSequencedSet=0;
     notify_register_dispatch(ASV_CMD_SET,&setToken,dispatch_get_main_queue(),^(int t){
         uint64_t wanted=0;
         notify_get_state(t,&wanted);
-        if (wanted==1 || wanted==2) SetEnabled(wanted==1);
+        uint64_t target=wanted&3;
+        if(target!=1 && target!=2)return;
+        if(wanted<=3 || wanted!=lastSequencedSet){
+            SetEnabled(target==1);
+            if(wanted>3)lastSequencedSet=wanted;
+        }
+        if(ackToken>=0){notify_set_state(ackToken,wanted);notify_post(ASV_CMD_SET_ACK);}
     });
     dispatch_source_t timer=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_main_queue());
     dispatch_source_set_timer(timer,DISPATCH_TIME_NOW,NSEC_PER_SEC,100*NSEC_PER_MSEC);

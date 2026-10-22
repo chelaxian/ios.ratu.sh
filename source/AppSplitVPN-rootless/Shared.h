@@ -10,6 +10,9 @@
 // Explicit enable/disable from Control Center: notify state 1 = on, 2 = off.
 // Unlike a toggle, repeated or coalesced posts cannot flip the switch twice.
 #define ASV_CMD_SET "com.ratush.appsplitvpn.set"
+// Sequenced CC requests: low 2 bits retain legacy ON=1/OFF=2, upper bits
+// identify the request. Repeating an absolute request is safe after a restart.
+#define ASV_CMD_SET_ACK "com.ratush.appsplitvpn.set.ack"
 // Control Center long press: advance TUNNEL ONLY -> BYPASS -> MULTI VPN -> TUNNEL ONLY.
 #define ASV_CMD_MODE_NEXT "com.ratush.appsplitvpn.mode-next"
 #define ASV_STATE_NOTIFY "com.ratush.appsplitvpn.state.changed"
