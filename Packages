@@ -222,16 +222,16 @@ Icon: https://ios.ratu.sh/icons/catmcpcc.png
 Name: CatMCP CC Toggle
 
 Package: com.ratush.catmcpcc
-Version: 1.2.1
+Version: 1.2.2
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Installed-Size: 336
 Depends: firmware (>= 15.0), com.opa334.ccsupport, com.catmcp.daemon
-Filename: debs/com.ratush.catmcpcc_1.2.1_iphoneos-arm64.deb
-Size: 37634
-MD5sum: a3c0785028836c5071761fb42098cfa1
-SHA1: de42c4f3dc90fb3d472e9a6b8001dd95e20f3c85
-SHA256: 9db4939e908edf11c852d48cfed670752927a386200d4c8ce804045a95509fff
+Filename: debs/com.ratush.catmcpcc_1.2.2_iphoneos-arm64.deb
+Size: 37104
+MD5sum: 00276f40c8884ae7a0da1544325c45a2
+SHA1: fce408ddd8bb8007c4ad244689650a284907f1a4
+SHA256: 8e09a7c4be026d60e856592be88cc8559eb0884a82c6f3f1ca1f829f319a9668
 Section: Tweaks
 Homepage: https://ios.ratu.sh
 Description: Turns the CatMCP service on and fully stops it on Dopamine.
@@ -379,25 +379,6 @@ Name: Choicy (Ratu.sh fork)
 
 Package: com.ratush.claude-code-ios
 Version: 2.1.112-8
-Architecture: iphoneos-arm64e
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-8_iphoneos-arm64e.deb
-Size: 46106070
-MD5sum: b6a489a8e6ea4d3de45756aed2d20627
-SHA1: 0c44272a1fc4feda123d2b45ca5105071d9ede1c
-SHA256: 845256b49063a7e207d76958813608a9022942cbee80495af78104a1f8a11f13
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-8
 Architecture: iphoneos-arm64
 Maintainer: ratu.sh
 Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
@@ -412,6 +393,25 @@ SHA256: 5dc1d52620c4639ae31fc56571235e28e0c9141bb098c813d28bc4e9f9ad7091
 Section: Tweaks
 Homepage: https://github.com/chelaxian/claude-code-ios
 Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-8
+Architecture: iphoneos-arm64e
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-8_iphoneos-arm64e.deb
+Size: 46106070
+MD5sum: b6a489a8e6ea4d3de45756aed2d20627
+SHA1: 0c44272a1fc4feda123d2b45ca5105071d9ede1c
+SHA256: 845256b49063a7e207d76958813608a9022942cbee80495af78104a1f8a11f13
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
 Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
 Name: Claude Code iOS (iGhostty launcher)
 
@@ -613,22 +613,6 @@ Name: TetherYou
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.2
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
-Size: 50738
-MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
-SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
-SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -638,6 +622,22 @@ Size: 50824
 MD5sum: 1ef5ba517cc1a36e86fe42cbc18fc5bd
 SHA1: 3cc5adf3fc60bbc1dae5044e69d791dfc22ee8a1
 SHA256: 5e92167d15baf6f53b31cb8f2ffeb257b18feaa5d94d20071316a15eb629c6e4
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
+Size: 50738
+MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
+SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
+SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
