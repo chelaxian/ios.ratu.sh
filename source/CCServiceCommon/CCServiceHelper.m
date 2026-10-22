@@ -30,7 +30,7 @@ static char *safeEnv[] = {"PATH=/var/jb/usr/bin:/var/jb/bin:/usr/bin:/bin", "HOM
 static NSString *Label(void) { return @SERVICE_LABEL; }
 static NSString *JobPath(void) { return [prefix stringByAppendingFormat:@"/Library/LaunchDaemons/%@.plist", Label()]; }
 static NSString *Marker(void) { return [stateDir stringByAppendingFormat:@"/%@.off", Label()]; }
-static NSString *MobilePrefs(void) { struct passwd *user=getpwuid(501);NSString *home=user && user->pw_dir?@(user->pw_dir):@"/var/mobile";return [home stringByAppendingString:@"/Library/Preferences/com.catmcp.server.plist"]; }
+static NSString *MobilePrefs(void) { return @"/var/mobile/Library/Preferences/com.catmcp.server.plist"; }
 static BOOL Exists(NSString *p) { return [[NSFileManager defaultManager] fileExistsAtPath:p]; }
 static int Run(NSString *exe, NSArray<NSString *> *args) {
     char *argv[32] = {0}; argv[0] = (char *)exe.fileSystemRepresentation;
@@ -190,13 +190,21 @@ static BOOL RestrictSSH(void){
 }
 static BOOL SetEnabled(BOOL enabled){
 #if SERVICE_KIND == 3
-    NSString *prefs=MobilePrefs();
-    NSMutableDictionary *values=[[NSDictionary dictionaryWithContentsOfFile:prefs] mutableCopy] ?: [NSMutableDictionary dictionary];
-    values[@"enabled"]=@(enabled);
-    if(![values writeToFile:prefs atomically:YES])return NO;
-    chown(prefs.fileSystemRepresentation,501,501);chmod(prefs.fileSystemRepresentation,0600);
+    // getpwuid(501)->pw_dir differs between SSH and SpringBoard launch
+    // contexts on Dopamine. CatMCP can read the Procursus home copy while
+    // Settings/CFPreferences reads the iOS home copy. Synchronize only enabled,
+    // preserving each file's other settings and never copying credentials.
     CFPreferencesSetValue(CFSTR("enabled"),enabled?kCFBooleanTrue:kCFBooleanFalse,CFSTR("com.catmcp.server"),CFSTR("mobile"),kCFPreferencesAnyHost);
     CFPreferencesSynchronize(CFSTR("com.catmcp.server"),CFSTR("mobile"),kCFPreferencesAnyHost);
+    NSMutableArray<NSString *> *paths=[NSMutableArray arrayWithObject:MobilePrefs()];
+    NSString *mirror=@"/var/jb/var/mobile/Library/Preferences/com.catmcp.server.plist";
+    if(Exists(mirror) && ![mirror.stringByResolvingSymlinksInPath isEqual:MobilePrefs().stringByResolvingSymlinksInPath])[paths addObject:mirror];
+    for(NSString *prefs in paths){
+        NSMutableDictionary *values=[[NSDictionary dictionaryWithContentsOfFile:prefs] mutableCopy] ?: [NSMutableDictionary dictionary];
+        values[@"enabled"]=@(enabled);
+        if(![values writeToFile:prefs atomically:YES])return NO;
+        chown(prefs.fileSystemRepresentation,501,501);chmod(prefs.fileSystemRepresentation,0600);
+    }
 #endif
     if(!Exists(JobPath())){fprintf(stderr,"service plist missing\n");return NO;}
     if(enabled && !RestoreSSH())return NO;
