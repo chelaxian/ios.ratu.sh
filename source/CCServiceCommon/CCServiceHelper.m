@@ -17,6 +17,9 @@
 #import <sys/sysctl.h>
 #import <string.h>
 #import "CCLocalListener.h"
+#if SERVICE_KIND == 3
+#import "../CatMCPCC-rootless/MCPListener.h"
+#endif
 extern int proc_listallpids(void *, int);
 extern int proc_pidpath(int, void *, uint32_t);
 extern char **environ;
@@ -108,11 +111,43 @@ static NSArray<NSNumber *> *Ports(void) {
     int port=[p[@"port"] intValue];return @[@(port>0 && port<65536?port:9000)];
 #endif
 }
-static BOOL Listening(void){for(NSNumber *p in Ports())if(PortOpen(p.intValue))return YES;return NO;}
+#if SERVICE_KIND == 3
+static NSInteger MCPListenerState(void){
+    int mib[]={CTL_KERN,KERN_PROC,KERN_PROC_ALL,0};size_t size=0;
+    if(sysctl(mib,4,NULL,&size,NULL,0)!=0)return -1;
+    size+=32*sizeof(struct kinfo_proc);
+    struct kinfo_proc *list=calloc(1,size);if(!list)return -1;
+    if(sysctl(mib,4,list,&size,NULL,0)!=0){free(list);return -1;}
+    NSInteger result=0;
+    for(size_t i=0;i<size/sizeof(*list);i++){
+        pid_t pid=list[i].kp_proc.p_pid;
+        // The launcher is not the server and must never light the tile.
+        if(pid<=1 || strcmp(list[i].kp_proc.p_comm,"catmcp"))continue;
+        char path[4096]={0};
+        if(proc_pidpath(pid,path,sizeof(path))<=0){if(kill(pid,0)==0)result=-1;continue;}
+        if(!ServiceProcess(@(path)))continue;
+        for(NSNumber *port in Ports()){
+            int state=MCPProcessListener(pid,port.intValue);
+            if(state==1){free(list);return 1;}
+            if(state<0)result=-1;
+        }
+    }
+    free(list);return result;
+}
+#endif
+static BOOL Listening(void){
+#if SERVICE_KIND == 3
+    return MCPListenerState()==1;
+#else
+    for(NSNumber *p in Ports())if(PortOpen(p.intValue))return YES;return NO;
+#endif
+}
 static NSInteger State(void){
 #if SERVICE_KIND == 1
     if(Exists([stateDir stringByAppendingString:@"/sshd.local-active"]) && Listening())return 2;
     return Listening()?1:0;
+#elif SERVICE_KIND == 3
+    return MCPListenerState();
 #else
     int processes=Processes(0);
     if(processes<0)return -1;

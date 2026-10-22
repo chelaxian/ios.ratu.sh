@@ -6,6 +6,7 @@ on:
     paths:
       - 'source/CCServiceCommon/**'
       - 'tests/cc-command-io-test.c'
+      - 'tests/cc-mcp-listener-test.c'
       - 'source/CCFRIDA-rootless/**'
       - 'source/CCGapCloser-rootless/**'
       - 'source/CCOpenSSH-rootless/**'
@@ -25,6 +26,8 @@ jobs:
           /tmp/cc-command-io-test
           cc -std=c11 -Wall -Wextra -Werror tests/cc-local-listener-test.c -o /tmp/cc-local-listener-test
           /tmp/cc-local-listener-test
+          cc -std=c11 -Wall -Wextra -Werror tests/cc-mcp-listener-test.c -o /tmp/cc-mcp-listener-test
+          /tmp/cc-mcp-listener-test
       - name: Install Theos and SDK
         run: |
           brew install ldid dpkg || { brew install ldid-procursus; brew install dpkg; }
