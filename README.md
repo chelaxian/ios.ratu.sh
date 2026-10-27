@@ -17,7 +17,7 @@ Sileo can group them predictably.
 
 Current project families:
 
-- App Split VPN 0.4.6 — VPN/DIRECT routing and experimental MULTI VPN: assign apps to different PacketTunnel profiles with separate IPs and a blue VPN:N indicator. Also includes VPN failover, music/PiP protection on the lock screen, Health Check, and Always ON. One profile per VPN app at a time; MULTI was tested with Default VPN and WireGuard. Install range iOS 15.0–26.0.1, actually verified on iOS 17.0; this is not a compatibility guarantee for every iOS version or VPN client. [Details and limitations](source/AppSplitVPN-rootless/README.md), [compatibility matrix](source/AppSplitVPN-rootless/README.md).
+- App Split VPN 0.4.8 — VPN/DIRECT routing and experimental MULTI VPN: assign apps to different PacketTunnel profiles with separate IPs and a blue VPN:N indicator. Also includes VPN failover, music/PiP protection on the lock screen, Health Check, and Always ON. The Control Center glyph fits circular tiles. One profile per VPN app at a time; MULTI was tested with Default VPN and WireGuard. Install range iOS 15.0–26.0.1, actually verified on iOS 17.0; this is not a compatibility guarantee for every iOS version or VPN client. [Details and limitations](source/AppSplitVPN-rootless/README.md), [compatibility matrix](source/AppSplitVPN-rootless/README.md).
 - Hidden Photos Manager and CCHPM
 - Twackup CLI and GUI
 - Offloader and libMRYIPC
