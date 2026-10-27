@@ -396,25 +396,6 @@ Name: Choicy (Ratu.sh fork)
 
 Package: com.ratush.claude-code-ios
 Version: 2.1.112-8
-Architecture: iphoneos-arm64
-Maintainer: ratu.sh
-Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
-Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
-Provides: claude-code
-Filename: debs/com.ratush.claude-code-ios_2.1.112-8_iphoneos-arm64.deb
-Size: 46105764
-MD5sum: 61c58754f2112ded2224b001724d3745
-SHA1: 9ca7db99ab787f7afd07fae9da5b125802edc9c1
-SHA256: 5dc1d52620c4639ae31fc56571235e28e0c9141bb098c813d28bc4e9f9ad7091
-Section: Tweaks
-Homepage: https://github.com/chelaxian/claude-code-ios
-Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
-Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
-Name: Claude Code iOS (iGhostty launcher)
-
-Package: com.ratush.claude-code-ios
-Version: 2.1.112-8
 Architecture: iphoneos-arm64e
 Maintainer: ratu.sh
 Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
@@ -429,6 +410,25 @@ SHA256: 845256b49063a7e207d76958813608a9022942cbee80495af78104a1f8a11f13
 Section: Tweaks
 Homepage: https://github.com/chelaxian/claude-code-ios
 Description: Claude Code CLI for RootHide. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
+Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
+Name: Claude Code iOS (iGhostty launcher)
+
+Package: com.ratush.claude-code-ios
+Version: 2.1.112-8
+Architecture: iphoneos-arm64
+Maintainer: ratu.sh
+Depends: firmware (>= 15.0), zsh, ldid, wiki.qaq.ighostty (>= 0.2.6)
+Conflicts: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Replaces: xyz.cypwn.claude-code, io.github.ba31k.claude-code-ios
+Provides: claude-code
+Filename: debs/com.ratush.claude-code-ios_2.1.112-8_iphoneos-arm64.deb
+Size: 46105764
+MD5sum: 61c58754f2112ded2224b001724d3745
+SHA1: 9ca7db99ab787f7afd07fae9da5b125802edc9c1
+SHA256: 5dc1d52620c4639ae31fc56571235e28e0c9141bb098c813d28bc4e9f9ad7091
+Section: Tweaks
+Homepage: https://github.com/chelaxian/claude-code-ios
+Description: Claude Code CLI for Dopamine. Tapping the home-screen app opens Claude Code in iGhostty through iGhostty's fixed ighostty://claude handoff, which accepts no arbitrary command or arguments. Based on the last JS release (2.1.112), bundled iOS Node with V8 JIT off, and iOS-patched ripgrep.
 Author: Anthropic (CLI); original iOS package by CyPwn/Bryan; repack by ba31k; iGhostty launcher by ratu.sh
 Name: Claude Code iOS (iGhostty launcher)
 
@@ -756,24 +756,6 @@ Name: Frida
 
 Package: ru.danpashin.twackup
 Version: 2.0.27
-Architecture: iphoneos-arm64
-Maintainer: DanP
-Installed-Size: 4608
-Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64.deb
-Size: 2261690
-MD5sum: 86bc539873da8290b69cc67c2ca5029d
-SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
-SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
-Section: Tweaks
-Priority: optional
-Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
-License: GPL-3.0-only
-Name: Twackup (CLI)
-
-Package: ru.danpashin.twackup
-Version: 2.0.27
 Architecture: iphoneos-arm64e
 Maintainer: DanP
 Installed-Size: 4608
@@ -790,23 +772,23 @@ Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up pa
 License: GPL-3.0-only
 Name: Twackup (CLI)
 
-Package: ru.danpashin.twackup-gui
+Package: ru.danpashin.twackup
 Version: 2.0.27
 Architecture: iphoneos-arm64
 Maintainer: DanP
-Installed-Size: 12100
-Depends: firmware (>= 14.0), libroot-dopamine
-Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64.deb
-Size: 4535812
-MD5sum: 1f4e8c3270a0ee0ae2fcaec8a3563fe5
-SHA1: 5ba5035e0ff22ea6e347775bc3589d8c966a9194
-SHA256: bd3718577b38ef96b2ba31c23541a0b157f9c8a283c4ea57310e366c60947a60
+Installed-Size: 4608
+Depends: firmware (>= 3.0)
+Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64.deb
+Size: 2261690
+MD5sum: 86bc539873da8290b69cc67c2ca5029d
+SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
+SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
+Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
 License: GPL-3.0-only
-Name: Twackup (GUI)
+Name: Twackup (CLI)
 
 Package: ru.danpashin.twackup-gui
 Version: 2.0.27
@@ -819,6 +801,24 @@ Size: 4535744
 MD5sum: 158e6c5b6ff2eec5dbfa1ca4c24f75d0
 SHA1: f54e8ca2e824d127404e5ce97690b4a1d92139c0
 SHA256: 37095f1bfeecc9e00229e9abebbd3ef998dddf670c9d9217498e9344081955bd
+Section: Tweaks
+Priority: optional
+Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
+Description: Safe and fast GUI utility for rebuilding DEBs and backing up packages
+License: GPL-3.0-only
+Name: Twackup (GUI)
+
+Package: ru.danpashin.twackup-gui
+Version: 2.0.27
+Architecture: iphoneos-arm64
+Maintainer: DanP
+Installed-Size: 12100
+Depends: firmware (>= 14.0), libroot-dopamine
+Filename: debs/ru.danpashin.twackup-gui_2.0.27_iphoneos-arm64.deb
+Size: 4535812
+MD5sum: 1f4e8c3270a0ee0ae2fcaec8a3563fe5
+SHA1: 5ba5035e0ff22ea6e347775bc3589d8c966a9194
+SHA256: bd3718577b38ef96b2ba31c23541a0b157f9c8a283c4ea57310e366c60947a60
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
