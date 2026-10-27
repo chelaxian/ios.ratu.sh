@@ -56,6 +56,13 @@ static UIImage *ASVGlyph(void) {
             // Arrow heads aligned with the end direction of each arc.
             [fork moveToPoint:CGPointMake(17,31)];[fork addLineToPoint:CGPointMake(17,17)];[fork addLineToPoint:CGPointMake(31,17)];
             [fork moveToPoint:CGPointMake(49,17)];[fork addLineToPoint:CGPointMake(63,17)];[fork addLineToPoint:CGPointMake(63,31)];
+            // Keep the complete stroked glyph inside circular CC tiles as well
+            // as stock tiles. Center its original ink bounds (40,43.5), then
+            // scale the path and stroke together without changing image size.
+            const CGFloat glyphScale=0.66;
+            [fork applyTransform:CGAffineTransformMake(glyphScale,0,0,glyphScale,
+                                                     40-40*glyphScale,40-43.5*glyphScale)];
+            fork.lineWidth*=glyphScale;
             [fork stroke];
         }] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     });
