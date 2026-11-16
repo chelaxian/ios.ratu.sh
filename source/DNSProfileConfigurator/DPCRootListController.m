@@ -81,6 +81,8 @@ static NSString *DPCL(NSString *key) {
 		  @"err_port": @{@"en": @"Port must be 1-65535.", @"ru": @"Порт должен быть 1-65535."},
 		  @"err_domain": @{@"en": @"Line %lu: not a domain: %@", @"ru": @"Строка %lu: не домен: %@"},
 		  @"err_block_empty": @{@"en": @"BLOCK mode needs at least one domain. An empty list would send all DNS to the dead server.", @"ru": @"Для режима БЛОК нужен хотя бы один домен. Пустой список отправил бы весь DNS на мёртвый сервер."},
+		  @"err_collision": @{@"en": @"Domain clash: %@ ends with the text of %@ (%@). iOS treats such names as the same and switches off one of the profiles. Remove one of these domains and try again.", @"ru": @"Конфликт доменов: %@ оканчивается текстом %@ (%@). iOS считает такие имена одинаковыми и выключает один из профилей. Уберите один из этих доменов и повторите."},
+		  @"collision_self": @{@"en": @"this profile", @"ru": @"этот профиль"},
 		  @"queued_title": @{@"en": @"Profile ready", @"ru": @"Профиль готов"},
 		  @"queued_msg": @{@"en": @"Go back to the main Settings screen and tap \"Profile Downloaded\" at the top to install it. Then choose it in General > VPN & Device Management > DNS.", @"ru": @"Вернитесь на главный экран Настроек и нажмите «Профиль загружен» вверху, чтобы установить его. Затем выберите его в Основные > VPN и управление устройством > DNS."},
 		  @"fail_title": @{@"en": @"Could not open the installer", @"ru": @"Не удалось открыть установщик"},
@@ -96,6 +98,53 @@ static NSString *DPCL(NSString *key) {
 #pragma mark - Helpers
 
 static NSString *DPCTrim(NSString *s) { return [s ?: @"" stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]; }
+
+// iOS compares match domains as plain text endings, without a dot boundary:
+// "graffiti-tags.apple.com" ends with "gs.apple.com", so a profile holding one
+// is switched off when a profile holding the other is enabled. Two domains clash
+// when one ends with the other as text but not as a whole-label suffix.
+static BOOL DPCDomainsClash(NSString *a, NSString *b) {
+	if (!a.length || !b.length || [a isEqualToString:b]) return NO;
+	if ([a hasPrefix:@"*."]) a = [a substringFromIndex:2];
+	if ([b hasPrefix:@"*."]) b = [b substringFromIndex:2];
+	if ([a isEqualToString:b]) return NO;
+	NSString *longer = a.length >= b.length ? a : b;
+	NSString *shorter = a.length >= b.length ? b : a;
+	if (![longer hasSuffix:shorter]) return NO;
+	return ![longer hasSuffix:[@"." stringByAppendingString:shorter]];
+}
+
+// Returns a localized clash message for the new domain list against itself and
+// every installed profile except the one with the same identifier (it is replaced).
+static NSString *DPCCollisionMessage(NSArray<NSString *> *domains, NSString *rootID) {
+	for (NSUInteger i = 0; i < domains.count; i++)
+		for (NSUInteger j = i + 1; j < domains.count; j++)
+			if (DPCDomainsClash(domains[i], domains[j]))
+				return [NSString stringWithFormat:DPCL(@"err_collision"), domains[i].length >= domains[j].length ? domains[i] : domains[j], domains[i].length >= domains[j].length ? domains[j] : domains[i], DPCL(@"collision_self")];
+	NSString *dir = @"/var/containers/Shared/SystemGroup/systemgroup.com.apple.configurationprofiles/Library/ConfigurationProfiles";
+	NSArray<NSString *> *files = [NSFileManager.defaultManager contentsOfDirectoryAtPath:dir error:nil];
+	for (NSString *f in files) {
+		if (![f hasPrefix:@"profile-"] || ![f hasSuffix:@".stub"]) continue;
+		NSDictionary *p = [NSDictionary dictionaryWithContentsOfFile:[dir stringByAppendingPathComponent:f]];
+		if (![p isKindOfClass:NSDictionary.class]) continue;
+		NSString *pid = p[@"PayloadIdentifier"];
+		if ([pid isEqualToString:rootID]) continue;
+		NSString *title = p[@"PayloadDisplayName"] ?: pid ?: f;
+		for (NSDictionary *pl in ([p[@"PayloadContent"] isKindOfClass:NSArray.class] ? p[@"PayloadContent"] : @[])) {
+			if (![pl isKindOfClass:NSDictionary.class] || ![pl[@"PayloadType"] isEqual:@"com.apple.dnsSettings.managed"]) continue;
+			NSArray *other = pl[@"DNSSettings"][@"SupplementalMatchDomains"];
+			if (![other isKindOfClass:NSArray.class]) continue;
+			for (NSString *o in other) {
+				if (![o isKindOfClass:NSString.class]) continue;
+				NSString *ol = o.lowercaseString;
+				for (NSString *n in domains)
+					if (DPCDomainsClash(n, ol))
+						return [NSString stringWithFormat:DPCL(@"err_collision"), n.length >= ol.length ? n : ol, n.length >= ol.length ? ol : n, title];
+			}
+		}
+	}
+	return nil;
+}
 
 static BOOL DPCIsIP(NSString *s) {
 	struct in_addr a4; struct in6_addr a6;
@@ -591,6 +640,10 @@ static NSString *DPCSlug(NSString *s) {
 	if (!name.length) name = autoName;
 	NSString *slug = DPCSlug(name);
 	NSString *rootID = [NSString stringWithFormat:@"%@.%@", DPCIdentifierBase, slug];
+	if (domains.count) {
+		NSString *clash = DPCCollisionMessage(domains, rootID);
+		if (clash) { *error = clash; return nil; }
+	}
 	NSDictionary *payload = @{
 		@"PayloadType": @"com.apple.dnsSettings.managed",
 		@"PayloadVersion": @1,
