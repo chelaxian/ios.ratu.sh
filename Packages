@@ -485,16 +485,16 @@ Author: chelaxian
 Name: iOS Daemons
 
 Package: com.ratush.dnsprofileconfigurator
-Version: 1.0.1
+Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: ratush
 Installed-Size: 332
 Depends: firmware (>= 15.0), preferenceloader
-Filename: debs/com.ratush.dnsprofileconfigurator_1.0.1_iphoneos-arm64.deb
-Size: 74736
-MD5sum: 1c42c4b3fb3168c81fd14719009b7961
-SHA1: 6fe2fe5fc310e229cf251b4629d5e1653df3642b
-SHA256: 29dafa66974f428aa16018b80b9aeade4b29888f0df4f0478d7298e55c3e1058
+Filename: debs/com.ratush.dnsprofileconfigurator_1.0.2_iphoneos-arm64.deb
+Size: 72950
+MD5sum: bb171c688ea7585c548619cac027329e
+SHA1: f30ecec204d621e72f2f02fb6fca5920d60264a3
+SHA256: e103922879940de7c81ebe825c79f02cc876b8606e0ce50df05ea08540e2b7fb
 Section: Tweaks
 Description: Build encrypted DNS profiles right in Settings. Choose DoT or DoH, enter the server (custom DoH port supported), optional server IPs and optional match domains, and install the result through iOS's own profile installer. BLOCK mode routes chosen domains to a DoT server at 127.0.0.1 where nothing listens, so they stop resolving. Produces ordinary com.apple.dnsSettings.managed profiles that you manage and remove in Settings > General > VPN & Device Management. No daemons, no hooks. Same green CRT style as /etc/hosts.
 Author: ratush
@@ -630,22 +630,6 @@ Name: TetherYou
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.2
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
-Size: 50738
-MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
-SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
-SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -655,6 +639,22 @@ Size: 50824
 MD5sum: 1ef5ba517cc1a36e86fe42cbc18fc5bd
 SHA1: 3cc5adf3fc60bbc1dae5044e69d791dfc22ee8a1
 SHA256: 5e92167d15baf6f53b31cb8f2ffeb257b18feaa5d94d20071316a15eb629c6e4
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
+Size: 50738
+MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
+SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
+SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -756,24 +756,6 @@ Name: Frida
 
 Package: ru.danpashin.twackup
 Version: 2.0.27
-Architecture: iphoneos-arm64e
-Maintainer: DanP
-Installed-Size: 4608
-Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64e.deb
-Size: 2261632
-MD5sum: de4e1817095903b0f9c2334219f132bf
-SHA1: 0524594ae8b33c4ab34962271ecdfe9b82a663be
-SHA256: 0d2e16158bdf63697e1e76ea4011b51c7aadf1e791cee0e60bb4bac239933f6d
-Section: Tweaks
-Priority: optional
-Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
-License: GPL-3.0-only
-Name: Twackup (CLI)
-
-Package: ru.danpashin.twackup
-Version: 2.0.27
 Architecture: iphoneos-arm64
 Maintainer: DanP
 Installed-Size: 4608
@@ -783,6 +765,24 @@ Size: 2261690
 MD5sum: 86bc539873da8290b69cc67c2ca5029d
 SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
 SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
+Section: Tweaks
+Priority: optional
+Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
+Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
+License: GPL-3.0-only
+Name: Twackup (CLI)
+
+Package: ru.danpashin.twackup
+Version: 2.0.27
+Architecture: iphoneos-arm64e
+Maintainer: DanP
+Installed-Size: 4608
+Depends: firmware (>= 3.0)
+Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64e.deb
+Size: 2261632
+MD5sum: de4e1817095903b0f9c2334219f132bf
+SHA1: 0524594ae8b33c4ab34962271ecdfe9b82a663be
+SHA256: 0d2e16158bdf63697e1e76ea4011b51c7aadf1e791cee0e60bb4bac239933f6d
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
