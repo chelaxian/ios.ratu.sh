@@ -373,7 +373,7 @@ Author: ratu.sh
 Name: CCVPN (on/off/auto)
 
 Package: com.ratush.choicy
-Version: 1.12.0-1
+Version: 1.12.1-2
 Architecture: iphoneos-arm64
 Maintainer: Ratu
 Installed-Size: 2080
@@ -381,11 +381,11 @@ Depends: mobilesubstrate, preferenceloader
 Conflicts: com.opa334.choicy
 Replaces: com.opa334.choicy
 Provides: com.opa334.choicy (= 1.5.4)
-Filename: debs/com.ratush.choicy_1.12.0-1_iphoneos-arm64.deb
-Size: 329594
-MD5sum: 72a5b6fde6ce4c561a739d2601cfc9ef
-SHA1: f0c1a807c214915041ac208502fbf6a8ad8f648a
-SHA256: 738b6ca4439d2ebf26be9aa91560b96e7e0fdd931eb198c144a8c0b77bb3f0de
+Filename: debs/com.ratush.choicy_1.12.1-2_iphoneos-arm64.deb
+Size: 331552
+MD5sum: 870e58d874b9a4e36e75109393db6205
+SHA1: de6a99200bc8f2e86beebbeb4463894afdc26d50
+SHA256: 14bb6a8d08cd4008c07ac80d479d49aceb78db2037a5d148696387f0d32cd919
 Section: Tweaks
 Homepage: https://github.com/chelaxian/Choicy-Ratu
 Description: Unified injection rules with Ratu app and dylib navigators.
@@ -630,22 +630,6 @@ Name: TetherYou
 
 Package: com.ratush.tgproxyrotation
 Version: 1.0.2
-Architecture: iphoneos-arm64e
-Maintainer: chelaxian
-Installed-Size: 164
-Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
-Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
-Size: 50738
-MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
-SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
-SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
-Section: Tweaks
-Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
-Author: chelaxian
-Name: TGProxyRotation
-
-Package: com.ratush.tgproxyrotation
-Version: 1.0.2
 Architecture: iphoneos-arm64
 Maintainer: chelaxian
 Installed-Size: 164
@@ -655,6 +639,22 @@ Size: 50824
 MD5sum: 1ef5ba517cc1a36e86fe42cbc18fc5bd
 SHA1: 3cc5adf3fc60bbc1dae5044e69d791dfc22ee8a1
 SHA256: 5e92167d15baf6f53b31cb8f2ffeb257b18feaa5d94d20071316a15eb629c6e4
+Section: Tweaks
+Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
+Author: chelaxian
+Name: TGProxyRotation
+
+Package: com.ratush.tgproxyrotation
+Version: 1.0.2
+Architecture: iphoneos-arm64e
+Maintainer: chelaxian
+Installed-Size: 164
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000)
+Filename: debs/com.ratush.tgproxyrotation_1.0.2_iphoneos-arm64e.deb
+Size: 50738
+MD5sum: 8c6e58b213a73bb5a5e5799f925fc965
+SHA1: b426b1feb1aa99791ef234000973bc08b65d4e2e
+SHA256: cbcd6a50f604916ae6dbb47956f1cfb3f6e6758fe364d006db64abf3042a8857
 Section: Tweaks
 Description: Automatic round-robin proxy rotation for Telegram iOS and its forks (Swiftgram, Nicegram, …) — client-agnostic. Reads Telegram's live saved proxy list, rotates after 5/10/15/30/60s of unavailability, shows rotation/confirmed-working toasts only during switching, and offers a floating RU/EN control panel. NOTE: the tweak does NOT move the checkmark in Telegram's own proxy list — the switch happens under the hood. To see which proxy is actually active, open the tweak's floating panel (long press anywhere in Telegram, including the shield icon, the "Proxy" text, or the paperclip in chats, or a three-finger tap).
 Author: chelaxian
@@ -756,24 +756,6 @@ Name: Frida
 
 Package: ru.danpashin.twackup
 Version: 2.0.27
-Architecture: iphoneos-arm64e
-Maintainer: DanP
-Installed-Size: 4608
-Depends: firmware (>= 3.0)
-Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64e.deb
-Size: 2261632
-MD5sum: de4e1817095903b0f9c2334219f132bf
-SHA1: 0524594ae8b33c4ab34962271ecdfe9b82a663be
-SHA256: 0d2e16158bdf63697e1e76ea4011b51c7aadf1e791cee0e60bb4bac239933f6d
-Section: Tweaks
-Priority: optional
-Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
-Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
-License: GPL-3.0-only
-Name: Twackup (CLI)
-
-Package: ru.danpashin.twackup
-Version: 2.0.27
 Architecture: iphoneos-arm64
 Maintainer: DanP
 Installed-Size: 4608
@@ -783,6 +765,24 @@ Size: 2261690
 MD5sum: 86bc539873da8290b69cc67c2ca5029d
 SHA1: bca927c5e4aa07267b9ecb55976b655386819a1c
 SHA256: ed104877bb300e870b6fc14cf6455d06306c2c50f3d6e7a21e0f5fd2833bdc3e
+Section: Tweaks
+Priority: optional
+Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
+Description: Safe and fast iOS CLI utility for rebuilding DEBs and backing up packages
+License: GPL-3.0-only
+Name: Twackup (CLI)
+
+Package: ru.danpashin.twackup
+Version: 2.0.27
+Architecture: iphoneos-arm64e
+Maintainer: DanP
+Installed-Size: 4608
+Depends: firmware (>= 3.0)
+Filename: debs/ru.danpashin.twackup_2.0.27_iphoneos-arm64e.deb
+Size: 2261632
+MD5sum: de4e1817095903b0f9c2334219f132bf
+SHA1: 0524594ae8b33c4ab34962271ecdfe9b82a663be
+SHA256: 0d2e16158bdf63697e1e76ea4011b51c7aadf1e791cee0e60bb4bac239933f6d
 Section: Tweaks
 Priority: optional
 Homepage: https://moreinfo.thebigboss.org/moreinfo/depiction.php?file=twackupDp
